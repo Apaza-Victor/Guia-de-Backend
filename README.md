@@ -4,8 +4,9 @@ Una plataforma educativa **gratuita, en español y sin registro** para aprender 
 **Backend desde cero hasta experiencia**: fundamentos, HTTP, bases de datos, APIs, arquitectura,
 System Design y proyectos reales.
 
-> **Sin herramientas, sin build, sin servidor.** Pura `HTML + CSS + JS vanilla`, lista para
-> desplegar en GitHub Pages abriendo `index.html` directamente.
+> **Sin herramientas, sin build, sin servidor.** Pura `HTML + CSS + JS vanilla`.
+
+🌐 **Ya está en línea** → [**apaza-victor.github.io/Guia-de-Backend/**](https://apaza-victor.github.io/Guia-de-Backend/)
 
 | | |
 |---|---|
