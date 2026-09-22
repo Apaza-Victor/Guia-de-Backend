@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="ciclo-de-vida-del-software">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ciclo de vida del software · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Las etapas del ciclo de vida del software que atraviesa todo servicio Backend: plan, code, build, test, release, deploy, operate y monitor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="ciclo-de-vida-del-software"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Ciclo de vida del software</span>
+      </nav>
+      <h1 class="lesson-title">Ciclo de vida del software</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a DevOps</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Todo servicio Backend vive un ciclo que va mucho más allá de escribir código. DevOps no cambia el resultado final: cambia la <strong>velocidad y fiabilidad</strong> con la que el software recorre ese ciclo. El modelo clásico se llama <strong>CI/CD loop</strong> y se compone de ocho fases que se repiten sin parar.</p>
+      </section>
+
+      <section>
+        <h2 id="fases">Las 8 fases del ciclo</h2>
+        <ul>
+          <li><strong>Plan:</strong> decidir qué se construye (tickets, prioridades, requisitos).</li>
+          <li><strong>Code:</strong> escribir y revisar el código en control de versiones (Git).</li>
+          <li><strong>Build:</strong> compilar, empaquetar dependencias y generar artefactos.</li>
+          <li><strong>Test:</strong> ejecutar pruebas unitarias, de integración y de calidad.</li>
+          <li><strong>Release:</strong> preparar la versión lista para producir (versionado, etiquetas).</li>
+          <li><strong>Deploy:</strong> publicar el artefacto en el entorno objetivo (staging, prod).</li>
+          <li><strong>Operate:</strong> mantener el servicio vivo: escalado, config, back up, parches.</li>
+          <li><strong>Monitor:</strong> observar métricas, logs y alertas para detectar problemas.</li>
+        </ul>
+        <p>El ciclo forma un <strong>bucle</strong>: lo aprendido al monitorear retroalimenta el siguiente plan. Cuanto más corto sea el bucle, más rápido llega valor al usuario y menos costoso es cada cambio.</p>
+      </section>
+
+      <section>
+        <h2 id="deploy-basica">Ejemplo: un ciclo básico con Git</h2>
+        <p>En un equipo pequeño, cada fase se ve así con herramientas concretas:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># PLAN    -> ticket #42: "agregar paginación a /orders"
+# CODE    -> creas la rama y haces un pull request
+git checkout -b feat/paginacion-orders
+git add .
+git commit -m "feat: paginación en /orders"
+git push origin feat/paginacion-orders
+# BUILD   -> el pipeline compila el proyecto
+# TEST    -> el pipeline ejecuta pytest / npm test
+# RELEASE -> se crea una etiqueta v2.4.0
+git tag v2.4.0 main
+# DEPLOY  -> el pipeline publica la versión etiquetada
+# OPERATE -> el proceso corre bajo systemd / docker
+# MONITOR -> Prometheus alerta si la latencia sube</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="entornos">Entornos: el ciclo se multiplica</h2>
+        <p>En producción real el ciclo ocurre en varios entornos, cada uno con más fidelidad y más riesgo:</p>
+        <ul>
+          <li><strong>Local:</strong> el desarrollador, sin pipeline.</li>
+          <li><strong>Desarrollo compartido:</strong> para integrar cambios a diario.</li>
+          <li><strong>Staging / QA:</strong> se parece a producción; se prueba contra datos y config similares.</li>
+          <li><strong>Producción:</strong> el entorno real, el que vemos con monitoreo.</li>
+        </ul>
+        <p>La regla DevOps: <strong>lo que pasa en staging debe ser idéntico a lo que pasa en producción</strong>. La misma imagen de contenedor, las mismas variables, el mismo proceso de despliegue. Cualquier diferencia entre entornos es una fuente potencial de "a mí me funcionaba".</p>
+      </section>
+
+      <section>
+        <h2 id="derecha-izquierda">Pensar "de derecha a izquierda"</h2>
+        <p>Desarrollar "a ciegas" significa diseñar el código sin pensar en cómo se despliega y opera. Los equipos DevOps practican el <strong>shift-left</strong>: mover pruebas, seguridad y problemas operativos a etapas tempranas. Antes de escribir el endpoint, ya se piensa en su health check, sus logs y su proceso de rollback.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe las 8 fases del ciclo de vida en una tabla y añade, para tu proyecto, la herramienta concreta que usas en cada una.</li>
+          <li>Identifica la fase en la que tu equipo pierde más tiempo y propón un cambio concreto.</li>
+          <li>Dibuja el mapa de entornos de tu servicio: ¿qué hay entre tu editor y producción?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El ciclo de vida es un bucle de 8 fases: plan, code, build, test, release, deploy, operate y monitor.</li>
+          <li>Acelerar el ciclo completo (lead time) importa más que acelerar una fase.</li>
+          <li>Los entornos deben ser lo más parecidos posible entre sí.</li>
+          <li>El shift-left anticipa problemas de despliegue y operación desde el diseño.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

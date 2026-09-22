@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu progreso · Backend Academy</title>
+<meta name="description" content="Panel de progreso de Backend Academy: lecciones completadas, total de lecciones, porcentaje global y el avance de cada uno de los 30 cursos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.dashboard__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--space-4); }
+.dash-note { font-size: 0.85rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html" class="is-active">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content" data-content>
+  <div class="container">
+
+    <nav class="breadcrumb" aria-label="Miga de pan">
+      <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">›</span>
+      <span class="breadcrumb__item" aria-current="page">Tu progreso</span>
+    </nav>
+
+    <header class="lesson-hero">
+      <p class="lesson-meta__item"><span class="badge badge--info">📊 Panel personal</span></p>
+      <h1 class="lesson-title">📊 Tu panel de progreso</h1>
+      <p class="section-subtitle">Marca lecciones como completadas desde cada página de lección y aquí verás tu avance a lo largo de los 30 cursos del roadmap. Todo se guarda en tu navegador mediante localStorage.</p>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardado local</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Se actualiza en tiempo real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> 30 cursos</span>
+      </div>
+    </header>
+
+    <section>
+      <h2 class="section-title">Resumen global</h2>
+      <div class="dashboard__stats">
+        <div class="stat-card">
+          <span class="stat-card__value" data-dash-done>0</span>
+          <span class="stat-card__label"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Lecciones completadas</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" data-dash-total>0</span>
+          <span class="stat-card__label"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Total de lecciones</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" data-dash-pct>0%</span>
+          <span class="stat-card__label"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> Progreso global</span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <section>
+      <div class="dashboard__progress-hero">
+        <h2 class="section-title">Tu avance global</h2>
+        <div class="progress" data-progress="">
+          <div class="progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress__fill" data-progress-fill></div>
+          </div>
+          <span class="progress__label" data-progress-label>0%</span>
+        </div>
+        <p class="dash-note">Completa lecciones y vuelve aquí para ver cómo sube la barra. Cada curso tiene su propia barra de progreso en el listado de abajo.</p>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <section>
+      <h2 class="section-title">Progreso por curso</h2>
+      <p class="section-subtitle">Los 30 cursos de la plataforma con su nivel, su categoría y el porcentaje de lecciones que ya completaste en cada uno.</p>
+      <div class="section-grid" id="course-grid"></div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/arquitectura/index.html">Arquitectura</a></li>
+          <li><a href="../cursos/system-design/index.html">System Design</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/favorites.js"></script>
+<script src="../assets/js/history.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function () {
+    if (typeof AppProgress === "undefined") return;
+
+    var done = AppProgress.completedIn();
+    var total = AppProgress.totalLessonsFor();
+    var pct = AppProgress.globalPercent();
+
+    var elDone = document.querySelector("[data-dash-done]");
+    var elTotal = document.querySelector("[data-dash-total]");
+    var elPct = document.querySelector("[data-dash-pct]");
+    if (elDone) elDone.textContent = done;
+    if (elTotal) elTotal.textContent = total;
+    if (elPct) elPct.textContent = pct + "%";
+
+    var grid = document.getElementById("course-grid");
+    if (grid && typeof window.courses !== "undefined" && Array.isArray(window.courses)) {
+      var hasHelpers = typeof AppHelpers !== "undefined";
+      var esc = hasHelpers && AppHelpers.escapeHtml
+        ? function (v) { return AppHelpers.escapeHtml(v); }
+        : function (v) { return String(v == null ? "" : v); };
+      var levels = window.APP && window.APP.levels ? window.APP.levels : {};
+      var categories = window.APP && window.APP.categories ? window.APP.categories : {};
+
+      var html = window.courses.map(function (c) {
+        var levelKey = c.level || "principiante";
+        var levelMeta = levels[levelKey] || { label: levelKey, emoji: "•" };
+        var catLabel = (categories[c.category] && categories[c.category].label) || c.category || "";
+        var cDone = AppProgress.completedIn(c.id);
+        var cTotal = AppProgress.totalLessonsFor(c.id);
+        return (
+          '<article class="card card--module card--link">' +
+          '<div class="card__top">' +
+            "<h3 class=\"card__title\">" + esc(c.icon || "") + " " + esc(c.title) + "</h3>" +
+            '<span class="badge level-badge level-' + esc(levelKey) + '">' + esc(levelMeta.emoji + " " + levelMeta.label) + "</span>" +
+          "</div>" +
+          '<p class="card__text">' + esc(catLabel) + (c.duration ? " · " + esc(c.duration) : "") + "</p>" +
+          '<div class="progress" data-progress="' + esc(c.id) + '">' +
+            '<div class="progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">' +
+              '<div class="progress__fill" data-progress-fill></div>' +
+            "</div>" +
+            '<span class="progress__label" data-progress-label>0%</span>' +
+          "</div>" +
+          '<div class="card__meta"><i class="fa-solid fa-list-check" aria-hidden="true"></i> ' + cDone + " de " + cTotal + " lecciones</div>" +
+          '<a class="btn btn--primary btn--sm" href="../' + esc(c.path) + '">Ver curso <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>' +
+          "</article>"
+        );
+      }).join("");
+      grid.innerHTML = html;
+    }
+
+    AppProgress.renderAll();
+  });
+})();
+</script>
+</body>
+</html>

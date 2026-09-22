@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m2-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jaeger y Zipkin · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende Jaeger y Zipkin: backends para visualizar trazas distribuidas, desplegarlos con Docker y consultar trazas por servicio y traceId.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m2-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Jaeger y Zipkin</span>
+      </nav>
+      <h1 class="lesson-title">Jaeger y Zipkin</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Herramientas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-son">Los backends de trazas</h2>
+        <p>El SDK de OpenTelemetry <em>produce</em> spans; alguien tiene que <strong>guardarlos y pintarlos</strong>. Ahí entran Jaeger y Zipkin: servidores que reciben los spans, los indexan y te dejan explorarlos con vistas tipo waterfall (una cascada de barras, cada una un span, ancho = tiempo).</p>
+        <dl class="definition-list">
+          <dt>Jaeger</dt><dd>proyecto de la CNCF (lo fue también de OpenTelemetry). UI con waterfall, comparación de trazas, grafo de dependencias y búsqueda por servicio, operación, tags y duración. Almacenamiento: Elasticsearch o Cassandra en producción.</dd>
+          <dt>Zipkin</dt><dd>el pionero del tracing distribuido. Más pequeño y simple; su API de trazas (<code class="inline">/api/v2/traces</code>) se usa como estándar de facto para integraciones.</dd>
+        </dl>
+        <p>No compiten: la mayoría de proyectos conecta el Collector de OTel a uno de ellos, y cambiar de backend es editar una configuración.</p>
+      </section>
+
+      <section>
+        <h2 id="despliegue">Despliegue con Docker</h2>
+        <p>El modo más rápido para desarrollo: <code class="inline">jaegertracing/all-in-one</code> levantando UI y recepción OTLP junto con tu API ya instrumentada:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # UI de Jaeger
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+
+  checkout-api:
+    build: .
+    environment:
+      OTEL_SERVICE_NAME: checkout-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+    depends_on:
+      - jaeger
+    ports:
+      - "3000:3000"</code></pre>
+          </div>
+        </figure>
+        <p>Con esto, cada petición a tu API queda guardada en Jaeger. Abre <code class="inline">http://localhost:16686</code>, elige el servicio «checkout-api» y verás la cascada de spans.</p>
+      </section>
+
+      <section>
+        <h2 id="zipkin">Instrumentar Zipkin con Zipkin Tracing</h2>
+        <p>Si tu stack usa librerías estilo Zipkin (brave en Java, zipkin-instrumentation en Node), el flujo es inyectar el middleware y apuntar al colector:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const express = require('express');
+const { Tracer, ExplicitContext } = require('zipkin');
+const { HttpLogger } = require('zipkin-transport-http');
+const { expressMiddleware } = require('zipkin-instrumentation-express');
+
+const tracer = new Tracer({
+  ctxImpl: new ExplicitContext(),
+  recorder: new HttpLogger({
+    endpoint: 'http://zipkin:9411/api/v2/spans',
+  }),
+  localServiceName: 'checkout-api',
+});
+
+const app = express();
+app.use(expressMiddleware({ tracer, serviceName: 'checkout-api' }));
+
+app.get('/v1/checkout/:id', async (req, res) => {
+  // La traza ya se crea automáticamente; aquí iría tu lógica
+  const resultado = await procesarCompra(req.params.id);
+  res.json(resultado);
+});</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="modelo">El modelo de datos en Zipkin</h2>
+        <p>Zipkin guarda los spans en su propio JSON (v2). Observa los tiempos en microsegundos y el endpoint local con el nombre del servicio:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "id": "00f067aa0ba902b7",
+  "name": "GET /v1/checkout/93812",
+  "timestamp": 1779523403000000,
+  "duration": 850000,
+  "localEndpoint": { "serviceName": "checkout-api" },
+  "tags": {
+    "http.method": "GET",
+    "http.path": "/v1/checkout/93812",
+    "http.status_code": "200"
+  }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Los campos de relación se llaman distintos que en OTel: aquí el padre es <code class="inline">parentId</code> (no <code class="inline">parentSpanId</code>) y el identificador de servicio es <code class="inline">localEndpoint.serviceName</code>. Por eso el Collector de OTel traduce entre formatos.</p>
+      </section>
+
+      <section>
+        <h2 id="buscar">Cómo investigar en la UI</h2>
+        <ol>
+          <li><strong>Por servicio:</strong> elige el servicio y un rango; verás las trazas más lentas arriba. Perfecto para cazar latencia.</li>
+          <li><strong>Por tags:</strong> filtra por <code class="inline">error=true</code> o <code class="inline">http.status_code=504</code> para ir directo a los fallos.</li>
+          <li><strong>Por traceId:</strong> pega el trace_id de un log (proveniente de ELK) y ves la petición completa, todos sus servicios.</li>
+          <li><strong>Dependencias:</strong> el grafo muestra qué servicio llama a cuál y con qué volumen.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Conexión con el resto:</strong> métrica → «p99 de checkout subió»; traza → «la consulta stock tarda 640 ms»; log → «timeout contra postgres». El traceId es la comilla del punto 3.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta <code class="inline">jaegertracing/all-in-one</code> y conecta tu API con OTLP.</li>
+          <li>Genera 50 peticiones en un bucle y encuentra la traza más lenta en la UI de Jaeger.</li>
+          <li>En esa traza, identifica el span que más tiempo consume y cópialo: ese será tu cuello de botella.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Jaeger y Zipkin almacenan y visualizan trazas; OTel produce los spans.</li>
+          <li>Jaeger es el más completo (waterfall, dependencias, comparación); Zipkin, el más simple.</li>
+          <li>Con docker-compose y OTLP tienes tracing funcionando en minutos.</li>
+          <li>Buscar por traceId convierte un log de error en la petición completa.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="opentelemetry.html">OpenTelemetry</a>
+          <a class="related-lessons__link" href="../modulo-01/trazas-distribuidas.html">Trazas distribuidas</a>
+          <a class="related-lessons__link" href="../modulo-02/elk-stack.html">ELK y OpenSearch</a>
+          <a class="related-lessons__link" href="../modulo-03/profiling-de-produccion.html">Profiling y correlación</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

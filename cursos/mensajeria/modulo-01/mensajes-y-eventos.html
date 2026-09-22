@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m1-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mensajes vs eventos · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Distingue mensajes dirigidos de eventos de dominio: órdenes y pedidos, hechos inmutables, naming, idempotencia y qué cambia en el diseño de tu backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m1-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Mensajes vs eventos</span>
+      </nav>
+      <h1 class="lesson-title">Mensajes vs eventos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>«Mensaje» y «evento» se usan como sinónimos en muchos textos, pero en el diseño de sistemas de mensajería distinguen dos intenciones muy distintas. Confundirlos conduce a APIs confusas: un sistema que no sabe si lo que recibe es una <em>orden</em> que debe ejecutar o un <em>hecho</em> que ya ocurrió.</p>
+        <ul>
+          <li><strong>Mensaje dirigido (comando):</strong> «haz esto». Pide trabajo, espera ejecución.</li>
+          <li><strong>Evento de dominio:</strong> «esto ya pasó». Informa de un hecho consumado, no pide nada.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="mensaje-dirigido">El mensaje dirigido</h2>
+        <p>Un mensaje dirigido nombra una <em>acción</em> y apunta a un receptor (aunque el broker lo abstrae). Ejemplos: <code>enviarEmail</code>, <code>generarFactura</code>, <code>importarCatalogo</code>. Su verbo va en imperativo y el emisor espera (o confía) en que alguien lo procese:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "mensaje",
+  "accion": "enviar_email",
+  "version": 1,
+  "id": "msg-7f3a91",
+  "timestamp": "2026-01-12T09:41:02Z",
+  "payload": {
+    "destinatario": "cliente@correo.com",
+    "plantilla": "confirmacion_pedido",
+    "pedidoId": "P-2026-0001"
+  }
+}</code></pre>
+        <p>Un mensaje resultado bien pensado es <strong>idempotente</strong>: si se procesa dos veces por un reintento, el efecto no se duplica (no enviar dos correos, no cobrar dos veces). Esa característica será clave en la lección de garantías de entrega.</p>
+      </section>
+
+      <section>
+        <h2 id="evento">El evento de dominio</h2>
+        <p>Un evento de dominio describe un <em>hecho del pasado</em>, en tiempo pasado, con el nombre del suceso: <code>pedido.completado</code>, <code>usuario.registrado</code>, <code>pago.aprobado</code>. No contiene instrucciones, solo la información del hecho y metadatos para trazarlo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "evento",
+  "nombre": "pedido.completado",
+  "version": 1,
+  "eventId": "evt-58c9d1",
+  "correlationId": "carr-orden-8842",
+  "timestamp": "2026-01-12T09:41:02Z",
+  "payload": {
+    "pedidoId": "P-2026-0001",
+    "usuarioId": "U-99",
+    "items": [
+      { "sku": "A-01", "cantidad": 2 }
+    ],
+    "total": 129.90
+  }
+}</code></pre>
+        <p>Fíjate en dos campos extra: <code>eventId</code> (identidad del hecho) y <code>correlationId</code> (cadena que une todos los eventos de una misma operación de negocio). Con ellos puedes deduplicar y reconstruir el recorrido completo de un pedido.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: el alta de un usuario</h2>
+        <p>El mismo hecho de negocio «el usuario se registró» produce una orden para un servicio y un evento para el resto. En la práctica ambos van por caminos distintos del broker:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function registrarUsuario(usuario) {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  // 1) MENSAJE dirigido: la cola 'emails' procesará el correo
+  ch.sendToQueue('emails', Buffer.from(JSON.stringify({
+    accion: 'enviar_email', id: `ms-${usuario.id}`,
+    payload: { destinatario: usuario.correo, plantilla: 'bienvenida' }
+  })), { persistent: true });
+
+  // 2) EVENTO de dominio: el topic 'usuarios' difunde el hecho
+  await ch.assertExchange('usuarios', 'topic', { durable: true });
+  ch.publish('usuarios', 'usuario.registrado', Buffer.from(JSON.stringify({
+    eventId: `evt-${Date.now()}`, timestamp: new Date().toISOString(),
+    payload: { usuarioId: usuario.id, correo: usuario.correo }
+  })));
+
+  await conn.close();
+}
+
+// facturación, recomendar luego ese correo: todos escuchan el topic</code></pre>
+        <p>La cola recibe una orden única; el topic entrega el hecho a cuantos quieran escuchar, sin que el productor los conozca.</p>
+      </section>
+
+      <section>
+        <h2 id="claves">Claves para distinguirlos</h2>
+        <ul>
+          <li><strong>Tiempo del verbo:</strong> imperativo (<em>envía</em>, <em>genera</em>) = mensaje; pasado (<em>enviado</em>, <em>generado</em>) = evento.</li>
+          <li><strong>Receptor:</strong> el mensaje tiene un destinatario lógico; el evento no conoce ni le importa quién lo oye.</li>
+          <li><strong>Efecto:</strong> el mensaje provoca trabajo; el evento ya es el resultado del trabajo hecho.</li>
+          <li><strong>Naming:</strong> colas de comandos <code>emails</code>, <code>facturas</code>; topics de eventos <code>pedido.completado</code>, <code>usuario.registrado</code>.</li>
+          <li><strong>Persistencia:</strong> los eventos se conservan como historia (Kafka los guarda por retención); los mensajes de cola se consumen y desaparecen.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Práctica recomendada:</strong> publica eventos en tiempo pasado (<code>pago.aprobado</code>), no en imperativo (<code>aprobar-pago</code>). El nombre imperativo obliga a los oyentes a interpretar su rol; el pasado describe el hecho sin ambigüedad.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe cinco «cosas» que te gustaría publicar en tu sistema y clasifícalas como mensaje o evento. Corrige los nombres que no sigan la regla del tiempo del verbo.</li>
+          <li>Completa el JSON del evento <code>pago.rechazado</code> con <code>eventId</code>, <code>correlationId</code>, <code>timestamp</code> y un payload mínimo.</li>
+          <li>Responde: ¿por qué convertir el mensaje <code>enviar_email</code> en un evento <code>email.enviado</code> antes de enviarlo sería un error de diseño?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un mensaje dirigido pide una acción («haz esto») y tiene un destinatario lógico.</li>
+          <li>Un evento de dominio describe un hecho consumado («esto pasó») y va a todo interesado.</li>
+          <li>Los mensajes deben ser idempotentes; los eventos se nombran en tiempo pasado con <code>eventId</code> y <code>correlationId</code>.</li>
+          <li>El naming honesto (cola de comandos vs topic de eventos) hace legible tu arquitectura.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+          <a class="related-lessons__link" href="garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="../modulo-03/event-sourcing-y-sagas.html">Event sourcing y sagas</a>
+          <a class="related-lessons__link" href="../modulo-03/particiones-y-claves.html">Particiones y claves</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

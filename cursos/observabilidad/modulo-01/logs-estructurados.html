@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logs estructurados · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende a escribir logs estructurados en JSON: formato, niveles, contexto, correlación por request y logs de acceso.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m1-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Logs estructurados</span>
+      </nav>
+      <h1 class="lesson-title">Logs estructurados</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="problema">El problema del log en texto plano</h2>
+        <p>Un log clásico se escribía a mano, sin formato fijo:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">2026-02-18 09:31:02 ERROR Fallo al procesar compra co_93812 por usuario 4421 proveedor mercadopago red timeout</code></pre>
+        <p>Sirve de poco porque no puedes consultarlo de forma fiable: el campo «usuario» no está en una posición estable, el formato cambia con cada mensaje y hacer búsquedas ad hoc exige inventar expresiones para cada patrón. Un log estructurado es máquina-legible: un objeto JSON con campos estables que puedes filtrar con una consulta.</p>
+        <div class="callout">
+          <p><strong>Prueba de calidad:</strong> si no puedes hacer <code class="inline">jq select(.level == "error")</code> sobre tu log, aún no son logs estructurados.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="campos">Qué campos debe tener</h2>
+        <ul>
+          <li><strong>ts:</strong> timestamp en ISO 8601 con zona horaria.</li>
+          <li><strong>level:</strong> nivel del mensaje (trace, debug, info, warn, error, fatal).</li>
+          <li><strong>msg:</strong> mensaje legible; los datos variables van como campos, no interpolados.</li>
+          <li><strong>service y version:</strong> qué servicio y qué release lo produjo.</li>
+          <li><strong>trace_id / span_id:</strong> correlación con la petición completa.</li>
+          <li><strong>Contexto de negocio:</strong> user_id, tenant, order_id, checkout.id, product.sku…</li>
+        </ul>
+        <p>Los campos de contexto son los que permiten responder «¿qué tenían en común los fallos?» agrupando por cuesa cautidad que sí importa, sin modificar mensajes ni instrumentación.</p>
+      </section>
+
+      <section>
+        <h2 id="niveles">Niveles y cuándo usarlos</h2>
+        <dl class="definition-list">
+          <dt>trace / debug</dt><dd>detalle de diagnóstico que casi siempre está apagado en producción.</dd>
+          <dt>info</dt><dd>eventos de flujo normal: request atendida, trabajo procesado, compra creada.</dd>
+          <dt>warn</dt><dd>algo funciona pero degradado o con riesgo: reintento, timeout puntual, stock bajo.</dd>
+          <dt>error</dt><dd>un fallo que afecta a un usuario o a una operación: exception capturada, cobro rechazado.</dd>
+          <dt>fatal</dt><dd>el proceso no puede continuar: fallo de arranque, out-of-memory, configuración inválida.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2 id="python">Ejemplo en Python</h2>
+        <p>La librería de logging permite añadir un formateador que emite JSON. Añadimos los campos de contexto con <code class="inline">extra</code>:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python" data-language="python">import json
+import logging
+import time
+
+class JsonFormatter(logging.Formatter):
+    CAMPOS = ("ts", "level", "msg", "logger", "trace_id", "user_id", "tenant", "service")
+
+    def format(self, record):
+        payload = {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "level": record.levelname.lower(),
+            "msg": record.getMessage(),
+            "logger": record.name,
+            "service": "checkout-api",
+        }
+        for campo in self.CAMPOS:
+            valor = getattr(record, campo, None)
+            if valor is not None:
+                payload[campo] = valor
+        return json.dumps(payload, ensure_ascii=False, default=str)
+
+logger = logging.getLogger("checkout")
+handler = logging.StreamHandler()
+handler.setFormatter(JsonFormatter())
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+logger.warning(
+    "stock insuficiente, reintentando con variante",
+    extra={"trace_id": "abc123", "user_id": "4421", "tenant": "acme", "product.sku": "TSHIRT-M-L"},
+)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="node">Ejemplo en Node.js con pino</h2>
+        <p>La librería <strong>pino</strong> emite JSON nativamente. Para correlacionar toda una petición, creamos un logger hijo por request con el contexto ya cargado:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const pino = require('pino');
+
+const logger = pino({ base: { service: 'checkout-api' }, timestamp: pino.stdTimeFunctions.isoTime });
+
+function conContexto(req, fn) {
+  const child = logger.child({
+    trace_id: req.headers['x-request-id'] || crypto.randomUUID(),
+    method: req.method,
+    path: req.url,
+    tenant: req.headers['x-tenant'] || 'anon',
+  });
+  return fn(child);
+}
+
+app.use('/v1/checkout', (req, res, next) => {
+  conContexto(req, (log) => {
+    log.info({ items: 3 }, 'compra recibida');
+    try {
+      cobrar();
+      log.info({ status: res.statusCode }, 'cobro exitoso');
+    } catch (err) {
+      log.error({ error: err.message, code: err.code }, 'fallo al cobrar');
+    }
+    next();
+  });
+});</code></pre>
+          </div>
+        </figure>
+        <p>El resultado: cada línea es JSON, cada request tiene su trace_id, y buscar el recorrido completo de un usuario se reduce a un filtro por trace_id.</p>
+      </section>
+
+      <section>
+        <h2 id="acceso">Logs de acceso</h2>
+        <p>El log de acceso (quién pidió qué, con qué código) es la base del debugging HTTP. No lo dejes en el formato del servidor web: transfórmalo a JSON para poder consultar por ruta, status y duración.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "level": "info",
+  "ts": "2026-02-18T09:31:02.184Z",
+  "msg": "request atendido",
+  "service": "checkout-api",
+  "type": "access",
+  "http.method": "POST",
+  "http.route": "/v1/checkout",
+  "http.status_code": 504,
+  "http.duration_ms": 850,
+  "http.user_agent": "Mozilla/5.0 ...",
+  "remote_addr": "190.120.14.7",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736"
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Convierte tu logger actual a JSON: si usas Python, implementa el JsonFormatter; si usas Node, integra pino.</li>
+          <li>Mete el trace_id de cada request en el logger hijo (child) para que todas las líneas lo lleven.</li>
+          <li>Escribe 3 consultas que ahora puedes hacer y antes no: por ejemplo, «errores 5xx por tenant en la última hora».</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los logs estructurados son objetos JSON consultables, no frases sueltas.</li>
+          <li>Los campos obligatorios: ts, level, msg, service, trace_id y contexto de negocio.</li>
+          <li>Los valores variables van como campos, nunca interpolados en el mensaje.</li>
+          <li>El mismo trace_id en todos los logs de una petición permite reconstruir todo el recorrido.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="los-tres-pilares.html">Los tres pilares</a>
+          <a class="related-lessons__link" href="metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="../modulo-02/elk-stack.html">ELK y OpenSearch</a>
+          <a class="related-lessons__link" href="../modulo-02/opentelemetry.html">OpenTelemetry</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

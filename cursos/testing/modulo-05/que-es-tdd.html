@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m5-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es TDD? · Testing Backend · Backend Academy</title>
+<meta name="description" content="Qué es TDD (Test-Driven Development): escribir el test antes del código, los beneficios reales y lo que NO es TDD, con ejemplos PHPUnit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m5-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">¿Qué es TDD?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es TDD?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · TDD</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="definicion">El orden que lo cambia todo</h2>
+        <p><strong>TDD (Test-Driven Development)</strong> invierte el orden natural: primero escribes <strong>una prueba de un comportamiento que aún no existe</strong>, la ves fallar, luego escribes el mínimo código para que pase. Repites y refactorizas.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Sin TDD:  implementar → testear (a veces) → "funciona"
+Con TDD:  test → rojo → implementar mínimo → verde → refactor</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="porque">Por qué funciona</h2>
+        <ul>
+          <li><strong>Piensas antes de escribir</strong>: diseñar el test obliga a decidir la API pública (nombres, parámetros, retorno).</li>
+          <li><strong>El test nunca miente</strong>: lo viste fallar por la razón correcta; cuando pasa, pasó por la tuya.</li>
+          <li><strong>Diseño guiado por el consumo</strong>: escribes el <em>uso</em> antes que la <em>implementación</em>; la API resulta ergonómica.</li>
+          <li><strong>Siempre tienes verde</strong>: cada paso es un commit seguro.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="ciclo">El ciclo en 30 segundos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · ejemplo mini</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// PASO 1: el test que NO existe (rojo)
+public function test_envio_gratis_desde_150(): void
+{
+    $envio = new CostoEnvio();
+    self::assertSame(0.0, $envio-&gt;calcular(150.0));
+}
+
+// PASO 2: implementación mínima (verde)
+final class CostoEnvio
+{
+    public function calcular(float $total): float
+    {
+        return $total &gt;= 150.0 ? 0.0 : 9.9;
+    }
+}
+
+// PASO 3: refactor (nombres, constantes...)
+public const GRATIS_DESDE = 150.0;
+public const MINIMO      = 9.9;</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="no-es">Lo que NO es TDD</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">✗ "Escribir el código y después los tests"
+✗ "Escribir el test pero el código YA está"
+  (lo llaman chocolate verde: el test pasa sin aportar)
+✗ "Refactorizar sin tests"
+✗ "Cobertura del 100% por sí sola"
+
+TDD ≠ cobertura: es una disciplina de diseño con ritmo.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo usarlo (y cuándo no)</h2>
+        <ul>
+          <li><strong>Sí:</strong> reglas de negocio, servicios, controladores, transformaciones, serialización compleja.</li>
+          <li><strong>No tanto:</strong> glue code trivial, prototipos descartables, integración de herramienta desconocida.</li>
+          <li><strong>Regla sana:</strong> si el programa no te cuenta el «cómo», TDD te obliga a decidir el «qué»; eso siempre vale.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige la próxima función que vayas a implementar.</li>
+          <li>Escribe TU test primero (rojo).</li>
+          <li>Implementa el mínimo para el verde.</li>
+          <li>Refactoriza. Anota cómo cambió el diseño.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>TDD: test → rojo → mínimo → verde → refactor.</li>
+          <li>El test fuerza decisiones de API antes del código.</li>
+          <li>Verlo fallar por la causa correcta es la garantía.</li>
+          <li>No es cobertura; es disciplina de diseño.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="red-green-refactor.html">Red, Green, Refactor</a>
+          <a class="related-lessons__link" href="../modulo-02/primer-test-phpunit.html">Primer test con PHPUnit</a>
+          <a class="related-lessons__link" href="../modulo-01/que-es-testing.html">¿Qué es el testing?</a>
+          <a class="related-lessons__link" href="casos-borde-y-errores.html">Casos borde y errores</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

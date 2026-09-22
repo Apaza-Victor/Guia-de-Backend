@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-presentar-tu-diseno">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presentar y comunicar · System Design · Backend Academy</title>
+<meta name="description" content="Aprende a presentar un diseño de sistema de forma clara: framework de entrevista, diagramas, trade-offs y checklist de revisión final.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-presentar-tu-diseno"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Presentar y comunicar</span>
+      </nav>
+      <h1 class="lesson-title">Presentar y comunicar</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño completo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">El diseño se comunica</h2>
+        <p>Un senior no solo diseña: <strong>presenta</strong>. En una entrevista de system design se evalúa el razonamiento tanto como el resultado: cómo ordenas la conversación, cómo justificas cada pieza y cómo reaccionas cuando te confrontan. En el trabajo, un diseño que no se explica se muere en un documento.</p>
+        <p>Este último capítulo condensa el método en un formato que puedes ejecutar una y otra vez: un framework, una manera de dibujar, un vocabulario de trade-offs y un checklist de cierre.</p>
+      </section>
+
+      <section>
+        <h2 id="framework">El framework en 5 pasos</h2>
+        <p>El orden del 90% de las entrevistas de system design. El secreto está en <strong>no saltar pasos</strong>: la gente que dibuja cajas primero pierde puntos, la que pregunta y estima primero los gana.</p>
+        <ol>
+          <li><strong>Requisitos</strong> (3-5 min): confirma alcance, funcionales y no funcionales clave, y fuera de alcance.</li>
+          <li><strong>Estimaciones</strong> (2-3 min): QPS, almacenamiento, ratios; cierra con «si esto se multiplica por 10…».</li>
+          <li><strong>API y datos</strong> (5 min): contratos y modelo de datos, con la clave de partición.</li>
+          <li><strong>Componentes</strong> (10 min): el diagrama, capa por capa, explicando cada bloque con su porqué.</li>
+          <li><strong>Profundidad y trade-offs</strong> (resto): búsqueda de cuellos de botella, fallos, y qué cambiar con más escala.</li>
+        </ol>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "blueprint_de_la_sesion": {
+    "1_requisitos": { "funcionales": ["crear", "leer"], "slo": "p95 < 300ms" },
+    "2_estimaciones": { "qps": 4167, "almacenamiento_anio_gb": 260 },
+    "3_api_datos": { "endpoints": 2, "clave_particion": "usuario_id" },
+    "4_componentes": ["cdn", "lb", "api_x3", "cache", "bd_replicada", "cola"],
+    "5_tradeoffs": ["consistencia_eventual_vs_disponibilidad",
+                    "sharding_por_hash_vs_rango"]
+  }
+}</code></pre>
+        <p>Nunca uses el tiempo de presentación para decidir: primero razona, luego dibuja. Y siempre vuelve al paso 5 preguntando: <strong>«¿hay alguna dirección en la que debería profundizar?»</strong>. La entrevista trabaja contigo, no contra ti.</p>
+      </section>
+
+      <section>
+        <h2 id="diagramas">Cómo dibujar que te entiendan</h2>
+        <p>Tu diagrama se va a interpretar en cadena. Buenas costumbres que separan a los buenos presentadores:</p>
+        <ul>
+          <li><strong>Una sola dirección de flujo:</strong> pinta siempre al cliente a la izquierda y los datos a la derecha; los flujos se leen de izquierda a derecha.</li>
+          <li><strong>Etiqueta cada flecha:</strong> «HTTP», «descarga CDN», «colas de trabajo». Una flecha sin nombre es una pregunta sin respuesta.</li>
+          <li><strong>Señala la redundancia:</strong> dibuja el punto de entrada y marca dónde hay réplicas y dónde hay un solo nodo (el riesgo).</li>
+          <li><strong>Anota decisiones al borde:</strong> «shard por hash: 16 shards», «TTL cache 5 min». El número a mano vale más que diez cajas.</li>
+        </ul>
+        <p>En la pizarra o en un documento, el típico diagrama de un buen diseño se lee así: <code>clientes → CDN → LB → API → caché → BD</code>, con una cola saliendo hacia workers y una región de réplicas de lectura debajo de la primaria. Si puedes dibujarlo en 2 minutos, dominas la forma.</p>
+      </section>
+
+      <section>
+        <h2 id="trade-offs">Comunicar trade-offs</h2>
+        <p>Decir «elijo cache-aside» vale menos que decir «elijo cache-aside porque las lecturas son 100x las escrituras y puedo tolerar 5 min de frescor en el catálogo». El vocabulario que vende cualquier decisión:</p>
+        <ul>
+          <li><strong>El beneficio:</strong> qué atributo cumple (latencia, disponibilidad, costo).</li>
+          <li><strong>El precio:</strong> qué atributo se sacrifica (frescura, consistencia, complejidad).</li>
+          <li><strong>El plan B:</strong> qué hago si el supuesto falla (¿y si el ratio fuera 1:1?).</li>
+        </ul>
+        <p>La misma lógica queda registrada en un ADR cuando documentamos la decisión técnicamente:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># ADR-014: Caché del catálogo con cache-aside
+estado: aceptado
+fecha: 2026-09-21
+
+contexto: >
+  El catálogo se lee 100 veces más de lo que se escribe y soporta frescura
+  de minutos. Una cache delante de la réplica de lectura reduce QPS a la BD.
+
+decision: >
+  Cache-aside con Redis, TTL de 5 minutos e invalidación al escribir.
+
+consecuencia: >
+  Latencia p95 de lecturas baja a menos de 50 ms. Coste: los cambios
+  tardan hasta 5 min en verse y sumar mitad de pieza a operar.
+
+alternativas: [write-through, write-back]
+supuestos: { ratio_lectura_escritura: "100:1", frescura_tolerada_min: 5 }</code></pre>
+      </section>
+
+      <section>
+        <h2 id="errores">Errores comunes a evitar</h2>
+        <ul>
+          <li><strong>Saltar al papel:</strong> diseñar antes de preguntar los requisitos. Síntoma: sistema con features que nadie pidió.</li>
+          <li><strong>Sin números:</strong> «escalable» sin QPS ni almacenamiento no decide nada.</li>
+          <li><strong>Una sola pieza:</strong> el monolito total sin exponer cómo se partiría en el futuro, o el microservicio por microservicio.</li>
+          <li><strong>Ignorar las fallas:</strong> nadie pregunta «¿y si este nodo muere?» y el diseño no tiene respuesta.</li>
+          <li><strong>Argumentar contra el entrevistador:</strong> ante un reto se explica el trade-off y se ajusta, no se pelea.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="checklist">Checklist de revisión final</h2>
+        <p>Antes de dar por terminado cualquier diseño —pizarra o documento— pásalo por esta lista:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">def revisar_diseno(d: dict) -> list:
+    """Puntos de revisión: devuelve los que aún no están cerrados."""
+    pendientes = []
+    if not d.get("qps"):
+        pendientes.append("estimar qps y pico")
+    if not d.get("almacenamiento"):
+        pendientes.append("estimar almacenamiento y retención")
+    if not d.get("clave_particion"):
+        pendientes.append("definir la clave de partición")
+    if "replica" not in d and "shard" not in d:
+        pendientes.append("explicar cómo escala la base por encima de 1 nodo")
+    if not d.get("cola"):
+        pendientes.append("decidir si alguna tarea pesada va por cola")
+    if not d.get("cache"):
+        pendientes.append("elegir dónde se cachea (y el TTL)")
+    if not d.get("tradeoffs"):
+        pendientes.append("nombrar qué se sacrifica en cada decisión")
+    if not d.get("falla"):
+        pendientes.append("responder qué pasa si el nodo central muere")
+    return pendientes
+
+diseno = {
+    "qps": 4167, "almacenamiento": "260 GB/año",
+    "clave_particion": "usuario_id",
+    "replica": True, "cache": {"ttl_s": 300}, "cola": "metricas",
+    "tradeoffs": ["frescura_vs_lecturas"],
+}
+print(revisar_diseno(diseno))   # lo que falta por cerrar</code></pre>
+        <p>Con este checklist cerraste el curso completo: ya puedes enfrentar una entrevista de system design, revisar un diseño ajeno con criterio y defender el tuyo con números y trade-offs explícitos.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma uno de los cuatro casos del módulo (URL shortener, chat, feed o búsqueda) y pásalo por el checklist: ¿qué falta cerrar en tu diseño?</li>
+          <li>Practica el framework completo con un cronómetro de 45 minutos: requisitos (5 min), estimaciones (3), API y datos (5), componentes (10) y trade-offs (resto).</li>
+          <li>Escribe el ADR de una decisión real de tu diseño usando el YAML de la lección.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El framework en 5 pasos ordena la sesión y evita saltarse lo que da puntos.</li>
+          <li>Los diagramas se leen de izquierda a derecha, con flechas etiquetadas y decisiones numeradas.</li>
+          <li>Un trade-off se comunica con beneficio, precio y plan B; los ADR lo dejan escrito.</li>
+          <li>Los errores típicos son diseñar sin requisitos, sin números y sin considerar fallas.</li>
+          <li>El checklist de revisión cierra el círculo y garantiza un diseño defendible.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="diseno-de-una-url-shortener.html">Caso: URL shortener</a>
+          <a class="related-lessons__link" href="diseno-de-un-chat.html">Caso: sistema de chat</a>
+          <a class="related-lessons__link" href="diseno-de-un-feed.html">Caso: feed (newsfeed)</a>
+          <a class="related-lessons__link" href="diseno-de-busqueda.html">Caso: búsqueda</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="diseno-de-busqueda.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Caso: búsqueda</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
+        <span class="label">Volver al curso →</span>
+        <span class="title">System Design</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="condicionales-if-else-match">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condicionales: if, else y match · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende a tomar decisiones en PHP con if, else, elseif y la expresión match de PHP 8, con ejemplos reales de lógica de negocio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="condicionales-if-else-match"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Condicionales: if, else y match</span>
+        </nav>
+        <h1 class="lesson-title">Condicionales: if, else y match</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de flujo y funciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="if-else">if, else y elseif</h2>
+          <p>La estructura <code class="inline">if</code> ejecuta un bloque solo si la condición es verdadera. Con <code class="inline">else</code> cubres el caso contrario y con <code class="inline">elseif</code> encadenas varias condiciones.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$edad = 22;
+
+if ($edad &gt;= 18) {
+    echo "Eres mayor de edad" . PHP_EOL;
+} else {
+    echo "Aún eres menor" . PHP_EOL;
+}
+
+$nota = 7.5;
+
+if ($nota &gt;= 9) {
+    $calificacion = "Sobresaliente";
+} elseif ($nota &gt;= 7) {
+    $calificacion = "Notable";
+} elseif ($nota &gt;= 5) {
+    $calificacion = "Aprobado";
+} else {
+    $calificacion = "Suspendido";
+}
+
+echo "Calificación: $calificacion" . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>En la práctica del backend, el caso <code class="inline">else</code> suele representar la respuesta de error o el plan alternativo. Una buena lectura: <em>si la validación pasa, sigue; si no, responde con el problema</em>.</p>
+        </section>
+
+        <section>
+          <h2 id="ternario-y-null-coalescing">El operador ternario y el operador ??</h2>
+          <p>Para decisiones simples en una sola línea, PHP ofrece el <strong>operador ternario</strong> <code class="inline">condicion ? valorSiTrue : valorSiFalse</code> y el <strong>null coalescing</strong> <code class="inline">??</code>, que devuelve el valor de la derecha si el de la izquierda no existe o es null.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$stock = 3;
+
+$mensaje = $stock &gt; 0 ? "Disponible" : "Agotado";
+echo $mensaje . PHP_EOL;
+
+// ¿El campo "color" llegó en la petición? Si no, usa "azul"
+$color = $_GET['color'] ?? "azul";
+echo "Color elegido: $color" . PHP_EOL;
+
+// Encadenado: el primer valor que no sea null gana
+$usuario = $nombre ?? $apodo ?? "Invitado";
+echo $usuario . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>El operador <code class="inline">??</code> es uno de los secretos del backend moderno en PHP: permite leer datos de formularios, cabeceras o configuraciones sin que falle el script cuando la clave no existe.</p>
+        </section>
+
+        <section>
+          <h2 id="match">match: la alternativa moderna</h2>
+          <p>Cuando necesitas comparar un valor contra varias opciones, <code class="inline">match</code> (PHP 8) es más expresiva y segura que una cadena de <code class="inline">if</code>. A diferencia de <code class="inline">switch</code>, <code class="inline">match</code> es una <strong>expresión</strong>: devuelve un valor y usa comparación estricta <code class="inline">===</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$metodoHttp = "DELETE";
+
+$accion = match ($metodoHttp) {
+    "GET"    =&gt; "Recuperar un recurso",
+    "POST"   =&gt; "Crear un recurso",
+    "PUT"    =&gt; "Actualizar un recurso",
+    "DELETE" =&gt; "Eliminar un recurso",
+    default  =&gt; "Método no soportado",
+};
+
+echo "La petición servirá para: $accion" . PHP_EOL;
+
+// match también funciona con condiciones booleanas
+$puntos = 85;
+$nivel = match (true) {
+    $puntos &gt;= 90 =&gt; "Avanzado",
+    $puntos &gt;= 60 =&gt; "Intermedio",
+    default       =&gt; "Básico",
+};
+echo "Nivel: $nivel" . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Si ningún brazo coincide y no existe <code class="inline">default</code>, <code class="inline">match</code> lanza un <code class="inline">UnhandledMatchError</code>. Eso fuerza a cubrir todos los casos, que es justo lo que quieres en lógica de negocio.</p>
+        </section>
+
+        <section>
+          <h2 id="sintaxis-alternativa">La sintaxis alternativa</h2>
+          <p>PHP permite una sintaxis alternativa de <code class="inline">if</code>, <code class="inline">for</code>, <code class="inline">foreach</code> y <code class="inline">while</code> usando dos puntos y <code class="inline">endif</code>. Es especialmente cómoda cuando intercalas mucho HTML en plantillas.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTML con PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php $sesionActiva = true; ?&gt;
+
+&lt;?php if ($sesionActiva): ?&gt;
+    &lt;p&gt;Bienvenido de nuevo.&lt;/p&gt;
+&lt;?php else: ?&gt;
+    &lt;p&gt;&lt;a href="login.php"&gt;Inicia sesión&lt;/a&gt;&lt;/p&gt;
+&lt;?php endif; ?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe un script que reciba un precio en <code class="inline">$precio</code> y aplique: 10% de descuento si supera 100, 5% si supera 50, y nada en caso contrario.</li>
+            <li>Usa <code class="inline">match</code> para traducir los códigos <code class="inline">A</code>, <code class="inline">B</code>, <code class="inline">C</code> a las etiquetas «Alta», «Media» y «Baja» prioridad.</li>
+            <li>Reescribe esa decisión con <code class="inline">switch</code> y compara la sintaxis y el comportamiento.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li><code class="inline">if / elseif / else</code> construyen decisiones por bloques.</li>
+            <li>El ternario <code class="inline">?:</code> comprime una decisión simple a una línea.</li>
+            <li><code class="inline">??</code> devuelve el primer valor no nulo y evita avisos con claves ausentes.</li>
+            <li><code class="inline">match</code> (PHP 8) compara en estricto y siempre devuelve un valor.</li>
+            <li>La sintaxis alternativa con <code class="inline">endif</code> brilla en plantillas con HTML.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

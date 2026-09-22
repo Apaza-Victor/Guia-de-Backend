@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m5-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Layer en acción · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Service Layer en backend: los casos de uso con nombre propio, la orquestación y el punto donde los controllers dejan de acumular lógica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m5-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Service Layer en acción</span>
+      </nav>
+      <h1 class="lesson-title">Service Layer en acción</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Backend</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Service Layer</strong> da <strong>nombre propio a los casos de uso</strong> del negocio (<code>ConfirmarPedido</code>, <code>TransferirFondos</code>) y los separa de la capa HTTP. El controller delega; el servicio <em>orquesta</em> repositorios, otras services y reglas.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El controller gordo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (acoplado)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class PedidoController
+{
+    public function confirmar(Request $r): Response
+    {
+        $pedido = $this-&gt;repo-&gt;buscar($r-&gt;get('id'));
+        $pedido-&gt;confirmar();
+        $this-&gt;repo-&gt;guardar($pedido);
+        $this-&gt;mail-&gt;enviar(...);
+        $this-&gt;auditoria-&gt;registrar(...);
+        return $this-&gt;json(['ok' =&gt; true]);
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>HTML/JSON, validación HTTP, reglas de negocio y efectos secundarios revueltos. Imposible reutilizar o testear el flujo.</p>
+      </section>
+
+      <section>
+        <h2 id="solucion">El servicio con nombre de caso de uso</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class ConfirmarPedido
+{
+    public function __construct(
+        private PedidoRepositorio $pedidos,
+        private MailService $mail,
+        private AuditoriaService $auditoria,
+    ) {}
+
+    public function ejecutar(string $pedidoId): void
+    {
+        $pedido = $this-&gt;pedidos-&gt;buscar($pedidoId);
+        $pedido-&gt;confirmar();
+        $this-&gt;pedidos-&gt;guardar($pedido);
+
+        $this-&gt;mail-&gt;enviar($pedido-&gt;clienteEmail(), 'Pedido confirmado', (string) $pedido-&gt;id());
+        $this-&gt;auditoria-&gt;registrar('pedido_confirmado', $pedido-&gt;id());
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="controller">El controller vuelve a ser delgado</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class PedidoController
+{
+    public function __construct(private ConfirmarPedido $confirmar) {}
+
+    public function confirmar(Request $r): Response
+    {
+        try {
+            $this-&gt;confirmar-&gt;ejecutar($r-&gt;get('id'));
+            return $this-&gt;json(['ok' =&gt; true], 200);
+        } catch (PedidoNoExiste $e) {
+            return $this-&gt;json(['error' =&gt; $e-&gt;getMessage()], 404);
+        }
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Ahora el mismo <code>ConfirmarPedido</code> funciona desde un controller, un comando CLI o una job.</p>
+      </section>
+
+      <section>
+        <h2 id="reglas">Reglas sanas para services</h2>
+        <ul>
+          <li><strong>Un caso de uso por servicio:</strong> método único y con nombre de intención (<code>ejecutar</code>, <code>__invoke</code>).</li>
+          <li><strong>No cuelgues el estado:</strong> un servicio de negocio no guarda estado por request; comparte solo dependencias.</li>
+          <li><strong>Recibe dependencias por inyección:</strong> repositorios, otros servicios, nada estático.</li>
+          <li><strong>Resuelve un nivel por vez:</strong> un servicio puede usar otros servicios; evita espagueti de llamadas cruzadas sin control.</li>
+          <li><strong>Devuelve valores/resultados:</strong> rara vez manipula el response; el transporte de datos va con DTO.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacion">Service Layer vs. Facade vs. Command</h2>
+        <ul>
+          <li><strong>Service Layer</strong>: organiza los <em>casos de uso del negocio</em>.</li>
+          <li><strong>Facade</strong>: simplifica un subsistema de integración externo.</li>
+          <li><strong>Command</strong>: convierte la acción en objeto para colas/registro; el Service puede ser el handler del Command.</li>
+        </ul>
+        <p>No son rivales: conviven. Un Command Bus puede enrutar comandos hacia tus services.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escoge el controller más gordo de tu proyecto.</li>
+          <li>Extrae su flujo a un servicio con nombre de caso de uso.</li>
+          <li>Haz que el controller solo traduzca HTTP ↔ servicio.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Service Layer nombra y orquesta los casos de uso.</li>
+          <li>El controller traduce HTTP; el servicio decide.</li>
+          <li>Reutilizable desde API, CLI o colas.</li>
+          <li>Un caso de uso por servicio, dependencias inyectadas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="repository-y-capa-de-datos.html">Repository y la capa de datos</a>
+          <a class="related-lessons__link" href="dto-y-objetos-de-transferencia.html">DTO y objetos de transferencia</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-03/service-layer.html">Service Layer (arquitectura)</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-03/mvc-en-la-practica.html">MVC en la práctica</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

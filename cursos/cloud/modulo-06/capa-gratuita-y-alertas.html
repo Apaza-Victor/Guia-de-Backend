@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="capa-gratuita-y-alertas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capa gratuita y alertas de gasto · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Aprovecha la capa gratuita de AWS, el tier de GCP/Azure y configura alertas de presupuesto para no llevarte sorpresas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="capa-gratuita-y-alertas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Capa gratuita y alertas de gasto</span>
+      </nav>
+      <h1 class="lesson-title">Capa gratuita y alertas de gasto</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Costos y Estrategia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Practicar sin pagar</h2>
+        <p>Todos los grandes proveedores seducen con una <strong>capa gratuita</strong>: recursos limitados durante 12 meses (AWS) o un crédito inicial (GCP y Azure). Es perfecta para aprender: con cuidado y vigilancia puedes operar un backend real por $0. Las tres reglas: <em>lee los límites, programa las alertas, borra lo que no usas</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="aws">La capa gratuita de AWS</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">12 meses de free tier:
+  EC2:    750 h/mes t3.micro        ≈ 1 instancia siempre encendida
+  RDS:    750 h/mes db.t3.micro     ≈ 1 micro de Postgres
+  S3:     5 GB estándar + 20 K GET + 2 K PUT
+  Lambda: 1M invocaciones + 400 K GB-seg/mes
+
+Siempre: 1 GB de transferencia hacia afuera al mes.
+CUIDADO: pasar el límite cobra tarifa normal. La alerta es tu amiga.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="alertas">La primera alerta: presupuestos AWS</h2>
+        <p>Configúrala <strong>antes de crear el primer recurso</strong>. El servicio <em>Budgets</em> de AWS envía un email cuando superas el umbral:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">aws budgets create-budget \
+  --account-id 123456789012 \
+  --budget '{
+    "BudgetName": "alerta-micro",
+    "BudgetLimit": {"Amount": 1, "Unit": "USD"},
+    "BudgetType": "COST",
+    "TimeUnit": "MONTHLY",
+    "NotificationPlan": {
+      "Template": {...}
+    }
+  }' \
+  --notifications-with-subscribers '[
+    {
+      "Notification": {
+        "NotificationType": "ACTUAL",
+        "ComparisonOperator": "GREATER_THAN",
+        "Threshold": 80,
+        "ThresholdType": "PERCENTAGE"
+      },
+      "Subscribers": [{"SubscriptionType": "EMAIL", "Address": "tu@correo.com"}]
+    }
+  ]'</code></pre>
+          </div>
+        </figure>
+        <p>Resultado: cuando gastes 80 centavos del dólar mensual, suena un alarm. Cero sorpresas carde factura.</p>
+      </section>
+
+      <section>
+        <h2 id="otros">Lo equivalente en GCP y Azure</h2>
+        <ul>
+          <li><strong>GCP:</strong> créditos iniciales + siempre free (hasta 2M invocaciones de Cloud Functions al mes). Alertas con <em>Presupuestos y alertas</em> (Budget alerts) y notificación por email/pubsub.</li>
+          <li><strong>Azure:</strong> $200 de crédito inicial y <em>Free services</em> por 12 meses. Alertas con <em>Cost Management + Billing → Budgets</em>.</li>
+        </ul>
+        <p>La idea es idéntica en los tres: <strong>un umbral en dinero + un aviso automático</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="rutina">La rutina anti-sorpresa</h2>
+        <ul>
+          <li>Al crear cada recurso, pregúntate: ¿cuándo lo voy a borrar? Anótalo en el tag <code class="inline">Name</code> u organiza por ambientes.</li>
+          <li>Repaso semanal de <em>Cost Explorer</em> (AWS) o el equivalente: 5 minutos que evitan el mes de factura alta.</li>
+          <li>Apaga lo que no se usa (instancias en pruebas las detienes, no las dejas corriendo).</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Activa una alerta de presupuesto a $1 en el proveedor que elijas.</li>
+          <li>Anota los límites exactos de tu capa gratuita y crea una tabla de consumo.</li>
+          <li>Establece una regla personal: ej. "detener instancias de dev los findes".</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La capa gratuita alcanza para un Backend real si respetas los límites.</li>
+          <li>Las alertas de presupuesto se configuran antes que el primer recurso.</li>
+          <li>AWS Budgets, GCP Budgets, Azure Cost Management: misma idea, tres nombres.</li>
+          <li>Una revisión semanal de 5 minutos evita la factura sorpresa.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

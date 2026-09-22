@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m2-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimizar bases de datos · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a optimizar bases de datos: índices eficientes, planes de ejecución con EXPLAIN, el problema N+1 y pooling de conexiones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m2-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Optimizar bases de datos</span>
+      </nav>
+      <h1 class="lesson-title">Optimizar bases de datos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Optimización</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La base de datos suele ser el recurso más caro y el más fácil de saturar. Casi todos los backends lentos tienen al menos uno de estos tres males: <strong>consultas sin índice</strong> (full scan), <strong>el problema N+1</strong> (una consulta extra por fila) o <strong>conexiones que se abren a lo loco</strong>. Esta lección ataca los tres con herramientas concretas.</p>
+        <p>El método es siempre el mismo: leer el plan de ejecución <strong>antes</strong> de tocar nada, porque el plan te dice la verdad sobre lo que la base hará con tu consulta.</p>
+      </section>
+
+      <section>
+        <h2 id="indices">Índices: qué son y qué no son</h2>
+        <p>Un índice es una estructura auxiliar (B-tree, por defecto) que permite encontrar filas sin recorrer toda la tabla. En una tabla de 10 millones de filas, una búsqueda por <code>usuario_id</code> sin índice recorre 10 millones de registros; con índice, salta directa a los pocos que tocan.</p>
+        <p>El precio: cada índice ocupa disco y ralentiza <em>las escrituras</em> (INSERT/UPDATE/DELETE deben mantenerlo a día). La regla de oro: <strong>índices para las columnas que usas en WHERE y JOIN</strong>, y no más.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># psql: crea índices sobre los campos de filtro y de orden más usados
+psql -d tienda <<'SQL'
+CREATE INDEX idx_ordenes_usuario           ON ordenes (usuario_id);
+CREATE INDEX idx_ordenes_fecha_codigo      ON ordenes (fecha DESC, codigo);
+CREATE INDEX idx_productos_precio          ON productos (precio)
+  WHERE activo = true;                     -- índice parcial: solo filas activas
+
+EXPLAIN (FORMAT JSON)
+SELECT * FROM ordenes WHERE usuario_id = 42;
+SQL</code></pre>
+        <p>Un índice <strong>compuesto</strong> como <code>(fecha DESC, codigo)</code> resuelve un solo query de orden+ficheros. Un índice <strong>parcial</strong> ahorra espacio indexando solo lo que se consulta. Fan-out desmedido: cada índice añadido para una consulta rara es deuda que pagan todas las escrituras.</p>
+      </section>
+
+      <section>
+        <h2 id="explain">Leyendo el plan de ejecución</h2>
+        <p><code>EXPLAIN ANALYZE</code> ejecuta la consulta de verdad y reporta qué hizo la base: índice o scan completo, qué estima, cuántas filas filtró y cuánto tardó. Es la herramienta <em>máxima</em> de diagnóstico:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">psql -d tienda <<'SQL'
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT o.codigo, p.nombre
+FROM ordenes o
+JOIN productos p ON p.id = o.producto_id
+WHERE o.usuario_id = 42
+ORDER BY o.fecha DESC;
+SQL
+
+-- Resultado simplificado (postgres):
+-- Sort  (cost=0.87..0.89 rows=8 ...) (actual time=0.20..0.20 rows=8 loops=1)
+--   ->  Nested Loop (actual time=0.02..0.11 rows=8 loops=1)
+--         ->  Index Scan on ordenes_usuario_idx (actual rows=8 loops=1)
+--         ->  Index Scan on productos_pkey (actual rows=1 loops=8)
+-- Como ves: usa el índice idx_ordenes_usuario y el PK de productos.
+-- Si viera "Seq Scan on ordenes", ahí estaría el cuello de botella.</code></pre>
+        <p>La señal de alarma máxima es <code>Seq Scan</code> sobre una tabla grande con un <code>rows=1000000.0</code> estimado. La solución casi siempre es un índice nuevo. Pero deja que la base te lo confirme: <code>EXPLAIN</code> tras crear el índice debe mostrar <code>Index Scan</code> y un tiempo muchísimo menor.</p>
+      </section>
+
+      <section>
+        <h2 id="n1">El problema N+1</h2>
+        <p>El N+1 es el error de rendimiento más común en ORMs: pides una lista de 100 pedidos y el ORM ejecuta 1 consulta para la lista <em>y luego</em> 100 consultas más, una por cada pedido, para rellenar el cliente. Eso es 101 round-trips a la base para algo que se hace con un solo JOIN o una consulta por lotes.</p>
+        <p>El patrón malo (en pseudo-código de objeto-relacional) y la solución de eager loading:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// MAL: 1 consulta (pedidos) + N consultas (un cliente por pedido)
+const pedidos = await pedidosRepo.buscarPorUsuario(42);
+for (const pedido of pedidos) {
+  const cliente = await clientesRepo.buscarPorId(pedido.cliente_id); // 1 query por pedido
+  pedido.cliente = cliente;
+}
+// Con 100 pedidos -> 101 queries. Con 10.000 pedidos en producción -> desastre.
+
+// BIEN: 2 consultas en total
+const pedidos = await pedidosRepo.buscarPorUsuario(42);
+const idsClientes = [...new Set(pedidos.map((p) => p.cliente_id))];
+const clientes = await clientesRepo.buscarPorIds(idsClientes); // IN (...) en 1 query
+const mapaClientes = new Map(clientes.map((c) => [c.id, c]));
+for (const pedido of pedidos) pedido.cliente = mapaClientes.get(pedido.cliente_id);</code></pre>
+        <p>La auditoría es inmediata: activa el log de consultas lentas o cuenta queries por petición con tu ORM, y busca cualquier endpoint donde el número de queries crezca con el tamaño de la lista. Ese es el N+1.</p>
+      </section>
+
+      <section>
+        <h2 id="pooling">Pooling de conexiones</h2>
+        <p>Abrir una conexión a la BD no es gratis: handshake TCP, autenticación, estado. Con tráfico alto, abrir una por petición agota el tope de conexiones del servidor y todo espera. La respuesta es un <strong>pool</strong>: un conjunto fijo de conexiones reutilizables de las que el código toma prestada una, hace la consulta y la devuelve.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># psycopg2 + pool. connection_pool comparte N conexiones entre todos los hilos/workers
+from psycopg2 import pool
+
+# 20 conexiones reutilizables a la tienda
+pool_bd = pool.SimpleConnectionPool(
+    1, 20, host="db", dbname="tienda", user="app", password="secreto"
+)
+
+import threading
+
+def consultar_por_usuario(usuario_id: int):
+    with pool_bd.getconn() as con:          # toma prestada y devuelve al terminar
+        with con.cursor() as cur:
+            cur.execute("SELECT * FROM ordenes WHERE usuario_id = %s", (usuario_id,))
+            return cur.fetchall()
+
+# Uso concurrente sin abrir una conexión por request:
+# 20 peticiones a la vez usan las 20 conexiones del pool sin negociar nuevas.</code></pre>
+        <p>Conceptos de ajuste: <code>pool_max</code> del app server y <code>max_connections</code> de la BD. Si el pool se agota, la app espera por una conexión (latencia en cola) o falla si hay timeout; hallar el tamaño correcto es parte normal del tuning bajo tu prueba de carga.</p>
+      </section>
+
+      <section>
+        <h2 id="orden">Prioridad de optimización</h2>
+        <p>Cuando una consulta va lenta, este orden evita trabajo perdido:</p>
+        <ol>
+          <li><code>EXPLAIN ANALYZE</code>: ¿Seq Scan innecesario? → índice.</li>
+          <li>¿Devuelvo columnas que no uso? → SELECT solo lo necesario.</li>
+          <li>¿Hay N+1 en el código? → batch / eager loading.</li>
+          <li>¿Conexiones per-petición? → pooling.</li>
+          <li>¿Sigue lento? → piensa en la fuente de verdad: caché (lección anterior) o escala (módulo 3).</li>
+        </ol>
+        <p>El 80% de las veces te quedas en el paso 1.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige la consulta más frecuente de tu sistema y ejecuta <code>EXPLAIN (ANALYZE, BUFFERS)</code>.</li>
+          <li>Si ves <code>Seq Scan</code> o un coste desproporcionado, crea el índice adecuado (compuesto o parcial si aplica) y vuelve a ejecutar: el plan debe cambiar y el tiempo caer.</li>
+          <li>Activa el conteo de consultas por petición en tu ORM y audita los endpoints de listas buscando N+1. Arregla al menos uno con la técnica de batch.</li>
+          <li>Revisa si tu app abre una conexión por petición y sustitúyela por un pool.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los índices aceleran lecturas y pagan en escrituras; úsalos para WHERE y JOIN y nada más.</li>
+          <li><code>EXPLAIN ANALYZE</code> es la herramienta central: <code>Seq Scan</code> sobre tabla grande = señal de alarma.</li>
+          <li>El N+1 convierte 1 consulta en 1+N: se arregla con JOIN o consultas por lotes (IN ...).</li>
+          <li>Un pool de conexiones reutiliza conexiones y evita agotar la BD bajo tráfico.</li>
+          <li>Orden de ataque: EXPLAIN → SELECT mínimo → N+1 → pooling → caché/escala.</li>
+          <li>El caché y las réplicas de lectura (módulo 3) son el siguiente paso cuando la BD sola no da.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="caching-estrategias.html">Caching y estrategias</a>
+          <a class="related-lessons__link" href="../modulo-01/benchmarking-y-perfiles.html">Benchmarking y perfiles</a>
+          <a class="related-lessons__link" href="../modulo-03/bases-de-datos-a-escala.html">Bases de datos a escala</a>
+          <a class="related-lessons__link" href="../modulo-01/cuellos-de-botalla.html">Identificar cuellos de botella</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

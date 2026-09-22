@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="el-event-loop">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Event Loop de Node.js · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Entiende cómo funciona el event loop de Node.js, el orden de ejecución de callbacks, timers y microtareas en tu código asíncrono.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="el-event-loop"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">El Event Loop de Node.js</span>
+        </nav>
+        <h1 class="lesson-title">El Event Loop de Node.js</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Node.js</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="single-thread">Un solo hilo que nunca se bloquea</h2>
+          <p>Node.js procesa tu JavaScript en <strong>un único hilo</strong>. Eso significa que el código que escribes se ejecuta de forma secuencial, pero las operaciones lentas (archivos, red, bases de datos) se delegan a libuv. Cuando terminan, sus resultados vuelven en forma de <strong>eventos</strong> y el <strong>event loop</strong> decide cuándo ejecutarlos.</p>
+          <p>Imagina un camarero (el hilo único) que toma pedidos. En lugar de quedarse parado junto al fogón mientras la comida se cocina, toma otro pedido. Cuando la cocina (libuv) avisa, el camarero lleva el plato a la mesa. Eso es el event loop.</p>
+        </section>
+
+        <section>
+          <h2 id="fases">Las fases del event loop</h2>
+          <p>El event loop es un bucle que recorre varias fases en cada iteración:</p>
+          <ol>
+            <li><strong>Timers:</strong> ejecuta los callbacks de <code class="inline">setTimeout</code> y <code class="inline">setInterval</code> con el tiempo vencido.</li>
+            <li><strong>Pending:</strong> algunos callbacks del sistema (como errores de TCP).</li>
+            <li><strong>Idle / Prepare:</strong> trabajos internos de Node.</li>
+            <li><strong>Poll:</strong> la fase principal: recoge nuevos eventos de I/O y ejecuta sus callbacks; aquí espera cuando no hay nada que hacer.</li>
+            <li><strong>Check:</strong> ejecuta los callbacks de <code class="inline">setImmediate</code>.</li>
+            <li><strong>Close:</strong> callbacks de cierre (por ejemplo <code class="inline">socket.on("close")</code>).</li>
+          </ol>
+          <p>Además, entre o después de cada fase se procesan las <strong>microtareas</strong>: las promesas (y <code class="inline">queueMicrotask</code>) tienen prioridad sobre el resto.</p>
+        </section>
+
+        <section>
+          <h2 id="orden">El orden real en la práctica</h2>
+          <p>Para no memorizar fases, queda con la regla práctica de prioridades:</p>
+          <ol>
+            <li>Código síncrono actual.</li>
+            <li>Microtareas (promesas, queueMicrotask).</li>
+            <li>Timers y I/O (fases del loop).</li>
+          </ol>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">console.log("1. síncrono");
+
+setTimeout(() =&gt; console.log("5. setTimeout"), 0);
+
+Promise.resolve()
+  .then(() =&gt; console.log("3. microtarea 1"))
+  .then(() =&gt; console.log("4. microtarea 2"));
+
+queueMicrotask(() =&gt; console.log("3.1 microtarea extra"));
+
+setImmediate(() =&gt; console.log("6. setImmediate"));
+
+console.log("2. síncrono de nuevo");</code></pre>
+            </div>
+          </figure>
+          <p>Ejecútalo varias veces: el orden de <code class="inline">setTimeout</code> y <code class="inline">setImmediate</code> puede variar según la carga, pero el 1, 2, 3, 3.1 y 4 siempre saldrán antes que el 5 y el 6.</p>
+        </section>
+
+        <section>
+          <h2 id="bloqueos">Un bloqueo puede detenerlo todo</h2>
+          <p>Si dentro de un callback ejecutas una operación síncrona pesada, el hilo único se queda ocupado y ninguna otra petición avanza. El event loop sigue vivo, pero se atasca.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const fs = require("node:fs");
+
+// MAL: bloquea el hilo durante la lectura
+fs.readFileSync("enorme.log", "utf8");
+
+// BIEN: delega la lectura a libuv y libera el hilo
+fs.readFile("enorme.log", "utf8", (err, datos) =&gt; {
+  // aquí seguimos cuando esté listo
+});</code></pre>
+            </div>
+          </figure>
+          <p>La CPU no puede ejecutar, por ejemplo, un <code class="inline">while</code> infinito. Una operación de cálculo puro muy pesada (como cifrar miles de datos) también bloquea. Para esos casos existen <code class="inline">worker_threads</code> (lo veremos en el módulo 3) o caminos alternativos.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Copia el script de prioridades y ejecútalo. Anota el orden exacto de la consola.</li>
+            <li>Modifica el ejemplo añadiendo un <code class="inline">Promise.resolve()</code> dentro de un <code class="inline">then</code> y observa dónde aparece.</li>
+            <li>Explica con tus palabras qué pasaría si un servidor usara <code class="inline">readFileSync</code> en cada petición.</li>
+            <li>Sustituye la variable <code class="inline">suma</code> del capítulo de V8 por operaciones dentro del hilo y piensa cómo la repartirías entre Microtasks.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Node usa un hilo único para tu JavaScript; libuv gestiona las operaciones lentas.</li>
+            <li>El event loop recorre fases: timers, poll, check y close.</li>
+            <li>Las microtareas (promesas) corren antes que los timers y la I/O.</li>
+            <li>Una operación síncrona pesada bloquea el loop y a todos los clientes.</li>
+            <li>Siempre prefieres las versiones asíncronas de fs y de red en servidores.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

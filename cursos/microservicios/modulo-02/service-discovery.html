@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-service-discovery">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Discovery · Microservicios · Backend Academy</title>
+<meta name="description" content="Service discovery en microservicios: registro centralizado, health checks, DNS dinámico y descubrimiento del lado del cliente para encontar instancias en movimiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-service-discovery"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Service discovery</span>
+      </nav>
+      <h1 class="lesson-title">Service discovery</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Comunicación</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Los microservicios escalan y se despliegan de forma independiente: nacen y mueren instancias constantemente, con IPs y puertos que cambian en cada despliegue. Las URLs fijas en archivos de configuración no sirven. El <strong>service discovery</strong> resuelve «<em>¿en qué máquina está ahora el servicio X?</em>» de forma dinámica.</p>
+      </section>
+
+      <section>
+        <h2 id="registro">Registro y consulta</h2>
+        <p>Hay dos actores: el <strong>registro</strong> (directorio que lista las instancias vivas) y el <strong>cliente</strong> (quien consulta la dirección correcta antes de llamar). Herramientas típicas: Consul, etcd, Zookeeper, Eureka, y del lado cloud: AWS Cloud Map, Kubernetes DNS, etc.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON (directorio)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "service": "servicio-pagos",
+  "instances": [
+    { "id": "pagos-a1", "host": "10.0.1.12", "port": 8080, "healthy": true },
+    { "id": "pagos-a2", "host": "10.0.1.18", "port": 8080, "healthy": true },
+    { "id": "pagos-a3", "host": "10.0.1.23", "port": 8080, "healthy": false }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="client-side">Descubrimiento del lado del cliente</h2>
+        <p>En el esquema <strong>client-side</strong>, el propio cliente pregunta al registro, obtiene la lista de instancias y aplica balanceo de carga. Es rápido (sin saltos extra), pero cada cliente debe implementar la lógica de descubrimiento:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript (cliente)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">async function descubrirPagador() {
+  const registro = await fetch("http://consul:8500/v1/health/service/servicio-pagos")
+    .then(r => r.json());
+
+  const vivas = registro
+    .filter(entry => entry.Checks.every(c => c.Status === "passing"))
+    .map(entry => entry.Service);
+
+  if (vivas.length === 0) throw new Error("Sin instancias disponibles");
+  const elegida = vivas[Math.floor(Math.random() * vivas.length)];
+  return `http://${elegida.Address}:${elegida.Port}`;
+}
+
+const url = await descubrirPagador();
+// url => "http://10.0.1.12:8080"</code></pre>
+          </div>
+        </figure>
+        <p>El balanceo round-robin o aleatorio distribuye la carga entre las instancias sanas.</p>
+      </section>
+
+      <section>
+        <h2 id="server-side">Descubrimiento del lado del servidor</h2>
+        <p>En el esquema <strong>server-side</strong>, el cliente solo conoce una dirección fija del balanceador (o del API Gateway). El balanceador consulta el registro y reparte el tráfico él mismo. El beneficio: los clientes no necesitan bibliotecas de descubrimiento; la desventaja: un salto de red más y un componente central que vigilar.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (load balancer)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">load_balancer:
+  frontend:
+    - "0.0.0.0:80"
+  service_discovery: consul
+  backend:
+    service_name: servicio-pagos
+    health_check: "/healthz"
+    strategy: least_connections
+    tls: true</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="health">Newsletter health checks</h2>
+        <p>El registro no puede fiarse solo de que una instancia se haya registrado: debe <strong>verificar que sigue viva y sana</strong>. Por eso cada instancia expone un <code>/healthz</code> que el registro consulta cada pocos segundos; si falla, la instancia se da de baja automáticamente del directorio.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (health check + heartbeat)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+REGISTRO = "http://consul:8500/v1/agent/service/register"
+CAVE_URL = {"ID": "cave-a1", "Name": "servicio-cave", "Address": "10.0.1.40", "Port": 8080}
+
+@app.get("/healthz")
+def healthz():
+    return jsonify({"status": "ok"})
+
+def registrarse():
+    requests.put(REGISTRO, json=CAVE_URL)   # TTL se renueva en cada heartbeat
+
+def heartbeat():
+    requests.put(f"{REGISTRO}/check?token=ttl", json={"Status": "passing"})</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="kubernetes">Descubrimiento en Kubernetes</h2>
+        <p>En Kubernetes el descubrimiento existe gracias al slang sobre DNS: cada <code>Service</code> del clúster expone un nombre DNS estable que resuelve a las IPs actuales de los pods. Así, el cliente puede llamar a <code>http://servicio-pagos:8080</code> sin saber quién atiende; Kube-DNS y el Service LoadBalancer reparten las peticiones.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (service en k8s)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: servicio-pagos
+spec:
+  selector:
+    app: servicio-pagos
+  ports:
+    - port: 8080
+      targetPort: 8080
+  # El DNS servicio-pagos:8080 resuelve a pods vivos automáticamente</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cache">Caché y tolerancia a fallos</h2>
+        <p>Consultar el registro en cada llamada es lento y añade un punto de dependencia. La buena práctica: <strong>cachear la lista</strong> de instancias en el cliente, refrescarla en segundo plano y, si el registro falla, seguir usando la última lista conocida. La disponibilidad del sistema no debe depender de la disponibilidad del registro en milisegundos.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe el flujo JSON de una instancia que nace, se registra y recibe health checks.</li>
+          <li>Explica qué sucede en client-side si el registro responde con una instancia caída.</li>
+          <li>Decide server-side vs client-side para 5 servicios internos y justifica.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El service discovery localiza instancias de microservicios que cambian de dirección constantemente.</li>
+          <li>Existe descubrimiento client-side (el cliente consulta) y server-side (el balanceador consulta).</li>
+          <li>Los health checks dan de baja instancias insalubles del directorio automáticamente.</li>
+          <li>En Kubernetes el Service DNS resuelve automáticamente a pods vivos.</li>
+          <li>La caché local y la tolerancia a fallos evitan depender de la latencia del registro.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="api-gateway.html">API Gateway</a>
+          <a class="related-lessons__link" href="comunicacion-sincrona.html">Comunicación síncrona</a>
+          <a class="related-lessons__link" href="comunicacion-asincrona.html">Comunicación asíncrona</a>
+          <a class="related-lessons__link" href="../modulo-03/despliegue-de-microservicios.html">Despliegue de microservicios</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-patrones-de-integracion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrones de integración · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende los patrones de integración clásicos: adaptadores para aislar a terceros, mappers para traducir contratos y orquestación de flujos complejos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-patrones-de-integracion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Patrones de integración</span>
+      </nav>
+      <h1 class="lesson-title">Patrones de integración</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Integrar sistemas de forma improvisada produce el famoso «espagueti de integración»: llamadas directas a terceros por todo el código, contratos quemados en cada controlador y cambios de proveedor que cuestan semanas. Los <strong>patrones de integración</strong> (Enterprise Integration Patterns, EIP) son soluciones probadas a los problemas recurrentes: cómo aislar al proveedor, cómo traducir los datos y cómo coordinar flujos que atraviesan varios sistemas.</p>
+        <p>Los tres patrones que más rinden en el día a día son el <strong>adaptador</strong>, el <strong>mapper</strong> y la <strong>orquestación</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="adapter">El patrón adaptador</h2>
+        <p>El adaptador es una clase que envuelve a un proveedor externo y lo presenta al resto del sistema con una interfaz <strong>tuya</strong>. Si mañana cambias de proveedor de correo a otro, solo cambia el adaptador; el resto del código ni se entera:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">class ProveedorCorreo {
+  _sdk = null;
+
+  constructor(sdk) {
+    this._sdk = sdk; // SDK oficial del proveedor
+  }
+
+  async enviar({ to, template, context }) {
+    const resp = await this._sdk.sendTemplate({ to, template, context });
+    return { messageId: resp.id, status: resp.status };
+  }
+
+  async obtenerEstado(messageId) {
+    return this._sdk.retrieve(messageId).status;
+  }
+}</code></pre>
+        <p>La interfaz interna (<code>enviar</code>, <code>obtenerEstado</code>) pertenece a tu dominio. El adaptador es el único lugar del proyecto que conoce la API real del tercero: es la frontera entre «tu mundo» y «el mundo del proveedor».</p>
+      </section>
+
+      <section>
+        <h2 id="mapper">El patrón mapper</h2>
+        <p>El tercero no habla tu idioma de contratos: a veces llama a la fecha de creación <code>created_at</code> y a veces <code>fechaCreacion</code>; a veces te manda céntimos y a veces euros. El <strong>mapper</strong> traduce entre ambos mundos, evitando que el formato del proveedor contamine tu código de negocio:</p>
+<pre class="code-block"><code class="language-python" data-language="python">from dataclasses import dataclass
+
+@dataclass
+class ClienteFacturacion:
+    id_externo: str
+    email: str
+    nombre: str
+
+def mapear_cliente_desde_proveedor(payload: dict) -> ClienteFacturacion:
+    return ClienteFacturacion(
+        id_externo=payload["customer_id"],
+        email=payload["billing"]["email"],
+        nombre=payload["name"]["given"] + " " + payload["name"]["family"],
+    )</code></pre>
+        <p>El mapper también sirve de defensa cuando el contrato cambia: si el proveedor renombra un campo, el único ajuste lo haces dentro del mapper y un test te avisa de qué esperaba antes.</p>
+      </section>
+
+      <section>
+        <h2 id="orquestacion">Orquestación vs coreografía</h2>
+        <p>Cuando un flujo cruza varios servicios (cobrar, actualizar inventario, enviar correo, guardar el pedido) necesitas decidir quién dirige el flujo:</p>
+        <ul>
+          <li><strong>Orquestación:</strong> un componente central (el orquestador) llama a cada servicio en orden y decide el resultado global. Es fácil de entender y de depurar, pero ese punto central puede convertirse en un cuello de botella.</li>
+          <li><strong>Coreografía:</strong> no hay director. Cada servicio reacciona a eventos publicados por los demás y todos se coordinan de forma descentralizada. Es más escalable, pero más difícil de razonar.</li>
+        </ul>
+        <p>Para integraciones con terceros, la orquestación suele ser la elección correcta al principio. Un flujo típico queda así:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "flujo": "confirmar_pedido",
+  "pasos": [
+    { "servicio": "pagos",     "accion": "cobrar",     "retry": true },
+    { "servicio": "inventario","accion": "reservar",   "retry": true },
+    { "servicio": "correo",    "accion": "confirmacion","retry": false },
+    { "servicio": "logistica", "accion": "programar",  "retry": true }
+  ],
+  "estrategia_fallo": "compensar_pasos_exitosos"
+}</code></pre>
+        <p>Cuando un paso falla, el orquestador decide si reintenta, si compensa lo ya hecho o si pasa el flujo a una cola para reintentarlo después.</p>
+      </section>
+
+      <section>
+        <h2 id="otros">Otros patrones útiles</h2>
+        <ul>
+          <li><strong>Gateway:</strong> una versión del adaptador orientada a servicios completos, habitual cuando se integra un ERP o un legacy.</li>
+          <li><strong>Router:</strong> decide a qué sistema va cada mensaje según su contenido (factura a SAP, pedido a Shopify).</li>
+          <li><strong>Translator:</strong> transforma el mensaje completo entre formatos (JSON a XML) antes de entregarlo.</li>
+          <li><strong>Aggregator:</strong> combina respuestas de varias fuentes en una única respuesta a tu sistema (un dashboard que consulta 3 APIs a la vez).</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> ningún proveedor externo debe aparecer como tipo importado fuera de su adaptador. Si tu controlador hace <code>new StripeAPI()</code>, ya estás fuera del patrón.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe la interfaz de un adaptador <code>PasarelaDePagos</code> con métodos para cobrar, reembolsar y consultar un pago.</li>
+          <li>Implementa un mapper en Python o JavaScript que traduzca un payload de ejemplo del proveedor a tu modelo interno.</li>
+          <li>Dibuja el flujo «registro de usuario» (validar correo, crear cuenta, dar bienvenida, crear workspace) y decide qué pasos requieren retry y cuáles no.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los patrones de integración resuelven problemas recurrentes de forma probada.</li>
+          <li>El adaptador aísla al proveedor detrás de una interfaz propia.</li>
+          <li>El mapper traduce contratos externos a tu modelo de dominio.</li>
+          <li>La orquestación centraliza el flujo; la coreografía lo descentraliza.</li>
+          <li>Ningún proveedor debe aparecer fuera de su adaptador.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-son-las-integraciones.html">¿Qué son las integraciones?</a>
+          <a class="related-lessons__link" href="sdk-y-clientes.html">SDKs y clientes HTTP</a>
+          <a class="related-lessons__link" href="../modulo-03/colas-para-tareas-lentas.html">Colas para tareas lentas</a>
+          <a class="related-lessons__link" href="../modulo-03/pruebas-de-integracion.html">Pruebas de integración</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

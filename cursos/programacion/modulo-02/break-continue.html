@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>break y continue: control fino de bucles · Programación para Backend · Backend Academy</title>
+<meta name="description" content="Interrumpir un bucle o saltar a la siguiente iteración cuando hace falta.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css"></head>
+<body class="app-shell">
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html" aria-label="Backend Academy - Inicio">
+      <span class="brand__logo" aria-hidden="true"><i class="fa-solid fa-code"></i></span>
+      <span>Backend Academy<small>aprende a programar</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../cursos/proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle btn btn--icon" type="button" aria-label="Cambiar a modo oscuro">
+        <i class="fa-solid fa-moon" data-mode="light" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="lesson-layout lesson-layout--with-toc container">
+<aside class="sidebar" aria-label="Contenido del curso Programación para Backend">
+  <div class="sidebar__section">
+    <a class="sidebar__title" href="../../../cursos/programacion/index.html">Programación para Backend</a>
+    <div class="progress" data-progress="programacion" aria-label="Progreso del curso">
+      <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+      <span class="progress__label">0%</span>
+    </div>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Fundamentos de programación</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="variables-y-constantes" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="tipos-de-datos" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="operadores" href="../../../cursos/programacion/modulo-01/operadores.html">Operadores y expresiones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conversion-de-tipos" href="../../../cursos/programacion/modulo-01/conversion-de-tipos.html">Conversión de tipos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="entrada-salida" href="../../../cursos/programacion/modulo-01/entrada-salida.html">Entrada, salida y comentarios<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group is-open">
+    <h3 class="sidebar__group-title"><span>Control de flujo</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="condicionales" href="../../../cursos/programacion/modulo-02/condicionales.html">Condicionales: if, else y elseif<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="condicional-switch" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-while" href="../../../cursos/programacion/modulo-02/bucles-while.html">Bucles while y do-while<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-for-foreach" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link is-active" data-lesson-id="break-continue" href="../../../cursos/programacion/modulo-02/break-continue.html" aria-current="page">break y continue: control fino de bucles<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Funciones</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="funciones" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="parametros-y-argumentos" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">Parámetros y argumentos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="ambito-de-variables" href="../../../cursos/programacion/modulo-03/ambito-de-variables.html">Ámbito (scope) de las variables<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="funciones-anonimas-callbacks" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="recursividad" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Estructuras de datos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="arrays" href="../../../cursos/programacion/modulo-04/arrays.html">Arrays: la base de los datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="arrays-asociativos" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conjuntos" href="../../../cursos/programacion/modulo-04/conjuntos.html">Conjuntos y colecciones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="objetos" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="estructuras-anidadas" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Programación Orientada a Objetos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="clases-y-objetos" href="../../../cursos/programacion/modulo-05/clases-y-objetos.html">Clases y objetos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="atributos-metodos-constructores" href="../../../cursos/programacion/modulo-05/atributos-metodos-constructores.html">Atributos, métodos y constructores<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="encapsulamiento" href="../../../cursos/programacion/modulo-05/encapsulamiento.html">Encapsulamiento: public, private y protected<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="herencia" href="../../../cursos/programacion/modulo-05/herencia.html">Herencia<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="polimorfismo-abstraccion-interfaces" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Código profesional</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="modularizacion" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="clean-code" href="../../../cursos/programacion/modulo-06/clean-code.html">Clean Code<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="principios-solid" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="dry-kiss" href="../../../cursos/programacion/modulo-06/dry-kiss.html">DRY y KISS<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="debugging" href="../../../cursos/programacion/modulo-06/debugging.html">Debugging y herramientas<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="manejo-de-errores" href="../../../cursos/programacion/modulo-06/manejo-de-errores.html">Manejo de errores y excepciones<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>  <div class="sidebar-footer">
+    <span><i class="fa-solid fa-code" aria-hidden="true"></i> Ejemplos en PHP 8.</span>
+    <a href="../../../cursos/programacion/index.html">Ver índice del curso</a>
+  </div>
+</aside>
+  <main class="lesson-main" id="main">
+<nav class="lesson-crumbs" aria-label="Ruta de navegación">
+  <a href="../../../index.html">Inicio</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../aprender/index.html">Cursos</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/index.html">Programación para Backend</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/modulo-02/index.html">módulo 02</a><span class="sep" aria-hidden="true">/</span>
+  <span class="current" aria-current="page">break y continue: control fino de bucles</span>
+</nav>
+    <article class="lesson-article" data-lesson-id="break-continue">
+      <header class="lesson-hero">
+        <h1 class="lesson-title">break y continue: control fino de bucles</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Principiante</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-code" aria-hidden="true"></i> PHP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Control de flujo</span>
+          <label class="complete-toggle"><input type="checkbox"><span class="complete-toggle__box" aria-hidden="true">✓</span> Marcar como completada</label>
+        </div>
+      </header>
+      <div class="lesson-content">
+<section id="introduccion" aria-labelledby="introduccion-t">
+  <h2 id="introduccion-t">Introducción</h2>
+  <p>A veces no quieres recorrer todo el array: quieres saltarte algo o parar en cuanto encuentres lo que buscas. Ahí entran <code class="inline">break</code> y <code class="inline">continue</code>, los dos interruptores finos del bucle.</p>
+</section><section id="definicion" aria-labelledby="definicion-t">
+  <h2 id="definicion-t">Definición</h2>
+  <p><code class="inline">break</code> <strong>termina</strong> el bucle de inmediato: ya no se repite más. <code class="inline">continue</code> <strong>salta a la siguiente iteración</strong> sin ejecutar el resto del bloque actual. Ambos aceptan un número opcional para controlar bucles anidados: <code class="inline">break 2</code> corta dos niveles a la vez. Úsalo con moderación y siempre dentro del bucle que quieres controlar.</p>
+</section><section id="conceptos-clave" aria-labelledby="conceptos-clave-t">
+  <h2 id="conceptos-clave-t">Conceptos clave</h2>
+  <ul>
+  <li><code class="inline">break</code>: salida inmediata del bucle (queda interrumpido).</li>
+  <li><code class="inline">continue</code>: ignora el resto de la vuelta y pasa a la siguiente.</li>
+  <li>Usa <code class="inline">break</code> para "encontrar y salir" en búsquedas.</li>
+  <li>Usa <code class="inline">continue</code> para filtrar: "si no cumple, sáltalo".</li>
+  <li><code class="inline">break N</code> y <code class="inline">continue N</code> afectan a N niveles de anidado.</li>
+</ul>
+</section><section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t">
+  <h2 id="ejemplo-basico-t">Ejemplo básico</h2>
+  <p><code class="inline">break</code> corta el bucle en cuanto llega al 5:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">break.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">for ($i = 1; $i &lt;= 10; $i++) {
+    if ($i === 5) {
+        break;              // salimos sin imprimir el 5
+    }
+    echo &quot;$i &quot;;
+}
+// Salida: 1 2 3 4</code></pre></div>
+</div>
+</section><section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t">
+  <h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2>
+  <p><code class="inline">continue</code> salta lo que no quieres:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">continue.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">for ($i = 1; $i &lt;= 6; $i++) {
+    if ($i % 2 === 0) {
+        continue;           // nos saltamos los pares
+    }
+    echo &quot;$i &quot;;
+}
+// Salida: 1 3 5</code></pre></div>
+</div>
+</section><section id="ejemplo-real" aria-labelledby="ejemplo-real-t">
+  <h2 id="ejemplo-real-t">Ejemplo real</h2>
+  <p>Juntos implementan busqueda con filtro, un patrón real:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">filtro.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$partidas = [
+    [&quot;jugador&quot; =&gt; &quot;Ana&quot;,  &quot;puntos&quot; =&gt; 120],
+    [&quot;jugador&quot; =&gt; &quot;Luis&quot;, &quot;puntos&quot; =&gt; 85],
+    [&quot;jugador&quot; =&gt; &quot;Nora&quot;, &quot;puntos&quot; =&gt; 200],
+];
+
+foreach ($partidas as $partida) {
+    if ($partida[&quot;puntos&quot;] &lt; 100) {
+        continue;                       // no alcanza el m&#237;nimo; saltamos
+    }
+    echo &quot;Partida v&#225;lida: {$partida[&#39;jugador&#39;]}\n&quot;;
+}</code></pre></div>
+</div>
+</section><section id="codigo" aria-labelledby="codigo-t">
+  <h2 id="codigo-t">Código completo</h2>
+  <p>Código completo: procesar usuarios con validaciones, saltando inactivos y parando en el objetivo:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">busqueda.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+$usuarios = [
+    [&quot;nombre&quot; =&gt; &quot;Ana&quot;,  &quot;activo&quot; =&gt; true],
+    [&quot;nombre&quot; =&gt; &quot;Luis&quot;, &quot;activo&quot; =&gt; false],
+    [&quot;nombre&quot; =&gt; &quot;Nora&quot;, &quot;activo&quot; =&gt; true],
+];
+
+foreach ($usuarios as $usuario) {
+    if (!$usuario[&quot;activo&quot;]) {
+        continue;   // ignora cuentas inactivas
+    }
+
+    if ($usuario[&quot;nombre&quot;] === &quot;Nora&quot;) {
+        echo &quot;Encontrado: {$usuario[&#39;nombre&#39;]}\n&quot;;
+        break;      // ya tenemos lo que busc&#225;bamos
+    }
+
+    echo &quot;Procesando a {$usuario[&#39;nombre&#39;]}\n&quot;;
+}</code></pre></div>
+</div>
+</section><section id="explicacion" aria-labelledby="explicacion-t">
+  <h2 id="explicacion-t">Explicación</h2>
+  <p>En <code class="inline">break.php</code> el bucle ni siquiera llega a imprimir el 5: la interrupción es total. En <code class="inline">continue.php</code>, en cambio, el 4 se evalúa pero su cuerpo "se salta" y el bucle sigue en el 5.</p>
+<p>El patrón de negocio aparece en <code class="inline">busqueda.php</code>: primero filtramos con <code class="inline">continue</code> (no proceses inválidos), luego buscamos con <code class="inline">break</code> (para en cuanto lo encuentres). Así recorres el mínimo de datos y comunicas tu intención con claridad. Y son tu salvoconducto contra bucles infinitos: un <code class="inline">break</code> de seguridad tras N vueltas nunca está de más.</p>
+</section><section id="errores-comunes" aria-labelledby="errores-comunes-t">
+  <h2 id="errores-comunes-t">Errores comunes</h2>
+  <ul>
+  <li>Usar <code class="inline">break</code> cuando querías <code class="inline">continue</code> (y viceversa): el flujo cambia por completo.</li>
+  <li>Añadir <code class="inline">continue</code> al final del bloque: no hace nada y confunde.</li>
+  <li>Romper más niveles de los que hay con <code class="inline">break 3</code>: se detiene todo el script.</li>
+  <li>Depender del valor que sobresale: documenta siempre qué termina cada interrupción.</li>
+</ul>
+</section><section id="buenas-practicas" aria-labelledby="buenas-practicas-t">
+  <h2 id="buenas-practicas-t">Buenas prácticas</h2>
+  <ul>
+  <li>Primero condiciones de filtro (<code class="inline">continue</code>), después de éxito (<code class="inline">break</code>).</li>
+  <li>Si el bucle se complica, extrae la lógica a una función que devuelva el resultado y evita saltos.</li>
+  <li>Usa <code class="inline">break 2</code> con moderación: dos niveles ya son demasiados.</li>
+</ul>
+</section><section id="ejercicio" aria-labelledby="ejercicio-t">
+  <h2 id="ejercicio-t">Ejercicio</h2>
+  <div class="exercise">
+  <div class="exercise__head">
+    <h3>Detector de spam</h3>
+    <span class="badge badge--level-intermedio">Dificultad: Media</span>
+  </div>
+  <ol>
+    <li>Con <code class="inline">$mensajes = ["hola", "", "oferta!" , "adiós"]</code>:</li>
+    <li>Saltate los vacíos con <code class="inline">continue</code>.</li>
+    <li>Si llega "oferta!", imprime "Spam detectado" y para el bucle con <code class="inline">break</code>.</li>
+    <li>Imprime cada mensaje no vacío antes del spam.</li>
+  </ol>
+</div>
+</section><section id="resumen" aria-labelledby="resumen-t">
+  <h2 id="resumen-t">Resumen</h2>
+  <div class="summary">
+  <ul>
+    <li><code class="inline">break</code> termina el bucle; <code class="inline">continue</code> salta la vuelta.</li>
+    <li>Patrón backend: filtrar con <code class="inline">continue</code>, encontrar y parar con <code class="inline">break</code>.</li>
+    <li>Evita anidados profundos y usa los saltos con intención clara.</li>
+  </ul>
+</div>
+</section>
+      </div>
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../../../cursos/programacion/modulo-02/index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo</a>
+      </nav><div class="lesson-prevnext">
+  <a class="lesson-prevnext__link" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">
+    <span class="label" aria-hidden="true">← Anterior</span>
+    <span class="title">Bucles for y foreach</span>
+  </a>
+  <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../../../cursos/programacion/modulo-03/funciones.html">
+    <span class="label" aria-hidden="true">Siguiente →</span>
+    <span class="title">Funciones: definir y retornar</span>
+  </a>
+</div>
+      <section class="related-block" aria-labelledby="rel-t">
+        <h2 id="rel-t">También puede interesarte</h2><div class="related-lessons">  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<br><span class="muted">Funciones</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<br><span class="muted">Estructuras de datos</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<br><span class="muted">Programación Orientada a Objetos</span></a></div>      </section>
+    </article>
+  </main><aside class="toc-rail" data-toc aria-label="Contenido de la página">
+  <h2>En esta página</h2>
+  <nav aria-label="Secciones de la lección">
+    <a href="#introduccion">Introducción</a>
+    <a href="#definicion">Definición</a>
+    <a href="#conceptos-clave">Conceptos clave</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-intermedio">Ejemplo intermedio</a>
+    <a href="#ejemplo-real">Ejemplo real</a>
+    <a href="#codigo">Código completo</a>
+    <a href="#explicacion">Explicación</a>
+    <a href="#errores-comunes">Errores comunes</a>
+    <a href="#buenas-practicas">Buenas prácticas</a>
+    <a href="#ejercicio">Ejercicio</a>
+    <a href="#resumen">Resumen</a>
+  </nav>
+</aside>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <h4><a href="../../../index.html">Backend Academy</a></h4>
+        <p>Plataforma en español para aprender desarrollo backend: de los fundamentos a la arquitectura de sistemas de alto tráfico.</p>
+      </div>
+      <div>
+        <h4>Cursos</h4>
+        <ul>
+          <li><a href="../../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../../cursos/programacion/index.html">Programación para Backend</a></li>
+          <li><a href="../../../cursos/php/index.html">PHP</a></li>
+          <li><a href="../../../cursos/nodejs/index.html">Node.js</a></li>
+          <li><a href="../../../cursos/python/index.html">Python</a></li>
+          <li><a href="../../../cursos/bases-datos/index.html">Bases de Datos</a></li>
+          <li><a href="../../../cursos/apis-rest/index.html">APIs REST</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap</a></li>
+          <li><a href="../../../retos/index.html">Retos</a></li>
+          <li><a href="../../../ejercicios/index.html">Ejercicios</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../dashboard/index.html">Mi progreso</a></li>
+          <li><a href="../../../favoritos/index.html">Favoritos</a></li>
+          <li><a href="../../../historial/index.html">Historial</a></li>
+          <li><a href="../../../acerca/index.html">Acerca de</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido educativo gratuito, en español.</span>
+      <span class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca</a>
+        <a href="../../../glosario/index.html">Glosario</a>
+        <a href="../../../roadmap/index.html">Roadmap</a>
+      </span>
+    </div>
+  </div>
+</footer><script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  try { if (window.AppTheme) AppTheme.init(); } catch (err) {}
+  try { if (window.AppProgress) AppProgress.init(); } catch (err) {}
+});
+</script></body>
+</html>

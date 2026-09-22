@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="autenticacion-basica-api-keys">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autenticación básica y API keys · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende autenticación básica y API keys en APIs REST: HTTP Basic, Bearer tokens, API keys, dónde guardarlas y buenas prácticas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="autenticacion-basica-api-keys"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4 · Implementación</a><span class="sep">/</span>
+          <span class="current">Autenticación básica y API keys</span>
+        </nav>
+        <h1 class="lesson-title">Autenticación básica y API keys</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Implementación</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="quien">«¿Quién eres?» ANTES de «¿qué quieres?»</h2>
+          <p>Autenticar = saber quién llama. Autorizar = saber qué puede. Las APIs REST modernas lo hacen con cabeceras estándar.</p>
+        </section>
+
+        <section>
+          <h2 id="basic">HTTP Basic: el abuelo directo</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/facturas HTTP/1.1
+Host: api.tienda.test
+Authorization: Basic base64("usuario:contraseña")</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>Enviado con <strong>HTTPS SIEMPRE</strong> (el base64 no es cifrado).</li>
+            <li>Simple, universal… pero cada petición repite credenciales e invita a guardarlas.</li>
+            <li>Usado aún por CI scripts, peticiones de monitoring y prototipos.</li>
+            <li>Con OAuth2, a veces se exige como flujo <em>client credentials</em> interno.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="bearer">Bearer token: JWT y compañía</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MiJ9.s1in...</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>El servidor emite un <strong>token firmado</strong>; el cliente lo presenta en cada petición.</li>
+            <li>JWT: payload firmado (sub, exp, iat, claims). Stateless: el servidor no guarda sesión.</li>
+            <li>Riesgo: token robado = identidad robada hasta su expiración. Usa <code>exp</code> cortos y tiempo; considera OAuth2 flows para rostros públicos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="apikeys">API keys: identidad de máquina</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/tiempo HTTP/1.1
+Host: api.weather.test
+X-Api-Key: klYx9...              (obsoleta pero habitual)
+Authorization: Bearer klYx9...   (estilo moderno)</code></pre>
+            </div>
+          </figure>
+          <p>Para servicios ↔ servicios (clima, pagos, envíos): una clave secreta por cliente, con caducidad y rotación. Cén yak: el <code>X-Api-Key</code> sigue vivo en muchos productos, pero <code>Authorization: Bearer</code> es más limpio y uniforme.</p>
+        </section>
+
+        <section>
+          <h2 id="donde">¿Dónde guardarlas en el cliente?</h2>
+          <ul>
+            <li><strong>Frontend JS:</strong> jamás — cualquier clave embebida es pública.</li>
+            <li><strong>Backend:</strong> variables de entorno o gestores de secretos (AWS Secrets, Vault), nunca en repos ni logs.</li>
+            <li><strong>móvil:</strong> guarda tokens en líbería segura; servidor detrás de proxy para las claves propias.</li>
+            <li>Truco API keys de terceros: provee las tuyas vía proxy propio, nunca del cliente final.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="responses">Respuestas típicas</h2>
+          <ul>
+            <li>Sin credenciales → <strong>401</strong> + <code>WWW-Authenticate</code>.</li>
+            <li>Credenciales inválidas → <strong>401</strong> también (no digas «existe este usuario»).</li>
+            <li>Válido pero sin permiso → <strong>403</strong>.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Protege un endpoint con una key de práctica (en middleware).</li>
+            <li>Prueba los tres caminos: sin key (401), con key (200), con key sin permiso (403).</li>
+            <li>Cifra un secreto en tu repo usando tu gestor de variables y úsalo.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Basic: simple, pero HTTPS o nada.</li>
+            <li>Bearer/JWT: stateless y ligero, con caducidad.</li>
+            <li>API keys: identidad de máquina, con rotación y secretos bien guardados.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="serializacion-respuestas-consistentes.html">Serialización y respuestas consistentes</a>
+            <a class="related-lessons__link" href="../modulo-02/cabeceras-peticion-respuesta.html">Cabeceras HTTP</a>
+            <a class="related-lessons__link" href="../modulo-06/cors-buenas-practicas-seguridad.html">CORS y buenas prácticas de seguridad</a>
+            <a class="related-lessons__link" href="../modulo-06/rate-limiting-abuso-api.html">Rate limiting</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

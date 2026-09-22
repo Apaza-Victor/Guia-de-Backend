@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-teorema-cap">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teorema CAP · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Entiende el teorema CAP: consistencia, disponibilidad y tolerancia a particiones. Por qué durante una partición debes elegir CP o AP y qué sistemas eligen cada camino.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-teorema-cap"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Teorema CAP</span>
+      </nav>
+      <h1 class="lesson-title">Teorema CAP</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>teorema CAP</strong>, formulado por Eric Brewer en el 2000 y demostrado por Seth Gilbert y Nancy Lynch en 2002, afirma que un sistema distribuido con datos replicados no puede garantizar simultáneamente <strong>Consistencia</strong> (C), <strong>Disponibilidad</strong> (A) y <strong>Tolerancia a particiones</strong> (P). Durante una <em>partición de red</em>, tienes que elegir entre C y A.</p>
+        <p>Interpretarlo bien es la diferencia entre tomar decisiones de arquitectura con criterio o memorizar «elige 2 de 3».</p>
+      </section>
+
+      <section>
+        <h2 id="propiedades">Las tres propiedades</h2>
+        <ul>
+          <li><strong>Consistencia (C):</strong> todas las lecturas devuelven la última escritura confirmada. Todo cliente ve el mismo valor al mismo tiempo, como una única copia.</li>
+          <li><strong>Disponibilidad (A):</strong> cada petición (lectura o escritura) recibe una respuesta no errónea, aunque sea con datos viejos. El sistema nunca «ignora» una petición durante la partición.</li>
+          <li><strong>Tolerancia a particiones (P):</strong> el sistema sigue funcionando aunque la red se divida en dos (o más) grupos que no pueden comunicarse entre sí. En Internet, la partición es inevitable.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Clave:</strong> la partición de red no es un fallo raro; es una condición permanente del mundo real (latencia, caídas de enrutadores, zona de disponibilidad caída). Por eso, en la práctica, <em>siempre</em> debemos tolerar P, y la decisión real es «durante una partición, ¿prefieres CP o AP?».</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="que-decidimos">Qué decidimos realmente</h2>
+        <p>Cuando la red funciona, puedes dar C + A. El dilema aparece en la partición:</p>
+        <ul>
+          <li><strong>Sistema CP (consistencia ante disponibilidad):</strong> ante una partición, el lado minoritario deja de responder (sacrifica A) para no servir datos viejos. Ejemplos: etcd, ZooKeeper, HBase, PostgreSQL con conmutación, Redis Cluster en modo estricto.</li>
+          <li><strong>Sistema AP (disponibilidad ante consistencia):</strong> ambos lados siguen sirviendo (sacrifica C), y el conflicto se resuelve después con reconciliación. Ejemplos: Cassandra, CouchDB, DynamoDB (en modo eventual), S3 en modo eventual.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="simulacion">Simulación de una partición</h2>
+        <p>Observa la diferencia entre ambas políticas en código. Dos nodos se quedan incomunicados; uno decide rechazar la escritura (CP) y el otro aceptarla con riesgo (AP):</p>
+        <pre class="code-block"><code class="language-python" data-language="python">def escribir(nodo, clave, valor, politica):
+    if politica == "CP":
+        # Si no alcanzo quórum de la otra mitad, niego la escritura
+        if not nodo.quorum_disponible():
+            return {"status": 503, "body": "No hay quórum: se rechaza la escritura"}
+    elif politica == "AP":
+        # Acepto y prometo reconciliar después (stale read posible)
+        nodo.guardar_local(clave, valor)
+        return {"status": 200, "body": "Escrito en local; pendiente de sincronizar"}
+
+# durante la partición, cada lado llamaría a escribir() con su política
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="configuracion">Configuración real de cada política</h2>
+        <p>Bases como Cassandra permiten elegir el nivel de consistencia por operación. Fíjate en cómo <code>QUORUM</code> fuerza C (más lento) y <code>ONE</code> optimiza A (con datos posiblemente viejos):</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Cassandra: política fuerte (CP) - espera confirmación de quórum
+cqlsh -e "CONSISTENCY QUORUM;
+INSERT INTO usuarios (id, nombre) VALUES (100, 'Ana García');"
+
+# Cassandra: política débil (AP) - una sola réplica confirma
+cqlsh -e "CONSISTENCY ONE;
+SELECT * FROM usuarios WHERE id = 100;"
+</code></pre>
+        <p>Estos niveles se declaran también desde la aplicación. Así quedaría registrado en la configuración de un servicio:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "cluster": "catalogo",
+  "duracion_lectura": "QUORUM",
+  "duracion_escritura": "LOCAL_QUORUM",
+  "comentario_politica": "CP durante lecturas críticas; AP permitido en analytics",
+  "consistencia_diagnostica": { "en_dudoso": "rechazar" }
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="trade-offs">Elegir entre CP y AP</h2>
+        <p>No existe la «mejor» opción; existe la correcta para el negocio:</p>
+        <ul>
+          <li>Un saldo bancario o un inventario estricto suele querer <strong>CP</strong>: un error de consistencia es peor que una caída momentánea.</li>
+          <li>Un carrito de compras, un feed o un contador de «me gusta» suelen tolerar <strong>AP</strong>: mejor responder con datos un poco viejos que fallar.</li>
+        </ul>
+        <p>Y recuerda: el CAP habla de la <em>partición</em>, no del rendimiento. Latencia y «consistencia eventual» son temas aparte (ver siguiente lección).</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige tres sistemas que uses habitualmente (bases, cachés, colas) y clasifica cada uno como CP o AP durante una partición.</li>
+          <li>Propón un caso de negocio donde prefieras AP y otro donde prefieras CP, y justifica por qué en una frase.</li>
+          <li>Diseña una simulación por escrito: dos nodos replican el stock de un producto. Describe qué ve un cliente si el sistema es CP y qué ve si es AP cuando la red se parte.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>CAP: consistencia, disponibilidad y tolerancia a particiones; no se pueden lograr las tres a la vez durante una partición.</li>
+          <li>La partición es inevitable en Internet: siempre se elige entre CP y AP en esos momentos.</li>
+          <li>CP sacrifica disponibilidad para no servir datos viejos; AP sacrifica consistencia para seguir respondiendo.</li>
+          <li>Los niveles de consistencia por operación (QUORUM, ONE) materializan esa elección en sistemas reales como Cassandra.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="consistencia-eventual.html">Consistencia eventual</a>
+          <a class="related-lessons__link" href="../modulo-02/quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="../modulo-02/consenso-distribuido.html">Consenso distribuido</a>
+          <a class="related-lessons__link" href="../modulo-03/casos-kafka-cassandra.html">Casos: Kafka, Cassandra, Redis cluster</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

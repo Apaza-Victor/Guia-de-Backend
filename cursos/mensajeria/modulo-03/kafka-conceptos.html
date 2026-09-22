@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m3-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kafka: conceptos · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende los conceptos de Apache Kafka: topics, particiones, offsets, brokers, replicación, retención y el log distribuido append-only.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m3-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Kafka: conceptos</span>
+      </nav>
+      <h1 class="lesson-title">Kafka: conceptos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Kafka y event streaming</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Apache Kafka no es «una cola más». Es un <strong>log distribuido, particionado y replicado</strong>: los eventos se <em>anexan</em> (append-only) a un archivo inmutable y los consumidores avanzan un puntero de lectura. Nadie borra el pasado; se conserva y se relee.</p>
+        <p>Esa diferencia de filosofía con RabbitMQ explica casi todo lo demás: el alto throughput (millones de eventos por segundo), el orden por clave, la reproducción de historial y la facilidad para reconstruir estados.</p>
+      </section>
+
+      <section>
+        <h2 id="topic-particion">Topics y particiones</h2>
+        <p>Un <strong>topic</strong> agrupa eventos del mismo tipo (<code>pedidos</code>, <code>usuario.creado</code>). Pero un topic grande no vive en un solo archivo: se <strong>particiona</strong>. Cada partición es una secuencia ordenada e inmutable de eventos numerados.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># topic "pedidos" con 4 particiones
+pedidos-0  [ ev0 | ev1 | ev2 | ... ]  <- offsets 0,1,2...
+pedidos-1  [ ev3 | ev4 | ... ]
+pedidos-2  [ ev5 | ... ]
+pedidos-3  [ ev6 | ... ]
+
+# Cada evento tiene un OFFSET: su posición dentro de su partición</code></pre>
+        <p>La partición es la unidad de paralelismo y de orden: dentro de una partición hay orden total; entre particiones, no. Cuántas particiones tenga un topic define cuánto puedes balancear y escalar a la vez que cuánto pierdes en orden global.</p>
+      </section>
+
+      <section>
+        <h2 id="offset">Offsets y consumo</h2>
+        <p>Encada partición, el consumidor lleva un <strong>offset</strong>: el número del próximo evento que toca leer. Consumir no elimina nada; solo mueve el puntero. Por eso dos servicios pueden leer el mismo topic con offsets independientes, y por eso Kafka puede <em>reproducir</em> el historial desde el principio (<code>auto.offset.reset=earliest</code>) o solo lo nuevo (<code>latest</code>).</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Leer desde el comienzo el topic 'pedidos' con la CLI
+kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 \
+  --topic pedidos \
+  --from-beginning</code></pre>
+      </section>
+
+      <section>
+        <h2 id="brokers">Brokers y replicación</h2>
+        <p>Un clúster de Kafka son varios <strong>brokers</strong> (servidores). Cada partición tiene una <strong>copia líder</strong> (la que acepta lecturas/escrituras) y <strong>réplicas</strong> (copias de respaldo sincronizadas). Si el líder muere, una réplica es promovida a líder: eso es alta disponibilidad.</p>
+        <ul>
+          <li><strong>Replication factor 3:</strong> 3 brokers guardan cada partición → aguanta la caída de 2 brokers.</li>
+          <li><strong>ISR (in-sync replicas):</strong> réplicas que están al día con el líder; solo ellas pueden ser promovidas.</li>
+          <li><strong>acks:</strong> cuántas confirmaciones exige el productor antes de considerar escrito un evento (0, 1 o all).</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Describir el topic para ver particiones, líderes y réplicas
+docker exec kafka kafka-topics.sh \
+  --bootstrap-server localhost:9092 \
+  --describe --topic pedidos
+
+# Salida ilustrativa:
+# Topic: pedidos  Partition: 0  Leader: 1  Replicas: 1,2,3  Isr: 1,2,3
+# Topic: pedidos  Partition: 1  Leader: 2  Replicas: 2,3,1  Isr: 2,3,1</code></pre>
+      </section>
+
+      <section>
+        <h2 id="retencion">Retención: Kafka conserva, las colas olvidan</h2>
+        <p>Una cola de RabbitMQ o SQS <strong>elimina</strong> el mensaje al confirmarlo. Kafka lo conserva según <strong>retención</strong> (por defecto 7 días o hasta un límite de bytes). Esto abre casos que una cola no puede resolver:</p>
+        <ul>
+          <li>Releer el historial completo para depurar un bug.</li>
+          <li>Repoblar un sistema nuevo (ej. una base de búsquedas) desde cero.</li>
+          <li>Hacer <em>event sourcing</em>: el topic ES el sistema de registro.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla mental:</strong> RabbitMQ te dice «toma el mensaje y olvídate»; Kafka te dice «aquí están los hechos, lee cuando quieras y vuelve a leer cuando quieras». Elige infraestructura según el tiempo de vida que necesitan tus datos.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo usar Kafka</h2>
+        <ul>
+          <li><strong>Sí:</strong> event streaming, pipelines de datos, eventos de dominio con varios consumidores, log de hechos, reconciliación, data lakes.</li>
+          <li><strong>No:</strong> una simple cola de tareas de envío de correos, un RPC, workload FIFO estricto de un solo destino.</li>
+          <li><strong>Compensa el coste:</strong> Kafka es más pesado de operar (clúster, particiones, retención, monitoreo de consumidores) que las alternativas gestionadas.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta Kafka con Docker y crea el topic <code>pedidos</code> con 3 particiones y factor de replicación 1.</li>
+          <li>Usa <code>kafka-console-producer</code> y <code>kafka-console-consumer</code> para publicar 5 eventos; luego relee desde el principio e identifica en qué partición quedó cada uno.</li>
+          <li>Explora <code>--describe</code>: ¿qué diferencias ves entre particiones en cuanto a líder y réplicas con un solo broker cnn? ¿Qué necesitarías para tener replicación real?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Kafka es un log distribuido append-only: los eventos se anexan, no se borran al consumir.</li>
+          <li>Los topics se dividen en particiones; dentro de cada partición hay orden y offsets.</li>
+          <li>Los brokers replican particiones; una réplica ISR toma el relevo si cae el líder.</li>
+          <li>La retención permite releer historial y reconstruir estados — algo imposible en una cola clásica.</li>
+          <li>Kafka brilla con eventos y alto volumen; pagas con complejidad operativa.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="productores-y-consumidores.html">Productores y consumidores</a>
+          <a class="related-lessons__link" href="particiones-y-claves.html">Particiones y claves</a>
+          <a class="related-lessons__link" href="../modulo-02/rabbitmq-conceptos.html">RabbitMQ: conceptos</a>
+          <a class="related-lessons__link" href="../modulo-01/brokers-de-mensajes.html">Brokers de mensajes</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

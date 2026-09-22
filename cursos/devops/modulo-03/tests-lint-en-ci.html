@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="tests-lint-en-ci">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tests y linting en CI · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Configura GitHub Actions para ejecutar tests, linting y verificación de calidad en cada commit: caching de dependencias y publicación de resultados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="tests-lint-en-ci"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Tests y linting en CI</span>
+      </nav>
+      <h1 class="lesson-title">Tests y linting en CI</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · GitHub Actions</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>integración continua</strong> (CI) es regla número uno de DevOps: en cada cambio, la máquina ejecuta las pruebas y verifica la calidad automáticamente. GitHub Actions la hace posible en minutos y, si falla algo, la PR no se puede fusionar: el propio GitHub puede aplicarlo con branch protection.</p>
+      </section>
+
+      <section>
+        <h2 id="workflow">Workflow de CI completo</h2>
+        <p>Un flujo típico para un Backend en Python: instalar dependencias, ejecutar tests, pasar el linter y reportar cobertura.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip        # cachea las dependencias
+      - run: pip install -r requirements-dev.txt
+      - run: pytest --cov=app --cov-report=xml
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install ruff
+          ruff check app tests</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="caché">Caché: el secreto de la velocidad</h2>
+        <p>Instalar dependencias cada vez hace lento el job. GitHub Actions permite <strong>cachear</strong> los paquetes según la huella del archivo de dependencias. En Python con pip se logra con <code class="inline">cache: pip</code>; en Node con <em>actions/setup-node</em> y <code class="inline">cache: npm</code>.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">- uses: actions/setup-python@v5
+  with:
+    python-version: "3.12"
+    cache: pip
+    cache-dependency-path: "**/requirements-dev.txt"
+
+- uses: actions/setup-node@v4
+  with:
+    node-version: 20
+    cache: npm        # usa package-lock.json</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="proteccion">Protección de ramas</h2>
+        <p>Para hacer cumplir la CI: en <em>Settings → Branches → Add rule</em>, exige <strong>status checks</strong> en <code class="inline">main</code>. Nadie podrá fusionar la PR si el job <code class="inline">test</code> o <code class="inline">lint</code> está en rojo. Ese candado es lo que separa una convención de una garantía.</p>
+        <ul>
+          <li>Activando GitHub Actions sobre cambios no es suficiente: <strong>el branch protection</strong> es quien bloquea.</li>
+          <li>También puedes requerir <em>revisiones de PR</em> (p. ej. 2 aprobadores).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="salida">Salidas útiles del pipeline</h2>
+        <ul>
+          <li><strong>Badges:</strong> el badge "status" de la CI se pega en el README para mostrar que el proyecto pasa verde.</li>
+          <li><strong>Job summaries:</strong> con <code class="inline">$GITHUB_STEP_SUMMARY</code> puedes escribir un resumen visible en la página de la ejecución.</li>
+          <li><strong>Notificaciones:</strong> un paso puede avisar a Slack/TM con el resultado de los tests.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">- name: Resumen del job
+  if: always()
+  run: |
+    echo "## Resultado de CI" &gt;&gt; $GITHUB_STEP_SUMMARY
+    echo "- Tests: ✔" &gt;&gt; $GITHUB_STEP_SUMMARY
+    echo "- Lint: ✔" &gt;&gt; $GITHUB_STEP_SUMMARY</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un workflow de CI que ejecute los tests de un proyecto tuyo al hacer pull_request.</li>
+          <li>Añade un job de lint y activa caching de dependencias.</li>
+          <li>Configura branch protection en <code class="inline">main</code> y verifica que una PR con un test rojo no se puede fusionar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La CI ejecuta tests y calidad en cada cambio, con problemas detectados al instante.</li>
+          <li>El caching de dependencias reduce drásticamente el tiempo del pipeline.</li>
+          <li>El branch protection convierte la CI en una garantía real.</li>
+          <li>Badges y resúmenes hacen visible el estado del proyecto.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

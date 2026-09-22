@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-estimaciones-de-capacidad">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimaciones de capacidad · System Design · Backend Academy</title>
+<meta name="description" content="Aprende a estimar QPS, almacenamiento y ancho de banda de un sistema a escala con cálculos de orden de magnitud o 'aritmética de servilleta'.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-estimaciones-de-capacidad"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Estimaciones de capacidad</span>
+      </nav>
+      <h1 class="lesson-title">Estimaciones de capacidad</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Estimar con orden de magnitud</h2>
+        <p>No necesitas una hoja de cálculo milimétrica: necesitas números con <strong>un orden de magnitud correcto</strong>. Saber si el QPS es 100, 1.000 o 100.000 cambia por completo el diseño (una sola API basta, o hace falta un clúster). Saber si necesitamos gigabytes o petabytes cambia la elección del almacenamiento.</p>
+        <p>Este estilo de cálculo, llamado <em>back-of-the-envelope</em> (aritmética de servilleta), parte siempre de los <strong>supuestos</strong> declarados en los requisitos y realiza multiplicaciones simples con números redondos.</p>
+        <ul>
+          <li>1 día = 10<sup>5</sup> segundos (86.400 es un buen redondeo).</li>
+          <li>Una petición promedio dura entre 20 y 50 ms en una API típica.</li>
+          <li>Un servidor de aplicación medio maneja cientos de QPS; una API con caché, miles.</li>
+          <li>Las potencias de 1024: 1 KB = 2<sup>10</sup>, 1 MB = 2<sup>20</sup>, 1 GB = 2<sup>30</sup>.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="qps">Calcular QPS</h2>
+        <p>El <strong>QPS</strong> (queries per second) es la métrica reina para dimensionar el plano de aplicación. Se obtiene encadenando supuestos: usuarios activos por día × peticiones por usuario ÷ segundos por día, y luego se aplica un factor de pico.</p>
+        <p>Supongamos un servicio con 10 millones de usuarios registrados, 2 millones activos diarios, y cada uno genera 60 peticiones al día (una mezcla de lecturas y escrituras):</p>
+        <pre class="code-block"><code class="language-python" data-language="python">SEGUNDOS_POR_DIA = 86400
+
+def qps_promedio(usuarios_activos_diarios, peticiones_por_usuario_dia):
+    total_diario = usuarios_activos_diarios * peticiones_por_usuario_dia
+    promedio = total_diario / SEGUNDOS_POR_DIA
+    return total_diario, promedio
+
+DAU = 2_000_000
+REQS_POR_USUARIO = 60
+
+total_diario, promedio = qps_promedio(DAU, REQS_POR_USUARIO)
+print(f"Total diario: {total_diario:,} peticiones")
+print(f"QPS promedio: {promedio:.0f}")
+
+# El tráfico no es uniforme: el pico suele ser 2-3x el promedio.
+FACTOR_PICO = 3
+print(f"QPS pico (x{FACTOR_PICO}): {promedio * FACTOR_PICO:.0f}")</code></pre>
+        <p>Resultado: 120 millones de peticiones al día, ≈1.389 QPS promedio y ≈4.167 QPS en pico. Con ese número ya podemos hablar de cuántos nodos de API y si la base de datos necesita caché o réplicas.</p>
+        <p>Regla práctica: una sola base de datos con réplica de lectura aguanta hasta unas pocas miles de QPS de lecturas si están cacheadas; por encima se necesita fragmentar o multiplicar réplicas.</p>
+      </section>
+
+      <section>
+        <h2 id="almacenamiento">Estimar almacenamiento</h2>
+        <p>El almacenamiento se calcula como <strong>tasa de escritura × tamaño del registro × retención</strong>. Hay que incluir overhead: índices, metadatos y el factor de replicación si el dato se guarda varias veces.</p>
+        <p>Continuemos con el acortador de URLs: 2 millones de usuarios activos, cada uno crea 1 URL por semana. Cada registro pesa ~500 bytes (URL original, clave corta, timestamps, métricas).</p>
+        <pre class="code-block"><code class="language-python" data-language="python">DIAS_SEMANA = 7
+BYTES_POR_KB = 1024
+KB_POR_MB = 1024
+MB_POR_GB = 1024
+GB_POR_TB = 1024
+
+def a_humanos(bytes_):
+    for unidad in ["B", "KB", "MB", "GB", "TB", "PB"]:
+        if bytes_ < 1024:
+            return f"{bytes_:.1f} {unidad}"
+        bytes_ /= 1024
+    return f"{bytes_:.1f} EB"
+
+DAU = 2_000_000
+urls_por_semana = DAU / DIAS_SEMANA          # escrituras de URLs por día
+tamano_registro = 500                        # bytes por registro
+retencion_anios = 5
+dias_en_un_anio = 365
+
+escrituras_dia = urls_por_semana
+bytes_dia = escrituras_dia * tamano_registro
+total_bytes = bytes_dia * dias_en_un_anio * retencion_anios
+
+print(f"Escrituras por día: {escrituras_dia:,.0f}")
+print(f"Crecimiento diario: {a_humanos(bytes_dia)}")
+print(f"Total 5 años (raw): {a_humanos(total_bytes)}")
+
+# En producción se replica al menos 2 veces y hay índices (~20% overhead)
+total_con_replicas = total_bytes * 2 * 1.2
+print(f"Con réplicas x2 y overhead: {a_humanos(total_con_replicas)}")</code></pre>
+        <p>Con esos números el equipo decide que una Postgres clásica alcanza de sobra, sin necesidad de sistemas distribuidos de almacenamiento. Si los bytes hubieran dado petabytes, la conversación sería otra.</p>
+      </section>
+
+      <section>
+        <h2 id="ancho-de-banda">Estimar ancho de banda</h2>
+        <p>El ancho de banda de salida se estima multiplicando el QPS por el tamaño promedio de la respuesta. Importa para dimensionar el tráfico de red y para justificar una CDN cuando los estáticos dominan.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Respuesta promedio de la API: 2 KB de JSON + 300 KB de assets cuando hay página
+json_kb = 2
+assets_kb = 300
+
+# De los 60 req/usuario/día, supongamos 50 son de API y 10 cargan assets
+qps_api = 2_000_000 * 50 / 86400
+qps_assets = 2_000_000 * 10 / 86400
+
+mbps_json = qps_api * json_kb * 8 / 1000         # bits, no bytes
+mbps_assets = qps_assets * assets_kb * 8 / 1000
+
+print(f"QPS API:   {qps_api:.0f} → ~{mbps_json:.0f} Mbps")
+print(f"QPS assets:{qps_assets:.0f} → ~{mbps_assets:.1f} Gbps")
+print("Conclusión: los assets dominan; una CDN lo mueve al borde.")</code></pre>
+        <p>Este resultado es muy informativo: mover los estáticos a una CDN elimina ~1 Gbps de tráfico hacia el propio clúster y suele ser más barato en total.</p>
+      </section>
+
+      <section>
+        <h2 id="resumen-escala">Cómo presentar las estimaciones</h2>
+        <p>Lo importante no es la precisión sino la <strong>cadena de razonamiento</strong>. En una entrevista o revisión de diseño conviene terminar con un mini panel donde se lean los resultados de un vistazo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "estimacion": {
+    "usuarios_activos_diarios": 2000000,
+    "peticiones_totales_dia": 120000000,
+    "qps_promedio": 1389,
+    "qps_pico_estimado": 4167,
+    "escrituras_por_dia": 285714,
+    "almacenamiento_5_anios": "6.1 TB",
+    "ancho_de_banda": {
+      "api": "100 Mbps",
+      "assets": "1.1 Gbps",
+      "accion": "mover assets a CDN"
+    }
+  }
+}</code></pre>
+        <p>Y siempre cierra con la frase clave: «si estos supuestos se multiplican por diez, ¿qué cambia?». Eso demuestra que entendiste qué decisiones dependen de cada número.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma los scripts de esta lección y cámbialos a un caso real: una red social con 50 millones de usuarios activos y 20 peticiones por usuario al día. ¿Qué QPS promedio y pico obtienes?</li>
+          <li>Si cada post pesa 1 KB y cada usuario publica 0.5 posts al día, calcula el almacenamiento a 3 años con factor de réplica 2.</li>
+          <li>Escribe un párrafo que explique qué decisión de diseño cambiarías si el pico resultara 10 veces el promedio (por ejemplo, un evento viral).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las estimaciones buscan orden de magnitud, no precisión fina; usan números redondos y potencias de 1024.</li>
+          <li>QPS = (usuarios activos × peticiones por usuario) ÷ segundos del día, con un factor de pico de 2–3x.</li>
+          <li>Almacenamiento = tasa de escritura × tamaño del registro × retención × factor de réplica e overhead.</li>
+          <li>Ancho de banda = QPS × tamaño promedio de respuesta; si los estáticos dominan, la CDN es la respuesta.</li>
+          <li>Siempre se presenta la cadena de razonamiento y qué cambiaría si los supuestos varían.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="requisitos-y-restricciones.html">Requisitos y restricciones</a>
+          <a class="related-lessons__link" href="bloques-de-construccion.html">Bloques de construcción</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+          <a class="related-lessons__link" href="diseno-de-una-url-shortener.html">Caso: URL shortener</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="requisitos-y-restricciones.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Requisitos y restricciones</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="bloques-de-construccion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Bloques de construcción</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cliente-servidor y aplicaciones web · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende el modelo cliente-servidor aplicado a aplicaciones web y APIs: roles, statelessness, escalado horizontal y las arquitecturas web más comunes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Cliente-servidor y aplicaciones web</span>
+      </nav>
+      <h1 class="lesson-title">Cliente-servidor y aplicaciones web</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Estilos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El estilo <strong>cliente-servidor</strong> es el fundamento de casi toda aplicación web y móvil: un <em>cliente</em> (navegador, app, otro servicio) hace peticiones a un <em>servidor</em> que procesa y responde. El servidor es <strong>centralizado</strong>: concentra la lógica, los datos y el control de acceso.</p>
+        <p>Su variante actual más popular es la <strong>arquitectura de dos capas con API</strong>: frontend (SPA) + API backend + base de datos.</p>
+      </section>
+
+      <section>
+        <h2 id="roles">Roles y responsabilidades</h2>
+        <dl class="definition-list">
+          <dt>Cliente</dt><dd>Captura la interacción del usuario, hace peticiones y renderiza. Puede ser «gordo» (SPA con mucha lógica) o «delgado» (solo HTML).</dd>
+          <dt>Servidor</dt><dd>Recibe peticiones, valida, aplica reglas, consulta datos y responde. Posee la fuente de verdad.</dd>
+          <dt>Apache/Nginx/Framework</dt><dd>El servidor web que despierta el código, sirve estáticos y enruta.</dd>
+        </dl>
+        <p>La separación física permite: múltiples clientes (web, iOS, Android) compartiendo el mismo backend, y escalar el servidor de forma independiente.</p>
+      </section>
+
+      <section>
+        <h2 id="stateless">El principio de statelessness</h2>
+        <p>Un servidor <strong>stateless</strong> no guarda información del cliente entre peticiones: cada request trae todo lo necesario (tokens, headers) para ser comprendida por sí sola. Las consecuencias son arquitectónicas:</p>
+        <ul>
+          <li>Puedes ejecutar <strong>muchas instancias</strong> del servidor sin sincronizar memoria entre ellas.</li>
+          <li>Un load balancer reparte peticiones a cualquier instancia sin problemas de sesión atada a una máquina.</li>
+          <li>Es más fácil escalar de forma horizontal (más servidores) en lugar de vertical (una máquina gigante).</li>
+        </ul>
+        <p>El estado se externaliza a la base de datos, la caché (Redis) o tokens firmados como JWT.</p>
+      </section>
+
+      <section>
+        <h2 id="variedades">Variedades de la arquitectura web</h2>
+        <dl class="definition-list">
+          <dt>Multi-page (MPA)</dt><dd>El servidor genera HTML en cada petición (PHP + Blade, Django templates). Simple y potente para SEO.</dd>
+          <dt>Single-page (SPA)</dt><dd>El frontend es una app que solo habla JSON con la API. Experiencia fluida, pero más lógica en el cliente.</dd>
+          <dt>Server-rendered con hidratación</dt><dd>Vué/React renderizado en servidor por velocidad, luego hidratado en el navegador.</dd>
+          <dt>API-only</dt><dd>Backend que solo expone una API consumida por cualquier cliente externo: la base de los microservicios.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo de flujo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Secuencia</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Navegador         API (servidor)         Database
+    |  GET /api/perfil?token=... |          |
+    |---------------------------&gt;|          |
+    |                            |  SELECT * |
+    |                            |---------&gt;|
+    |                            |&lt;---------|
+    |  200 {"nombre": "Ana"}     |          |
+    |&lt;---------------------------|          |</code></pre>
+          </div>
+        </figure>
+        <p>El token viaja en cada request; el servidor no guarda nada entre llamadas. Si mañana hay 3 instancias de la API detrás de un balanceador, el flujo no cambia en absoluto.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Identifica si tu app favorita es MPA, SPA o híbrida, y qué API consume.</li>
+          <li>Explica qué pasa con las sesiones de PHP si hoy «viven» en memoria del servidor y duplicas las instancias.</li>
+          <li>Dibuja el flujo cliente-API-datos de un login real (token, validación, respuesta).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Cliente-servidor separa presentación y lógica en procesos distintos.</li>
+          <li>Un servidor stateless permite escalar horizontalmente sin problemas.</li>
+          <li>Las arquitecturas web van de MPA a SPA y API-only.</li>
+          <li>El estado vive fuera del proceso: en la BD, la caché o los tokens.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="estilo-monolitico.html">Estilo monolítico</a>
+          <a class="related-lessons__link" href="../modulo-03/mvc-en-la-practica.html">MVC en la práctica</a>
+          <a class="related-lessons__link" href="modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

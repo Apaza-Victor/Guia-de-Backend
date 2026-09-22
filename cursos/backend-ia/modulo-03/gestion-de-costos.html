@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-gestion-de-costos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de costos · Backend para IA · Backend Academy</title>
+<meta name="description" content="Controla la factura de tu integración de IA: estima tokens, cachea respuestas, fija límites por usuario y alerta sobre el presupuesto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-gestion-de-costos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Gestión de costos</span>
+      </nav>
+      <h1 class="lesson-title">Gestión de costos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Producción de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La IA se paga por uso: cada token de entrada y de salida cuesta dinero, y cada llamada multiplica el gasto. Un chatbot sin control puede costar cientos de dólares el primer mes sin que nadie lo note. La gestión de costos no es contabilidad: es una disciplina de backend tan importante como la latencia.</p>
+        <p>Aquí verás el flujo completo: medir, cachear, limitar y alertar.</p>
+      </section>
+
+      <section>
+        <h2 id="estimar">Estimar el coste de cada llamada</h2>
+        <p>El coste unitario se calcula con los precios por token del proveedor y la cantidad exacta de tokens. La librería de tokenización del proveedor te da la medición real de tu prompt:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import tiktoken
+
+PRECIO = {
+    "gpt-4o-mini": {"entrada": 0.00015, "salida": 0.00060},  # USD por 1k tokens
+}
+MODELO = "gpt-4o-mini"
+
+encoding = tiktoken.encoding_for_model(MODELO)
+
+def costo_estimado(mensajes, max_salida_tokens):
+    entrada = sum(len(encoding.encode(m["content"])) for m in mensajes)
+    tarifas = PRECIO[MODELO]
+    costo_entrada = entrada / 1000 * tarifas["entrada"]
+    costo_salida = max_salida_tokens / 1000 * tarifas["salida"]
+    return costo_entrada + costo_salida
+
+mensajes = [
+    {"role": "system", "content": "Eres un asistente de reservas."},
+    {"role": "user", "content": "Busca un vuelo a Madrid para el viernes."},
+]
+print(f"Coste estimado por llamada: ${costo_estimado(mensajes, 500):.5f}")
+# Coste estimado por llamada: $0.00054</code></pre>
+        <p>Con el coste por llamada estimado puedes proyectar tu facturación: multiplica por el volumen esperado de usuarios y por sus conversaciones promedio. Esa cifra decide qué modelo usas (un mini cuesta centésimas de un flagship) y dónde conviene cachear.</p>
+      </section>
+
+      <section>
+        <h2 id="cache">Cachear respuestas repetidas</h2>
+        <p>Muchas preguntas se repiten (FAQ, documentación, errores comunes). Cachear una completion idéntica es el arma de ahorro más rápida: la primera llamada paga tokens; las demás, cero. La clave del caché es el <em>prompt completo</em>, así el modelo no se re-ejecuta dos veces por el mismo input.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { createClient } from 'redis';
+
+const redis = createClient();
+await redis.connect();
+
+function claveDeCache(mensajes, modelo) {
+  return `llm:${modelo}:${JSON.stringify(mensajes)}`;
+}
+
+async function responderConCache(mensajes, modelo) {
+  const clave = claveDeCache(mensajes, modelo);
+  const cacheado = await redis.get(clave);
+  if (cacheado) return { contenido: cacheado, desdeCache: true };
+
+  const contenido = await llm.completar(mensajes, { modelo });
+  await redis.set(clave, contenido, { EX: 24 * 3600 }); // 24 horas
+  return { contenido, desdeCache: false };
+}</code></pre>
+        <p>Combina el caché por prompt con un TTL corto cuando el dato de referencia cambia: la factura de una feature que pregunta siempre lo mismo puede desplomarse un 80%.</p>
+      </section>
+
+      <section>
+        <h2 id="limites">Límites por usuario y rate limiting</h2>
+        <p>Un solo usuario agresivo o un script malicioso puede quemar tu presupuesto en horas. Los límites por usuario son un contrato de costos: tokens por minuto, llamadas por día, presupuesto mensual por cuenta.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const MAX_TOKENS_DIA_POR_USUARIO = 100_000;
+
+async function presupuestarTokens(usuarioId, tokensGastados) {
+  const actual = Number(await redis.get(`tokens-dia:${usuarioId}`)) || 0;
+  const nuevoTotal = actual + tokensGastados;
+
+  if (nuevoTotal > MAX_TOKENS_DIA_POR_USUARIO) {
+    throw new Error('Llegaste al límite diario de uso del asistente.');
+  }
+
+  await redis.set(`tokens-dia:${usuarioId}`, nuevoTotal, { EX: 24 * 3600 });
+}
+
+// En cada llamada real: descuenta los tokens reales de la respuesta
+const data = await llm.completar(mensajes, { modelo });
+await presupuestarTokens(usuario.id, data.usage.total_tokens);</code></pre>
+        <p>Usa los tokens <em>reales</em> de la respuesta (<code>usage.total_tokens</code>), no la estimación. Introduce aquí también los rate limits de HTTP clásicos: una llamada cada X segundos por usuario evita los bucles de retry del cliente.</p>
+      </section>
+
+      <section>
+        <h2 id="alertas">Presupuesto y alertas</h2>
+        <p>Define topes por entorno y día, y haz que tu backend avise cuando se acerca a ellos. Las alertas tempranas convierten una sorpresa de fin de mes en una decisión de esta tarde.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Presupuesto diario en variables de entorno (dashboard de observabilidad)
+export IA_PRESUPUESTO_DIARIO_USD=25
+export IA_ALERTA_AL="80"           # % del presupuesto que dispara aviso
+export IA_ALERTA_MAX="100"         # % que corta tráfico nuevo
+
+# Un cron corre cada 5 min:
+#   > Presupuesto diario (USD) tomado de ausage + log de tokens.
+#   > Si gasto/alerta >= 80  -> aviso a Slack
+#   > Si gasto/alerta >= 100 -> edge activa un circuit breaker de la llamada al LLM</code></pre>
+        <p>El corte automático al 100% es un <strong>circuit breaker</strong>: una feature de IA debe degradarse (mensaje «dame tiempo») antes que arruinar la factura mensual. Combina la alerta con un tablero que muestre costo por feature y por usuario.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Calcula el coste estimado de 5 prompts de tu proyecto con <code>costo_estimado</code> y compara el total del día con un volumen hipotético de 1000 usuarios.</li>
+          <li>Implementa un caché de respuestas en Redis con TTL y mide cuántas llamadas reales te ahorras con 10 preguntas repetidas.</li>
+          <li>Añade el límite diario de tokens por usuario y escribe una alerta que se dispare a 80% del presupuesto diario.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El coste se estima con tokens reales del prompt y precios por modelo, y se proyecta por volumen de uso.</li>
+          <li>El caché de completions elimina el pago de preguntas repetidas.</li>
+          <li>Los límites por usuario (tokens por día, llamadas por minuto) protegen tu presupuesto.</li>
+          <li>Alerta al 80% y corte automático al 100%: la IA debe degradar antes que endeudarte.</li>
+          <li>Los datos reales para medir siempre vienen de <code>usage</code> de la respuesta.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="evaluacion-y-monitoreo.html">Evaluación y monitoreo</a>
+          <a class="related-lessons__link" href="../modulo-01/lenguaje-natural-y-llms.html">Lenguaje natural y LLMs</a>
+          <a class="related-lessons__link" href="../modulo-02/llm-integration-en-servicio.html">Integrar LLMs en un servicio</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 3</span>
+        <span class="title">Producción de IA</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="seguridad-y-guardrails.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Seguridad y guardrails</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m2-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulos, paquetes y boundaries · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a dividir el código en módulos y paquetes con boundaries claros: organización por dominio, dependencias explícitas y aislamiento de límites.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m2-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Módulos, paquetes y boundaries</span>
+      </nav>
+      <h1 class="lesson-title">Módulos, paquetes y boundaries</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Estilos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un proyecto chico cabe en tu cabeza. Cuando crece, la mala organización lo convierte en spaghetti: todos los archivos se importan entre sí y nadie sabe qué depende de qué. La solución no es mágica: es <strong>modularizar</strong> con criterio, organizar el código en <strong>paquetes</strong> y marcar <strong>boundaries</strong> (fronteras) explícitas.</p>
+      </section>
+
+      <section>
+        <h2 id="por-tipo-vs-dominio">Organizar por tipo vs por dominio</h2>
+        <p>Organizar <strong>por tipo</strong> («controllers/», «models/», «services/») funciona al inicio, pero en proyectos grandes mezcla dominios distintos dentro de cada carpeta. Organizar <strong>por dominio</strong> agrupa todo lo relacionado con una capacidad del negocio:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Estructura por dominio (módulos)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">src/
+  Pedidos/          (todo lo de pedidos)
+    PedidoOrderController.php
+    PedidoService.php
+    PedidoRepository.php
+    Pedido.php
+  Usuarios/         (todo lo de usuarios)
+    UsuarioController.php
+    UsuarioService.php
+  Pagos/
+    ...
+  infra/            (compartido: DB, mail, cache)</code></pre>
+          </div>
+        </figure>
+        <p>El boundary de cada módulo es su carpeta: <strong>lo que cambia en Pedidos no debe tocar el interior de Pagos</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="boundary">La frontera como contrato</h2>
+        <p>Un boundary implica tres reglas:</p>
+        <ul>
+          <li><strong>API pública mínima:</strong> solo ciertas clases del módulo son visibles hacia fuera (los controladores o servicios públicos).</li>
+          <li><strong>Acceso a infraestructura:</strong> el módulo no ataca la BD directamente; usa su propio repositorio o una interfaz.</li>
+          <li><strong>Sin dependencias entre módulos hermanos:</strong> si dos dominios necesitan comunicarse, se usa una interfaz (puerto) definida por quien la necesita.</li>
+        </ul>
+        <p>En PHP y lenguajes sin visibilidad de paquete real, el boundary es una <strong>convención disciplinada</strong>: tooling de análisis estático o tests de arquitectura pueden vigilar que no se violen.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo de interdependencia controlada</h2>
+        <p>Pedidos necesita hacer un cobro, pero no debe acoplarse a la clase concreta de Pagos. Define un puerto:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+// En el módulo Pedidos: el contrato que YO necesito
+interface Cobrador
+{
+    public function cobrar(int $monto): string;
+}
+
+// En el módulo Pedidos: el servicio usa SOLO el puerto
+final class PedidoService
+{
+    public function __construct(private Cobrador $cobrador) {}
+
+    public function confirmar(Pedido $pedido): void
+    {
+        $tx = $this-&gt;cobrador-&gt;cobrar($pedido-&gt;total());
+        $pedido-&gt;marcarPagado($tx);
+    }
+}
+
+// En el módulo Pagos: la implementación concreta
+final class StripeCobrador implements Cobrador
+{
+    public function cobrar(int $monto): string { /* Stripe */ }
+}</code></pre>
+          </div>
+        </figure>
+        <p>La dirección de la dependencia apunta de Pedidos a su propia interfaz; Pagos implementa ese contrato. Pedidos queda libre de conocer Stripe, y se puede sustituir sin tocar nada.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuánta modularidad?</h2>
+        <ul>
+          <li><strong>Sobremodularizar</strong> (10 módulos para 3 clases) añade burocracia sin beneficio.</li>
+          <li><strong>Submodularizar</strong> (todo junto) funciona mientras el código sea pequeño y estable.</li>
+          <li><strong>La señal de que necesitas boundaries:</strong> los cambios en un área rompen constantemente cosas de otra.</li>
+        </ul>
+        <p>Empieza simple: separa por dominio cuando el proyecto supere un tamaño razonable, o cuando dos equipos trabajen en paralelo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Reorganiza (en papel) tu proyecto actual en módulos por dominio y anota qué quedaría compartido.</li>
+          <li>Identifica una dependencia cruzada entre dos dominios y rediseñala con una interfaz.</li>
+          <li>Escribe una prueba de arquitectura sencilla que falle si un controlador importa una clase de otro módulo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los módulos agrupan código por dominio de negocio, no por tipo.</li>
+          <li>El boundary define una API pública mínima y oculta el interior.</li>
+          <li>Las comunicaciones entre módulos usan puertos (interfaces), no clases concretas.</li>
+          <li>La modularidad correcta es la justa: ni mucha ni poca.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="../modulo-04/acoplamiento-y-cohesion.html">Acoplamiento y cohesión</a>
+          <a class="related-lessons__link" href="../modulo-03/diagrama-de-dependencias.html">El diagrama de dependencias</a>
+          <a class="related-lessons__link" href="../modulo-07/de-monolito-a-modulos.html">De monólito a módulos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

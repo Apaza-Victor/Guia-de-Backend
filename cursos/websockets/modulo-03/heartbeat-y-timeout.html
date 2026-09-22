@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-heartbeat-y-timeout">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heartbeat y timeouts · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Mantén tus conexiones vivas y limpias: ping/pong del protocolo, detección de sockets zombies, reconexión del cliente y tolerancia a fallos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-heartbeat-y-timeout"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Heartbeat y timeouts</span>
+      </nav>
+      <h1 class="lesson-title">Heartbeat y timeouts</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalar y asegurar WebSockets</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="zombies">El problema de los sockets zombies</h2>
+        <p>Cuando un cliente se va sin despedirse (apagón, wifi cortado, aplicación cerrada de golpe), el servidor no recibe un frame de cierre. La conexión TCP puede quedar «viva» durante minutos: el socket sigue en tu memoria y consumiendo recursos, aunque nadie está al otro lado. Es un <strong>socket zombie</strong> que ensucia la presencia, las salas y la factura de memoria.</p>
+        <p>La solución estándar es el <strong>heartbeat</strong>: una lanza de pings periódicos + comprobación de que el cliente responde con pong. Si no responde en un plazo, el servidor cierra y limpia.</p>
+      </section>
+
+      <section>
+        <h2 id="ping-pong">Ping/pong del protocolo</h2>
+        <p>El protocolo ya trae los mecanismos: el servidor envía un frame <code>ping</code> y el peer responde automáticamente un frame <code>pong</code>. En el navegador, el pong surge solo; tu código solo tiene que confiar en que, si el cliente está vivo, tarde o temprano llega algún frame (mensaje, pong…).</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Heartbeat con el paquete ws: sonsacar al cliente cada 30 segundos.
+const { WebSocketServer } = require('ws');
+const wss = new WebSocketServer({ port: 8080 });
+
+const INTERVALO_PING_MS = 30_000;
+const TIMEOUT_PONG_MS = 10_000;
+
+wss.on('connection', (ws) =&gt; {
+  ws.estaVivo = true;
+
+  // Cualquier tráfico del cliente demuestra vida.
+  ws.on('pong', () =&gt; (ws.estaVivo = true));
+  ws.on('message', () =&gt; (ws.estaVivo = true));
+
+  ws.on('close', () =&gt; clearInterval(ws.heartbeatTimer));
+});
+
+const sondeo = setInterval(() =&gt; {
+  for (const ws of wss.clients) {
+    if (!ws.estaVivo) {
+      // Dos rondas sin responder: adiós, zombie.
+      ws.terminate();
+      continue;
+    }
+    ws.estaVivo = false;            // si no llega pong/mensaje, muere
+    ws.ping();
+  }
+}, INTERVALO_PING_MS);
+
+wss.on('close', () =&gt; clearInterval(sondeo));</code></pre>
+        <p>La idea «reversible» (cambiar a <code>false</code> ANTES de preguntar y volver a <code>true</code> al recibir respuesta) evita falsos positivos con un solo temporizador.</p>
+      </section>
+
+      <section>
+        <h2 id="heartbeat-io">Heartbeat en Socket.IO</h2>
+        <p>Socket.IO incorpora su propio heartbeat con ping/pong y valores configurables. Los parámetros clave son <code>pingInterval</code> (cada cuánto pregunta) y <code>pingTimeout</code> (cuánto espera la respuesta antes de cortar). El servidor desconecta el cliente y este provoca su reconexión automática.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { Server } = require('socket.io');
+const io = new Server(3000, {
+  pingInterval: 25_000,   // pregunta cada 25 s
+  pingTimeout: 20_000,    // corta si no responde en 20 s
+  transports: ['websocket'] // forzar WebSocket puro (opcional)
+});
+
+io.on('connection', (socket) =&gt; {
+  socket.on('disconnect', (razon) =&gt; {
+    // razon suele ser 'ping timeout' cuando se detecta un zombie.
+    console.log('Desconectado:', socket.id, 'por', razon);
+  });
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cliente">El otro lado: reconexión del cliente</h2>
+        <p>El heartbeat detecta muertos, pero quien sufre la caída es el cliente: debe reconectar solo y reconstruir su estado. El esquema ideal tiene tres piezas: reintentos con backoff, carga del estado pendiente (mensajes no entregados, salas) y una UI que avise al usuario.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">let intentos = 0;
+
+function conectar() {
+  const socket = new WebSocket('wss://api.miservidor.com/chat');
+
+  socket.onopen = () =&gt; {
+    intentos = 0;
+    // Al volver, reintenta unirse a la sala que tenía.
+    socket.send(JSON.stringify({ tipo: 'unirse', sala: 'general' }));
+  };
+
+  socket.onclose = (e) =&gt; {
+    if (e.code === 1000) return; // cierre intencional: no reconectar
+
+    const espera = Math.min(500 * Math.pow(2, intentos), 10000);
+    intentos += 1;
+    console.log(`Reconectando en ${espera} ms…`);
+    setTimeout(conectar, espera + Math.random() * 500);
+  };
+
+  return socket;
+}
+
+const socket = conectar();</code></pre>
+      </section>
+
+      <section>
+        <h2 id="tolerancia">Tolerancia a fallos y límites</h2>
+        <p>Un sistema robusto combina heartbeat con límites sensatos:</p>
+        <ul>
+          <li><strong>Límite de discontinuidad:</strong> corta la reconexión tras N intentos (p. ej. 10) y muestra un mensaje «revisa tu conexión».</li>
+          <li><strong>Capacity del servidor:</strong> establece un máximo de conexiones por nodo; al llegar, rechaza nuevas (1008/1024) y avisa a operaciones.</li>
+          <li><strong>Autoescala:</strong> encaja con el módulo de escalado: si la memoria o la CPU suben, el orquestador añade nodos y el balanceador reparte.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> configura el timeout de conexión y el heartbeat para que cualquier abandono sea detectado en menos de un minuto, y que la reconexión automática no supere de largo ese ciclo de vida con picos de tráfico.»</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Añade el heartbeat de <code>ws</code> de la lección a tu servidor y conéctale un cliente con DevTools abiertas.</li>
+          <li>Activa la regulación de red (throttle) o apaga el wifi 45 segundos y observa en el log cómo el servidor termina el socket zombie.</li>
+          <li>Implementa la reconexión del cliente y comprueba que, al volver la red, la sala se re-establece automáticamente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los sockets zombies son conexiones muertas que consumen recursos y ensucian la presencia.</li>
+          <li>El heartbeat (ping/pong) detecta a los que no responden y los termina.</li>
+          <li>Socket.IO trae heartbeat configurable con pingInterval y pingTimeout.</li>
+          <li>El cliente debe reconectar con backoff y reconstruir su estado (salas, mensajes).</li>
+          <li>Pon límites a los reintentos y a las conexiones por nodo para no degradar el servicio.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="abrir-cerrar-conexion.html">Abrir y cerrar la conexión</a>
+          <a class="related-lessons__link" href="seguridad-en-websockets.html">Seguridad</a>
+          <a class="related-lessons__link" href="cliente-websocket-web.html">Cliente WebSocket en el navegador</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="seguridad-en-websockets.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Seguridad</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="despliegue-tras-proxy.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Despliegue tras proxy</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

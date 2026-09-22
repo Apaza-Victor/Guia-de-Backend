@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m2-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assertions y expectativas · Testing Backend · Backend Academy</title>
+<meta name="description" content="Las assertions de PHPUnit explicadas: assertSame, assertEquals, assertTrue, assertEmpty, assertContains y las matchers de igualdad y existencia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m2-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Assertions y expectativas</span>
+      </nav>
+      <h1 class="lesson-title">Assertions y expectativas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Unit Testing</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="intro">Una assertion, una pregunta concreta</h2>
+        <p>Cada assertion es una pregunta binaria al código. Elegir la correcta es <strong>lo que hace legible tu intención</strong> y que el fallo cuente una historia.</p>
+      </section>
+
+      <section>
+        <h2 id="igualdad">Igualdad: assertSame vs assertEquals</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · PHPUnit</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">self::assertSame(5, $resultado);        // igualdad ESTRICTA (valor y tipo, ===)
+self::assertEquals(5, $resultado);      // igualdad LOOSA (5 == '5') - evitala
+
+self::assertSame([1, 2], $resultado);   // mismo contenido y mismo tipo
+self::assertSame(['a'=&gt;1], $resultado); // mapas, comparación espejo
+
+// Regla de oro: assertSame SIEMPRE, salvo razón muy concreta</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="booleanos">Booleans y existencia</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">self::assertTrue($esValido);
+self::assertFalse($estaBloqueado);
+
+self::assertNull($usuario-&gt;apodo());
+self::assertNotNull($usuario-&gt;email());
+
+self::assertEmpty($errores);          // '' | [] | 0 | null
+self::assertNotEmpty($productos);     // lo contrario</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="colecciones">Colecciones, strings y tipos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">self::assertContains('php', $lenguajes);          // en arrays y Traversable
+self::assertNotContains('java', $lenguajes);
+self::assertContainsOnly('string', $nombres);     // tipo de cada elemento
+
+self::assertStringContainsString('token', $url);  // substring
+self::assertStringStartsWith('https://', $url);
+self::assertMatchesRegularExpression('/^\d{2}\/\d{4}$/', $fecha);
+
+self::assertInstanceOf(Usuario::class, $resultado);
+self::assertCount(3, $lineas);</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="los-impares">Los menos conocidos que te salvan</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">self::assertGreaterThan(0, $precio);
+self::assertLessThanOrEqual(100, $porcentaje);
+
+self::assertArrayHasKey('email', $payload);
+self::assertObjectHasProperty('total', $carrito);
+
+self::assertEqualsWithDelta(3.33, $resultado, 0.01); // flotantes, tolerancia
+
+self::assertSame(['a'=&gt;1], ['b'=&gt;2], 'mensaje útil al fallar'); // msg opcional</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="practica">Practica de elección</h2>
+        <ul>
+          <li>«El resultado es exactamente este» → <code>assertSame</code>.</li>
+          <li>«¿Es verdadero / falso?» → <code>assertTrue/assertFalse</code>.</li>
+          <li>«¿Está vacío?» → <code>assertEmpty</code>.</li>
+          <li>«¿Contiene?» → <code>assertContains</code> / <code>assertStringContainsString</code>.</li>
+          <li>«¿Es de este tipo/clase?» → <code>assertInstanceOf</code>.</li>
+          <li>«¿Cae en esta tolerancia?» → <code>assertEqualsWithDelta</code> (flotantes).</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Sobre una función <code>filtrar()</code> que devuelve arrays, escribe: un <code>assertCount</code>, un <code>assertContains</code> y un <code>assertNotEmpty</code>.</li>
+          <li>Cambia un <code>assertEquals</code> a <code>assertSame</code> y observa si el test sigue pasando (spoiler en strings numéricas no).</li>
+          <li>Añade un mensaje personalizado en el assert más importante.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li><code>assertSame</code> por defecto; <code>assertEquals</code> solo con conciencia.</li>
+          <li>La aserción correcta = intención legible y fallos explícitos.</li>
+          <li>Hay assertions para colecciones, strings, tipos y tolerancias.</li>
+          <li>Un mensaje en el assert ayuda en CI a las 3 a.m.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="primer-test-phpunit.html">Primer test con PHPUnit</a>
+          <a class="related-lessons__link" href="testeando-excepciones.html">Testeando excepciones</a>
+          <a class="related-lessons__link" href="../modulo-03/test-data-fixtures-y-seeds.html">Fixtures y seeds</a>
+          <a class="related-lessons__link" href="../modulo-05/casos-borde-y-errores.html">Casos borde y errores</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

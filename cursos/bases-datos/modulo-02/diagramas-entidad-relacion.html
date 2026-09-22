@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="diagramas-entidad-relacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dibujando diagramas entidad-relación · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende la notación Crow's Foot para dibujar diagramas entidad-relación, y cómo convertir una conversación con el negocio en el plano de tu base de datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="diagramas-entidad-relacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2 · Modelado y diseño</a><span class="sep">/</span>
+          <span class="current">Dibujando diagramas entidad-relación</span>
+        </nav>
+        <h1 class="lesson-title">Dibujando diagramas entidad-relación</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Modelado y diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>El modelo entidad-relación vive en la cabeza; el <strong>diagrama entidad-relación</strong> (DER) lo deja en papel. Un buen diagrama se lee en segundos: alguien nuevo en el equipo debería poder entender el sistema con solo mirarlo, sin necesidad de preguntar.</p>
+          <p>Existen varias notaciones (Chen, UML, IDEF1X) y la más usada en herramientas modernas es la <strong>Crow&#39;s Foot</strong> (pata de cuervo), la misma que usan draw.io, MySQL Workbench y Lucidchart.</p>
+        </section>
+
+        <section>
+          <h2 id="notacion">La notación Crow&#39;s Foot</h2>
+          <p>En esta notación cada <strong>entidad</strong> es un rectángulo con su nombre arriba y la lista de atributos dentro. Las <strong>relaciones</strong> son líneas entre rectángulos, y cada extremo lleva un símbolo que revela la cardinalidad, visto desde esa entidad:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Símbolos (desde la entidad opuesta)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-text">        |   uno (una fila o cero en el lado opuesto... depende de lectura)
+        o   cero o uno
+        ||  exactamente uno
+        &lt;   muchos (infinito)
+        o&lt;  cero o muchos
+        ||&lt; uno o muchos</code></pre>
+            </div>
+          </figure>
+          <p>Los símbolos que usan muchas veces se resumen así: <code class="inline">1</code> (línea sencilla) y <code class="inline">N</code> (pata de cuervo). Lo importante no es memorizar la tabla: es que el diagrama comunique <em>cuántos de cada lado</em> participan en la relación.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo">De la conversación al diagrama</h2>
+          <p>Paso a paso para el caso «una editorial publica muchos libros; cada libro tiene un editor»:</p>
+          <ol>
+            <li>Extrae las entidades: <strong>Editorial</strong> y <strong>Libro</strong>.</li>
+            <li>Escribe sus atributos: Editorial (id, nombre); Libro (id, titulo, anio, editorial_id).</li>
+            <li>Decide la relación y su cardinalidad: <strong>una editorial publica muchos libros</strong> → 1 a N.</li>
+            <li>Dibuja: rectángulo EDITORIAL — línea con pata de cuervo — rectángulo LIBRO, con el símbolo 1 en el lado de Editorial visto desde Libro.</li>
+          </ol>
+          <p>La pata de cuervo cae del lado de <strong>muchos</strong> (Libro). En SQL, el 1 se convierte en la clave foránea que vive en el lado N:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE libros (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(200) NOT NULL,
+    anio SMALLINT NOT NULL,
+    editorial_id INT NOT NULL,
+    FOREIGN KEY (editorial_id) REFERENCES editoriales(id)
+);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="herramientas">Herramientas y buenas prácticas</h2>
+          <ul>
+            <li><strong>draw.io</strong> y <strong>Lucidchart</strong>: diagramas gratis y fáciles de compartir.</li>
+            <li><strong>MySQL Workbench</strong> y <strong>DataGrip</strong>: generan el diagrama desde el esquema real (ingeniería inversa).</li>
+            <li>Nombra las relaciones con un <strong>verbo</strong> que describa la lectura: «un usuario <em>crea</em> muchos posts».</li>
+            <li>Mantén el diagrama <strong>actualizado</strong>: un DER viejo es peor que ninguno.</li>
+            <li>Divide diagramas grandes en <strong>diagramas por dominio</strong> (usuarios, pagos, catálogo) para que sigan siendo legibles.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Dibuja en draw.io (o papel) el DER completo de una biblioteca con las entidades del ejercicio anterior: usuario, libro, préstamo.</li>
+            <li>Coloca los símbolos de cardinalidad correctos en cada extremo.</li>
+            <li>Traduce el diagrama a SQL con <code class="inline">CREATE TABLE</code> y claves foráneas.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El DER expresa visualmente el modelo entidad-relación.</li>
+            <li>Crow&#39;s Foot es la notación más común en herramientas modernas.</li>
+            <li>Los símbolos de cardinalidad se leen en ambos extremos de la relación.</li>
+            <li>El lado «N» de una relación 1:N recibe la clave foránea.</li>
+            <li>Un diagrama vivo y legible ahorra horas de malentendidos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="modelo-entidad-relacion.html">Modelo entidad-relación</a>
+            <a class="related-lessons__link" href="cardinalidad.html">Cardinalidad de las relaciones</a>
+            <a class="related-lessons__link" href="../modulo-03/create-table.html">Creando tablas con CREATE TABLE</a>
+            <a class="related-lessons__link" href="../modulo-04/joins-inner-left-right.html">JOINs: inner, left y right</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

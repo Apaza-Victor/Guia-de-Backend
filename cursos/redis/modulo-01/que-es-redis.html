@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="que-es-redis">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es Redis? · Redis para Backend · Backend Academy</title>
+<meta name="description" content="Redis en detalle: almacenamiento en memoria, clave-valor, single thread, latencias y usos en el Backend moderno.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="que-es-redis"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Redis para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es Redis?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es Redis?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Un almacén que vive en RAM</h2>
+        <p><strong>Redis</strong> (REmote DIctionary Server) es un almacén de datos <strong>clave-valor en memoria</strong>. Mientras una base SQL escribe en disco, Redis guarda todo en RAM: por eso responde en <strong>microsegundos</strong>, miles de veces más rápido que consultar un disco. No reemplaza a tu base principal: la acelera.</p>
+      </section>
+
+      <section>
+        <h2 id="caracteristicas">Qué lo hace diferente</h2>
+        <ul>
+          <li><strong>En memoria:</strong> velocidad extrema; el pago es que los datos viven donde cabe la RAM.</li>
+          <li><strong>Tipos de datos ricos:</strong> no solo strings: hay hashes, listas, conjuntos, etc.</li>
+          <li><strong>Operaciones atómicas:</strong> comandos que se ejecutan sin interrupciones (clave para contadores y locks).</li>
+          <li><strong>TTL / expiración:</strong> las claves pueden borrarse solas, ideal para caché y tokens.</li>
+          <li><strong>Single-threaded:</strong> un solo hilo ejecuta comandos: si un comando tarda, todos esperan.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="modelo">El modelo de datos: clave → valor</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">clave                    →  valor
+----------------------     -------------------------
+session:u42               →  {"user_id": 42}
+cache:usuarios:tendencias →  [...] (JSON)
+contador:visitas:2026-09  →  124_530
+cola:emails               →  [msg1, msg2, msg3]
+task:notif:takeout        →  {worker: "w3"}</code></pre>
+          </div>
+        </figure>
+        <p>Las claves suelen tener un prefijo de <em>namespace</em> (<code class="inline">session:</code>, <code class="inline">cache:</code>) que ayuda a organizar y a operar en masa.</p>
+      </section>
+
+      <section>
+        <h2 id="casos">Usos estrella en el Backend</h2>
+        <ul>
+          <li><strong>Caché</strong> de consultas y páginas (pattern cache-aside).</li>
+          <li><strong>Sesiones</strong> de usuario compartidas entre instancias.</li>
+          <li><strong>Rate limiting</strong> (cuotas por IP/usuario).</li>
+          <li><strong>Colas ligeras</strong> y pub/sub para eventos.</li>
+          <li><strong>Contadores</strong> y rankings (sorted sets).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="vida">No es tu base de canon</h2>
+        <p>Los datos de Redis son volátiles si no hay persistencia configurada, y vivir en RAM la encarece. La regla práctica: <strong>la base de verdad vive en SQL/NoSQL; Redis es su acelero para lo frecuente</strong>. En el módulo 3 verás exactamente dónde trazar esa línea.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Anota tres piezas de tu última API que tendrían sentido en Redis y por qué.</li>
+          <li>Explica por qué un comando lento en single-threaded afecta a todos los clientes.</li>
+          <li>¿Qué pasaría si Redis se pone en producción sin persistencia y se reinicia?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Redis es un clave-valor en memoria con latencias de microsegundos.</li>
+          <li>Tipos ricos, atómicidad y TTL lo hacen versátil.</li>
+          <li>Es single-threaded: los comandos caros bloquean a todos.</li>
+          <li>Su trabajo es acelerar; la verdad de los datos vive en tu base principal.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

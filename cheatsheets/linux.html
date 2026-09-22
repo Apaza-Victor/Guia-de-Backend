@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de Linux para backend: sistema de archivos, navegación, permisos, grep/sed/awk, procesos, red, logs, systemd y cron.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">Linux</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🐧 Linux</h1>
+          <p class="section-subtitle">El sistema operativo de los servidores. Navegación, permisos, procesos, red, logs, systemd y cron para operar sin GUI.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Herramientas</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="filesystem">Sistema de archivos</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Ruta</th><th>Contenido</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">/</code></td><td>Raíz del sistema.</td></tr>
+                    <tr><td><code class="inline">/etc</code></td><td>Configuración global (nginx, postgres, systemd).</td></tr>
+                    <tr><td><code class="inline">/var</code></td><td>Datos variables: logs (<code class="inline">/var/log</code>), cache, bases de datos.</td></tr>
+                    <tr><td><code class="inline">/usr</code></td><td>Programas y librerías del sistema.</td></tr>
+                    <tr><td><code class="inline">/opt</code></td><td>Software extra instalado manualmente.</td></tr>
+                    <tr><td><code class="inline">/home/usuario</code></td><td>Directorio personal.</td></tr>
+                    <tr><td><code class="inline">/tmp</code></td><td>Archivos temporales (se vacía al reiniciar).</td></tr>
+                    <tr><td><code class="inline">/root</code></td><td>Home del usuario root.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="navegacion">Navegación y archivos</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">pwd                      # ruta actual
+ls -lah                  # lista detallada (permisos, tamaños legibles)
+cd /var/log              # cambiar de directorio
+cd ~                     # home del usuario
+cd ..                    # directorio padre
+
+cp archivo.txt copia.txt
+cp -r carpeta/ copia/
+mv origen destino        # mover o renombrar
+rm archivo.txt
+rm -rf carpeta/          # borrar recursivo FORZOSO (¡cuidado!)
+mkdir -p a/b/c           # crear directorios anidados
+touch nuevo.txt          # crear vacío o actualizar timestamp
+
+# Ver archivos
+cat archivo.txt          # todo
+head -20 archivo.txt     # primeras 20 líneas
+tail -f app.log          # últimas líneas y seguir "vivas"
+less archivo.txt         # paginador interactivo (q para salir)
+
+# Medir espacio
+df -h                    # discos
+du -sh /var              # tamaño de un directorio</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="permisos">Permisos, chmod y chown</h2>
+              <p>Los permisos se leen: <code class="inline">r w x</code> para <em>usuario, grupo, otros</em>. El modo numérico suma: <code class="inline">r=4</code>, <code class="inline">w=2</code>, <code class="inline">x=1</code>.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">ls -l script.sh
+# -rwxr-xr-x  1 user group  122  ...    → dueño: rwx, grupo: rx, otros: rx
+
+chmod 755 script.sh       # dueño todo, resto leer+ejecutar
+chmod 600 clave.pem       # solo dueño (para claves SSH)
+chmod +x script.sh        # añadir ejecución
+chmod -R 750 carpeta/     # recursivo
+
+chown usuario:grupo archivo
+chown -R www-data:www-data /var/www/app
+chgrp grupo archivo
+
+# Permisos especiales típicos
+# setuid (4) → 4755   setgid (2) → 2755   sticky (1) → 1777 (/tmp)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="grep-sed-awk">grep, sed y awk</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># grep: buscar texto
+grep "error" app.log
+grep -i "error" app.log          # sin distinguir mayúsculas
+grep -rn "TIMEOUT" /app/src      # recursivo con número de línea
+grep -l "TODO" *.js              # solo nombres de archivo
+grep -v "^#" nginx.conf          # excluir comentarios
+grep -c "500" access.log         # contar coincidencias
+
+# sed: editar flujo de texto
+sed -i 's/old/new/g' archivo     # reemplaza en el archivo
+sed -n '10,30p' archivo          # imprimir rango de líneas
+sed -i '/linea-a-borrar/d' archivo
+
+# awk: procesar columnas
+awk '{print $1}' access.log                       # primera columna
+awk '{print $2, $4}' archivo
+awk '$3 > 100 {print}' numeros.txt                # filtro numérico
+awk -F, '{print $1}' datos.csv                    # separador coma</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="procesos">Procesos</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">ps aux                    # todos los procesos del sistema
+ps aux | grep node        # filtrar por nombre
+top                       # monitor interactivo (htop si está instalado)
+htop
+
+# Matar procesos
+kill 1234                 # SIGTERM, apagado limpio
+kill -9 1234              # SIGKILL, forzado (último recurso)
+pkill -f "node app.js"    # por patrón de línea de comando
+
+# Tareas en segundo plano
+comando &amp;                 # lanza en background
+nohup node app.js &amp;       # aguanta al cerrar la sesión
+jobs                      # ver tareas del shell
+fg %1                     # traer al frente
+Ctrl+C                    # cancelar
+Ctrl+Z                    # pausar (bg %1 para reanudar en bg)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="red">Red: ping, curl, netstat y SSH</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">ping -c 4 8.8.8.8          # latencia
+curl http://localhost:3000/health
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"email":"a@b.io"}' http://localhost:3000/login
+curl -I https://api.example.com     # solo cabeceras
+curl -i https://api.example.com     # cabeceras + body
+
+ss -tlnp                   # puertos en escucha (moderno)
+netstat -tlnp              # sustituto clásico
+
+# SSH
+ssh usuario@servidor
+ssh -i ~/.ssh/clave.pem usuario@servidor
+scp archivo usuario@servidor:/ruta/
+rsync -avz ./app/ usuario@servidor:/srv/app/
+
+# DNS
+dig example.com
+nslookup example.com</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="logs">Logs y journald</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># systemd journal
+journalctl -u mi-servicio
+journalctl -u mi-servicio -f         # seguir en vivo
+journalctl -u mi-servicio --since "2 hours ago"
+journalctl -p err --since today      # solo errores
+
+# Archivos clásicos
+tail -f /var/log/syslog
+tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
+grep "FATAL" /var/log/app.log | tail -30
+
+# Rotación de logs
+# /etc/logrotate.d/nginx: comprime, rota diario y conserva 14 días
+
+# Espacio en disco lleno (caso clásico de caída en producción)
+df -h
+journalctl --vacuum-size=200M        # vaciar journal antiguo
+du -sh /var/log/* | sort -h | tail</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="systemd">systemd y servicios</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">systemctl status nginx        # estado del servicio
+systemctl start nginx
+systemctl stop nginx
+systemctl restart nginx
+systemctl reload nginx        # recargar config sin cortar
+systemctl enable nginx        # arrancar al encender
+systemctl disable nginx
+systemctl is-active nginx
+systemctl list-units --type=service --state=running
+
+# Crear tu propio servicio: /etc/systemd/system/app.service
+# [Unit]
+# Description=Miapp API
+# After=network.target
+#
+# [Service]
+# User=deploy
+# WorkingDirectory=/srv/app
+# ExecStart=/usr/bin/node /srv/app/server.js
+# Restart=always
+# RestartSec=5
+# Environment=NODE_ENV=production
+#
+# [Install]
+# WantedBy=multi-user.target
+
+systemctl daemon-reload
+systemctl enable app
+systemctl restart app</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="cron">Tareas programadas: cron</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">crontab -e                  # editar el cron del usuario
+crontab -l                  # listar entradas
+crontab -r                  # borrar todo el cron
+
+# Formato:  min  hora  día-mes  mes  día-semana   comando
+#            0    3    *       *      *     /ruta/backup.sh
+#           15   0,12  *       *      *     comando      # dos veces al día
+#           0    */2   *       *      *     comando      # cada 2 horas
+#           0     1   1        *      *     comando      # cada mes
+
+# Asegurar que ejecuta con PATH y log
+0 3 * * * /usr/bin/bash /srv/scripts/backup.sh &gt;&gt; /var/log/backup.log 2&gt;&amp;1
+
+# Ejecutar cada minuto (¿de verdad quieres esto?) para pruebas
+* * * * * /bin/echo test &gt;&gt; /tmp/cron.log
+
+# Verificar que cron está activo y qué ejecuta
+systemctl status cron
+tail -f /var/log/syslog | grep CRON</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Trabaja con un usuario sin permisos de root; usa <code class="inline">sudo</code> solo para lo necesario.</li>
+                <li>Claves SSH con permisos <code class="inline">600</code>; servidores con login por clave y SSH bloqueado.</li>
+                <li>Todo servicio que deba sobrevivir: unit de <strong>systemd</strong> con <code class="inline">Restart=always</code>.</li>
+                <li>Backups con <strong>cron</strong> y verificación del log cada día.</li>
+                <li>Vigila discos (<code class="inline">df -h</code>) y memoria antes de que fallen.</li>
+                <li>Prueba una restauración de respaldo, no solo generes respaldos.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="docker.html">Siguiente: Docker <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

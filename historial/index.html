@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial · Backend Academy</title>
+<meta name="description" content="Historial de las lecciones que has visitado en Backend Academy. Se guarda solo en tu navegador (localStorage) y puedes borrarlo cuando quieras.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html" class="is-active">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content" data-content>
+  <div class="container">
+
+    <nav class="breadcrumb" aria-label="Miga de pan">
+      <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">›</span>
+      <span class="breadcrumb__item" aria-current="page">Historial</span>
+    </nav>
+
+    <header class="lesson-hero">
+      <p class="lesson-meta__item"><span class="badge badge--info">🕘 Registro local</span></p>
+      <h1 class="lesson-title">🕘 Historial de lecciones</h1>
+      <p class="section-subtitle">Cada lección que abres se registra aquí para que retomes el estudio donde lo dejaste. El historial mantiene las últimas vistas, con su fecha relativa.</p>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Últimas lecciones visitadas</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Hasta 200 registros</span>
+        <button type="button" class="btn btn--ghost" data-history-clear>Vaciar historial</button>
+      </div>
+    </header>
+
+    <section>
+      <h2 class="section-title">Lecciones visitadas</h2>
+      <div data-history-view></div>
+      <p class="section-subtitle">El historial se guarda solo en tu navegador (localStorage). Puedes borrarlo cuando quieras.</p>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/arquitectura/index.html">Arquitectura</a></li>
+          <li><a href="../cursos/system-design/index.html">System Design</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/favorites.js"></script>
+<script src="../assets/js/history.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

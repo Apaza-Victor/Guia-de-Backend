@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-agentes-y-tools">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentes y herramientas · Backend para IA · Backend Academy</title>
+<meta name="description" content="Construye agentes con function calling: define herramientas, ejecuta el bucle modelo→código→modelo y orquesta acciones seguras desde tu backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-agentes-y-tools"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Agentes y herramientas</span>
+      </nav>
+      <h1 class="lesson-title">Agentes y herramientas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Features con IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un LLM por sí solo solo genera texto. Para que «haga cosas» —consultar tu base de datos, calcular un impuesto, verificar un pedido— necesitas el patrón de <strong>agente con herramientas</strong>: el modelo decide cuál de tus funciones llamar, tu backend la ejecuta y devuelve el resultado, y el modelo continúa con esa información.</p>
+        <p>Técnicamente se llama <strong>function calling</strong>: describes cada herramienta como un esquema, y el modelo responde no con texto sino con una petición estructurada de llamada.</p>
+      </section>
+
+      <section>
+        <h2 id="herramientas">Definir herramientas con function calling</h2>
+        <p>Cada herramienta se describe con su nombre, una descripción clara (el modelo elige según ella) y el esquema JSON de sus parámetros:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "model": "gpt-4o-mini",
+  "messages": [
+    { "role": "system", "content": "Eres el asistente de la tienda. Cuando necesites datos, usa las herramientas." },
+    { "role": "user", "content": "¿Salió mi pedido 998? Y dime cuánto cuesta enviarlo mañana." }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "consultar_pedido",
+        "description": "Obtiene el estado y la fecha estimada de un pedido por su id.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "pedido_id": { "type": "string", "description": "Identificador del pedido" }
+          },
+          "required": ["pedido_id"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "calcular_envio",
+        "description": "Calcula el coste y tiempo de envío para una dirección.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "direccion": { "type": "string" }
+          },
+          "required": ["direccion"]
+        }
+      }
+    }
+  ]
+}</code></pre>
+        <p>Las descripciones son las que «enseñan» al modelo cuándo usar cada herramienta. Descripciones vagas producen llamadas equivocadas; sé específico sobre cuándo y para qué usar cada una.</p>
+      </section>
+
+      <section>
+        <h2 id="bucle">El bucle del agente (tool loop)</h2>
+        <p>El flujo se repite hasta que el modelo responde texto normal: si responde con una <code>tool_call</code>, ejecutas la función, le devuelves el resultado como mensaje de rol <code>tool</code> y vuelves a preguntarle.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">async function ejecutarAgente(conversacion, herramientas, maxVueltas = 5) {
+  const registro = { ejecuciones: 0 };
+
+  while (registro.ejecuciones < maxVueltas) {
+    const respuesta = await llm.completarConTools(conversacion, herramientas);
+    const llamada = respuesta.choices[0];
+
+    if (llamada.finish_reason !== 'tool_calls') {
+      return llamada.message.content;            // el agente terminó en texto
+    }
+
+    for (const tool of llamada.message.tool_calls) {
+      const nombre = tool.function.name;
+      const args = JSON.parse(tool.function.arguments);
+      const resultado = herramientas[nombre](args);   // EJECUTA tu código
+
+      conversacion.push({
+        role: 'tool',
+        tool_call_id: tool.id,
+        content: JSON.stringify(resultado)
+      });
+    }
+    conversacion.push(llamada.message);
+    registro.ejecuciones++;
+  }
+
+  throw new Error('El agente superó el límite de vueltas');
+}</code></pre>
+        <p>El límite de vueltas es obligatorio: sin él, un agente que no encuentra lo que busca puede llamar herramientas infinitamente y disparar tu factura. Trata este bucle como a un while sobre una API externa: siempre con tope y con timeout.</p>
+      </section>
+
+      <section>
+        <h2 id="seguridad">Seguridad: el agente solo pide, tú ejecutas</h2>
+        <p>La regla de oro es que <strong>el modelo jamás ejecuta operaciones reales</strong>: solo propone llamadas estructuradas. Toda ejecución pasa por tu código, donde aplicas permisos, validación y autorización:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from typing import Callable
+
+def herramienta_protegida(func: Callable, puede_ejecutar: Callable):
+    """
+    Envuelve una herramienta para exigir autorización y validación
+    antes de tocar cualquier dato real.
+    """
+    def wrapper(args: dict):
+        usuario = extraer_contexto(args)
+        if not puede_ejecutar(usuario):
+            return {"error": "sin_permisos"}
+        if not validar_esquema(args):
+            return {"error": "argumentos_invalidos"}
+        return func(args)
+    return wrapper
+
+herramientas = {
+    "cancelar_pedido": herramienta_protegida(
+        cancelar_pedido,
+        puede_ejecutar=lambda usuario: rol_de(usuario) == "admin"
+    )
+}</code></pre>
+        <p>Modelo mental: el LLM es solo el <em>que pregunta</em>. Nunca confíes en que validará bien, nunca le des credenciales, y recuerda que «los tokens que trata de meter el usuario» son datos — no hacks.</p>
+      </section>
+
+      <section>
+        <h2 id="orquestar">Orquestación y límites</h2>
+        <ul>
+          <li><strong>Herramientas de solo lectura primero:</strong> consultas y búsquedas son baratas y seguras; las mutaciones exigen confirmación.</li>
+          <li><strong>Auditoría:</strong> loguea siempre qué herramienta pidió el agente, con qué argumentos y qué devolvió.</li>
+          <li><strong>Máximo tiempo:</strong> combina el tope de vueltas con un timeout global del agente.</li>
+          <li><strong>Streaming de pasos:</strong> envía al cliente los avisos «consultando pedido...» como eventos SSE.</li>
+          <li><strong>Escala:</strong> una arquitectura de agente real se separa en orquestador (decide) y ejecutores (hacen). No mezcles todo en la ruta.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Define dos herramientas (por ejemplo, <code>buscar_producto</code> y <code>calcular_total_con_impuesto</code>) en formato JSON.</li>
+          <li>Implementa el bucle del agente con un máximo de 4 vueltas y un mapa de herramientas reales.</li>
+          <li>Pide al agente algo que requiera ambas herramientas en secuencia y verifica que encadena las llamadas correctamente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un agente = LLM que elige herramientas + tu código que las ejecuta + bucle de vuelta al modelo.</li>
+          <li>Las herramientas se describen con nombre, descripción y esquema de parámetros (function calling).</li>
+          <li>El bucle termina cuando el modelo responde texto, y siempre lleva tope de vueltas y timeout.</li>
+          <li>El modelo solo propone llamadas; las operaciones las ejecuta y autoriza tu backend.</li>
+          <li>Audita cada llamada de herramienta y separa orquestación de ejecución a escala.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="llm-integration-en-servicio.html">Integrar LLMs en un servicio</a>
+          <a class="related-lessons__link" href="streaming-de-respuestas.html">Streaming de respuestas</a>
+          <a class="related-lessons__link" href="../modulo-03/seguridad-y-guardrails.html">Seguridad y guardrails</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="streaming-de-respuestas.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Streaming de respuestas</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Producción de IA</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

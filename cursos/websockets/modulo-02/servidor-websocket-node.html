@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-servidor-websocket-node">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Servidor WebSocket con Node · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Levanta tu primer servidor WebSocket con Node.js: el paquete ws, uWebSockets, los eventos del servidor y cómo compartir puerto con HTTP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-servidor-websocket-node"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Servidor WebSocket con Node</span>
+      </nav>
+      <h1 class="lesson-title">Servidor WebSocket con Node</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · WebSockets en Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="elegir-libreria">Elegir la librería correcta</h2>
+        <p>Node.js no trae WebSocket en el núcleo: hay que instalar una librería que implemente el protocolo sobre sus sockets TCP. Las dos opciones que debes conocer son:</p>
+        <ul>
+          <li><strong>ws:</strong> la implementación de referencia de JavaScript, ligera, mantenida por la comunidad de Node y usada como base por miles de proyectos. Ideal para la mayoría de los casos.</li>
+          <li><strong>uWebSockets.js:</strong> implementados en C++ sobre libuv y el loop de eventos de uNetworking. Extremadamente rápidos y con menor uso de memoria, buenos para servidores con millones de conexiones.</li>
+        </ul>
+        <p>En este curso trabajamos con <code>ws</code> por su simplicidad y porque la API que expone es la más parecida a la del navegador, lo que facilita el salto entre cliente y servidor.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Crear un proyecto y instalar el paquete ws
+mkdir servidor-chat
+cd servidor-chat
+npm init -y
+npm install ws
+
+# Alternativa de alto rendimiento si la necesitas:
+# npm install uwebsockets.js</code></pre>
+      </section>
+
+      <section>
+        <h2 id="server-basico">El servidor mínimo con ws</h2>
+        <p>Con veinte líneas tienes un servidor que acepta conexiones, saluda a cada cliente y responde cualquier mensaje que reciba:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { WebSocketServer } = require('ws');
+
+const wss = new WebSocketServer({ port: 8080 });
+
+wss.on('connection', (ws, req) =&gt; {
+  console.log('Nuevo cliente conectado desde', req.socket.remoteAddress);
+
+  // Saludar en cuanto se abre la conexión.
+  ws.send(JSON.stringify({ tipo: 'bienvenida', texto: '¡Conectado!' }));
+
+  // Contestar cada mensaje que llegue del cliente.
+  ws.on('message', (datos) =&gt; {
+    const payload = JSON.parse(datos.toString());
+    console.log('Recibido:', payload.tipo);
+    ws.send(JSON.stringify({ tipo: 'eco', de: payload }));
+  });
+
+  ws.on('close', () =&gt; console.log('Cliente desconectado'));
+});
+
+console.log('Servidor WebSocket escuchando en ws://localhost:8080');</code></pre>
+        <p>Observa que <code>connection</code> se emite por cada cliente recién conectado (después del handshake), y que el objeto <code>ws</code> que recibes representa UNA conexión concreta: es tu unidad de comunicación con ese cliente.</p>
+      </section>
+
+      <section>
+        <h2 id="eventos-server">Los eventos del servidor</h2>
+        <p>La API de <code>ws</code> en el servidor replica la del navegador pero con nombres de eventos Node nativos:</p>
+        <ul>
+          <li><code>connection</code> — se dispara tras el handshake exitoso con un nuevo peer.</li>
+          <li><code>message</code> — llegan datos del cliente; en <code>ws</code> vienen como <em>Buffer</em> o string según la opción <code>binaryType</code>.</li>
+          <li><code>error</code> — problema con la conexión o el protocolo.</li>
+          <li><code>close</code> — la conexión se cerró; aquí limpias estado de memoria (quitarlo de salas, marcar presencia, etc.).</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">wss.on('connection', (ws) =&gt; {
+  // Convertir automáticamente los mensajes entrantes a texto.
+  ws.binaryType = 'text';
+
+  ws.on('message', (mensaje) =&gt; {
+    // No asumas que es JSON: valida antes de parsear.
+    try {
+      const datos = JSON.parse(String(mensaje));
+      manejarEvento(ws, datos);
+    } catch {
+      ws.send(JSON.stringify({ tipo: 'error', razon: 'JSON inválido' }));
+    }
+  });
+
+  ws.on('error', (err) =&gt; console.error('Error del socket:', err.message));
+  ws.on('close', () =&gt; limpiarEstadoDe(ws));
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="sobre-http">Compartir puerto con HTTP</h2>
+        <p>En producción casi siempre tendrás HTTP (tu API REST) y WebSocket en el mismo puerto expuesto al exterior. Con <code>ws</code> puedes adjuntar el servidor de sockets a un servidor HTTP existente: cuando llega un handshake <code>Upgrade</code>, <code>ws</code> se encarga; el resto lo atiende Express o tu enrutador.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const http = require('http');
+const { WebSocketServer } = require('ws');
+
+const server = http.createServer((req, res) =&gt; {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Hola desde HTTP. Los sockets viven en la misma puerta.');
+});
+
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+wss.on('connection', (ws) =&gt; {
+  ws.send('Conectado por la ruta /ws del mismo puerto.');
+});
+
+server.listen(3000, () =&gt; console.log('HTTP + WebSocket en :3000'));</code></pre>
+        <p>Al fijar <code>path: '/ws'</code> solo responderás handshakes a esa ruta; cualquier otra ruta queda para HTTP. Esto te permite servir la API, la página y los sockets desde un único proceso y facilita el despliegue tras nginx (lo verás en el módulo 3).</p>
+      </section>
+
+      <section>
+        <h2 id="probando">Probar el servidor sin navegador</h2>
+        <p>Para depurar rápido usa <code>wscat</code>, el cliente de consola del mismo ecosistema de <code>ws</code>: te conectas, envías texto y ves lo que responde el servidor.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Instalar y usar el cliente CLI de ws
+npm install -g wscat
+
+# Conectar con el servidor de la lección
+wscat -c ws://localhost:8080
+# &gt; {"tipo":"saludo","nombre":"ana"}
+# &lt; {"tipo":"eco","de":{"tipo":"saludo","nombre":"ana"}}</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Instala <code>ws</code>, crea el servidor mínimo de la lección y arranca con <code>node server.js</code>.</li>
+          <li>Conecta con <code>wscat</code> y envíale un mensaje JSON; comprueba que el eco llega intacto.</li>
+          <li>Modifica el servidor para que envíe un mensaje de «despedida» antes de cerrar; usa <code>ws.close(1000)</code> y observa el cierre limpio en el cliente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Node.js necesita una librería para WebSocket: <code>ws</code> es la referencia y <code>uWebSockets.js</code> la opción de máximo rendimiento.</li>
+          <li>Con <code>WebSocketServer</code> y dos eventos (<code>connection</code> y <code>message</code>) tienes un servidor funcional.</li>
+          <li>Cada objeto <code>ws</code> es una conexión individual que puedes enviar y escuchar.</li>
+          <li>Puedes montar HTTP y WebSocket sobre el mismo puerto adjuntando <code>ws</code> a un servidor HTTP.</li>
+          <li><code>wscat</code> te permite probar sin escribir código de cliente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="broadcast-de-mensajes.html">Broadcast y salas</a>
+          <a class="related-lessons__link" href="autenticacion-por-token.html">Autenticación por token</a>
+          <a class="related-lessons__link" href="cliente-websocket-web.html">Cliente WebSocket en el navegador</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 2</span>
+        <span class="title">WebSockets en Node.js</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="broadcast-de-mensajes.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Broadcast y salas</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

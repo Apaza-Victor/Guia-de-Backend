@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m3-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOs, SLIs y SRE · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende SLIs, SLOs, error budgets y la cultura SRE: cómo definir objetivos de nivel de servicio medibles y gestionarlos en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m3-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">SLOs, SLIs y SRE</span>
+      </nav>
+      <h1 class="lesson-title">SLOs, SLIs y SRE</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Alertas y dashboards</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="definiciones">SLI, SLO y error budget</h2>
+        <p>La palabra «99,9 % de uptime» no significa nada hasta que defines exactamente qué mides y en qué período. Tres términos separan la frase del contrato:</p>
+        <dl class="definition-list">
+          <dt>SLI (Service Level Indicator)</dt><dd>medida objetiva de un aspecto del servicio: qué fracción de peticiones correctas, qué fracción que respondió en menos de X.</dd>
+          <dt>SLO (Service Level Objective)</dt><dd>el objetivo sobre ese SLI en una ventana temporal: «al menos el 99,5 % de las peticiones del último trimestre respondió en ≤ 300 ms».</dd>
+          <dt>Error budget</dt><dd>la tolerancia de fallo: 100 % − SLO. Con un SLO del 99,9 % mensual, tu presupuesto de error son ~43 minutos al mes.</dd>
+        </dl>
+        <p>El <strong>error budget</strong> es la pieza que mezcla producto y tecnología: mientras el sistema se mantenga dentro de presupuesto, el equipo prioriza velocidad de features; cuando lo agota, la velocidad de features pasa a segundo plano y se estabiliza.</p>
+      </section>
+
+      <section>
+        <h2 id="elegir">Cómo elegir un SLI</h2>
+        <p>Un SLI debe reflejar lo que el usuario (o el negocio) nota. Los dos más comunes en backend:</p>
+        <ul>
+          <li><strong>Disponibilidad:</strong> fracción de peticiones atendidas correctamente (<code class="inline">2xx</code> o <code class="inline">3xx</code>) sobre el total.</li>
+          <li><strong>Latencia:</strong> fracción de peticiones que completan por debajo de un umbral (por ejemplo 300 ms).</li>
+        </ul>
+        <p>Empieza humilde: 2 o 3 SLIs críticos por servicio. Cada SLI adicional es paneles, alertas y reuniones que mantener.</p>
+        <p>Traducción del SLI de latencia a PromQL:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># SLI de latencia: fracción de peticiones que respondieron en ≤ 300 ms
+sum(rate(http_request_duration_seconds_bucket{le="0.3"}[5m]))
+  / sum(rate(http_request_duration_seconds_bucket{le="+Inf"}[5m])) * 100
+
+# SLI de disponibilidad: fracción de respuestas 2xx/3xx
+sum(rate(http_requests_total{status=~"2..|3.."}[5m]))
+  / sum(rate(http_requests_total[5m])) * 100</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="contrato">Documentar el objetivo</h2>
+        <p>El SLO se escribe y se revisa. Una forma práctica de declararlo por servicio (tipo SLoth u OpenSLO):</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">version: 1
+servicio: checkout-api
+propietario: team-pagos
+
+sli:
+  - nombre: disponibilidad
+    query: sum(rate(http_requests_total{status=~"2..|3.."}[5m]))
+          / sum(rate(http_requests_total[5m]))
+  - nombre: latencia-p95-debajo-de-300ms
+    query: histogram_quantile(0.95,
+          sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) &lt; 0.3
+
+slo:
+  - nombre: checkout-disponible
+    objective: 0.999       # 99,9 %
+    sli: disponibilidad
+    ventana: "28d"
+  - nombre: checkout-rapido
+    objective: 0.995       # 99,5 %
+    sli: latencia-p95-debajo-de-300ms
+    ventana: "7d"</code></pre>
+          </div>
+        </figure>
+        <p>Nota: el SLI no se negocia; el SLO sí. El SLI describe la realidad; el SLO decide cuánta imperfección es aceptable y cuánto riesgo de negocio se asume.</p>
+      </section>
+
+      <section>
+        <h2 id="presupuesto">Gestionar el error budget</h2>
+        <p>El presupuesto se lleva en una ventana deslizante. Un cálculo simple en Python te dice cuánto te queda:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python" data-language="python">VENTANA_DIAS = 30
+OBJETIVO = 0.999  # SLO 99,9 %
+
+# Lo que mide el SLI hoy (promedio de la ventana)
+disponibilidad = 0.99891
+
+presupuesto_usado = 1 - disponibilidad / OBJETIVO
+presupuesto_minutos = (1 - OBJETIVO) * VENTANA_DIAS * 24 * 60
+restante_minutos = (1 - disponibilidad) * VENTANA_DIAS * 24 * 60
+
+print(f"Presupuesto total del mes: {presupuesto_minutos:.0f} min")
+print(f"Ya gastado:               {presupuesto_usado * 100:.1f} %")
+print(f"Restante aproximado:      {restante_minutos:.0f} min")
+
+if disponible_un_mes := restante_minutos &lt;= 0:
+    print("Presupuesto AGOTADO: congela features, ataca la causa raíz.")</code></pre>
+          </div>
+        </figure>
+        <p>Cuando se agota presupuesto de forma repetida, el SLO está mal definido (demasiado ambicioso) o hay una deuda técnica estructural. Ambos son decisiones de producto, no de una sola persona, y por eso el SLO vive en un documento del equipo.</p>
+      </section>
+
+      <section>
+        <h2 id="sre">La cultura SRE</h2>
+        <p>Site Reliability Engineering aporta el marco: la fiabilidad se mide, se divide con producto y se mejora con automatización. Tres reglas prácticas:</p>
+        <ul>
+          <li>Mide la fiabilidad con SLIs de <em>síntoma de usuario</em>, no con salud de servidores.</li>
+          <li>La fiabilidad se presupuesta como cualquier recurso: hay límite y se gestiona.</li>
+          <li>El automatismo que se hizo una vez para escalar se debería poder repetir para recuperarse.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un servicio tuyo y define 2 SLIs (disponibilidad y latencia) con su consulta PromQL.</li>
+          <li>Elige el SLO de cada uno y justifica: ¿99,9 directo para pagos? ¿99,9 para un panel interno?</li>
+          <li>Calcula el error budget mensual en minutos de ambos y decide la política de features al agotarse.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>SLI mide, SLO objetivo, error budget tolerancia: 100 % − SLO.</li>
+          <li>Un buen SLI es lo que el usuario nota (disponibilidad y latencia por debajo de umbral).</li>
+          <li>El SLO se documenta y el presupuesto se gestiona con datos, no con opiniones.</li>
+          <li>SRE es producto + operaciones decidiendo fiabilidad con números.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="alertas-inteligentes.html">Alertas inteligentes</a>
+          <a class="related-lessons__link" href="../modulo-01/metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="../modulo-03/dashboards-efectivos.html">Dashboards efectivos</a>
+          <a class="related-lessons__link" href="../modulo-02/prometheus.html">Prometheus</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

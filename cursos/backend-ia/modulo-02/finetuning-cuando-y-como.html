@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-finetuning-cuando-y-como">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fine-tuning: cuándo y cómo · Backend para IA · Backend Academy</title>
+<meta name="description" content="Aprende cuándo el fine-tuning supera al RAG, cómo preparar un dataset de chat y cómo evaluar el modelo ajustado antes de producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-finetuning-cuando-y-como"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Fine-tuning: cuándo y cómo</span>
+      </nav>
+      <h1 class="lesson-title">Fine-tuning: cuándo y cómo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Features con IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>fine-tuning</strong> entrena una copia de un modelo base sobre tu dataset para que imite tu tono, tu formato o tus reglas. Es la herramienta adecuada para un puñado de problemas muy concretos — y la herramienta equivocada, cara e innecesaria, para la mayoría.</p>
+        <p>La regla que debe guiarte como backend: <strong>si el problema es de conocimiento, usa RAG; si el problema es de comportamiento o formato, considera fine-tuning</strong>. Esta lección te da el criterio y el proceso completo.</p>
+      </section>
+
+      <section>
+        <h2 id="rag-vs-finetuning">RAG vs fine-tuning</h2>
+        <div class="callout">
+          <p><strong>Pregúntate siempre primero:</strong> ¿el problema es «no sabe mis datos» (RAG) o «sabe pero no se comporta como quiero» (fine-tuning)?</p>
+        </div>
+        <ul>
+          <li><strong>RAG</strong> aporta hechos que cambian (catálogo, precios, política) y no requiere entrenar nada; se actualiza reindexando.</li>
+          <li><strong>Fine-tuning</strong> aporta un estilo y un formato estable (siempre responde en JSON, tono de soporte, resúmenes con estructura propia), pero los hechos que aprendió pueden quedar obsoletos y NO sustituye la búsqueda de datos.</li>
+          <li><strong>Combinados</strong>: fine-tuneas el tono y el formato, y usas RAG para el contenido. Es el patrón de muchos asistentes corporativos.</li>
+        </ul>
+        <p>Un criterio práctico: si necesitas más de <em>algunos cientos de ejemplos</em> consistentes de «input → respuesta perfecta», el fine-tuning puede valer la pena; con menos, un buen prompt con RAG renderá igual.</p>
+      </section>
+
+      <section>
+        <h2 id="dataset">El dataset: conversaciones de chat</h2>
+        <p>El formato estándar copia la estructura de mensajes: cada ejemplo es una conversación con roles. Lo que entrenas es la respuesta esperada del asistente dado el historial.</p>
+        <pre class="code-block"><code class="language-jsonl" data-language="json">{"messages":[{"role":"system","content":"Asistente de soporte de TiendaX. Responde con el formato: {estado: string, texto: string}"},{"role":"user","content":"¿Dónde está mi pedido 998?"},{"role":"assistant","content":"{\"estado\":\"en_envio\",\"texto\":\"Tu pedido 998 salió hoy de nuestra bodega.\"}"}]}
+{"messages":[{"role":"system","content":"Asistente de soporte de TiendaX. Responde con el formato: {estado: string, texto: string}"},{"role":"user","content":"Quiero cancelar mi suscripción"},{"role":"assistant","content":"{\"estado\":\"error\",\"texto\":\"No encontramos una suscripción activa con tu cuenta.\"}"}]}</code></pre>
+        <p>Cada línea es un ejemplo JSONL. Los ejemplos deben ser <strong>consistentes</strong>: si la mitad devuelve JSON y la otra texto plano, el modelo ajustado será un promedio mediocre de ambos. La calidad del dataset vale más que su tamaño.</p>
+      </section>
+
+      <section>
+        <h2 id="entrenamiento">Lanzar un fine-tune vía API</h2>
+        <p>Una vez subido el archivo JSONL, creas el job de entrenamiento. El backend espera, revisa el progreso y, al terminar, recibe un identificador del modelo ajustado que puedes usar de inmediato en tu cliente.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from openai import OpenAI
+
+client = OpenAI()
+
+# 1. Sube el dataset
+archivo = client.files.create(
+    file=open("dataset_finetune.jsonl", "rb"),
+    purpose="fine-tune"
+)
+
+# 2. Lanza el entrenamiento
+job = client.fine_tuning.jobs.create(
+    training_file=archivo.id,
+    model="gpt-4o-mini",
+    suffix="soporte-tiendax"
+)
+print("Job:", job.id)  # ftjob_XXXXXXXX
+
+# 3. Consulta hasta que llegue a "succeeded"
+estado = client.fine_tuning.jobs.retrieve(job.id)
+print(estado.status, estado.fine_tuned_model)
+# succeeded ft:gpt-4o-mini:personal:soporte-tiendax:AB12CD</code></pre>
+        <p>El modelo resultante se referencia como <code>ft:gpt-4o-mini:personal:soporte-tiendax:AB12CD</code> y se usa idéntico a uno base: basta pasar ese nombre en <code>model</code>. Úsalo en tu capa de cliente desde la variable de entorno, no escrita a fuego.</p>
+      </section>
+
+      <section>
+        <h2 id="evaluacion">Evaluar antes de promocionar</h2>
+        <p>Nunca promuevas un modelo ajustado solo porque «entrenó bien». Guarda un conjunto de evaluación que el modelo <strong>no haya visto</strong> y compara tus métricas contra la base sin ajustar:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">evaluacion = [
+    {"prompt": "¿Dónde está mi pedido?", "esperado": "estado"},
+    {"prompt": "¿Puedo cancelar?", "esperado": "error"},
+]
+
+def exactitud(predicciones, esperados):
+    aciertos = sum(p == e for p, e in zip(predicciones, esperados))
+    return aciertos / len(esperados)
+
+# Compara exactitud vs el modelo base con el mismo prompt
+print("Exactitud modelo base:", exactitud(predicciones_base, evaluacion))
+print("Exactitud modelo ajustado:", exactitud(predicciones_afinado, evaluacion))</code></pre>
+        <p>Si el ajustado no gana por una diferencia real en tu conjunto de evaluación, no lo promuevas: el costo de un fine-tune (tiempo, entrenamiento e inferencia) debe justificarse con una métrica. Recuerda que el modelo ajustado suele tener <strong>precio de entrada y salida más caro</strong> que el base.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe en papel 5 casos de un problema de tu producto y decide por cada uno: ¿lo resolvería RAG o necesitaría fine-tuning? Justifica cada elección.</li>
+          <li>Convierte uno de tus casos en 3 ejemplos en formato JSONL del dataset de chat.</li>
+          <li>Define una métrica simple de evaluación (por ejemplo, % de respuestas que parsean como JSON) y explica cómo compararías el modelo base vs el ajustado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>RAG aporta conocimiento actualizable; el fine-tuning aporta estilo, tono y formato estable.</li>
+          <li>El dataset usa el formato de conversación JSONL y debe ser consistente.</li>
+          <li>El entrenamiento se lanza vía API y entrega un identificador de modelo utilizable directamente.</li>
+          <li>Evalúa siempre contra un conjunto que el modelo no haya visto, comparando con la base.</li>
+          <li>El fine-tuning cuesta más en entrenamiento e inferencia: solo lo adoptas si gana la métrica.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="rag-basico.html">RAG básico</a>
+          <a class="related-lessons__link" href="../modulo-03/evaluacion-y-monitoreo.html">Evaluación y monitoreo</a>
+          <a class="related-lessons__link" href="../modulo-03/versionado-de-modelos.html">Versionado de modelos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="rag-basico.html">
+        <span class="label">← Anterior</span>
+        <span class="title">RAG básico</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="streaming-de-respuestas.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Streaming de respuestas</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

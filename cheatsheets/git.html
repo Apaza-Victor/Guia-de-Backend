@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git &amp; GitHub · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de Git y GitHub: configuración, init/clone, add/commit, status/log, branches y merge, rebase, stash, remotos, pull requests, .gitignore y revert.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">Git &amp; GitHub</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🌿 Git &amp; GitHub</h1>
+          <p class="section-subtitle">El sistema de control de versiones imprescindible. Commits, ramas, merges, rebases, remotos y pull requests en una sola hoja de referencia.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Herramientas</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="configuracion">Configuración inicial</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git config --global user.name "Tu Nombre"
+git config --global user.email "tu@email.com"
+
+# Editor y alias útiles
+git config --global core.editor "code --wait"
+git config --global alias.st status
+git config --global alias.co checkout
+git config --global alias.lg "log --oneline --graph --all -20"
+
+# Ver configuración
+git config --list --show-origin
+git config user.name</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="crear">Crear y clonar repositorios</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git init                 # crear repo local
+git init -b main         # con rama inicial main
+
+# Copiar un repo remoto
+git clone URL-repo
+git clone URL-repo mi-directorio
+git clone --branch v1.0 --single-branch URL-repo
+
+# Conectar un local a un remoto
+git remote add origin https://github.com/usuario/repo.git
+git remote -v            # ver remotos
+git push -u origin main  # publicar y fijar upstream</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="ciclo-vida">El ciclo de vida: status, add y commit</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git status                # qué ha cambiado (rojo sin trackear)
+git add archivo.js        # staged (verde, área de staging)
+git add .                 # todo el directorio
+git add '*.js' '!*.test.js'  # con patrones de exclusión
+
+git diff                  # cambios sin staging
+git diff --staged         # cambios ya en staging
+
+git commit -m "feat: añade login con JWT"
+git commit -a -m "fix: typo"        # add los modificados (no nuevos)
+git commit --amend -m "mensaje"     # arreglar el último commit (no pusheado)
+git commit --amend --no-edit        # añadir archivos al último</code></pre>
+                </div>
+              </div>
+              <p>Convención de mensajes (Conventional Commits): <code class="inline">feat:</code>, <code class="inline">fix:</code>, <code class="inline">refactor:</code>, <code class="inline">docs:</code>, <code class="inline">test:</code>, <code class="inline">chore:</code>.</p>
+            </section>
+
+            <section>
+              <h2 id="historial">Estado e historial</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git log                      # historial completo
+git log --oneline            # un commit por línea
+git log --oneline --graph    # con grafo de ramas
+git log -5 --oneline         # últimos 5
+git log --oneline --all -20  # todas las ramas
+git show HEAD                # último commit en detalle
+git show abc1234             # commit concreto
+git blame archivo.js         # quién tocó cada línea
+git shortlog -sn             # contribuciones por autor</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="ramas">Ramas, checkout y merge</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git branch                    # listar ramas locales
+git branch -a                 # incluye remotas
+git branch feature/login      # crear rama
+git switch feature/login      # cambiar de rama
+git switch -c feature/login   # crear y cambiar
+git switch -c nueva main      # crear desde otra rama
+
+# Fusionar la rama en la actual
+git switch main
+git merge feature/login
+
+# Conflictos: git marca los archivos, se resuelven a mano y se hace add+commit
+git merge --abort             # cancelar merge en curso
+git log --merge               # commits con conflicto
+
+# Borrar ramas
+git branch -d feature/login   # ya fusionada
+git branch -D feature/login   # forzado (no fusionada)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="rebase">Rebase</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Traer los cambios de main encima de tu rama
+git switch feature/login
+git rebase main
+
+# Rebase interactivo: ordenar, combinar, arreglar commits
+git rebase -i HEAD~4
+
+# Etiquetas en el prompt:
+#  p / pick   → conserva el commit
+#  r / reword → cambiar solo el mensaje
+#  e / edit   → modificar el contenido
+#  s / squash → combinar con el anterior
+#  d / drop   → eliminar commit
+
+# Repetir rebase tras conflicto
+git rebase --continue
+git rebase --abort
+
+# Regla de oro: nunca rebases commits ya pusheados y compartidos.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="stash">Stash (guardar cambios a medias)</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git stash                    # guardar y limpiar WC
+git stash -u                 # incluye archivos nuevos sin trackear
+git stash list               # ver stashes guardados
+git stash pop                # recuperar el último y borrarlo
+git stash apply stash@{1}    # aplicar uno concreto sin borrar
+git stash show -p stash@{0}  # ver diff del stash
+git stash drop stash@{0}     # descartar stash
+git stash clear              # borrar todos</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="remotos">Remotos: push, pull y fetch</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">git fetch origin             # descargar cambios sin fusionar
+git pull                     # fetch + merge (en la rama actual)
+git pull --rebase            # fetch + rebase (historial lineal)
+git push                     # subir commits al upstream
+git push origin feature      # subir una rama
+git push -u origin rama      # primera vez: fija el upstream
+git push --force-with-lease  # forzar SOLO si nadie tocó esa rama
+
+git remote add origin URL
+git remote -v
+git remote rename origin nuevo
+git remote remove origin</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="pr">Pull requests (GitHub)</h2>
+              <ol>
+                <li>Abre una <strong>rama</strong> nueva desde <code class="inline">main</code>.</li>
+                <li>Haz <span class="inline-code">push</span> y pulsa <em>Compare &amp; pull request</em>.</li>
+                <li>Escribe título y descripción con contexto, adjunta capturas o logs.</li>
+                <li>Marca <strong>Draft</strong> si sigue en construcción.</li>
+                <li>Revisa los checks (CI): deben pasar antes del merge.</li>
+                <li>Fusiona: preferible <em>Squash and merge</em> para historial limpio.</li>
+                <li>Borra la rama al final.</li>
+              </ol>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Con la CLI de GitHub
+gh pr create --title "feat: login" --body "Descripción"
+gh pr checkout 12          # traer la PR a local
+gh pr list
+gh pr status
+gh pr review 12 --approve
+gh pr merge 12 --squash --delete-branch</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="gitignore">.gitignore</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">GitIgnore</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-gitignore"># dependencias
+node_modules/
+vendor/
+
+# entornos y secretos
+.env
+.env.*
+
+# builds y logs
+dist/
+build/
+*.log
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# nunca subir: contraseñas, claves, .env con datos reales</code></pre>
+                </div>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Si ya lo habías versionado por error
+git rm --cached .env        # quitar del índice, lo deja en el disco
+git rm -r --cached node_modules</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="deshacer">Deshacer: revert, reset y restore</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># revert: crea un commit que deshace otro (seguro para pushear)
+git revert abc1234
+
+# deshacer un commit local sin tocar archivos (mixto)
+git reset HEAD~1            # o git reset --soft HEAD~1
+
+# reset duro: descarta commits Y cambios (¡cuidado!)
+git reset --hard HEAD~2
+git reset --hard origin/main
+
+# restore: cambios del working directory / staging
+git restore archivo.js      # descarta cambios locales del archivo
+git restore --staged archivo.js   # quitar del staging, sin tocar disco
+
+# etiquetas
+git tag v1.0.0
+git tag -a v1.0.0 -m "Versión 1.0"
+git push origin v1.0.0
+git tag -d v1.0.0</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Commits pequeños, atómicos y con mensajes en español claros usando Conventional Commits.</li>
+                <li>Todo lo que llega a <code class="inline">main</code> pasa por PR revisada y con CI verde.</li>
+                <li>Nunca subas secretos: rota la clave si llego a pushear uno.</li>
+                <li>Ramas temáticas cortas con un único propósito.</li>
+                <li>Rebase para leer historial; merge para no reescribir lo compartido.</li>
+                <li>Actualiza <code class="inline">main</code> antes de empezar una rama y vuelve a sincronizar antes del PR.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="linux.html">Siguiente: Linux <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

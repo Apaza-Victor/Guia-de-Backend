@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-argumentos-y-variables">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Argumentos y variables · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a usar argumentos y variables en GraphQL: declaración con $, variables JSON, valores por defecto y validación automática de tipos en el servidor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-argumentos-y-variables"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Argumentos y variables</span>
+      </nav>
+      <h1 class="lesson-title">Argumentos y variables</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Implementación con Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Escribir valores fijos dentro de la query funciona para probar, pero en una aplicación real los argumentos cambian en cada llamada: el id del perfil que abre el usuario, la página que pide, el término de búsqueda. Por eso GraphQL define las <strong>variables</strong>: parámetros declarados con <code>$</code> que se pasan aparte, en el payload JSON de la petición.</p>
+        <p>Además de hacer la query reutilizable, las variables tienen un beneficio de seguridad adicional: <strong>jamás deben concatenarse</strong> en el texto de la query, lo que elimina una familia de inyecciones.</p>
+      </section>
+
+      <section>
+        <h2 id="variables">Declarar variables en la operación</h2>
+        <p>La operación declara sus variables entre paréntesis, indicando tipo y, si aplica, el carácter no-null. Después se usan donde antes había un literal:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query ObtenerPost($id: ID!) {
+  post(id: $id) {
+    titulo
+    contenido
+  }
+}</code></pre>
+        <p>La variable <code>$id</code> es de tipo <code>ID!</code>: obligatoria. Si el cliente la omite, la validación la rechaza antes de ejecutar nada. El resolver recibe el valor final dentro de <code>args</code>, como si hubiera llegado como literal.</p>
+      </section>
+
+      <section>
+        <h2 id="json">El payload de variables</h2>
+        <p>Las variables viajan como un objeto JSON aparte dentro de la petición. En GraphiQL se escriben en el panel "Variables" y por HTTP van en el cuerpo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "id": "p42"
+}</code></pre>
+        <pre class="code-block"><code class="language-bash" data-language="bash">curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query ObtenerPost($id: ID!) { post(id: $id) { titulo } }",
+    "variables": { "id": "p42" }
+  }'</code></pre>
+      </section>
+
+      <section>
+        <h2 id="defaults">Valores por defecto</h2>
+        <p>Las variables pueden declararse con un valor por defecto (<code>=</code>), que se usa cuando el cliente no envía ese dato. Es práctico para paginación, idioma o límites:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query ObtenerFeed($limite: Int = 10, $filtro: String) {
+  posts(limite: $limite, filtro: $filtro) {
+    id
+    titulo
+  }
+}</code></pre>
+        <p>Aquí <code>$limite</code> tiene 10 por defecto y <code>$filtro</code> es opcional (puede ser <code>null</code>). El cliente puede enviar solo <code>{}</code> y la query se ejecuta con <code>limite = 10</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="resolver">Usar los argumentos en el resolver</h2>
+        <p>En el resolver, <code>args</code> contiene las variables ya resueltas. El valor del límite puede (con cuidado) componer la consulta SQL siempre que el parámetro se pase como placeholder:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    posts: async (parent, { limite, filtro }, context) => {
+      const where = filtro ? "WHERE titulo ILIKE $1" : "";
+      const parametros = filtro ? [`%${filtro}%`, limite] : [limite];
+      const texto = `SELECT * FROM posts ${where} LIMIT $${where ? 2 : 1}`;
+      const { rows } = await context.db.query(texto, parametros);
+      return rows;
+    },
+  },
+};</code></pre>
+        <p>Nunca interpoles variables dentro del SQL: pasa por placeholders y deja que el driver escape. Componer la cláusula <em>WHERE</em> condicionalmente es normal; interpolar el <em>valor</em> es un riesgo de inyección.</p>
+      </section>
+
+      <section>
+        <h2 id="validacion">Validación automática del servidor</h2>
+        <p>Una de las ventajas del tipado fuerte: enviar una variable con el tipo equivocado o faltante produce un error de validación estándar antes de tocar los resolvers:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "errors": [
+    {
+      "message": "Variable \"$id\" of required type \"ID!\" was not provided.",
+      "locations": [{ "line": 1, "column": 20 }]
+    }
+  ]
+}</code></pre>
+        <p>Así, una variable mal tipada no llega a la base de datos: el schema actúa como primera capa de defensa. La lógica de negocio (¿el id existe?, ¿tiene permiso?) la validas tú en el resolver.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe una query <code>posts($pagina: Int = 1, $tamano: Int = 20)</code> que pagine resultados.</li>
+          <li>Envíala desde GraphiQL con variables JSON y sin variables (usa los defaults).</li>
+          <li>Intenta enviar <code>$pagina</code> como <code>"uno"</code> y observa el error de validación.</li>
+          <li>Adapta el resolver para que pase las variables como placeholders SQL y nunca como literales interpolados.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las variables se declaran con <code>$</code> en la operación y se tipan.</li>
+          <li>Los valores viajan aparte, en el payload JSON <code>variables</code>.</li>
+          <li>Pueden tener valores por defecto y ser opcionales o no-null.</li>
+          <li>El servidor valida tipos y obligatoriedad antes de ejecutar resolvers.</li>
+          <li>Las variables se pasan a la BD como placeholders, nunca interpolar en SQL.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="apollo-server-basico.html">Apollo Server básico</a>
+          <a class="related-lessons__link" href="errores-y-estados.html">Errores y validación</a>
+          <a class="related-lessons__link" href="mutations-validaciones.html">Mutations y validación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="servidor-express-graphql.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Express + GraphQL</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="errores-y-estados.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Errores y validación</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

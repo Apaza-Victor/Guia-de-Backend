@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El diagrama de dependencias · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a leer y dibujar el diagrama de dependencias: capas, flechas, regla de dependencia y cómo detectar arquitectura enredada de un vistazo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">El diagrama de dependencias</span>
+      </nav>
+      <h1 class="lesson-title">El diagrama de dependencias</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La arquitectura no se ve en el editor: se ve en el <strong>grafo de dependencias</strong> de tu código. El diagrama de dependencias dibuja las capas y los flujos de uso entre ellas. Con un vistazo puedes saber si tu sistema es frágil, qué cambiar toca qué, y dónde está el enredo.</p>
+      </section>
+
+      <section>
+        <h2 id="reglas">El vocabulario del diagrama</h2>
+        <ul>
+          <li><strong>Nodo:</strong> una capa, módulo o paquete (por ejemplo, «Service Layer»).</li>
+          <li><strong>Flecha A → B:</strong> «A usa a B». La casilla más segura es la que menos flechas apuntan hacia ella desde el negocio.</li>
+          <li><strong>Dirección de la flecha = dirección del cambio:</strong> si B cambia, puede romper A.</li>
+        </ul>
+        <p>En una buena arquitectura las flechas <strong>solo apuntan hacia dentro</strong> (desde la periferia hacia el núcleo de dominio). Si las flechas se invierten o forman ciclos, llegó el desacoplamiento.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo legible</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Diagrama (plantUML)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Controller --&gt; Service
+Controller --&gt; FormRequest
+Service --&gt; Repository
+Service --&gt; DomainEvent
+Repository --&gt; EloquentModel
+Repository --&gt; InterfazRepository</code></pre>
+          </div>
+        </figure>
+        <p>Dirección: el controlador usa servicios; el servicio usa repositorios e interfaces; el repositorio (infraestructura) usa la implementación concreta. Ninguna capa de negocio conoce EloquentModel.</p>
+      </section>
+
+      <section>
+        <h2 id="enredos">Detectar enredos</h2>
+        <ul>
+          <li><strong>Un</strong> <strong>Ciclo:</strong> A usa B y B usa A. Cambiar una rompe la otra y la prueba mental se vuelve imposible.</li>
+          <li><strong>Flecha desde el dominio hacia la infraestructura:</strong> indica fuga de detalles (SQL, HTTP) hacia adentro.</li>
+          <li><strong>Nodo «god»:</strong> una capa que recibe demasiadas flechas «se come» todo el negocio.</li>
+          <li><strong>Saltos de capas:</strong> controlador que usa directamente el repositorio se salta el service layer y viene el acoplamiento a datos.</li>
+        </ul>
+        <p>Herramientas como <em>Jdepend</em>, <em>Deptrac</em> (PHP) o <em>ArchUnit</em> (Java) permiten escribir estas reglas como tests y fallar en CI cuando alguien las rompe.</p>
+      </section>
+
+      <section>
+        <h2 id="practica">Cómo dejarlo sano</h2>
+        <ol>
+          <li>Dibuja primero las capas que existen hoy, sin adornar.</li>
+          <li>Marca cada flecha que cruce las capas permitidas; esa es tu lista de deuda.</li>
+          <li>Aplica el patrón <strong>Dependency Inversion</strong> (interfaces entre capas) para invertir flechas concretas.</li>
+          <li>Convierte el diagrama en reglas automatizadas para que no vuelvan a aparecer.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el diagrama de dependencias de tu módulo principal (papel o editor).</li>
+          <li>Subraya todos los ciclos y los atajos de capas.</li>
+          <li>Elige uno y propón cómo invertir esa flecha con una interfaz.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El diagrama de dependencias revela la arquitectura real sobre la documentada.</li>
+          <li>Las flechas apuntan hacia el núcleo; los ciclos y atajos son la deuda a pagar.</li>
+          <li>Dependen de inversión, se invierten flechas con interfaces.</li>
+          <li>Automatiza las reglas con tests de arquitectura en CI.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="inyeccion-de-dependencias.html">Inyección de dependencias</a>
+          <a class="related-lessons__link" href="../modulo-02/modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+          <a class="related-lessons__link" href="../modulo-05/regla-de-dependencia.html">La regla de dependencia</a>
+          <a class="related-lessons__link" href="../modulo-04/acoplamiento-y-cohesion.html">Acoplamiento y cohesión</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

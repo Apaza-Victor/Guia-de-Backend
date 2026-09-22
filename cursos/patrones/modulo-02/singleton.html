@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m2-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Singleton · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Singleton en backend: garantizar una única instancia, cuándo es útil (config, logging, conexiones) y por qué suele ser un anti-patrón hoy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m2-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Singleton</span>
+      </nav>
+      <h1 class="lesson-title">Singleton</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Creacionales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Singleton</strong> garantiza que una clase tenga <strong>una sola instancia</strong> y ofrece un punto global de acceso a ella. Clásicos del backend donde encaja: configuración global, loggers, pools de conexiones y cachés.</p>
+      </section>
+
+      <section>
+        <h2 id="codigo">En código</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+final class Configuracion
+{
+    private static ?Configuracion $instancia = null;
+    private array $valores;
+
+    private function __construct(array $valores)
+    {
+        $this-&gt;valores = $valores;
+    }
+
+    public static function obtener(array $valores = []): Configuracion
+    {
+        return self::$instancia ??= new self($valores);
+    }
+
+    public function get(string $clave): string
+    {
+        return $this-&gt;valores[$clave] ?? '';
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Constructor privado + método estático de acceso: el «one-of» queda protegido por el propio diseño.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo sí</h2>
+        <ul>
+          <li>Un <strong>recurso compartido</strong> con estado global coherente (config, logger).</li>
+          <li>Algo costoso de crear que no debe duplicarse (pool de conexiones, caché en memoria).</li>
+          <li>En lenguajes/proyectos sin contenedor de DI disponible.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="cuando-no">Cuándo NO (y suele ser casi siempre)</h2>
+        <p>El Singleton es muchas veces un anti-patrón encubierto:</p>
+        <ul>
+          <li><strong>Estado global oculto:</strong> quien lo consume guarda memoria implícita; testearlo exige reinicios.</li>
+          <li><strong>Acoplamiento directo:</strong> `Configuracion::obtener()` dentro de cualquier clase es acoplamiento puro a la clase concreta.</li>
+          <li><strong>Difícil de sustituir:</strong> en tests quieres un fake, pero el acceso estático lo atornilla al código.</li>
+          <li><strong>En frameworks modernos, innecesario:</strong> el contenedor de DI ya garantiza «una instancia» via singleton scope, sin amarrar tu código a la clase.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="alternativa">La alternativa moderna</h2>
+        <p>Deja que el <strong>contenedor de inyección</strong> cree la instancia y la inyecte donde se necesite:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// Composition root: una sola instancia controlada
+$c-&gt;set(Configuracion::class, singleton(fn() =&gt; leerDotenv()));
+
+// En cualquier servicio: recibo el objeto, no lo busco
+final class PedidoService {
+    public function __construct(private Configuracion $config) {}
+}</code></pre>
+          </div>
+        </figure>
+        <p>Mismo beneficio (una instancia), pero sin acoplar: en un test inyectas un fake.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Si usas `getInstance()` en tu código, identifica cada uso y su propósito real.</li>
+          <li>Convierte uno de ellos a inyección de dependencias.</li>
+          <li>Escribe cuándo un Singleton seguiría siendo legítimo en tu proyecto.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Singleton = una única instancia + acceso global.</li>
+          <li>Útil para configuración, loggers y pools.</li>
+          <li>Es un anti-patrón si esconde estado global o impide el testeo.</li>
+          <li>El contenedor de DI logra «una instancia» sin el amarre global.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-06/dependency-injection.html">Dependency Injection</a>
+          <a class="related-lessons__link" href="factory-method.html">Factory Method</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-03/inyeccion-de-dependencias.html">Inyección de dependencias</a>
+          <a class="related-lessons__link" href="eligiendo-patron-creacional.html">Eligiendo el patrón creacional</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

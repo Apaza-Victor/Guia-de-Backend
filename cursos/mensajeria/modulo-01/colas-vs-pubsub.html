@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m1-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colas vs Pub/Sub · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende la diferencia entre colas punto a punto y pub/sub por topic: competencia entre consumidores, broadcast, grupos de suscripción y cuándo usar cada modelo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m1-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Colas vs Pub/Sub</span>
+      </nav>
+      <h1 class="lesson-title">Colas vs Pub/Sub</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando hay un mensaje nuevo, ¿quién debe recibirlo? La respuesta define dos modelos de mensajería opuestos:</p>
+        <ul>
+          <li><strong>Cola (punto a punto):</strong> el mensaje se entrega a <em>un</em> consumidor. Los demás que escuchen la misma cola compiten, pero nunca dos procesan el mismo mensaje.</li>
+          <li><strong>Pub/Sub (topic):</strong> el mensaje se publica en un <em>topic</em> y se copia a <em>todos</em> los suscriptores interesados. Es un broadcast con filtro por interés.</li>
+        </ul>
+        <p>La confusión más común es creer que una cola y un topic son lo mismo. Comparten infraestructura, pero resuelven problemas distintos: <strong>repartir trabajo</strong> en un caso y <strong>notificar a muchos</strong> en el otro.</p>
+      </section>
+
+      <section>
+        <h2 id="cola">Cola: repartir trabajo entre consumidores</h2>
+        <p>Una cola se usa para tareas que exactamente un proceso debe ejecutar. Piensa en el envío de correos: si tres workers escuchan la cola <code>emails</code>, cada correo debe procesarse <strong>una sola vez</strong>, así que el broker lo entrega a un único consumidor.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Diagrama de competencia: 1 mensaje, 1 consumidor
+Producción -> [cola "emails"]
+                      |
+              +-------+--------+
+              | worker-1      |  consume el mensaje
+              | worker-2      |  (los demás no lo ven)
+              | worker-3      |
+              +--------------+</code></pre>
+        <p>Si pones más consumidores, el trabajo se reparte entre todos: es la forma más sencilla de escalar procesamiento. La respuesta del sistema es «entregado a uno, listo».</p>
+      </section>
+
+      <section>
+        <h2 id="pubsub">Pub/Sub: notificar a todos los interesados</h2>
+        <p>Un topic se usa cuando varios sistemas necesitan reaccionar al <em>mismo hecho</em>. En una tienda, cuando un pedido se concreta: el servicio de inventario quiere descontar stock, el de facturación quiere generar la boleta, el de notificaciones quiere avisar al usuario y el de analítica quiere registrar el evento.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Diagrama de broadcast: 1 mensaje, muchos suscriptores
+Publicador -> [topic "pedido.completado"]
+                       |
+       +---------------+---------------+
+       | sub factura    | sub inventario |
+       | sub notificaciones | sub analítica |
+       +---------------+---------------+
+       # Cada suscriptor recibe una copia</code></pre>
+        <p>El publicador no sabe quién escucha ni cuántos son. Añadir un suscriptor nuevo (por ejemplo, un servicio de recomendaciones) no obliga a tocar al publicador: esa es la magia del desacople por topic.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo de implementación</h2>
+        <p>Con la librería <code>amqplib</code> de Node.js y RabbitMQ, publicar a una cola y a un topic se ve casi igual desde el productor; la diferencia está en el <em>modelo</em> (qué exposiciones se enrutan). Primero, la cola de trabajo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function publicarEnCola() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+  const q = await ch.assertQueue('emails', { durable: true });
+
+  ch.sendToQueue(q.queue, Buffer.from(JSON.stringify({
+    destino: 'cliente@correo.com',
+    asunto: 'Tu pedido va en camino'
+  })), { persistent: true });
+
+  console.log('Mensaje encolado para un único worker');
+  await conn.close();
+}
+
+async function publicarEnTopic() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  await ch.assertExchange('eventos', 'topic', { durable: true });
+  ch.publish('eventos', 'pedido.completado', Buffer.from(JSON.stringify({
+    pedidoId: 'P-2026-0001', total: 129.90
+  })));
+
+  console.log('Evento publicado para todos los suscriptores');
+  await conn.close();
+}</code></pre>
+        <p>Observa la diferencia de intención: <code>sendToQueue</code> entrega a una cola concreta, <code>publish</code> a un exchange que replica el mensaje a cada binding que coincida.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo usar cada uno</h2>
+        <ul>
+          <li><strong>Cola:</strong> un correo, un trabajo de importación, un redimensionamiento de imagen, un webhook de pago que debe procesarse una vez. Si más de un consumidor lo tomara, sería un bug.</li>
+          <li><strong>Topic:</strong> un hecho de dominio con varios efectos: pedido completado, usuario creado, ticket cerrado, alerta disparada. El desconocimiento entre emisor y oyentes es una ventaja.</li>
+          <li><strong>Híbrido:</strong> en la práctica se combinan: un topic entrega el evento a varios servicios, y cada servicio lo canaliza hacia su propia cola interna para repartirlo entre sus workers.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla de oro:</strong> pregunta «¿cuántos procesos deben reaccionar?». Si la respuesta es «uno», usa cola. Si es «muchos», usa topic. Si es «muchos, cada uno con su equipo de workers», combina ambos.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica estas situaciones como cola o topic: (a) enviar un PDF generado, (b) avisar del alta de un usuario a 4 servicios, (c) procesar pagos de una pasarela, (d) difundir una alerta de seguridad a todos los componentes.</li>
+          <li>Escribe el JSON de un evento <code>usuario.creado</code> y decide qué suscriptores naturales tendría en tu propia aplicación.</li>
+          <li>Responde: si usaras una cola donde el evento «usuario.creado» debería llegar a facturación e inventario, ¿qué problema aparece cuando solo uno de los dos la consume?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las colas entregan cada mensaje a un único consumidor: reparten trabajo.</li>
+          <li>Los topics copian el mensaje a todos los suscriptores: difunden hechos.</li>
+          <li>La cola escala añadiendo workers; el topic escala añadiendo suscriptores.</li>
+          <li>Los sistemas reales suelen combinar ambos: topic para difundir, cola interna para procesar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="mensajeria-asincrona.html">Mensajería asíncrona</a>
+          <a class="related-lessons__link" href="brokers-de-mensajes.html">Brokers de mensajes</a>
+          <a class="related-lessons__link" href="../modulo-02/exchanges-y-routing.html">Exchanges y routing</a>
+          <a class="related-lessons__link" href="../modulo-03/consumer-groups.html">Consumer groups y rebalanceo</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

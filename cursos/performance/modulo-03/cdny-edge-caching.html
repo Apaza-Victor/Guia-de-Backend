@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m3-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CDN y edge caching · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende CDN y edge caching: cómo una red de distribución responde por tu backend, headers de caché, Cache-Control y purge en la práctica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m3-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">CDN y edge caching</span>
+      </nav>
+      <h1 class="lesson-title">CDN y edge caching</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y despliegue</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Aunque tu backend sea rapidísimo, cada kilómetro de distancia física suma milisegundos: un usuario en Buenos Aires contra un servidor en Madrid acumula 100-200 ms solo de latencia de red. Una <strong>CDN</strong> (Content Delivery Network) replica tu contenido en cientos de servidores «del borde» (edge) distribuidos por el mundo; la petición la responde el edge más cercano al usuario, sin viajar hasta tu origen.</p>
+        <p>Y el <strong>edge caching</strong> es la versión de caché con más rendimiento que existe: la respuesta se sirve sin tocar ni tu balanceador, ni tu API, ni tu base de datos. El coste para tu equipo: decidir <em>qué</em> es cacheable y controlar su expiración con headers.</p>
+      </section>
+
+      <section>
+        <h2 id="que-cachear">Qué se cachea en el edge</h2>
+        <p>La decisión de cacheabilidad es tuya y se expresa en headers. Lo ideal para el edge:</p>
+        <ul>
+          <li><strong>Recursos con contenido público</strong> e idéntico para todos: imágenes, CSS/JS, catálogos, páginas de precios, descripciones. Cachea agresivamente.</li>
+          <li><strong>Recursos públicos pero cambiantes:</strong> feeds, noticias, estados de envío. Cachea con TTL corto o validación.</li>
+          <li><strong>Lo que NO se cachea:</strong> cualquier cosa privada/autenticada (perfiles, saldos, carritos) — salvo que la CDN ofrezca probing por cookies o token.</li>
+        </ul>
+        <p>La regla del balance: cada recurso cacheado que coincide con el mismo usuario que pide de nuevo = cero backends. Es el multiplicador de capacidad más barato que existe.</p>
+      </section>
+
+      <section>
+        <h2 id="headers">Headers de caché: Cache-Control</h2>
+        <p>El servidor de origen declara si un recurso puede quedar en caché y por cuánto tiempo con <code>Cache-Control</code>. Verifica lo que envían tus respuestas con la terminal:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Inspeccionar los headers de las respuestas
+curl -sI https://mi-servicio.com/catalogo.json | grep -i -e cache -e etag -e edad
+# cache-control: public, max-age=300, stale-while-revalidate=60
+# etag: "abcdef-123456"
+# age: 120
+
+# Directivas típicas:
+#   public, max-age=3600    -> cacheable en edge y navegador durante 1h
+#   private, max-age=0      -> solo en el navegador, nunca en CDN (datos personales)
+#   no-store                -> nunca en caché (tokens, datos bancarios)
+#   stale-while-revalidate  -> sirve obsoleto mientras revalida en segundo plano
+#   s-maxage=300            -> TTL DIFERENTE para las CDN/proxies (edge)</code></pre>
+        <p>El matiz que manda con CDNs: <code>s-maxage</code> fija la duración en los caños intermedios (proxy, CDN) distinta de la del navegador. Y el <code>ETag</code> es el mecanismo para la revalidación barata: el edge pide «¿cambió?», el origen responde 304 <em>sin payload</em>, y el cache sigue sirviendo la copia.</p>
+        <p>En Express, fijar estos headers es trabajo de un middleware por ruta:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const express = require('express');
+const app = express();
+
+// Catálogo público: cacheable por la CDN durante 5 minutos (s-maxage)
+app.get('/catalogo/precios.json', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=60');
+  res.json(preciosActuales);      // si cambia, invalidar con purge o subir TTL de version
+});
+
+// Datos privados: nadie comparte este recurso (ni edge, ni proxy)
+app.get('/perfil/:id', (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  res.json({ usuario: req.usuario });   // con 'no-store' la CDN no lo toca
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="purge">Invalidación en la CDN</h2>
+        <p>El TTL protege a medias: 5 minutos de catálogo viejo es aceptable; un precio desactualizado 5 minutos durante una oferta puede ser un problema. Para eso, las CDNs ofrecen <strong>purge</strong>: eliminar una URL (o patrón) de todos los edges al instante.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Purge selectivo por URL (ej. Fastly/Cloudflare invokes purging por API/CLI)
+# Los clientes de CDN exponen una operación de purge:
+curl -X POST https://api.fastly.com/service/$SERVICIO/purge/catalogo/precios.json \
+  -H "Fastly-Key: $FASTLY_KEY"
+# -> {"status":"ok"}
+
+# Patrón alternativo muy usado (cache busting): cambia la URL al versionar.
+#   /catalogo/v2/precios.json -> ninguna copia antigua puede sobrevivir al cambio de URL:
+#   dejas de servir la versión v1, y solo existe v2. Cero purge manual.</code></pre>
+        <p>Diseño perfecto de producción: URL versionada (cache-busting) para assets inmutables (no necesitas purge) + TTL corto con <code>s-maxage</code> + revalidación con ETag para los cambiantes. El purge manual queda como último recurso.</p>
+      </section>
+
+      <section>
+        <h2 id="efecto">El efecto global</h2>
+        <p>Pon números a la diferencia. Un catálogo de 2 MB servido desde un origen en Madrid a un usuario en Montevideo puede tardar 400 ms solo de red. Servido por el edge local de la CDN: 20 ms y cero carga sobre tu backend — que pasa de servir esa URL a no verla jamás. En la punta de escala, la tuya es una de las optimizaciones con mayor retorno por minuto de configuración.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> la CDN transforma «mi backend responde en 150 ms» en «el usuario no está hablando con tu backend». Cuando el desafío es mundial, es la única palanca que funciona de verdad.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lista tus endpoints y clasifícalos en cacheables (públicos) y no-cacheables (privados). Fija para cada uno un <code>Cache-Control</code> correcto y revísalo con <code>curl -sI</code>.</li>
+          <li>Elige el recurso más solicitado de tus públicos y aplica <code>public, s-maxage</code>. Delante de una CDN (o mejor, de un proxy de caché local como nginx caching) mide cuántas peticiones dejan de llegar a tu origen.</li>
+          <li>Si un recurso debe actualizarse rápido: decide entre TTL corto/ETag (revalidación) o purge; añade el bash de purge a tu runbook.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Una CDN replica tu contenido en el edge; el usuario habla con el servidor más cercano, no con tu origen.</li>
+          <li>El edge caching saca las respuestas públicas de tu backend por completo.</li>
+          <li><code>Cache-Control: public/private + max-age + s-maxage</code> es el idioma con la CDN.</li>
+          <li><code>s-maxage</code> fija el TTL del edge; el <code>ETag</code> permite revalidar sin reenviar el payload.</li>
+          <li>URLs versionadas (cache-busting) evitan el purge en assets inmutables.</li>
+          <li>Dato privado → <code>no-store</code>; el purge solo para emergencias.</li>
+          <li>Es la palanca de mayor retorno cuando el desafío es distribuir contenido por todo el mundo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/caching-estrategias.html">Caching y estrategias</a>
+          <a class="related-lessons__link" href="../modulo-02/optimizacion-de-apis.html">Optimizar APIs</a>
+          <a class="related-lessons__link" href="load-balancing.html">Load balancing</a>
+          <a class="related-lessons__link" href="estrategia-de-rendimiento.html">Estrategia integral</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

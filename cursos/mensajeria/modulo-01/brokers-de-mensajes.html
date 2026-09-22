@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m1-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brokers de mensajes · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Compara los brokers de mensajes más usados en backend: RabbitMQ, Apache Kafka, Redis Streams y AWS SQS/SNS, y aprende a elegir según colas, eventos y escala.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m1-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Brokers de mensajes</span>
+      </nav>
+      <h1 class="lesson-title">Brokers de mensajes</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un <strong>broker de mensajes</strong> es el servidor que recibe mensajes de los productores, los almacena y los entrega a los consumidores. Puede ser un proceso propio (RabbitMQ, Kafka) o un servicio gestionado en la nube (SQS, SNS, Redis Streams en memoria). Elegir bien el broker equivale a decidir cuánto tráfico, durabilidad y complejidad necesitas.</p>
+        <p>Los cuatro protagonistas del backend moderno, cada uno con personalidad propia:</p>
+        <ul>
+          <li><strong>RabbitMQ:</strong> el gestor de colas clásico. Maestro del routing flexible.</li>
+          <li><strong>Apache Kafka:</strong> el log distribuido. Pensado para streams de eventos y alto volumen.</li>
+          <li><strong>Redis Streams:</strong> colas muy rápidas dentro de un Redis ya existente.</li>
+          <li><strong>AWS SQS/SNS:</strong> colas y topics gestionados, sin servidor que administrar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="comparativa">Comparativa rápida</h2>
+        <p>Así se posicionan frente a las preguntas clave:</p>
+        <ul>
+          <li><strong>Modelo:</strong> RabbitMQ y SQS son colas (con soporte de topics vía exchange o SNS). Kafka y Redis Streams son logs con clara vocación de eventos.</li>
+          <li><strong>Garantías:</strong> RabbitMQ y SQS entregan at-least-once; Kafka ofrece exactly-once en modos especiales; Redis Streams depende del consumidor.</li>
+          <li><strong>Orden:</strong> en Kafka el orden se garantiza por partición; en RabbitMQ y SQS el orden global no está garantizado (SQS FIFO sí lo permite).</li>
+          <li><strong>Reproducción:</strong> Kafka permite releer mensajes viejos (los conserva por retención); una cola de RabbitMQ o SQS elimina el mensaje tras el ACK.</li>
+          <li><strong>Operación:</strong> SQS/SNS no requieren infraestructura. RabbitMQ y Kafka requieren clústeres que vigilar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="rabbitmq">RabbitMQ: colas con routing fino</h2>
+        <p>Se apoya en <strong>exchanges</strong> que enrutan cada mensaje a colas mediante reglas (<code>direct</code>, <code>fanout</code>, <code>topic</code>). Es la elección natural para tareas de trabajo, notificaciones y ACKs manuales. Su modelo de consumo es push: empuja el mensaje al consumidor.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Levantar RabbitMQ con Docker para probar en minutos
+docker run -d --name rabbit \
+  -p 5672:5672 -p 15672:15672 \
+  rabbitmq:3-management
+
+# Consola de administración disponible en http://localhost:15672
+# Usuario por defecto: guest / guest</code></pre>
+      </section>
+
+      <section>
+        <h2 id="kafka">Apache Kafka: el log distribuido</h2>
+        <p>En Kafka un mensaje es un <strong>evento anexado</strong> a un topic particionado y replicado entre brokers. Los consumidores no borran nada: avanzan un puntero (offset). Eso permite releer historial, reconstruir estados y alimentar pipelines de datos. Es la opción reina del event streaming y las arquitecturas orientadas a eventos.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Kafka necesita ZooKeeper (o KRaft) + los brokers
+docker run -d --name kafka -p 9092:9092 \
+  apache/kafka:3.7.0
+
+# Crear un topic con 3 particiones y replicación 1
+docker exec kafka kafka-topics.sh \
+  --bootstrap-server localhost:9092 \
+  --create --topic pedidos \
+  --partitions 3 --replication-factor 1</code></pre>
+      </section>
+
+      <section>
+        <h2 id="redis-y-sqs">Redis Streams y AWS SQS/SNS</h2>
+        <p><strong>Redis Streams</strong> (<code>XADD</code>, <code>XREADGROUP</code>) añade colas con confirmación y consumer groups a un Redis que ya tienes corriendo. Extrema baja latencia (microsegundos) y cero infraestructura extra, a cambio de durabilidad limitada y mensajes que se pierden bajo presión de memoria.</p>
+        <p><strong>AWS SQS</strong> es la cola gestionada por excelencia: 99,9 % de disponibilidad, retries, dead-letter y visibilidad. <strong>SNS</strong> es el topic hermano (fanout). Juntos forman el stack clásico de AWS para mensajería asíncrona.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Ejemplo con boto3: enviar y recibir de una cola SQS
+import boto3
+
+sqs = boto3.client('sqs', region_name='us-east-1')
+url = 'https://sqs.us-east-1.amazonaws.com/123456789012/pedidos'
+
+sqs.send_message(
+    QueueUrl=url,
+    MessageBody='{"pedido":"P-2026-0001","total":129.90}'
+)
+
+resp = sqs.receive_message(QueueUrl=url, MaxNumberOfMessages=1)
+if resp.get('Messages'):
+    mensaje = resp['Messages'][0]
+    print('Recibido:', mensaje['Body'])
+    # Confirmar para que SQS lo elimine
+    sqs.delete_message(QueueUrl=url,
+                       ReceiptHandle=mensaje['ReceiptHandle'])</code></pre>
+      </section>
+
+      <section>
+        <h2 id="como-elegir">Cómo elegir tu broker</h2>
+        <ul>
+          <li><strong>Tareas y notificaciones</strong> con routing flexible → RabbitMQ.</li>
+          <li><strong>Stream de eventos, historial y alto throughput</strong> en millones de msg/s → Apache Kafka.</li>
+          <li><strong>Quieres cachear y encolar en el mismo servidor</strong> con latencia mínima → Redis Streams.</li>
+          <li><strong>No quieres administrar infraestructura</strong> y ya estás en AWS → SQS + SNS.</li>
+          <li><strong>Regla de oro:</strong> si solo necesitas «proceso esto una vez», una cola simple basta; no cargo Kafka porque «está de moda».</li>
+        </ul>
+        <div class="callout">
+          <p><strong>No las mezcles por capricho:</strong> usar RabbitMQ para tareas y Kafka para eventos de dominio es una combinación legítima y común. Usar dos brokers para lo mismo es deuda técnica.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="docker">Un entorno local con Docker Compose</h2>
+        <p>Para estudiar RabbitMQ y Kafka juntos, un <code>docker-compose.yml</code> te levanta ambos:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  kafka:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092</code></pre>
+        <p>Con <code>docker compose up -d</code> tendrás ambos listos para las lecciones del módulo 2 (RabbitMQ) y del módulo 3 (Kafka).</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un escenario propio (envío de correos, sincronización de datos, pipeline de analítica) y razona cuál de los cuatro brokers encaja mejor.</li>
+          <li>Levanta RabbitMQ con Docker y publica un mensaje a la cola <code>hola-mundo</code> usando el panel de administración.</li>
+          <li>Investiga: ¿qué garantía de entrega ofrece SQS de forma nativa y qué problema resuelve una cola FIFO de SQS?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>RabbitMQ destaca por routing flexible y colas de trabajo con ACKs.</li>
+          <li>Kafka es un log distribuido: eventos reproducibles, orden por partición y alto volumen.</li>
+          <li>Redis Streams agrega colas rápidas a un Redis existente; SQS/SNS aportan colas gestionadas sin servidor.</li>
+          <li>Elige según modelo (cola vs evento), garantías, orden, durabilidad y si quieres operar infraestructura.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+          <a class="related-lessons__link" href="../modulo-02/rabbitmq-conceptos.html">RabbitMQ: conceptos</a>
+          <a class="related-lessons__link" href="../modulo-03/kafka-conceptos.html">Kafka: conceptos</a>
+          <a class="related-lessons__link" href="garantias-de-entrega.html">Garantías de entrega</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

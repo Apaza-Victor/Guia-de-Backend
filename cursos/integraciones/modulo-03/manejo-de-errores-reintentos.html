@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-manejo-de-errores-reintentos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Errores y reintentos · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a manejar errores de API externas: códigos HTTP, reintentos con backoff exponencial y jitter, presupuesto de reintentos e idempotencia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-manejo-de-errores-reintentos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Errores y reintentos</span>
+      </nav>
+      <h1 class="lesson-title">Errores y reintentos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Robustez</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Las APIs externas fallan. No es un accidente: es la definición de un servicio de terceros. La diferencia entre una integración amateur y una profesional es cómo tratas ese fallo. Un reintento sin pensarlo es casi tan malo como no reintentar nunca: si 100 clientes reintentan a la vez tras una caída del proveedor, la propia recuperación se vuelve imposible. Reintentar bien significa clasificar el error, esperar el tiempo justo, dispersar la avalancha (jitter) y saber <strong>cuándo rendirse</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="clasificar">Clasificar el error primero</h2>
+        <p>No todas las respuestas merecen reintento. La regla más importante del manejo de errores:</p>
+        <ul>
+          <li><strong>Reintenta</strong>: <code>408</code> (timeout), <code>429</code> (rate limit, espera respetando Retry-After), <code>5xx</code> (fallo del proveedor) y errores de red/timeout.</li>
+          <li><strong>No reintentes</strong>: <code>400</code>, <code>401</code>, <code>403</code>, <code>404</code>, <code>422</code>: el error no desaparecerá por insistir, y en caso de <code>429</code> permanente solo empeorarás tu posición.</li>
+        </ul>
+        <p>Reaparecer ante el mismo <code>422</code> 10 veces es quemar cuota (y dinero) en un error que tu código debe corregir, no tu bucle de reintentos.</p>
+      </section>
+
+      <section>
+        <h2 id="backoff">Backoff exponencial</h2>
+        <p>El patrón estándar: espera que crece exponencialmente entre intentos, con un tope máximo. Después del primer fallo esperas 1 s, luego 2, 4, 8, ... hasta un máximo (30–60 s). Eso da al proveedor tiempo de recuperarse sin bombardearlo:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">export async function peticionConReintentos(fn, { intentos = 5, base = 1000, max = 30000 } = {}) {
+  let ultimoError;
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      ultimoError = err;
+      if (!esReintentable(err)) throw err;     // 4xx definitivo: no insistas
+      const espera = Math.min(base * 2 ** (i - 1), max);
+      await sleep(espera + jitter(espera));
+    }
+  }
+  throw ultimoError;
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="jitter">Jitter: dispersa la avalancha</h2>
+        <p>Si todos los clientes reintentan con la misma secuencia 1s, 2s, 4s..., vuelven a sincronizarse al mismo segundo y generan picos simultáneos. El <strong>jitter</strong> añade aleatoriedad a cada espera. La variante más robusta es <em>full jitter</em>: en lugar de sumar tiempo al azar, eliges un valor aleatorio entre 0 y la espera calculada:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import random, time
+
+def espera_backoff(intento: int, base: float = 1.0, tope: float = 30.0) -> float:
+    exponencial = base * (2 ** intento)
+    # full jitter: entre 0 y el valor exponencial, nunca pasando el tope
+    return random.uniform(0, min(exponencial, tope))
+
+for intento in range(5):
+    try:
+        cliente.peticion()
+        break
+    except ErrorReintentable:
+        time.sleep(espera_backoff(intento))</code></pre>
+      </section>
+
+      <section>
+        <h2 id="presupuesto">Presupuesto de reintentos y circuito</h2>
+        <p>Reintentar indefinidamente no solo daña tu cuota: si tu servicio síncrono espera 30 reintentos encadenados, el usuario aguanta minutos por una API caída. Define un <strong>presupuesto total</strong> (por ejemplo, 3 intentos o 20 s) y, si el flujo es crítico, encola el trabajo para reintentar en background. Cuando el proveedor falla demasiado seguido, un <strong>circuit breaker</strong> corta en seco los intentos y va probando de a poco (medio abierto) hasta recuperarse:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "circuito": {
+    "estado": "cerrado",
+    "umbral_fallos_consecutivos": 5,
+    "ventana_apertura_s": 30,
+    "prueba_medio_abierta": { "max_peticiones": 2 }
+  },
+  "reintentos": {
+    "max_intentos": 3,
+    "base_ms": 500,
+    "jitter": "full",
+    "presupuesto_total_ms": 20000
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="idempotencia">Idempotencia en el cliente y el servidor</h2>
+        <p>Un reintento puede provocar la ejecución doble de la operación: imagina que el pago se procesó, pero la respuesta se perdió en la red y tu cliente reintenta. La solución es la <strong>clave de idempotencia</strong>: el mismo identificador en todos los intentos de la misma operación, para que el servicio externo devuelva el resultado original en lugar de ejecutar otra vez:</p>
+<pre class="code-block"><code class="language-bash" data-language="bash"># Todas las repeticiones de la misma operación usan la misma clave
+curl -X POST https://api.proveedor.com/v1/cobros \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Idempotency-Key: pedido-12345-intento-1" \
+  -d '{"amount":4900,"currency":"mxn"}'</code></pre>
+        <p>Del lado del proveedor, registrarlo por clave; del tuyo como consumidor, usar una clave nueva por cada operación de negocio distinta y reutilizarla en sus reintentos. Así el mundo sigue siendo consistente aunque se pierda una respuesta.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe una función <code>peticionConReintentos</code> con full jitter y que no reintente los <code>4xx</code>.</li>
+          <li>Simula un proveedor que falla con <code>503</code> los primeros 3 intentos y verifica el presupuesto total.</li>
+          <li>Añade una clave de idempotencia a una operación de cobro de prueba y comprueba que el doble envío no duplica el cobro.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Reintenta 408/429/5xx; nunca 4xx definitivos.</li>
+          <li>Backoff exponencial con tope máximo y full jitter evita avalanchas sincronizadas.</li>
+          <li>Define un presupuesto de reintentos y usa circuit breaker para fallos continuos.</li>
+          <li>La clave de idempotencia evita el doble efecto de un reintento.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-01/webhooks.html">Webhooks</a>
+          <a class="related-lessons__link" href="colas-para-tareas-lentas.html">Colas para tareas lentas</a>
+          <a class="related-lessons__link" href="monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

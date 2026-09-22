@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-lenguaje-natural-y-llms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lenguaje natural y LLMs · Backend para IA · Backend Academy</title>
+<meta name="description" content="Descubre cómo los modelos de lenguaje procesan texto con tokens, representan significado con embeddings y generan texto token a token.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-lenguaje-natural-y-llms"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Lenguaje natural y LLMs</span>
+      </nav>
+      <h1 class="lesson-title">Lenguaje natural y LLMs</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un modelo no «lee» texto como tú: transforma las palabras en números. Todo lo que un LLM entiende y genera pasa por dos conversiones: las palabras se parten en <strong>tokens</strong> (la unidad que el modelo procesa) y esos tokens se convierten en <strong>embeddings</strong> (vectores que representan significado).</p>
+        <p>Esta lección te da el vocabulario exacto para razonar sobre costes, límites y calidad de las respuestas. Sin ella, parámetros como <code>max_tokens</code> o el precio por token serán una caja negra.</p>
+      </section>
+
+      <section>
+        <h2 id="tokens">Tokens: la moneda del lenguaje</h2>
+        <p>Un token es un fragmento de texto: puede ser una palabra entera, una parte de ella, un signo de puntuación o incluso un carácter. Cada modelo tiene su propio tokenizador. En español, por ejemplo, la frase <em>«Hola, ¿cómo estás?»</em> se parte en algo parecido a <code>["Hola", ",", "¿", "cómo", " estás", "?"]</code>.</p>
+        <p>Los tokens importan por tres razones: el modelo tiene una <strong>ventana máxima de contexto</strong> (no caben más de N tokens por conversación), el <strong>coste se mide por tokens</strong> y el tiempo de generación crece con ellos. Con la librería <code>tiktoken</code> puedes medir exactamente cuántos tokens consumirás antes de llamar al modelo:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import tiktoken
+
+encoding = tiktoken.encoding_for_model("gpt-4o")
+
+texto = "El pedido número 1234 llegó con una pieza rota."
+tokens = encoding.encode(texto)
+
+print(len(tokens))       # 13
+print(encoding.decode(tokens))
+# 'El pedido número 1234 llegó con una pieza rota.'</code></pre>
+        <p>Regla práctica para estimar: en español, un token ≈ 0.75 palabras en promedio. Úsalo solo como cifra mental; para presupuestar, mejor contar con la librería real del proveedor.</p>
+      </section>
+
+      <section>
+        <h2 id="embeddings">Embeddings: texto convertido en números</h2>
+        <p>Para comparar significados, el modelo convierte cada token (o cada frase) en un <strong>vector</strong>: una lista de números de cientos de dimensiones. Textos con significado parecido quedan cerca en el espacio, y textos opuestos, lejos. <em>«Gato»</em> y <em>«felino»</em> apuntan casi en la misma dirección; <em>«auto»</em> apunta hacia otro lado.</p>
+        <p>Desde el backend se obtienen con una API específica de embeddings, distinta del chat:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const res = await fetch('https://api.openai.com/v1/embeddings', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify({
+    model: 'text-embedding-3-small',
+    input: ['El pedido llegó con una pieza rota']
+  })
+});
+
+const data = await res.json();
+const vector = data.data[0].embedding;
+console.log('Dimensiones del vector:', vector.length); // 1536</code></pre>
+        <p>El resultado es un arreglo de 1536 números (con <code>text-embedding-3-small</code>). Ese vector se guarda en una base de datos de vectores y es la base de la búsqueda semántica, como verás en la lección de embeddings.</p>
+      </section>
+
+      <section>
+        <h2 id="generacion">Generación: predecir el siguiente token</h2>
+        <p>Un LLM genera texto de forma <strong>autoregresiva</strong>: mira el contexto completo y predice el siguiente token más probable, lo añade al contexto, y repite. Esa repetición, token a token, es literalmente lo que ves llegar en streaming.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Ejemplo conceptual: pedir al modelo que complete una frase
+curl https://api.openai.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "prompt": "La capital de Francia es",
+    "max_tokens": 8,
+    "temperature": 0
+  }'</code></pre>
+        <p>El parámetro <code>max_tokens</code> limita cuántos tokens puede producir la respuesta (el presupuesto de salida). Con <code>temperature</code> controlas la aleatoriedad: cercana a cero, la salida es casi determinista; más alta, más creativa pero menos reproducible. Ningún modelo está «pensando»: está lanzando una distribución de probabilidad.</p>
+      </section>
+
+      <section>
+        <h2 id="por-que-importa">Por qué importa para tu backend</h2>
+        <ul>
+          <li><strong>Ventana de contexto:</strong> historiales muy largos o documentos enormes se cortan. Debes gestionar cuánto contexto envías.</li>
+          <li><strong>Coste:</strong> el precio está ligado a los tokens <em>de entrada y de salida</em>. Responder 500 tokens cuesta más que recibir 100.</li>
+          <li><strong>Latencia:</strong> cada token adicional de salida agrega milisegundos. Los modelos grandes producen muchos tokens por segundo.</li>
+          <li><strong>Determinismo:</strong> para tareas técnicas conviene <code>temperature</code> baja y validar estructuras en lugar de confiar en el texto libre.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Dato útil:</strong> la palabra contada como 1 token en inglés puede ser 3 o 4 tokens en español por los caracteres acentuados y los signos. Tu estimación de coste debe considerar el idioma real de tus usuarios.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Usa <code>tiktoken</code> en Python para contar los tokens de un párrafo tuyo en español y compara con su número de palabras.</li>
+          <li>Llama al endpoint de embeddings con dos frases parecidas (por ejemplo, <em>«El gato duerme»</em> y <em>«El felino descansa»</em>) y guarda ambos vectores.</li>
+          <li>Con <code>temperature: 0</code> pide al modelo que complete la frase anterior dos veces y confirma que obtienes la misma respuesta: así compruebas el determinismo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los LLMs procesan texto en tokens: fragmentos de palabras que definen contexto, coste y latencia.</li>
+          <li>Los embeddings convierten el texto en vectores numéricos que representan significado.</li>
+          <li>Generar texto es predecir el siguiente token de forma autoregresiva.</li>
+          <li><code>max_tokens</code> limita la salida y <code>temperature</code> controla la aleatoriedad.</li>
+          <li>Gestionar contexto, idioma y presupuesto de tokens es responsabilidad del backend.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="apis-de-ia.html">APIs de IA</a>
+          <a class="related-lessons__link" href="prompts-y-completions.html">Prompts y completions</a>
+          <a class="related-lessons__link" href="embeddings-y-busqueda-semantica.html">Embeddings y búsqueda semántica</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="que-es-inteligencia-artificial.html">
+        <span class="label">← Anterior</span>
+        <span class="title">¿Qué es la IA en el backend?</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="apis-de-ia.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">APIs de IA</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

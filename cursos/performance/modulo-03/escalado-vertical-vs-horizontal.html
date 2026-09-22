@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m3-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalado vertical vs horizontal · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende escalado vertical y horizontal en backend: cuándo subir la máquina, cuándo replicar nodos y por qué lo stateless es la condición para escalar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m3-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Escalado vertical vs horizontal</span>
+      </nav>
+      <h1 class="lesson-title">Escalado vertical vs horizontal</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y despliegue</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando el servicio ya no da para todo el tráfico tienes dos caminos. El <strong>escalado vertical</strong> compra más recursos para la misma máquina: más CPU, más RAM, un disco más rápido. El <strong>escalado horizontal</strong> añade máquinas: un segundo (o vigésimo) nodo que reparte el trabajo con el anterior. Ambos son legítimos; la gracia es saber cuál necesitas en cada momento.</p>
+        <p>Y hay una condición que decide todo: <strong>si el servicio guarda estado en sus procesos, no puedes escalar horizontal simplemente</strong>. Esta lección empieza por ahí.</p>
+      </section>
+
+      <section>
+        <h2 id="vertical">Escalado vertical: el arreglo rápido</h2>
+        <p>Subir de 4 GB a 16 GB de RAM, de 2 vCPU a 8 vCPU, o moverte a un disco NVMe. Ventajas: no tocas el código, no cambia la operación, y funciona de inmediato para servicios con un cuello de botella de <em>recursos</em> (CPU o memoria). Desventajas: tiene un <strong>tope físico y económico</strong> —no existe una máquina infinita, y además son carísimas— y no aporta tolerancia a fallos: si la máquina cae, cae todo.</p>
+        <p>En la práctica, el escalado vertical es el punto de partida razonable (un solo nodo sano aguanta mucho) y la respuesta cuando el problema es claramente CPU-local en un solo proceso (visto en «cuellos de botella»). Pero llega un tráfico y un momento donde comprar RAM deja de ser la jugada.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si escalando vertical tu prueba de carga mejora hasta el nivel del presupuesto, sigue vertical. El día que la RAM pedida equivalga al coste de dos o más nodos, cambia de estrategia.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="horizontal">Escalado horizontal: más nodos</h2>
+        <p>En vez de un nodo gigante, tres nodos medianos detrás de un balanceador (siguiente lección). Ventajas: crecimiento casi ilimitado, tolerancia a fallos (si uno cae, los otros siguen) y despliegues sin ventana de mantenimiento. Desventajas: la operación se complica (balanceo, métricas distribuidas, monitoreo) y obliga a que el código no dependa de «la máquina concreta».</p>
+        <p>Con Docker Compose, pasar de 1 a 3 réplicas de la API es un comando:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># docker-compose.yml (fragmento)
+# services:
+#   api:
+#     build: ./app
+#     ports: ["8080:8080"]     # el balanceador reparte detrás
+
+# Escalar la API a 3 réplicas (misma imagen, mismos datos)
+docker compose up --scale api=3 -d
+
+# En orquestadores (Kubernetes) es igual de mecánico:
+# kubectl scale deployment api --replicas=3</code></pre>
+        <p>El truco del comando es que «funcione» oculta el trabajo real: las 3 réplicas deben hablar con la <em>misma</em> caché, la <em>misma</em> BD y atender cualquier petición sin importar a cuál caiga.</p>
+      </section>
+
+      <section>
+        <h2 id="stateless">La condición: servicios stateless</h2>
+        <p>Un servicio es <strong>stateless</strong> cuando no guarda en su proceso nada que se necesite en la siguiente petición: sesiones, contadores, archivos subidos, objetos en memoria. Si dos réplicas distintas de la misma API atienden las dos mitades de una conexión y cada una tiene su propio estado, es un desastre anunciado.</p>
+        <p>La respuesta canónica: <strong>todo estado va a la caché/BD compartida</strong> (Redis para sesiones y contadores, object storage para archivos) y el proceso queda limpio y reproducible. Un token JWT firmado por cualquiera de las réplicas es memorable: la sesión vive en el token, no en el proceso.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// MAL: la sesión vive en memoria del proceso; la réplica B no la conoce
+const sesiones = new Map();
+app.post('/login', (req, res) => {
+  sesiones.set(req.body.token, { usuario: req.body.usuario, exp: Date.now() + 3600000 });
+  res.json({ ok: true });
+});
+app.get('/perfil', (req, res) => {
+  const s = sesiones.get(req.headers.authorization);
+  if (!s || s.exp < Date.now()) return res.status(401).end();
+  res.json({ usuario: s.usuario });   // falla si esta petición cae en otra réplica
+});
+
+// BIEN: sesión autocontenida y verificable por cualquier réplica (JWT)
+const jwt = require('jsonwebtoken');
+const FIRMA = process.env.FIRMA_JWT;          // clave compartida por todas las réplicas
+app.post('/login', (req, res) => {
+  const token = jwt.sign({ usuario: req.body.usuario }, FIRMA, { expiresIn: '1h' });
+  res.json({ token });
+});
+app.get('/perfil', (req, res) => {
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
+  try { res.json({ usuario: jwt.verify(token, FIRMA).usuario }); }
+  catch { res.status(401).end(); }            // cualquier réplica valida el token
+});</code></pre>
+        <p>Revisa tu lista mental de estado: sesiones en memoria, <code>upload/files</code> en disco local, contadores con <code>let contador++</code>… todos son obstáculos al escalado horizontal.</p>
+        <p>Cuando el estado no cabe en un token (grande, revocable, temporal), la herramienta es Redis: las réplicas comparten la misma sesión sin guardarla en su proceso:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import redis
+
+# Redis compartido: TODAS las réplicas leen y escriben la misma sesión
+cache = redis.Redis(host="redis-compartida", port=6379, decode_responses=True)
+
+
+def iniciar_sesion(usuario_id: int, datos: dict) -> str:
+    import secrets
+    token = secrets.token_hex(16)
+    clave = f"sesion:{token}"
+    cache.hset(clave, mapping={"usuario_id": usuario_id, **datos})
+    cache.expire(clave, 3600)          # sesión de 1 hora, muerta sola
+    return token
+
+
+def obtener_usuario_de(token: str) -> dict | None:
+    datos = cache.hgetall(f"sesion:{token}")   # funciona desde CUALQUIER réplica
+    return datos or None</code></pre>
+      </section>
+
+      <section>
+        <h2 id="datos">¿Y los datos? Ese es otro escalado</h2>
+        <p>Escalar la API horizontal es relativamente fácil; escalar la base de datos no lo es (lección «bases de datos a escala»). El momento crítico llega cuando 10 réplicas de la API golpean a UNA base de datos: tu nuevo cuello de botella será la BD. La secuencia natural es: primero caché (para quitar lecturas), luego réplicas de lectura y particionado, y solo después añadir API nodes.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta tu servicio en un contenedor y enrólalo en Compose o Kubernetes con 3 réplicas. Prueba a hacer login y navegar: ¿funciona? Si algo se rompe, ese algo es tu estado local.</li>
+          <li>Audita el estado de tu aplicación: sesiones, archivos, contadores en memoria. Lista cada uno y decide dónde debería vivir (Redis, object storage, JWT).</li>
+          <li>Decide (con tu prueba de carga): ¿estás en el momento vertical (recursos locales) o en el horizontal (varios nodos)? Razona la respuesta con los datos del módulo 1.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Vertical: más recursos en la misma máquina; rápido, simple, sin código que tocar, pero con tope y sin tolerancia a fallos.</li>
+          <li>Horizontal: más nodos detrás de un balanceador; escala casi infinito y sobrevive a fallos operacionales.</li>
+          <li>La condición del horizontal es ser stateless: todo estado vive en caché/BD/almacenamiento compartido, no en el proceso.</li>
+          <li>Los tokens firmados (JWT) y redis son las herramientas típicas para quitar estado al proceso.</li>
+          <li>El cuello de botella siguiente al escalar nodos es la base de datos: por eso el orden es caché → BD a escala → más nodos.</li>
+          <li>Lo siguiente es repartir el tráfico: load balancing.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="load-balancing.html">Load balancing</a>
+          <a class="related-lessons__link" href="bases-de-datos-a-escala.html">Bases de datos a escala</a>
+          <a class="related-lessons__link" href="cdny-edge-caching.html">CDN y edge caching</a>
+          <a class="related-lessons__link" href="../modulo-02/concurrencia-y-asincronia.html">Concurrencia y asincronía</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

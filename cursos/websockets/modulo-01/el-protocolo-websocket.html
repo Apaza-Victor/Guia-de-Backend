@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-el-protocolo-websocket">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El protocolo WebSocket · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Entiende el protocolo WebSocket en profundidad: el handshake HTTP Upgrade, los marcos (frames), los opcodes y el estándar RFC 6455.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-el-protocolo-websocket"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">El protocolo WebSocket</span>
+      </nav>
+      <h1 class="lesson-title">El protocolo WebSocket</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de WebSocket</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="rfc6455">El estándar RFC 6455</h2>
+        <p>WebSocket no es un invento de una empresa ni una librería mágica: es un <strong>protocolo formal</strong> definido en el documento RFC 6455 del IETF. Bajo la superficie, todo se reduce a unas reglas precisas sobre cómo empezar la conversación, cómo se trocea la información y cómo se cierra la conexión.</p>
+        <p>Conocer esas reglas te sirve por dos razones: entiendes por qué el «handshake» se parece sospechosamente a HTTP, y puedes leer capturas de red o mensajes de error sin que parezcan jeroglíficos.</p>
+      </section>
+
+      <section>
+        <h2 id="handshake">El handshake: HTTP Upgrade</h2>
+        <p>Todo WebSocket nace como una petición HTTP normal de la que el cliente pide «promover» el protocolo con la cabecera <code>Upgrade</code>. El servidor, si acepta, responde con el código <strong>101 Switching Protocols</strong> y a partir de ese segundo ya no habla HTTP sino frames WebSocket sobre la misma conexión TCP.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Petición del cliente (lo que el navegador envía por ti):
+GET /chat HTTP/1.1
+Host: api.miservidor.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+Origin: https://app.miservidor.com
+
+# Respuesta del servidor si acepta:
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=</code></pre>
+        <p>La clave <code>Sec-WebSocket-Key</code> se combina con un GUID fijo del estándar (<code>258EAFA5-E914-47DA-95CA-C5AB0DC85B11</code>), se aplica SHA-1 y base64, y el resultado viaja en <code>Sec-WebSocket-Accept</code>. Así el servidor demuestra que de verdad habla el protocolo, sin necesidad de credenciales.</p>
+        <p>Por diseño, casi cualquier cliente puede hacer un handshake: WebSocket funciona <strong>sobre el puerto 80 (ws) o 443 (wss)</strong>, así que el tráfico atraviesa firewalls y proxies que ya permiten salida web.</p>
+      </section>
+
+      <section>
+        <h2 id="frames">Los marcos (frames)</h2>
+        <p>Después del 101, la comunicación deja de usar líneas de texto HTTP y pasa a enviar <strong>marcos</strong> (frames): trocitos de datos con una cabecera pequeña que indica qué son. La cabecera de un frame WebSocket empieza con:</p>
+        <ul>
+          <li><strong>FIN:</strong> 1 bit que marca si es el último fragmento de un mensaje (si un mensaje se parte, los frames en cadena lo recomponen).</li>
+          <li><strong>Opcode:</strong> 4 bits que indican el tipo del frame (texto, binario, ping, pong, cierre).</li>
+          <li><strong>MASK:</strong> 1 bit. Los clientes deben enmascarar sus frames (bit a 1); el servidor no, para detectar bugs de intermediarios.</li>
+          <li><strong>Longitud:</strong> 7 bits estándar, ampliables a 16 o 64 bits para mensajes grandes.</li>
+        </ul>
+        <p>Esa cabecera tan compacta es lo que hace a WebSocket tan ligero frente a HTTP: cada mensaje puede costar solo 2-6 bytes de overhead, en lugar de cientos de bytes de cabeceras.</p>
+      </section>
+
+      <section>
+        <h2 id="opcodes">Opcodes que debes conocer</h2>
+        <p>Los opcodes más relevantes del RFC 6455 en la práctica:</p>
+        <ul>
+          <li><code>0x1 text</code> — mensaje de texto (UTF-8), el que usas con JSON.</li>
+          <li><code>0x2 binary</code> — datos binarios (imágenes, buffers).</li>
+          <li><code>0x8 close</code> — cierre de conexión; puede llevar un código de cierre.</li>
+          <li><code>0x9 ping</code> — comprobación de vida enviada por el servidor.</li>
+          <li><code>0xA pong</code> — respuesta automática a un ping.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Curiosidad útil:</strong> los clientes no pueden enviar pings. Los pings son cosa del servidor (o del proxy), y el otro extremo responde el pong solo. Eso lo aprovecharemos al montar el heartbeat de los sockets.</p>
+        </div>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// En el navegador no ves el frame, pero detrás ocurre esto:
+// Envío de un frame de texto con FIN=1, opcode=0x1 y payload JSON.
+const datos = { tipo: 'mensaje', texto: '¡Hola, mundo!' };
+const json = JSON.stringify(datos);
+socket.send(json); // un frame WebSocket de texto enmascarado por el cliente
+
+// Protocolo de salto: un frame 0x8 (close) sin más es decir adiós.
+socket.close(1000, 'me voy de casa');</code></pre>
+      </section>
+
+      <section>
+        <h2 id="fragmentacion">Fragmentación y control</h2>
+        <p>Un mensaje grande puede enviarse en varios frames: los intermedios llevan el mismo opcode, el último desactiva FIN. Los frames de control (ping, pong, close) nunca se fragmentan y pueden aparecer entre fragmentos de un mensaje largo, lo que permite mantener viva la conexión mientras un archivo grande va por partes.</p>
+        <p>El protocolo también define el <strong>enmascarado</strong> de los datos del cliente con un array aleatorio de 4 bytes: evita que un proxy mal configurado (o un atacante intermedio) pueda inyectar contenido camuflado en la conexión.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Abre las herramientas de desarrollador (pestaña Red/Network) y filtra por <code>WS</code>: conecta a <code>wss://echo.websocket.events</code> y envía un mensaje.</li>
+          <li>Inspecciona el frame enviado: anota el opcode y la longitud visible en los detalles del mensaje.</li>
+          <li>Explica en una frase por qué el handshake se hace con HTTP en vez de inventar un protocolo nuevo desde cero.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>WebSocket está estandarizado en el RFC 6455 sobre TCP.</li>
+          <li>La conexión empieza con un handshake HTTP <code>Upgrade</code> y la respuesta <code>101 Switching Protocols</code>.</li>
+          <li>Los mensajes viajan en frames con cabecera mínima: FIN, opcode, mask y longitud.</li>
+          <li>Los opcodes principales son texto, binario, ping, pong y cierre.</li>
+          <li>El enmascarado del cliente protege de proxies y de inyección de contenido.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="http-vs-websockets.html">HTTP vs WebSockets</a>
+          <a class="related-lessons__link" href="abrir-cerrar-conexion.html">Abrir y cerrar la conexión</a>
+          <a class="related-lessons__link" href="heartbeat-y-timeout.html">Heartbeat y timeouts</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="http-vs-websockets.html">
+        <span class="label">← Anterior</span>
+        <span class="title">HTTP vs WebSockets</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="abrir-cerrar-conexion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Abrir y cerrar la conexión</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

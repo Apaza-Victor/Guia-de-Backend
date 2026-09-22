@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="autenticacion-vs-autorizacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autenticación vs Autorización · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Aprende la diferencia entre autenticación (quién eres) y autorización (qué puedes hacer) con ejemplos de backend en PHP y casos de uso reales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="autenticacion-vs-autorizacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Autenticación vs Autorización</span>
+        </nav>
+        <h1 class="lesson-title">Autenticación vs Autorización</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Cuando entras a un edificio de oficinas te piden una credencial en recepción: eso verifica <strong>quién eres</strong>. Aunque ya estés identificado, no puedes entrar a cualquier sala: la de servidores y la dirección tienen llaves que solo algunos tienen. Ese segundo paso decide <strong>qué puedes hacer</strong>. En el mundo del backend esos dos momentos son la <strong>autenticación</strong> y la <strong>autorización</strong>, y aunque suenan parecido, son responsabilidades distintas que se implementan en momentos distintos del ciclo de una petición.</p>
+          <p>Confundirlas es una de las causas más comunes de vulnerabilidades: un sistema que verifica el login pero no comprueba permisos en cada ruta permite que un usuario común lea datos de administrador. Este módulo entrena tu ojo para separar ambos problemas desde el diseño.</p>
+        </section>
+
+        <section>
+          <h2 id="definiciones">Las dos preguntas</h2>
+          <ul>
+            <li><strong>Autenticación:</strong> responde a <em>«¿quién eres?»</em>. Valida una credencial (contraseña, código TOTP, clave pública) contra una fuente de verdad: sistema de usuarios, directorio LDAP o proveedor externo.</li>
+            <li><strong>Autorización:</strong> responde a <em>«¿qué tienes permitido hacer?»</em>. Se decide tras la autenticación, usando identidad, roles y permisos.</li>
+          </ul>
+          <p>La autorización <strong>nunca</strong> debe depender de datos que el cliente envíe (como un parámetro <code class="inline">?rol=admin</code>): debe computarse en el servidor a partir del usuario autenticado.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplos">Ejemplos en una API real</h2>
+          <p>Imagina una app de una clínica: <code class="inline">POST /api/login</code> autentica (verifica credenciales), mientras que <code class="inline">GET /api/pacientes</code> autoriza (solo doctores). Un paciente tiene sesión activa, pero no el permiso para listar pacientes ajenos.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// 1. AUTENTICACION: verifica credenciales (password_hash / password_verify)
+function autenticar(PDO $db, string $email, string $password): ?array
+{
+    $stmt = $db-&gt;prepare("SELECT id, email, password_hash, rol FROM usuarios WHERE email = ?");
+    $stmt-&gt;execute([$email]);
+    $usuario = $stmt-&gt;fetch();
+
+    if (!$usuario || !password_verify($password, $usuario["password_hash"])) {
+        return null; // credenciales invalidas
+    }
+    return $usuario; // autenticado
+}
+
+// 2. AUTORIZACION: decide que puede hacer el usuario ya autenticado
+function autorizar(array $usuario, array $rolesPermitidos): bool
+{
+    return in_array($usuario["rol"], $rolesPermitidos, true);
+}
+
+// Uso en una ruta protegida
+$usuario = autenticar($db, $_POST["email"], $_POST["password"]);
+if (!$usuario) {
+    http_response_code(401); // No autenticado
+    exit(json_encode(["error" =&gt; "Credenciales incorrectas"]));
+}
+
+if (!autorizar($usuario, ["doctor", "admin"])) {
+    http_response_code(403); // Autenticado pero sin permiso
+    exit(json_encode(["error" =&gt; "No tienes permiso para esta accion"]));
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="codigos">Los códigos 401 y 403</h2>
+          <p>HTTP te ayuda a comunicar cada resultado de forma precisa:</p>
+          <ul>
+            <li><strong>401 Unauthorized:</strong> faltan credenciales o son inválidas. El servidor no sabe quién eres. Se usa en el momento de autenticar.</li>
+            <li><strong>403 Forbidden:</strong> ya estás autenticado, pero la acción no está permitida para tu perfil. Se usa en el momento de autorizar.</li>
+          </ul>
+          <p>Muchas APIs devuelven 401 para ambos casos para no filtrar información; pero en proyectos internos ser exacto ayuda a depurar. Lo importante es no devolver 200 con datos que el usuario no debía ver.</p>
+        </section>
+
+        <section>
+          <h2 id="errores">Errores típicos</h2>
+          <ul>
+            <li>Confiar en el frontend para ocultar botones en lugar de proteger rutas en el servidor.</li>
+            <li>Autorizar solo en el login y olvidar comprobar permisos en cada endpoint.</li>
+            <li>Leer el rol desde el request en lugar de desde la sesión o token firmado.</li>
+            <li>Devolver 200 con un <code class="inline">{"datos": []}</code> cuando el usuario no debería saber que el recurso existe.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Enumera 5 acciones de una app de tu elección y clasifícalas en «requiere autenticación» y «requiere además autorización».</li>
+            <li>Escribe un endpoint <code class="inline">GET /api/perfil/{id}</code> en PHP que devuelva <code class="inline">401</code> sin sesión, <code class="inline">403</code> si el perfil no es propio ni de un admin autorizado, y <code class="inline">200</code> en el resto de casos.</li>
+            <li>Explica en una línea por qué «ocultar el botón» no es una medida de autorización.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Autenticación verifica identidad; autorización verifica permisos.</li>
+            <li>La autorización se decide en el servidor, nunca desde datos del cliente.</li>
+            <li>401 para identidad fallida; 403 para permiso denegado.</li>
+            <li>Comprueba permisos en cada ruta, no solo en el login.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="identidad-y-estados-de-sesion.html">Identidad y estados de sesión</a>
+            <a class="related-lessons__link" href="cookies-y-su-rol.html">Cookies y su rol en la web</a>
+            <a class="related-lessons__link" href="modelo-de-amenazas-login.html">El modelo de amenazas del login</a>
+            <a class="related-lessons__link" href="../modulo-05/roles-de-usuario.html">Roles de usuario</a>
+            <a class="related-lessons__link" href="../modulo-05/middleware-de-autorizacion.html">Middleware de autorización</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

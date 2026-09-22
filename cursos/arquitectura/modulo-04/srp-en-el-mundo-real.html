@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m4-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SRP en el mundo real · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="La Responsabilidad Única aplicada a casos reales: validadores, controladores, servicios y la pregunta de "tan fantasma" que la define.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m4-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">SRP en el mundo real</span>
+      </nav>
+      <h1 class="lesson-title">SRP en el mundo real</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Principios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>Responsabilidad Única (SRP)</strong> es el principio más citado y el peor entendido. No significa «una clase, un método». Significa una clase con <strong>una única razón de cambio</strong> — lo que en la práctica se traduce en que un solo actor de negocio pueda pedir cambios sobre ella sin enredarse con otros.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion">La definición precisa</h2>
+        <p>Robert Martin la resume así: <em>«reunir las cosas que cambian por las mismas razones y separar las que cambian por razones distintas»</em>. El detector es el «fantasma» de la pregunta:</p>
+        <blockquote>
+          <p>«¿Para quién estarías cambiando esto si tuvieras que cambiarlo?»</p>
+        </blockquote>
+        <p>Si la respuesta son dos equipos o dos necesidades distintas (facturación vs. inventario), esa clase tiene dos responsabilidades.</p>
+      </section>
+
+      <section>
+        <h2 id="caso">Caso real: el controlador que lo hacía todo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+// ANTES: el controlador tenía 4 razones de cambio
+final class PedidoController
+{
+    public function store(Request $req)
+    {
+        $this-&gt;validate($req, [...]);
+        $cart = $this-&gt;buscarCarrito($req-&gt;usuario_id);
+        $total = $this-&gt;calcularTotalConIva($cart);   // reglas de negocio
+        DB::table('pedidos')-&gt;insert([...]);          // persistencia
+        Mail::to($req-&gt;correo)-&gt;send(new PedidoCreado(...)); // efectos
+    }
+}
+
+// DESPUÉS: cada razón tiene su clase
+final class PedidoController {
+    public function store(CrearPedidoRequest $req, CrearPedidoService $servicio) {
+        $pedido = $servicio-&gt;ejecutar($req-&gt;toArray());
+        return response()-&gt;json($pedido);
+    }
+}
+
+// CrearPedidoService ejecuta el caso de uso (reglas + evento),
+// PedidoRepository persiste, PedidoMailer envía el correo.</code></pre>
+          </div>
+        </figure>
+        <p>El controlador pasó de «hacer todo» a «orquestar uno»: validar la entrada, llamar al caso de uso y responder. Cada clase ahora solo cambia por una razón: la suya.</p>
+      </section>
+
+      <section>
+        <h2 id="limites">Los límites del SRP</h2>
+        <ul>
+          <li><strong>No es sobre tamaño:</strong> una clase de 200 líneas puede ser perfectamente SRP si hace una sola cosa bien.</li>
+          <li><strong>Los getters y setters no definen responsabilidad:</strong> el value object sigue siendo «el valor» aunque tenga 40 métodos.</li>
+          <li><strong>El exceso rompe la cohesión:</strong> escindir de más (una clase por método) hace el código ilegible y el cambio se dispersa en 20 archivos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="sintomas">Síntomas de violación</h2>
+        <ol>
+          <li>Una clase importa cosas de ámbitos ajenos (Mail, DB, Cache, HTTP).</li>
+          <li>Dos equipos piden tocar el mismo archivo en el mismo sprint.</li>
+          <li>Un test necesita «mockear» el mundo entero porque la clase se trae todo.<br>Ese último es el mejor detector práctico: si testear una clase es caro, tiene demasiadas responsabilidades.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una clase con más de 3 imports «ajenos».</li>
+          <li>Identifica los actores que pedirían cambios sobre ella (facturación, inventario, notificaciones...).</li>
+          <li>Extrae una responsabilidad a otra clase y observa cómo tu test se vuelve más barato.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>SRP = una única razón de cambio, medible por actores de negocio.</li>
+          <li>No es tamaño: es «¿para quién cambiaría esto?».</li>
+          <li>Testear cara una clase suele delatar violación de SRP.</li>
+          <li>El exceso de escisión es tan malo como la ausencia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="acoplamiento-y-cohesion.html">Acoplamiento y cohesión</a>
+          <a class="related-lessons__link" href="../modulo-03/service-layer.html">Service Layer</a>
+          <a class="related-lessons__link" href="olores-de-diseno.html">Olores de diseño y deuda técnica</a>
+          <a class="related-lessons__link" href="solid-principios.html">Principios SOLID</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

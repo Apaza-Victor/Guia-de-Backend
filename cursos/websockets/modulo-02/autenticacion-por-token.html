@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-autenticacion-por-token">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autenticación por token · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Aprende a autenticar conexiones WebSocket: extraer un JWT del handshake, validarlo en el servidor y aplicar un middleware de autenticación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-autenticacion-por-token"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Autenticación por token</span>
+      </nav>
+      <h1 class="lesson-title">Autenticación por token</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · WebSockets en Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="porque">Por qué autenticar sockets</h2>
+        <p>Un servidor WebSocket sin autenticación es una puerta abierta: cualquiera puede conectarse, suscribirse a canales privados, leer notificaciones ajenas o impersonar a otro usuario. El handshake ocurre por HTTP, así que puedes reutilizar la misma estrategia de autenticación que tu API REST: un token JWT.</p>
+        <p>La clave es entender <strong>cuándo</strong> validar: no en cada mensaje, sino una sola vez, en el instante del handshake. Si el token no es válido, rechazas el <code>Upgrade</code> y el cliente jamás llega al estado OPEN.</p>
+      </section>
+
+      <section>
+        <h2 id="extraer-token">Extraer el token del handshake</h2>
+        <p>En el evento <code>connection</code> del paquete <code>ws</code> tienes a mano el objeto <code>request</code> del handshake HTTP. De ahí puedes leer el token de dos sitios:</p>
+        <ul>
+          <li>Una cabecera propia, p. ej. <code>Authorization: Bearer &lt;token&gt;</code> (más seguro, no viaja visible en la URL).</li>
+          <li>Un parámetro en la URL, p. ej. <code>ws://api/chat?token=xyz</code> (más cómodo para algunos clientes, pero el token queda en los logs del proxy).</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const http = require('http');
+const { WebSocketServer } = require('ws');
+
+const server = http.createServer(...);
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws, req) =&gt; {
+  const cabecera = req.headers['authorization'] || '';
+  const token = cabecera.startsWith('Bearer ')
+    ? cabecera.slice('Bearer '.length)
+    : null;
+
+  const url = new URL(req.url, 'http://localhost');
+  const tokenEnUrl = url.searchParams.get('token');
+
+  autenticar(token || tokenEnUrl, ws); // decidir si aceptar o cerrar
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="validar-jwt">Validar el JWT en el servidor</h2>
+        <p>Un JWT firmado garantiza que solo tu servidor pudo emitirlo. Para validarlo usas la clave que lo firmó (secreto HMAC o clave pública asimétrica) y compruebas además la expiración (<code>exp</code>). El paquete <code>jsonwebtoken</code> hace todo el trabajo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const jwt = require('jsonwebtoken');
+
+const SECRETO = process.env.JWT_SECRETO; // nunca en el código
+
+function autenticar(token, ws) {
+  try {
+    const payload = jwt.verify(token, SECRETO, { algorithms: ['HS256'] });
+    // Guardar el usuario autenticado sobre el socket para usarlo
+    // en cada evento posterior.
+    ws.usuario = { id: payload.sub, rol: payload.rol };
+    ws.send(JSON.stringify({ tipo: 'autenticado', usuario: ws.usuario }));
+    console.log('Conectado:', payload.sub);
+  } catch (err) {
+    // Token inválido o expirado: rechazar sin vueltas.
+    ws.close(4001, 'Token inválido o expirado');
+  }
+}</code></pre>
+        <p>Recuerda fijar la lista de algoritmos (<code>algorithms: ['HS256']</code>): aceptar algoritmos por defecto permite a un atacante firmar tokens con <code>none</code> y saltarse la firma.</p>
+      </section>
+
+      <section>
+        <h2 id="middleware">El middleware de autenticación</h2>
+        <p>Cuando el handshake pase por un proxy (nginx, load balancer) o tengas varios puntos de conexión, conviene centralizar la autenticación en un <strong>middleware</strong>: una función que se ejecuta para cada conexión entrante, decide si la acepta o la cierra, y deja el resultado a disposición del resto del código.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function crearMiddlewareAutenticacion(secreto) {
+  return (ws, req, siguiente) =&gt; {
+    const tokenExtraido = extraerTokenDe(req);
+
+    if (!tokenExtraido) {
+      ws.close(4001, 'Falta el token');
+      return;
+    }
+    try {
+      ws.usuario = jwt.verify(tokenExtraido, secreto);
+      siguiente(); // continuar: registrar salas, enviar bienvenida, etc.
+    } catch {
+      ws.close(4001, 'Token inválido o expirado');
+    }
+  };
+}
+
+// Aplicarlo en cada `connection`:
+const requerirToken = crearMiddlewareAutenticacion(process.env.JWT_SECRETO);
+
+wss.on('connection', (ws, req) =&gt; {
+  requerirToken(ws, req, () =&gt; {
+    console.log('Usuario', ws.usuario.sub, 'autenticado');
+    // aquí, negocio: unirse a sus salas, cargar su estado, etc.
+  });
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cliente">Enviar el token desde el cliente</h2>
+        <p>En el navegador, la API WebSocket nativa no permite cabeceras personalizadas en el handshake. La solución práctica es pasar el token en la URL del socket. (Si usas Socket.IO, la opción <code>auth</code> permite enviarlo sin exponerlo en la URL).</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Cliente del navegador: el token viaja como query del handshake.
+const token = localStorage.getItem('jwt');
+const socket = new WebSocket(
+  'wss://api.miservidor.com/chat?token=' + encodeURIComponent(token)
+);
+
+socket.onopen = () =&gt; console.log('Conectado y autenticado');
+socket.onclose = (e) =&gt; {
+  if (e.code === 4001) {
+    // Token invalidado: pedir login de nuevo.
+    cerrarSesion();
+  }
+};</code></pre>
+        <div class="callout">
+          <p><strong>Recomendación de seguridad:</strong> si el token puede viajar en la URL de un handshake, evita registrarlo en los logs (configura nginx para que no escriba la query y redirige logs sensibles). Siempre que puedas, prefiere cabeceras con clientes que las soporten, o la opción <code>auth</code> de Socket.IO.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un par de tokens de prueba con <code>jsonwebtoken</code>: uno firmado correctamente y otro con un secreto distinto.</li>
+          <li>Conecta un cliente a tu servidor enviando el token en la URL; verifica el mensaje <code>autenticado</code>.</li>
+          <li>Prueba el token inválido y comprueba que el servidor cierra con el código 4001. Anota qué ve el cliente al cerrar sesión.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Autentica en el handshake, una sola vez, no por mensaje.</li>
+          <li>El token se extrae de una cabecera Bearer o de la query de la URL.</li>
+          <li>Valida el JWT con firma y algoritmo fijos, y rechaza tokens inválidos con un código propio (4001).</li>
+          <li>Un middleware centraliza la decisión y deja <code>ws.usuario</code> disponible para el negocio.</li>
+          <li>En el navegador el token va en la URL; con Socket.IO usa <code>auth</code>.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="broadcast-de-mensajes.html">Broadcast y salas</a>
+          <a class="related-lessons__link" href="socket-io.html">Socket.IO</a>
+          <a class="related-lessons__link" href="../modulo-03/seguridad-en-websockets.html">Seguridad</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="broadcast-de-mensajes.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Broadcast y salas</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="socket-io.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Socket.IO</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="rds-bases-de-datos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RDS: bases de datos gestionadas · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Crea una base Postgres/MySQL gestionada en AWS RDS: backups, réplicas, alta disponibilidad y conexión desde tu API.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="rds-bases-de-datos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">RDS: bases de datos gestionadas</span>
+      </nav>
+      <h1 class="lesson-title">RDS: bases de datos gestionadas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · AWS</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Postgres o MySQL sin el dolor del servidor</h2>
+        <p>Instalar, parchear, hacer backups y restaurar una base es trabajo clásico de operaciones. <strong>RDS</strong> lo hace por ti: eliges el motor (PostgreSQL, MySQL, MariaDB, SQL Server, Oracle), el tamaño, y AWS gestiona el sistema operativo, el almacenamiento y las copias. Es el <em>PaaS para datos</em> de AWS.</p>
+      </section>
+
+      <section>
+        <h2 id="crear">Crear la instancia</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">aws rds create-db-instance \
+  --db-instance-identifier api-db \
+  --db-instance-class db.t3.micro \
+  --engine postgres \
+  --engine-version 16.3 \
+  --allocated-storage 20 \
+  --master-username apiuser \
+  --master-user-password 'Reemplaza-mel-123!' \
+  --backup-retention-period 7 \
+  --db-subnet-group-name default \
+  --no-publicly-accessible \
+  --storage-encrypted
+
+# esperar a que esté disponible
+aws rds wait db-instance-available --db-instance-identifier api-db
+
+# obtener el endpoint de conexión
+aws rds describe-db-instances \
+  --db-instance-identifier api-db \
+  --query "DBInstances[0].Endpoint.Address" --output text</code></pre>
+          </div>
+        </figure>
+        <p>Seguridad de serie: <code class="inline">--no-publicly-accessible</code> hace que la base solo se vea desde la VPC (ideal: tu API la alcanza por IP interna, y el público nunca).</p>
+      </section>
+
+      <section>
+        <h2 id="conectar">Conectar desde la API</h2>
+        <p>El endpoint resultante (ej. <code class="inline">api-db.c9abc...sa-east-1.rds.amazonaws.com</code>) se usa en tu cadena de conexión, guardado como secreto:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">env</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">DATABASE_URL=postgresql://apiuser:Reemplaza-mel-123!@api-db.c9abc...sa-east-1.rds.amazonaws.com:5432/apidb</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">from sqlalchemy import create_engine
+from os import environ
+
+engine = create_engine(environ["DATABASE_URL"], pool_size=10)</code></pre>
+          </div>
+        </figure>
+        <p>El security group de la DB solo admite conexiones desde el security group de tu API: nadie de internet puede tocar Postgres.</p>
+      </section>
+
+      <section>
+        <h2 id="features">Backups, réplicas y alta disponibilidad</h2>
+        <ul>
+          <li><strong>Backups automáticos</strong> diarios (el <em>retention</em> del comando) + restauración a un punto en el tiempo.</li>
+          <li><strong>Multi-AZ:</strong> una réplica sincrónica en otra zona; si la principal falla, conmutación automática.</li>
+          <li><strong>Read replicas:</strong> réplicas asíncronas para leer (el tráfico de solo lectura) y descargar la principal.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># agregar una réplica de lectura para escalar consultas
+aws rds create-db-instance-read-replica \
+  --db-instance-identifier api-db-read \
+  --source-db-instance-identifier api-db
+
+# conmutar a Multi-AZ (alta disponibilidad)
+aws rds modify-db-instance \
+  --db-instance-identifier api-db \
+  --multi-az \
+  --apply-immediately</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="alternativa">¿Y si tu proyecto es pequeño?</h2>
+        <p>RDS tiene un mínimo de costo (~$15-30/mes). Para aprendizaje, tests o MVPs low-cost hay opciones <strong>serverless</strong> (Aurora Serverless, por uso) o gestionar Postgres en la propia EC2. Pero una base "manejada a mano" no te da backups ni failover: esa responsabilidad vuelve a tu mesa.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea una DB Postgres <code class="inline">db.t3.micro</code> en el tier gratuito sin acceso público y conusuar fuera de la VPC para que te la bloquee.</li>
+          <li>Conecta tu API en una EC2 de la misma VPC usando <code class="inline">DATABASE_URL</code>.</li>
+          <li>Haz un backup manual con <code class="inline">aws rds create-db-snapshot</code> y restaura una copia.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>RDS = base gestionada: OS, parches y backups los hace AWS.</li>
+          <li>La DB sin acceso público + security group internos mantiene los datos fuera del internet.</li>
+          <li>Multi-AZ da alta disponibilidad; read replicas escalan lecturas.</li>
+          <li>Los snapshots permiten restaurar en minutos.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

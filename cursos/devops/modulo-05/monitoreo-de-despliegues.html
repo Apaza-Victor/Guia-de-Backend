@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="monitoreo-de-despliegues">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoreo de despliegues · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Monitorea tus despliegues Backend: métricas, logs y alertas para detectar cuándo un deploy sale mal y actuar antes que los usuarios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="monitoreo-de-despliegues"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Monitoreo de despliegues</span>
+      </nav>
+      <h1 class="lesson-title">Monitoreo de despliegues</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Despliegue Continuo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Ver para creer</h2>
+        <p>Un despliegue no termina con <em>parece que anda</em>. Sin monitoreo no sabes si la nueva versión degrada la latencia, produce 500 ocultos o agota la memoria. El monitoreo convierte un "deploy exitoso" en una serie de <strong>señales observables</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="pilares">Los cuatro pilares: métricas, logs, trazas, alertas</h2>
+        <ul>
+          <li><strong>Métricas:</strong> números agregados en el tiempo: requests/s, latencia (p50/p95/p99), tasa de error, uso de CPU/RAM, threads.</li>
+          <li><strong>Logs:</strong> eventos individuales con contexto, útiles para buscar el porqué de una anomalía.</li>
+          <li><strong>Trazas:</strong> el recorrido de una petición a través de los servicios (conteo de saltos).</li>
+          <li><strong>Alertas:</strong> reglas que disparan notificaciones cuando una métrica cruza un umbral.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="endpoint">El endpoint /health</h2>
+        <p>Todo servicio debe exponer un <code class="inline">/health</code> (o <code class="inline">/ready</code>) que valide partes importantes y responda 200 u otro código:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">from flask import jsonify
+from sqlalchemy import text
+
+@app.route("/health")
+def health():
+    try:
+        db.execute(text("SELECT 1"))
+        return jsonify(status="ok")
+    except Exception:
+        return jsonify(status="error", db="caido"), 503</code></pre>
+          </div>
+        </figure>
+        <p>El orquestador y Nginx lo consultan periódicamente. Es la primera línea de detección de un deploy roto.</p>
+      </section>
+
+      <section>
+        <h2 id="stack">Un stack mínimo viable</h2>
+        <ul>
+          <li><strong>Prometheus:</strong> recopila métricas desde un endpoint <code class="inline">/metrics</code> de la API (p. ej. con <em>prometheus-client</em>): requests, latencias, errores, versiones desplegadas.</li>
+          <li><strong>Grafana:</strong> dashboards visuales sobre Prometheus.</li>
+          <li><strong>Logs con estructura:</strong> salida JSON con timestamp, nivel, request_id; <em>journalctl</em> o un agregador como Loki/ELK.</li>
+          <li><strong>Alertas:</strong> umbrales como "tasa de 5xx &gt; 5% durante 5 min" o "latencia p95 &gt; 800 ms".</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">from prometheus_client import Counter, Histogram, start_http_server
+
+REQUESTS = Counter("http_requests_total", "Total", ["method", "status"])
+LATENCY = Histogram("http_request_duration_seconds", "Latencia")
+ERROR_RATE = Counter("http_errors_total", "Errores 5xx")</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="deteccion">Detectar un deploy defectuoso</h2>
+        <p>Compara las métricas <em>antes y después</em> del despliegue. Señales típicas de problema:</p>
+        <ul>
+          <li>La tasa de errores 5xx sube abruptamente justo tras el cambio.</li>
+          <li>La latencia p99 se dispara (nueva query lenta, cache fría).</li>
+          <li>El uso de memoria crece sin freno (leak introducido).</li>
+          <li>El healthcheck responde 503 en algunas instancias.</li>
+        </ul>
+        <p>Con la alerta en el canal correcto (Slack, email, Telegram), el equipo actúa minutos antes de que los usuarios lo noten.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Agrega un endpoint <code class="inline">/health</code> a tu API que valide la conexión a la base de datos.</li>
+          <li>Añade métricas básicas de requests y errores (por ejemplo con <code class="inline">prometheus-client</code>).</li>
+          <li>Define una alerta: tasa de 5xx &gt; 5% durante 5 minutos. ¿Dónde la activarías?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Métricas, logs, trazas y alertas forman la observabilidad del deploy.</li>
+          <li>El endpoint <code class="inline">/health</code> detecta instancias rotas de inmediato.</li>
+          <li>Prometheus + Grafana + logs estructurados es un stack sólido y gratis.</li>
+          <li>Comparar métricas antes/después del deploy revela regresiones.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

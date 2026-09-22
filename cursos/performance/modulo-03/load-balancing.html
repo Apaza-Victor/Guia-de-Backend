@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m3-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Load balancing · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende load balancing en backend: round-robin, least-connections, sticky sessions y health checks con nginx y HAProxy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m3-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Load balancing</span>
+      </nav>
+      <h1 class="lesson-title">Load balancing</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y despliegue</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>load balancer</strong> (balanceador de carga) es el repartidor de tráfico de tu sistema: recibe cada petición, decide qué nodo del grupo debe atenderla y la reenvía. Con él, varias réplicas se comportan como un solo servicio frente al cliente. Sus dos trabajos son <strong>repartir el trabajo</strong> y <strong>apartar los nodos enfermos</strong> con health checks.</p>
+        <p>Las estrellas del mundo abierto son <strong>nginx</strong> y <strong>HAProxy</strong>. Te mostraremos ambos, porque las decisiones (round-robin, least-connections, sticky) son las mismas.</p>
+      </section>
+
+      <section>
+        <h2 id="algoritmos">Algoritmos de balanceo</h2>
+        <ul>
+          <li><strong>Round-robin:</strong> alterna los nodos uno tras otro, repartiendo de forma pareja y simple. Insuficiente si uno es más potente que los otros o si algunas peticiones son mucho más costosas.</li>
+          <li><strong>Least-connections:</strong> envía la petición al nodo con menos conexiones activas. Mejor que round-robin cuando las peticiones duran distinto: elige el nodo con menos ocupación, no el siguiente de una rotación rígida.</li>
+          <li><strong>Pondered (ponderado):</strong> asigna pesos: un nodo de 8 vCPU recibe el doble que uno de 4.</li>
+          <li><strong>IP-hash / sticky sessions:</strong> siempre el mismo cliente va al mismo nodo. Útil solo como muleta para servicios con estado en memoria; la solución correcta sigue siendo hacerlo stateless (lección anterior).</li>
+          <li><strong>Consistent hashing:</strong> para cachés distribuidas: mantiene el «mapeo» estable aunque entren o salgan nodos.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> empieza con <code>least_conn</code>. Solo vuelve al sticky si un servicio con estado en memoria no se puede corregir todavía; y entonces que sea un checklist urgente de «hágase stateless».</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="nginx">Balanceo con nginx</h2>
+        <p>Un upstream de tres réplicas con least-connections, health check pasivo y retries es una configuración de pocas líneas:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># /etc/nginx/conf.d/api-balancer.conf
+upstream backend_api {
+    least_conn;                       # mejor nodo = menos conexiones activas
+    server api-1:8080 weight=3;       # tres veces el tráfico que api-3
+    server api-2:8080 weight=3;
+    server api-3:8080 weight=1;       # máquina más pequeña
+}
+
+server {
+    listen 80;
+
+    location /api/ {
+        proxy_pass http://backend_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_next_upstream error timeout;   # si falla, reintenta en otro nodo
+        proxy_connect_timeout 2s;
+        proxy_read_timeout 30s;              # timeouts cortos: no esperar a un nodo colgado
+    }
+}</code></pre>
+        <p>Verificar con la terminal y los logs:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Chequear sintaxis y recargar sin cortar el servicio
+nginx -t && nginx -s reload
+
+# Los nodos caídos se marcan en los logs de error o con un endpoint de estado
+curl -s http://balanceador/api/health | jq .
+# {"estado":"ok","nodos":["api-1","api-2"],"caidos":["api-3"]}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="haproxy">Balanceo con HAProxy</h2>
+        <p>HAProxy es el estándar donde el rendimiento importa de verdad: soporta health checks <em>activos</em> (sondea los nodos por sí mismo) y una interfaz de estadísticas en vivo:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># /etc/haproxy/haproxy.cfg
+global
+    maxconn 20000
+
+defaults
+    mode http
+    timeout connect 3s
+    timeout client  30s
+    timeout server  30s
+
+frontend http_in
+    bind *:80
+    default_backend api_nodes
+
+backend api_nodes
+    balance leastconn                  # menos conexiones activas
+    option httpchk GET /health         # health check activo cada 2s por defecto
+    server api-1 api-1:8080 check fall 3 rise 2
+    server api-2 api-2:8080 check fall 3 rise 2
+    server api-3 api-3:8080 check fall 3 rise 2
+
+listen stats
+    bind *:8404
+    stats enable
+    stats uri /stats                   # http://balanceador:8404/stats
+    stats refresh 5s</code></pre>
+        <p>La diferencia operativa clave: HAProxy <em>comprueba</em> sus nodos con <code>check</code> y los retira solos; nginx (en esta configuración mínima) confía en el reintento. Para producción seria, los dos se usan juntos muy a menudo: HAProxy delante y nginx en los nodos.</p>
+      </section>
+
+      <section>
+        <h2 id="health">Health checks y timeouts</h2>
+        <p>El health check es lo que hace que el conjunto no falle: si un nodo empieza a responder 500 o no responde, el balanceador lo saca del reparto. Sin health checks, todos los errores llegarían igual al usuario en el nodo roto.</p>
+        <ul>
+          <li><strong>Pasivo</strong> (nginx): te enteras cuando ha fallado; reintenta en otro nodo.</li>
+          <li><strong>Activo</strong> (HAProxy, nginx plus): sondea periódicamente <code>/health</code> y mantiene los nodos malos apartados.</li>
+        </ul>
+        <p>Y los <strong>timeouts</strong> son parte de la estrategia: un nodo colgado que no responde nunca debe ser tratado como caído <em>rápido</em>, no dejar que las peticiones esperen 60 segundos. Un valor de 2-3 s de conectividad y 30 s de lectura es un punto de partida razonable.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Monta el upstream de nginx de arriba con 3 réplicas de tu API (puede ser la misma imagen en 3 puertos) y verifica que las peticiones se reparten.</li>
+          <li>Detén un contenedor a la vez: ¿las peticiones siguen funcionando? ¿cuánto tardan en venir de otro nodo? Ajusta timeouts y health checks para que sea inmediato.</li>
+          <li>Abre los stats de HAProxy (o los acces logs de nginx) y confirma con tu prueba de carga que el reparto es parejo entre los nodos cuando todos están sanos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un load balancer reparte peticiones entre réplicas y aísla los nodos enfermos.</li>
+          <li>Round-robin es simple; least-connections reparte mejor cuando las peticiones duran distinto.</li>
+          <li>Los pesos igualan la asimetría entre máquinas; el sticky/IP-hash es una muleta, no una solución.</li>
+          <li>nginx: configuración por upstream; HAProxy: health checks activos y stats en vivo.</li>
+          <li>Los timeouts cortos convierten un nodo colgado en un nodo apartado rápido.</li>
+          <li>El complemento ideal del estado compartido viene de la lección anterior: ser stateless.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="escalado-vertical-vs-horizontal.html">Escalado vertical vs horizontal</a>
+          <a class="related-lessons__link" href="bases-de-datos-a-escala.html">Bases de datos a escala</a>
+          <a class="related-lessons__link" href="cdny-edge-caching.html">CDN y edge caching</a>
+          <a class="related-lessons__link" href="../modulo-02/caching-estrategias.html">Caching y estrategias</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

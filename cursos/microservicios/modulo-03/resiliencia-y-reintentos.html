@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-resiliencia-y-reintentos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resiliencia y reintentos · Microservicios · Backend Academy</title>
+<meta name="description" content="Resiliencia en microservicios: timeouts, retries con backoff exponencial y jitter, bulkheads y cómo sobrevivir a fallos parciales sin hacer caer a todo el sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-resiliencia-y-reintentos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Resiliencia y reintentos</span>
+      </nav>
+      <h1 class="lesson-title">Resiliencia y reintentos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Datos y resiliencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En un sistema distribuido, los fallos son parte del paisaje, no la excepción. La <strong>resiliencia</strong> es la capacidad de seguir operando aunque haya servicios que fallan: degradar con elegancia, reintentar lo retractable y aislar el daño. Esta lección es sobre los tres pilares: timeouts, retries bien diseñados y aislamiento.</p>
+      </section>
+
+      <section>
+        <h2 id="timeouts">Timeouts antes que todo</h2>
+        <p>Todo comienza con un <strong>timeout</strong>: si el proveedor no responde en un tiempo razonable, el cliente abandona la llamada. Sin timeout, un servicio lento consume hilos de su dependiente hasta agotar la memoria y tumbar a todo el sistema. Los timeouts deben ser <strong>decrecientes</strong> hacia afuera (3000 ms en la puerta, 2000 internos, 1000 a BD).</p>
+      </section>
+
+      <section>
+        <h2 id="backoff">Retries con backoff exponencial</h2>
+        <p>Reintentar inmediatamente un servicio caído es inútil y a veces contraproducente (thumb el «efecto repliega»). La práctica correcta es el <strong>backoff exponencial</strong>: esperar cada vez más entre intentos (1 s, 2 s, 4 s, 8 s...), añadiendo <strong>jitter</strong> (ruido aleatorio) para que no todos los clientes reintenten al unísono.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript (retry con backoff y jitter)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">const ESPERA = ms => new Promise(r => setTimeout(r, ms));
+
+async function llamarConReintentos(fn, { max = 5, base = 200 } = {}) {
+  let intento = 0;
+  while (intento < max) {
+    try {
+      return await fn();                       // si funciona, salimos
+    } catch (err) {
+      if (err.noRetry) throw err;              // ej: 400, 404: no reintentar
+      const backoff = base * 2 ** intento;     // 200, 400, 800, 1600...
+      const jitter = Math.random() * backoff;  // evita sincronización
+      intento++;
+      await ESPERA(backoff + jitter);
+    }
+  }
+  throw new Error("Reintentos agotados");
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="que-reintentar">Qué se puede reintentar</h2>
+        <ul>
+          <li><strong>Sí:</strong> errores transitorios (503, 504, timeout, error de red).</li>
+          <li><strong>No:</strong> errores del cliente (400, 401, 403, 404, 422): nunca se resolverán reintentando.</li>
+          <li><strong>Con cuidado:</strong> errores de lógica (409), los que pueden dejar la operación a medias; recurre a idempotencia.</li>
+          <li>Máximo número de reintentos acotado; no reintentar indefinidamente.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (solo reintenta status correctos)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">import time, random, requests
+
+def llamada_robusta(url, max_intentos=4):
+    for intento in range(max_intentos):
+        try:
+            r = requests.get(url, timeout=2)
+            if r.status_code < 500:      # 2xx y 4xx: resultado definitivo
+                return r
+        except requests.ConnectionError:
+            pass                          # transitorio: permite reintentar
+        time.sleep((2 ** intento) + random.uniform(0, 0.3))
+    raise RuntimeError("Servicio no disponible: " + url)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="idempotencia">El par con la idempotencia</h2>
+        <p>Si el timeout ocurre después de que el proveedor procesó la petición, el reintento puede duplicar la operación. Por eso los retries seguros van acompañados de <strong>idempotencia</strong> (recuerda la lección de comunicación síncrona): el cliente envía una clave única y el proveedor devuelve el mismo resultado si la ve de nuevo.</p>
+      </section>
+
+      <section>
+        <h2 id="bulkhead">Bulkheads y aislamiento</h2>
+        <p>El patrón <strong>bulkhead</strong> (compartimentos estancos en los buques) limita cuántos recursos puede consumir cada dependencia. Si el servicio de envíos se pone lento, solo se satura el grupo de conexiones asignado a envíos; el resto de servicios sigue recibiendo sus hilos. Sin bulkhead, una dependencia enferma «contagia» a todo el proceso.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (grupos de conexión independientes)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">bulkheads:
+  pool-pagos:
+    max_connections: 20
+    max_queue: 10
+    timeout_ms: 1000
+  pool-inventario:
+    max_connections: 10
+    max_queue: 5
+    timeout_ms: 1500
+  # Si inventario se satura, pagos sigue con su propio pool intacto.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="degradacion">Degradación controlada</h2>
+        <p>Cuando algo falla, la resiliencia también implica <strong>degradar con gracia</strong>: devolver un resultado parcial, una versión cacheada, o un mensaje claro al usuario en vez de un error genérico. La caída de un servicio no debería nunca tumbar toda la cara de una aplicación.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe la función de retry con backoff exponencial que rechace los errores no reintentables.</li>
+          <li>Compara qué códigos HTTP deben reintentarse y cuáles no, y justifica.</li>
+          <li>Diseña los bulkheads para 3 dependencias y define los límites.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los fallos son la norma; la resiliencia es diseñar para ellos, no evitarlos.</li>
+          <li>Timeouts decrecientes hacia afuera evitan que la latencia se propague.</li>
+          <li>Reintentos solo para errores transitorios, con backoff exponencial y jitter.</li>
+          <li>La idempotencia hace seguros los reintentos tras un timeout ambiguo.</li>
+          <li>Bulkheads aíslan el daño: una dependencia lenta no consume a todas las demás.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="circuit-breaker.html">Circuit breaker</a>
+          <a class="related-lessons__link" href="../modulo-02/comunicacion-sincrona.html">Comunicación síncrona</a>
+          <a class="related-lessons__link" href="sagas-y-transacciones.html">Sagas y transacciones distribuidas</a>
+          <a class="related-lessons__link" href="../modulo-02/api-gateway.html">API Gateway</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

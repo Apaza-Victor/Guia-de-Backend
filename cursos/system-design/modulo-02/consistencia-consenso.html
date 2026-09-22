@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-consistencia-consenso">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consistencia y consenso · System Design · Backend Academy</title>
+<meta name="description" content="Aprende el teorema CAP, la consistencia eventual y los algoritmos de consenso (Raft y Paxos) para decidir el equilibrio correcto en un sistema distribuido.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-consistencia-consenso"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Consistencia y consenso</span>
+      </nav>
+      <h1 class="lesson-title">Consistencia y consenso</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">La pregunta incómoda</h2>
+        <p>Cuando un sistema tiene una sola copia de los datos, la consistencia es gratuita. En cuanto replicas para escalar o sobrevivir a fallas, aparece la pregunta incómoda: <strong>si dos nodos tienen el mismo dato y uno se actualiza, ¿qué ve el siguiente lector?</strong> La respuesta define todos los modelos de consistencia y los algoritmos de consenso.</p>
+      </section>
+
+      <section>
+        <h2 id="cap">El teorema CAP</h2>
+        <p>CAP afirma que en una partición de la red (dos grupos de nodos sin poder hablarse) un sistema distribuido debe elegir entre:</p>
+        <ul>
+          <li><strong>Consistencia (C):</strong> cada lectura devuelve la escritura más reciente conocida, aunque eso signifique rechazar lecturas (CP).</li>
+          <li><strong>Disponibilidad (A):</strong> cada petición recibe respuesta, aunque pueda ser con datos de hace un momento (AP).</li>
+          <li><strong>Particionabilidad (P):</strong> el factor que siempre existe: la red se puede partir.</li>
+        </ul>
+        <p>Como la partición no la decides tú, la decisión real es <strong>CP o AP durante una partición</strong>. Un sistema «CA» es en realidad un sistema que detiene todo si la red se parte: no es útil en producción.</p>
+        <p>El matiz que casi nadie menciona: CAP habla del peor momento (la partición). En operación normal, un sistema puede ser consistente y disponible a la vez; la distinción se vuelve concreta solo cuando parte la red.</p>
+      </section>
+
+      <section>
+        <h2 id="eventual">Consistencia fuerte y eventual</h2>
+        <p>Los extremos que se manejan en la práctica:</p>
+        <ul>
+          <li><strong>Consistencia fuerte (linealizable):</strong> cualquier lectura que se inicia después de terminar una escritura ve el resultado. Es lo que ofrecen las transacciones de una sola base relacional sin replicación.</li>
+          <li><strong>Consistencia eventual:</strong> sin escrituras nuevas, las réplicas convergen a un valor único; pero un lector puede ver estados intermedios antes de que converja. Es la oferta natural de las réplicas asíncronas y de la mayoría de los sistemas NoSQL distribuidos.</li>
+          <li><strong>Consistencia causal:</strong> punto medio muy usado: si una operación depende de otra, los lectores las ven en ese orden (un comentario nunca aparece antes que el post que responde).</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python"># Simulación: un contador replicado con consistencia eventual converge.
+class ContadorReplicado:
+    def __init__(self):
+        self.valor = 0
+        self.version = 0
+
+    def aplicar(self, delta: int, version: int) -> None:
+        # Last-writer-wins simple: solo acepta versiones más nuevas
+        if version &gt; self.version:
+            self.valor += delta
+            self.version = version
+
+nodo_a = ContadorReplicado()
+nodo_b = ContadorReplicado()
+
+nodo_a.aplicar(+1, 1)   # réplica A recibe la escritura...
+nodo_b.aplicar(+1, 1)   # ...la réplica B todavía no.
+print("A:", nodo_a.valor, "| B:", nodo_b.valor)   # divergen
+
+# El replicador asíncrono propaga; la red converge al mismo estado.
+nodo_b.aplicar(0, 1)    # propaga el mismo log
+print("A:", nodo_a.valor, "| B:", nodo_b.valor)   # ambos = 1</code></pre>
+        <p>La lección del ejemplo: la consistencia eventual <strong>no es caos</strong>, es una promesa de convergencia. El diseño decide quién gana cuando hay conflictos (last-writer-wins, versionado, merge de contadores), y eso se llama <em>política de resolución de conflictos</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="consenso">Consenso: Raft y Paxos</h2>
+        <p>Cuando el sistema no puede permitirse la ambigüedad (por ejemplo, elegir quién es el líder del clúster o decidir el valor de un registro replicado), necesita <strong>consenso</strong>: que todos los nodos acuerden un único valor aunque algunos falle o la red se mueva. Es el problema que resuelven Paxos y su versión práctica, Raft.</p>
+        <p>Las ideas centrales de la familia de algoritmos de consenso:</p>
+        <ul>
+          <li><strong>Quórum:</strong> una mayoría de nodos (N/2 + 1) debe aceptar el valor; nunca habrá dos mayorías que aprueben valores distintos.</li>
+          <li><strong>Términos y votos:</strong> cada cambio va en un «término» en Raft; los nodos votan por un líder que propone entradas al log.</li>
+          <li><strong>Replicación por log:</strong> las operaciones se agregan a un log replicado y ordenado; cuando una entrada se confirma, todos los nodos la aplican en el mismo orden.</li>
+          <li><strong>Liderazgo único:</strong> en Raft, el líder recibe escrituras; los seguidores replaplican. Si el líder cae, una elección elige otro.</li>
+        </ul>
+        <p>Ejemplos reales: <strong>etcd</strong> y <strong>Consul</strong> usan Raft para la coordinación (lock distribuido, elección de líder); <strong>ZooKeeper</strong> usa su variante ZAB; <strong>Spanner</strong> usa Paxos a lo largo de sus réplicas.</p>
+      </section>
+
+      <section>
+        <h2 id="quorum">Niveles de quórum en práctica</h2>
+        <p>Algunos sistemas exponen el quórum en la configuración. Cassandra, por ejemplo, deja elegir cuántas réplicas confirmamos al escribir y al leer; elegir el nivel correcto es una decisión de diseño real:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># Paulatinos niveles de consistencia en un clúster de 3 réplicas.
+rendimiento_escribir: "ONE"        # rápidísimo: una réplica confirma; AP
+default: "QUORUM"                  # 2 de 3 confirmaciones; balance clásico
+lectura_critica: "ALL"             # las 3 deben responder; CP
+esquema: "LOCAL_QUORUM"            # quórum solo en la región local</code></pre>
+        <p>Si <code>W + R &gt; N</code> (whites mayor que la suma del número de réplicas que escriben y leen), la lectura garantiza ver la última escritura confirmada incluso en presencia de fallas. Ese es el famoso resultado de quórum: <em>escribir en 2 de 3 réplicas y leer de 2 garantiza frescura</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="decidir">Cuándo cada modelo</h2>
+        <p>La decisión de consistencia se toma mirando el requisito, no la tecnología:</p>
+        <ul>
+          <li><strong>Consistencia fuerte:</strong> saldos, inventarios que deciden ventas, IDs únicos, elección de líder. Soporta CP y pagas disponibilidad.</li>
+          <li><strong>Causal o por sesión:</strong> posts y comentarios, feeds: el usuario espera ver lo que ya escribió, pero tolera retrasos entre el suyo y el de otros.</li>
+          <li><strong>Consistencia eventual:</strong> likes, contadores, cachés, presencia: la divergencia de segundos no importa y se maximiza la disponibilidad.</li>
+        </ul>
+        <p>El diseñador hábil no elige «consistencia fuerte» o «eventual» en abstracto: elige un modela por <strong>fragmento de datos</strong>, porque en un mismo sistema conviven datos que exigen fuerte (el saldo) y datos que viven bien eventuales (el contador de seguidores).</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica estos datos de un sistema de e-commerce como consistentes o eventuales y explica por qué: el saldo, el stock, el contador de visitas, los comentarios, la foto de perfil.</li>
+          <li>Con un clúster de 3 réplicas, verifica la regla W+R&gt;N: escribe en 1 y lee en 1, luego escribe en 2 y lee en 2. ¿Cuál garantiza que la lectura ve la escritura?</li>
+          <li>Explica con tus palabras por qué «consenso» no es sinónimo de «consistencia fuerte» sino de «acuerdo sobre un único valor», y pon un ejemplo de dónde lo usarías (elección de líder).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>CAP obliga a elegir CP o AP cuando la red se parte; en operación normal un sistema puede ser ambas.</li>
+          <li>La consistencia fuerte es linealizable; la eventual converge sin escrituras; la causal ordena dependencias.</li>
+          <li>Paxos y Raft resuelven consenso con quórum, términos y log replicado; son la base de etcd y ZooKeeper.</li>
+          <li>El quórum W+R&gt;N permite leer escrituras confirmadas con una mayoría de escritura.</li>
+          <li>La consistencia se elige por fragmento de dato, no para todo el sistema por igual.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolitica-vs-distribuida.html">Monolito vs distribuida</a>
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+          <a class="related-lessons__link" href="diseno-de-un-chat.html">Caso: sistema de chat</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="dedicla-y-caching-patterns.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Patrones de durabilidad y caché</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Diseño completo</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

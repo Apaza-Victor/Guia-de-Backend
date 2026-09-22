@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-versionado-de-modelos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versionado de modelos · Backend para IA · Backend Academy</title>
+<meta name="description" content="Trata los modelos como código versionado: model registry, pin de versiones, despliegues A/B y canary, y rollback sin tocar código.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-versionado-de-modelos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Versionado de modelos</span>
+      </nav>
+      <h1 class="lesson-title">Versionado de modelos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Producción de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Tu feature de IA depende de dos versiones: la de tu código y la del modelo que responde. La segunda es propiedad del proveedor y puede cambiar sin aviso: un «gpt-4o-mini» hoy no es el mismo dentro de tres meses. Versionar el modelo es tratarlo como una dependencia más, con versión fija, pruebas y plan de rollback.</p>
+      </section>
+
+      <section>
+        <h2 id="registry">Model registry</h2>
+        <p>Un <strong>model registry</strong> centraliza qué versión está aprobada, qué versión se usa y qué versiones están obsoletas. Sirve tanto para modelos externos (pines de nombres y fechas) como para modelos propios (artefactos guardados). Tu código nunca escribe el nombre del modelo: lo consulta.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// config de modelos versionados por entorno
+const REGISTRO = {
+  produccion: {
+    clasificar_ticket: { nombre: 'gpt-4o-mini',   fecha: '2025-08-01', estado: 'activo' },
+    resumir:           { nombre: 'gpt-4o',        fecha: '2025-08-01', estado: 'activo' },
+    analizar_sentimiento: { nombre: 'claude-3-5-sonnet', fecha: '2025-09-15', estado: 'bajo_revision' }
+  },
+  staging: {
+    clasificar_ticket: { nombre: 'gpt-4o-mini',   fecha: '2025-08-01', estado: 'activo' },
+    analizar_sentimiento: { nombre: 'claude-3-5-sonnet', fecha: '2025-09-15', estado: 'activo' }
+  }
+};
+
+function modeloDe(env, feature) {
+  return REGISTRO[env][feature].nombre;
+}
+
+// en la llamada real, el modelo viene del registry, no del código duro
+const modelo = modeloDe(process.env.NODE_ENV, 'clasificar_ticket');
+const respuesta = await llm.completar(mensajes, { modelo });</code></pre>
+        <p>Como un <code>package.json</code>, el registry vive en el repo, se revisa en PR y habilita un commit trivial como «update modelo a 2025-09-15» que el CI evalúa contra tu eval set antes de tocar producción.</p>
+      </section>
+
+      <section>
+        <h2 id="pin">Fijar la versión del proveedor</h2>
+        <p>Cuando el proveedor te deja elegir (por timestamp o por etiqueta de despliegue), fija la versión <em>explícita</em> en vez de la etiqueta mutable. Así una nueva versión no cambia el comportamiento de tu producción sin que tú decidas migrar.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// Mutable: cambia silenciosamente cuando Anthropic lo actualiza
+// const modelo = "claude-3-5-sonnet-20240909";
+
+// Pin por timestamp: produccion se comporta igual hasta que decidas migrar
+const modeloFijado = 'claude-3-5-sonnet-20240909';
+
+const respuesta = await anthropic.messages.create({
+  model: modeloFijado,
+  max_tokens: 800,
+  messages: [
+    { role: 'user', content: req.body.pregunta }
+  ]
+});</code></pre>
+        <p>Define una política de caducidad: por ejemplo, «migrar dentro de 30 días de publicado el nuevo pin». La migración es un PR que cambia el registry y corre el eval set completo, igual que un bump de versión de librería.</p>
+      </section>
+
+      <section>
+        <h2 id="ab">A/B testing y canary</h2>
+        <p>Antes de migrar un modelo para todos, enruta un subconjunto de tráfico real al nuevo pin y compara métricas del eval set y de producción. Primero el 5%, luego sube si no hay regresión.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const CANARY = {
+  activo: false,
+  pinNuevo: 'gpt-4o-2025-08-16',
+  pinActual: 'gpt-4o-2025-04-01',
+  porcentaje: 0.05               // 5% del tráfico
+};
+
+function modeloPara(req) {
+  if (CANARY.activo && Math.random() < CANARY.porcentaje) {
+    return CANARY.pinNuevo;      // grupo de tratamiento
+  }
+  return CANARY.pinActual;       // grupo de control
+}
+
+// Por cada respuesta, guarda qué pin respondió y sus métricas
+const pin = modeloPara(req);
+const data = await llm.completar(mensajes, { modelo: pin });
+await registrarExperimento({
+  pin,
+  ok:      validar(data.contenido),
+  latencia: data.latencia_ms,
+  fecha:   new Date().toISOString(),
+});</code></pre>
+        <p>Los flags de canary se gobiernan por configuración (tu proveedor de feature flags), no por redeploys. El log de experimento que guardamos aquí es el que alimenta el panel de monitoreo de la lección anterior.</p>
+      </section>
+
+      <section>
+        <h2 id="rollback">Rollback sin tocar código</h2>
+        <p>Si el canary falla, vuelves al pin anterior con un cambio de configuración: un flag que reenvía al pin base. Ese debe ser el procedimiento automático de tu equipo, medido en minutos y probado en staging periódicamente (los rollbacks que no se ensayan no funcionan cuando importa).</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># El CI del registry valida cada PR: formato, pin existente y eval set
+# - [ ] Evaluar el clip tipo a cada pin del canary
+# - [ ] Subir el porcentaje de canary siguiendo la "escalera": 5% -> 25% -> 100%
+# - [ ] Si otra métrica empeora, volver a pinActual con un solo comando:
+#   feature-flag set modelo.produccion.gpt4o.canary --value off
+
+# El rollback es config, no nueva emisión de binario:
+#   curl -X POST https://flags/api/v1/flags/migracion-gpt4o \
+#     -d '{"enabled": false}'</code></pre>
+        <p>Regla final: código y modelo se lanzan por separado. Tu código debe funcionar con el pin anterior y con el nuevo, porque el rollout del modelo y el del software no están acoplados en el tiempo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un registry en JSON con 3 features y fija cada modelo con su pin completo y su estado.</li>
+          <li>Simula un canary al 10% con el nuevo pin y registra <code>pin</code>, <code>ok</code> y latencia por llamada.</li>
+          <li>Escribe el comando de rollback que apaga el canary, y confirma que la app vuelve al pin base sin recomplar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El model registry centraliza versión, estado y uso de cada modelo; el código lo consulta, no lo fija.</li>
+          <li>Pinea la versión del proveedor, nunca la etiqueta mutable, para que nada cambie en silencio.</li>
+          <li>A/B y canary prueban el pin nuevo en tráfico real y crecen en una escalera controlada.</li>
+          <li>El rollback es un cambio de configuración, no un redeploy: rápido y ensayado.</li>
+          <li>Modelo y código se versionan y se lanzan por separado.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="evaluacion-y-monitoreo.html">Evaluación y monitoreo</a>
+          <a class="related-lessons__link" href="gestion-de-costos.html">Gestión de costos</a>
+          <a class="related-lessons__link" href="../modulo-02/llm-integration-en-servicio.html">Integrar LLMs en un servicio</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="evaluacion-y-monitoreo.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Evaluación y monitoreo</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="arquitecturas-de-ia-en-backend.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Arquitecturas de IA en backend</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

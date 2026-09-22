@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testeando excepciones · Testing Backend · Backend Academy</title>
+<meta name="description" content="Cómo testear excepciones con PHPUnit: expectException, expectExceptionMessage, assertThrows con PHP 8.1+ y errores silenciosos en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Testeando excepciones</span>
+      </nav>
+      <h1 class="lesson-title">Testeando excepciones</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Unit Testing</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="porque">El error también es comportamiento</h2>
+        <p>Si tu código espera que algo <strong>falle</strong> en una condición dada, ese fallo es parte del contrato y se testea igual que el camino feliz. Un test de excepción protege: <em>«aquí, en estas condiciones, la API responde así»</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="expect">expectException y sus primas</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · PHPUnit</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class CarritoTest extends \PHPUnit\Framework\TestCase
+{
+    public function test_rechaza_producto_sin_precio(): void
+    {
+        $this-&gt;expectException(ProductoInvalido::class);
+        $this-&gt;expectExceptionMessage('precio no puede ser negativo');
+
+        (new Carrito())-&gt;agregar(new Producto('zapatos', -5));
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li><code>expectException(Clase::class)</code>: tipo exacto o subclase.</li>
+          <li><code>expectExceptionMessage('...')</code>: trozo del mensaje.</li>
+          <li><code>expectExceptionCode(422)</code>: para excepciones con código.</li>
+          <li>Se declaran <strong>antes</strong> de la línea que debe fallar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="try-catch">El patrón manual con try/catch</h2>
+        <p>Para validaciones más finas (mensaje exacto, re-lanzamiento, lado del error), el bloque <code>try/catch</code> sin framework gana control:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">public function test_duplica_error_cuando_se_reintenta(): void
+{
+    throw $esperado = null;
+
+    try {
+        $cliente-&gt;pagar();
+        self::fail('se esperaba una excepción');
+    } catch (PagoFallido $e) {
+        $esperado = $e;
+    }
+
+    self::assertSame(602.0, $esperado-&gt;monto());
+    self::assertStringContainsString('timeout', $esperado-&gt;getMessage());
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="php81">assertThrows (PHP 8.1+)</h2>
+        <p>PHPUnit 10+ ofrece <code>assertThrows</code>, ideal para mirar la excepción devuelta sin declarar expectations previas:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$ex = self::assertThrows(
+    PagoFallido::class,
+    static fn () =&gt; $cliente-&gt;pagar(),
+);
+
+self::assertSame(602.0, $ex-&gt;monto());</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="errores-silenciosos">La trampa de los errores silenciosos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · anti-ejemplo</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">public function procesar(): bool
+{
+    try {
+        $this-&gt;bd-&gt;guardar($datos);
+        return true;
+    } catch (Throwable $ignorad) {
+        return false;   // 💣 tragó el error sin decir nada
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li>If a dominio «no debe fallar» captura y devuelve <code>false</code>, es imposible saber si el fallo fue del negocio.</li>
+          <li>Regla: capturalo donde puedas <strong>hacer algo</strong> (retry, log, cola) o dejalo subir.</li>
+          <li>Un test sobre el camino <code>return false</code> junto a un stub que lanza, documenta la decisión.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea una clase <code>CuentaBancaria</code> con <code>retirar()</code> que lance <code>SaldoInsuficiente</code>.</li>
+          <li>Test tipo: expectException + expectExceptionMessage.</li>
+          <li>Test con assertThrows validando el monto que faltó.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El error es contrato: si está previsto, se testea.</li>
+          <li><code>expectException*</code> declara antes; try/catch da control fino.</li>
+          <li><code>assertThrows</code> devuelve la excepción para inspeccionarla.</li>
+          <li>No tragues excepciones: capturá donde puedas actuar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="assertions-y-expectativas.html">Assertions y expectativas</a>
+          <a class="related-lessons__link" href="../modulo-05/casos-borde-y-errores.html">Casos borde y errores</a>
+          <a class="related-lessons__link" href="../modulo-04/flujos-completos-api.html">Flujos completos de API</a>
+          <a class="related-lessons__link" href="../modulo-05/tdd-para-corregir-bugs.html">TDD para corregir bugs</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

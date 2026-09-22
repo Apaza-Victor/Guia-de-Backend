@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="subconsultas-in">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subconsultas con IN · SQL · Backend Academy</title>
+<meta name="description" content="Aprende subconsultas con IN y NOT IN en SQL: filtros con listas dinámicas, diferencias semánticas con el JOIN y el peligro de los NULL.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="subconsultas-in"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4 · Subconsultas y CTEs</a><span class="sep">/</span>
+          <span class="current">Subconsultas con IN</span>
+        </nav>
+        <h1 class="lesson-title">Subconsultas con IN</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Subconsultas y CTEs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p><code class="inline">IN (lista)</code> ya lo usaste con valores: <code class="inline">estado IN ('pagado','enviado')</code>. Lo poderoso llega cuando la lista la <strong>genera otra consulta</strong>. Ese es el «IN con subconsulta de una columna».</p>
+        </section>
+
+        <section>
+          <h2 id="sintaxis">Sintaxis y ejemplo</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Clientes que han pagado algún pedido
+SELECT nombre, email
+FROM clientes
+WHERE id IN (
+    SELECT DISTINCT cliente_id
+    FROM pedidos
+    WHERE estado = 'pagado'
+);</code></pre>
+            </div>
+          </figure>
+          <p>Se lee: «nombres de clientes cuyo id esté entre los ids de pedidos pagados». La subconsulta devuelve una columna con N filas.</p>
+        </section>
+
+        <section>
+          <h2 id="not-in">NOT IN y el fantasma de NULL</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- ¿Falla? Esta consulta puede devolver 0 filas si la
+-- subconsulta contiene un NULL.
+SELECT nombre
+FROM clientes
+WHERE id NOT IN (
+    SELECT cliente_id FROM pedidos
+);
+
+-- Si pedidos.cliente_id admite NULL, el NULL «se traga» resultado.
+-- WHERE id NOT IN (1, 2, NULL) → todo NULL → 0 filas.
+
+-- Solución segura: filtrar los NULL en la subconsulta
+WHERE id NOT IN (
+    SELECT cliente_id FROM pedidos WHERE cliente_id IS NOT NULL
+);</code></pre>
+            </div>
+          </figure>
+          <p>En lógica de tres valores, <code class="inline">NULL NOT IN (...)</code> nunca puede afirmar «verdadero»: el NULL siembra la duda. Filtra siempre con <code class="inline">IS NOT NULL</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="in-vs-join">IN vs JOIN</h2>
+          <p>Ambos resuelven preguntas parecidas, con matices:</p>
+          <ul>
+            <li><code class="inline">IN</code>: ideal para «existe en…» y no repite filas (no implica duplicación).</li>
+            <li><code class="inline">JOIN</code>: quieres traer columnas de la otra tabla, quieres sumar o necesitas el detalle fila a fila.</li>
+            <li>Con <code class="inline">WHERE ... IS NULL</code> + JOIN también obtienes «los que NO están».</li>
+          </ul>
+          <p>Regla rápida: «solo filtro» → IN; «necesito la otra tabla» → JOIN.</p>
+        </section>
+
+        <section>
+          <h2 id="exists">El primo EXISTS</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Búsqueda de existencia por cliente: EXISTS correlada
+SELECT c.nombre
+FROM clientes c
+WHERE EXISTS (
+    SELECT 1
+    FROM pedidos p
+    WHERE p.cliente_id = c.id
+      AND p.estado = 'pagado'
+);</code></pre>
+            </div>
+          </figure>
+          <p>EXISTS deja de evaluar en cuanto encuentra una coincidencia y maneja NULL sin sorpresas. Para «existe o no existe» es a menudo la opción más clara y rápida.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Encuentra clientes que nunca han pedido, con NOT IN y con LEFT JOIN (compara).</li>
+            <li>Reescribe un IN con EXISTS y comprueba el mismo resultado.</li>
+            <li>Siembra un NULL en tu subconsulta y observa el comportamiento.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>IN con subconsulta = filtro por una lista calculada.</li>
+            <li>NOT IN con NULL en la lista puede devolver 0 filas (usa IS NOT NULL).</li>
+            <li>IN para existencia; JOIN cuando necesitas la otra tabla.</li>
+            <li>EXISTS es el hermano eficiente de la existencia.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="subconsultas-escalares.html">Subconsultas escalares</a>
+            <a class="related-lessons__link" href="ctes-with.html">CTEs con WITH</a>
+            <a class="related-lessons__link" href="../modulo-03/left-right-join.html">LEFT y RIGHT JOIN</a>
+            <a class="related-lessons__link" href="../modulo-01/where.html">Filtrando con WHERE</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

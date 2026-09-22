@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-prompts-y-completions">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompts y completions · Backend para IA · Backend Academy</title>
+<meta name="description" content="Diseña prompts desde el backend: roles system y user, control de temperatura, límite de tokens y cómo forzar salidas JSON estructuradas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-prompts-y-completions"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Prompts y completions</span>
+      </nav>
+      <h1 class="lesson-title">Prompts y completions</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>prompt</strong> es la instrucción que envías al modelo y el <strong>completion</strong> es su respuesta. Para tu backend, el prompt no es un texto suelto: es una estructura de datos —un arreglo de mensajes con roles— que define qué debe hacer el modelo y con qué contexto.</p>
+        <p>Un prompt bien diseñado separa lo que <em>siempre</em> debe cumplirse (las reglas del sistema) de lo que <em>cambia por usuario</em> (su pregunta y su contexto). Esa separación es la primera «arquitectura» de tu feature con IA.</p>
+      </section>
+
+      <section>
+        <h2 id="roles">Los roles: system, user y assistant</h2>
+        <ul>
+          <li><strong>System:</strong> instrucciones permanentes e implacables. Define la personalidad, las reglas y el formato de salida. No viene del usuario.</li>
+          <li><strong>User:</strong> el mensaje de la persona, tal como llega a tu servidor. Puedes añadirle contexto añadido por ti.</li>
+          <li><strong>Assistant:</strong> respuestas previas del modelo. Se incluyen para dar historial al modelo sin repetir texto.</li>
+        </ul>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "model": "gpt-4o-mini",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Eres un agente de soporte de una tienda online. Respónde solo con datos verificados, en máximo 2 frases y en español."
+    },
+    {
+      "role": "user",
+      "content": "Mi pedido 1234 no aparece en el seguimiento."
+    },
+    {
+      "role": "assistant",
+      "content": "Cuéntame el correo con el que compraste."
+    },
+    {
+      "role": "user",
+      "content": "ana@correo.com"
+    }
+  ]
+}</code></pre>
+        <p>El modelo «recuerda» lo que esté dentro de su ventana de contexto. Si en tu base de datos guardas el historial, cada turno nuevo lo reconstruyes como este arreglo: ese es el patrón de los chatbots.</p>
+      </section>
+
+      <section>
+        <h2 id="parametros">Temperatura y límite de tokens</h2>
+        <p>Dos parámetros gobiernan la calidad operativa de cada completion:</p>
+        <ul>
+          <li><strong><code>temperature</code></strong> (0–2): 0 es determinista y preciso, ideal para extraer datos o clasificar. Valores altos añaden variedad, útiles para copy creativo pero peligrosos para lógica.</li>
+          <li><strong><code>max_tokens</code></strong>: corta la salida al llegar al límite. Respuestas truncadas se reconocen por <code>finish_reason: "length"</code> y deben detectarse, o tu app servirá texto a medias.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: 'Eres una API. Devuelve solo JSON.' },
+      { role: 'user', content: 'Clasifica el sentimiento de: "Me encanta el nuevo diseño".' }
+    ],
+    temperature: 0,
+    max_tokens: 150
+  })
+});
+
+const data = await res.json();
+const choice = data.choices[0];
+
+if (choice.finish_reason === 'length') {
+  console.warn('La respuesta se cortó por max_tokens');
+}
+
+console.log(choice.message.content);</code></pre>
+        <p>Regla de oro para features de lógica: <code>temperature: 0</code> y, si el resultado esperado es un dato, pedir JSON y validarlo tú mismo.</p>
+      </section>
+
+      <section>
+        <h2 id="json-mode">Pedir y validar JSON</h2>
+        <p>Tu backend no debería parsear la respuesta de un LLM como si fuera un API confiable. La técnica robusta es triple: pedir JSON explícitamente, usar el modo JSON si el proveedor lo ofrece y validar en tu código con un esquema.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const prompt = `
+Devuelve un objeto JSON con el siguiente esquema exacto:
+{
+  "sentimiento": "positivo" | "negativo" | "neutralo",
+  "confianza": number entre 0 y 1,
+  "resumen": string de máximo 15 palabras
+}
+Texto a analizar: ${usuarioInput}
+`;</code></pre>
+        <p>Al recibir la respuesta, el primer paso del servidor es intentar <code>JSON.parse</code>. Si falla, puedes pedirle al modelo que la corrija una vez; si sigue fallando, devuelve un error controlado en lugar de propagar basura.</p>
+      </section>
+
+      <section>
+        <h2 id="plantillas">Plantillas de prompt en el backend</h2>
+        <p>Nunca escribas prompts concatenando texto a mano dentro de las rutas. Centralízalos en una capa de <em>plantillas</em> que recibe datos y devuelve mensajes:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const plantillas = {
+  clasificarTicker(ticker, noticias) {
+    return [
+      { role: 'system', content: 'Clasifica el impacto del ticker en: alcista, bajista o neutral. Devuelve solo JSON.' },
+      { role: 'user', content: `Ticker: ${ticker}\nNoticias:\n${noticias.join('\n')}` }
+    ];
+  },
+  resumir(contenido) {
+    return [
+      { role: 'system', content: 'Eres un resumidor técnico en español, máximo 100 palabras.' },
+      { role: 'user', content: contenido }
+    ];
+  }
+};
+
+const mensajes = plantillas.clasificarTicker('TSLA', noticiasDelDia);</code></pre>
+        <p>Centralizar los prompts hace que las pruebas sean más fáciles (puedes ver todo el mensaje en un solo lugar), que la seguridad se audite (sabes dónde entra input del usuario sin sanitizar) y que cambiar de modelo no implique buscar cadenas por todo el código.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea dos plantillas de prompt: una que clasifique el sentimiento de una reseña y otra que extraiga el nombre, email y teléfono de un texto.</li>
+          <li>Llama con <code>temperature: 0</code> y <code>max_tokens</code> suficiente, y valida que la respuesta del modelo sea JSON parseable en tu servidor.</li>
+          <li>Comprueba qué ocurre cuando fijas <code>max_tokens</code> muy bajo (por ejemplo, 10): observa el <code>finish_reason</code> y añade el manejo correspondiente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El prompt es un arreglo de mensajes con roles: system (reglas), user (input) y assistant (historial).</li>
+          <li><code>temperature: 0</code> da resultados deterministas; valores altos son para tareas creativas.</li>
+          <li><code>max_tokens</code> limita la salida y deja <code>finish_reason: "length"</code> cuando se trunca.</li>
+          <li>Para integrar datos, pide JSON e incluye una validación en tu backend.</li>
+          <li>Centraliza los prompts en plantillas reutilizables: se prueban, auditan y migran mejor.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="apis-de-ia.html">APIs de IA</a>
+          <a class="related-lessons__link" href="lenguaje-natural-y-llms.html">Lenguaje natural y LLMs</a>
+          <a class="related-lessons__link" href="../modulo-02/llm-integration-en-servicio.html">Integrar LLMs en un servicio</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="apis-de-ia.html">
+        <span class="label">← Anterior</span>
+        <span class="title">APIs de IA</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="embeddings-y-busqueda-semantica.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Embeddings y búsqueda semántica</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

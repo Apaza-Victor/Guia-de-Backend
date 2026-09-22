@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="validando-entrada-y-escapando-salida">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validando entrada y escapando salida · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Validación estricta de entrada y escape de salida en PHP: filter_var, reglas por campo y por qué nunca user filter_input sin opciones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="validando-entrada-y-escapando-salida"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Validando entrada y escapando salida</span>
+        </nav>
+        <h1 class="lesson-title">Validando entrada y escapando salida</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Inyecciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="doble">Dos direcciones</h2>
+          <p>La seguridad de datos corre en dos sentidos: lo que <strong>entra</strong> se <strong>valida</strong> (¿es lo que esperabas?) y lo que <strong>sale</strong> se <strong>escapa</strong> para su contexto (¿no rompe el HTML, el SQL, el JSON?). Confundirlos es el error clásico que deja XSS y SQLi abiertos.</p>
+        </section>
+
+        <section>
+          <h2 id="entrada">Validar, no adivinar</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Reglas por campo: permite, restringe y convierte
+$email = filter_var($_POST["email"] ?? "", FILTER_VALIDATE_EMAIL);
+if ($email === false) { http_response_code(422); exit; }   // 422: mal formado
+
+$edad = filter_var($_POST["edad"] ?? "", FILTER_VALIDATE_INT, ["options" =&gt; ["min_range" =&gt; 18, "max_range" =&gt; 120]]);
+if ($edad === false) { http_response_code(422); exit; }
+
+$slug = (string) $_POST["slug"] ?? "";
+if (!preg_match("/^[a-z0-9-]{5,60}$/", $slug)) { http_response_code(422); exit; }
+
+// LISTA BLANCA para valores fijos (rol, estado)
+$rolesPermitidos = ["lector", "editor", "admin"];
+if (!in_array($_POST["rol"] ?? "", $rolesPermitidos, true)) { http_response_code(422); exit; }</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="salida">Escapar para el contexto</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Escape AL SALIR a HTML, no al entrar (la BD guarda el dato puro)
+echo htmlspecialchars($comentario, ENT_QUOTES, "UTF-8");
+
+// En JSON: json_encode ya escapa el < si usas JSON_HEX_TAG
+header("Content-Type: application/json; charset=utf-8");
+echo json_encode(["texto" =&gt; $comentario], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_QUOT);
+
+// En plantillas (Blade/Twig) el motor escapa por defecto: no lo desactives
+// {!! $dato !!}  => ESCAPE DESACTIVADO: peligro si no es tuyo y no sanitizas</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="errores">Errores que verás en el mundo real</h2>
+          <ul>
+            <li>«Saneo» en la entrada con <code class="inline">addslashes</code>: no sustituye a prepared statements.</li>
+            <li>Desactivar el escape de plantillas «porque es rápido».</li>
+            <li>Validar solo el frontend: el atacante no pasa por tu <code class="inline">&lt;input&gt;</code>.</li>
+            <li>Rechazar en 400 en vez de 422: menor, pero define criterios; lo importante es que la regla exista en backend.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe reglas de validación para 5 campos de tu API.</li>
+            <li>Envía un JSON con <code class="inline">&lt;script&gt;</code> y comprueba que sale escapado.</li>
+            <li>Reemplaza <code class="inline">addslashes</code> de algún proyecto con prepared statements.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Validación para la entrada; escape para la salida.</li>
+            <li>filter_var y listas blancas por campo.</li>
+            <li>Escapa al contexto: HTML o JSON, según destino.</li>
+            <li>La BD guarda puro; el escape vive en la capa de presentación.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="consultas-preparadas.html">Consultas preparadas</a>
+            <a class="related-lessons__link" href="../modulo-03/sanitizacion-y-escaping.html">Sanitización y escaping</a>
+            <a class="related-lessons__link" href="../modulo-03/tipos-de-xss.html">Tipos de XSS</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

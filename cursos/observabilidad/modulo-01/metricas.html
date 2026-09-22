@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Métricas · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende los tipos de métricas en backend: counter, gauge, histogram y summary, y los enfoques RED (Rate, Errors, Duration) y USE (Utilization, Saturation, Errors).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m1-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Métricas</span>
+      </nav>
+      <h1 class="lesson-title">Métricas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-son">Qué es una métrica</h2>
+        <p>Una métrica es un número que cambia en el tiempo y que se recolecta de forma agregada: <code class="inline">http_requests_total{method="POST", route="/v1/checkout"} 48217</code>. A diferencia de los logs, que registran cada evento, las métricas acumulan valores con pocas dimensiones (etiquetas) y se pueden calcular y consultar con muchísimo menor coste.</p>
+        <p>Su fortaleza: detectar tendencias, alertar y comparar. Su debilidad: poca granularidad; no te dicen exactamente qué petición falló. Por eso conviven con logs y trazas.</p>
+      </section>
+
+      <section>
+        <h2 id="tipos">Los cuatro tipos</h2>
+        <dl class="definition-list">
+          <dt>Counter</dt><dd>acumulador que solo puede aumentar o reiniciarse. Útil para sucesos: peticiones, errores, trabajos procesados. Para velocidad se usa la derivada <code class="inline">rate()</code>.</dd>
+          <dt>Gauge</dt><dd>valor que sube y baja libremente: memoria, CPU en uso, trabajos pendientes en una cola, conexiones abiertas.</dd>
+          <dt>Histogram</dt><dd>cuenta observaciones en buckets de valor. Permite estimar percentiles (p50, p95, p99) con <code class="inline">histogram_quantile()</code>.</dd>
+          <dt>Summary</dt><dd>como el histogram pero con percentiles calculados en el cliente; más caro de agregar entre instancias, hoy raramente usado.</dd>
+        </dl>
+        <div class="callout">
+          <p><strong>Regla:</strong> ¿medimos cuántos? → counter. ¿Medimos un estado que fluctúa? → gauge. ¿Medimos latencias o tamaños? → histogram.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="ejemplo-js">Ejemplo con prom-client (Node.js)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const client = require('prom-client');
+
+const peticiones = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total de peticiones HTTP recibidas.',
+  labelNames: ['method', 'route', 'status'],
+});
+
+const colaPendiente = new client.Gauge({
+  name: 'queue_jobs_pending',
+  help: 'Trabajos pendientes en la cola de checkout.',
+});
+
+const duracion = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duración de las peticiones HTTP.',
+  labelNames: ['route'],
+  buckets: [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+});
+
+app.use((req, res, next) => {
+  const fin = duracion.startTimer({ route: req.path });
+  res.on('finish', () => {
+    peticiones.inc({ method: req.method, route: req.path, status: String(res.statusCode) });
+    fin();
+  });
+  next();
+});
+
+app.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="ejemplo-py">Ejemplo en Python</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python" data-language="python">from prometheus_client import Counter, Histogram, start_http_server
+
+ERRORES = Counter("checkout_errores_totales", "Errores de checkout", ["codigo"])
+DURACION = Histogram(
+    "checkout_duracion_segundos",
+    "Duración del flujo de checkout",
+    buckets=(0.1, 0.25, 0.5, 1, 2, 5),
+)
+
+def cobrar(items):
+    with DURACION.time():
+        try:
+            pasarela.cobrar(items)
+        except Rechazo as e:
+            ERRORES.labels(codigo=e.codigo).inc()
+            raise
+
+start_http_server(8000)  # expone /metrics en el puerto 8000</code></pre>
+          </div>
+        </figure>
+        <p>Con el endpoint <code class="inline">/metrics</code> desplegado, Prometheus puede hacer scraping (lo verás en el módulo 2). Expón esas métricas también en localhost en desarrollo para validar que salen valores.</p>
+      </section>
+
+      <section>
+        <h2 id="enfoques">Dos marcos para elegir qué medir</h2>
+        <p>No hace falta adivinar: existen dos marcos consolidados.</p>
+        <h3>RED — pensado para servicios de usuario</h3>
+        <ul>
+          <li><strong>Rate:</strong> peticiones por segundo. Tráfico.</li>
+          <li><strong>Errors:</strong> ratio o número de errores (5xx, excepciones).</li>
+          <li><strong>Duration:</strong> latencia (p50, p95, p99) y distribución.</li>
+        </ul>
+        <h3>USE — pensado para recursos de infraestructura</h3>
+        <ul>
+          <li><strong>Utilization:</strong> qué porcentaje del recurso está ocupado (CPU, RAM, disco).</li>
+          <li><strong>Saturation:</strong> hasta dónde está saturado: colas, esperas, backlog.</li>
+          <li><strong>Errors:</strong> fallos del recurso: errores de disco, reinfecciones, paquetes perdidos.</li>
+        </ul>
+        <p>Consulta típica de RED, traducida a PromQL (que aprenderás en la lección de Prometheus):</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># Rate: peticiones por segundo (últimos 5 minutos)
+sum(rate(http_requests_total{route="/v1/checkout"}[5m]))
+
+# Errors: porcentaje de respuestas 5xx
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+  / sum(rate(http_requests_total[5m])) * 100
+
+# Duration: p99 de latencia del checkout
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket{route="/v1/checkout"}[5m])) by (le))</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="buenas-practicas">Buenas prácticas al nombrar</h2>
+        <ul>
+          <li>Unidad en el sufijo: <code class="inline">_seconds</code>, <code class="inline">_bytes</code>, <code class="inline">_total</code> para counters.</li>
+          <li>Sustantivo + verbo en pasado para counters: <code class="inline">jobs_failed_total</code>, <code class="inline">emails_sent_total</code>.</li>
+          <li>Etiquetas con cardinalidad controlada: status, route, provider. Evita user_id como etiqueta (explota la cardinalidad).</li>
+          <li>Una sola unidad por métrica: no mezcles milisegundos y segundos.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Instrumenta un endpoint de tu API con un counter (request + status) y un histogram (duración).</li>
+          <li>Añade un gauge para el tamaño de la cola de trabajos o el pool de conexiones.</li>
+          <li>Define las métricas RED de ese endpoint y escribe las 3 consultas PromQL correspondientes.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Counter para acumular eventos, gauge para estados, histogram para latencias.</li>
+          <li>RED para servicios (rate, errors, duration); USE para recursos (utilization, saturation, errors).</li>
+          <li>Los percentiles salen de los histogramas: el promedio miente en colas y picos.</li>
+          <li>Etiquetas sí, pero con cardinalidad controlada: no guardes user_id por evento.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="logs-estructurados.html">Logs estructurados</a>
+          <a class="related-lessons__link" href="que-es-observabilidad.html">¿Qué es la observabilidad?</a>
+          <a class="related-lessons__link" href="../modulo-02/prometheus.html">Prometheus</a>
+          <a class="related-lessons__link" href="../modulo-03/slos-y-slis.html">SLOs, SLIs y SRE</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

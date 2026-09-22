@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bind mounts · Docker para Backend · Backend Academy</title>
+<meta name="description" content="Monta una carpeta del host dentro del contenedor: para hot-reload en desarrollo, archivos de configuración y datos que quieres ver y tocar desde tu máquina.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Bind mounts</span>
+      </nav>
+      <h1 class="lesson-title">Bind mounts</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Volúmenes y Redes</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que">Montar "tu" carpeta, no un espacio de Docker</h2>
+        <p>Un <strong>bind mount</strong> conecta una ruta del host con una ruta del contenedor. Lo que escribas en una lo ves en la otra. No lo administra Docker como un volumen: es tu carpeta, tu disco.</p>
+      </section>
+
+      <section>
+        <h2 id="dev">El caso rey: desarrollo con hot-reload</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Tu código vive en ./app y lo montas en /app del contenedor
+docker run -d --name api-dev \
+  -p 3000:3000 \
+  -v "$PWD/app":/app \
+  -v /app/node_modules \
+  node:20 node /app/server.js
+
+# node_modules se monta como volumen ANÓNIMO para no pisar
+# el que aporta la imagen (soluciona el clásico conflicto de bind)</code></pre>
+          </div>
+        </figure>
+        <p>Con un runner que recarga (<code>nodemon</code>, <code>tsx watch</code>, <code>--watch</code>), cada cambio se refleja al instante en el contenedor.</p>
+      </section>
+
+      <section>
+        <h2 id="config">Configuración sin reconstruir</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Un archivo tipo nginx.conf del host entra al contenedor:
+docker run -d -p 8080:80 \
+  -v "$PWD/nginx.conf":/etc/nginx/nginx.conf:ro \
+  nginx:alpine
+# Cambias el archivo → docker restart <cont> y listo.
+# (¡sin recompilar la imagen!)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="percances">Los percances típicos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">⚠ PERMISOS: el contenedor escribe como el UID que corre.
+   En Linux, puede dejar archivos "de root" en tu carpeta.
+   → usa la MISMA ruta/UID o chown, según el caso.
+
+⚠ node_modules: montar la carpeta del host pisa los del contenedor
+   (deps de Linux vs las tuyas). Solución: volumen anónimo encima.
+
+⚠ rutas ABSOLUTAS del host: usa "$PWD" para no tener sorpresas.
+
+⚠ Windows/WSL: las rutas se traducen (C:\\Users\\... → /mnt/c/...);
+   los bind mounts en Docker Desktop son lentos: limita el montaje.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea <code>./app</code> con un <code>server.js</code> que devuelva un texto.</li>
+          <li>Móntalo con bind y cambia el texto SIN reconstruir.</li>
+          <li>Prueba el montaje: <code>docker cp</code> ya no te necesita.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Bind mount = carpeta del host dentro del contenedor.</li>
+          <li>Hot-reload y configuración editable al vuelo.</li>
+          <li>Cuidado con permisos y con pisar node_modules.</li>
+          <li>Para datos de la app usa volúmenes; para dev, bind.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="volumenes-nombrados.html">Volúmenes nombrados</a>
+          <a class="related-lessons__link" href="persistencia-de-datos.html">La persistencia de datos</a>
+          <a class="related-lessons__link" href="../modulo-04/entornos-de-desarrollo.html">Entornos de desarrollo con Compose</a>
+          <a class="related-lessons__link" href="index.html">Módulo 3 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

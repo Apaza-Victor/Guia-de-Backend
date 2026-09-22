@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="modelado-de-amenazas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelado de amenazas · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Modela amenazas de forma práctica: identifica activos, dibuja el flujo de datos, aplica STRIDE y decide qué mitigar de tu sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="modelado-de-amenazas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Modelado de amenazas</span>
+        </nav>
+        <h1 class="lesson-title">Modelado de amenazas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Modelo de Amenazas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="idea">Pensar como atacante</h2>
+          <p><strong>Modelar amenazas</strong> es sentarse en una mesa, dibujar el sistema y preguntar: ¿de qué maneras puede fallar cada pieza? Es más barato descubrirlo en un documento que en un incidente. La receta, a lo simple: <strong>activos → flujo → amenazas → mitigaciones</strong>.</p>
+        </section>
+
+        <section>
+          <h2 id="pasos">Los cuatro pasos</h2>
+          <ol>
+            <li><strong>Activos:</strong> qué vale (datos, credenciales, dinero, disponibilidad).</li>
+            <li><strong>Diagrama:</strong> navegador → API → BD/Redis → terceros, y quién toca qué.</li>
+            <li><strong>STRIDE</strong>: generas las amenazas sistemáticamente.</li>
+            <li><strong>Prioriza y mitiga</strong>: probabilidad × impacto.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 id="stride">STRIDE</h2>
+          <table class="lesson-table">
+            <thead>
+              <tr><th>Letra</th><th>Amenaza</th><th>Ejemplo</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>S</td><td>Spoofing</td><td>Suplantar un usuario con tokens robados</td></tr>
+              <tr><td>T</td><td>Tampering</td><td>Alterar un precio entre cliente y servidor</td></tr>
+              <tr><td>R</td><td>Repudiation</td><td>Negar haber hecho un pedido (sin logs)</td></tr>
+              <tr><td>I</td><td>Information disclosure</td><td>Leer datos ajenos por IDOR</td></tr>
+              <tr><td>D</td><td>Denial of service</td><td>Inundar el login sin rate-limit</td></tr>
+              <tr><td>E</td><td>Elevation of privilege</td><td>Escalar a admin por fallo de sesión</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2 id="matriz">Priorizar con una matriz</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Plantilla</span></div>
+            <div class="code-block__body">
+              <pre><code>TABLA DE RIESGOS
+| # | Activo        | STRIDE | Impacto (1-5) | Prob. (1-5) | Riesgo | Mitigacion            |
+|---|--------------|--------|---------------|-------------|--------|-----------------------|
+| 1 | Token JS     | S      | 4             | 3           | 12     | httpOnly + short ttl  |
+| 2 | Precio pedido| T      | 5             | 4           | 20     | revalidar en backend  |
+| 3 | Credenciales | I      | 5             | 2           | 10     | bcrypt/argon2 + audit |
+| 4 | Login        | D      | 3             | 5           | 15     | rate limiting         |</code></pre>
+            </div>
+          </figure>
+          <p>Riesgo = impacto × probabilidad. Ataca primero los de puntuación alta y los de bajo costo.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Dibuja tu sistema con sus flujos de datos.</li>
+            <li>Genera 8 amenazas con STRIDE, una por letra al menos.</li>
+            <li>Clasifícalas en la matriz y elige las 2 primeras a mitigar.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Modelar = entender qué puede fallar antes de que falle.</li>
+            <li>Activos → diagrama → STRIDE → matriz de riesgo.</li>
+            <li>STRIDE sistematiza las categorías de amenaza.</li>
+            <li>Prioriza por impacto × probabilidad.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="minimo-privilegio-y-defensa-profunda.html">Mínimo privilegio y defensa profunda</a>
+            <a class="related-lessons__link" href="superficies-de-ataque.html">Superficies de ataque</a>
+            <a class="related-lessons__link" href="owasp-top-10.html">OWASP Top 10</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

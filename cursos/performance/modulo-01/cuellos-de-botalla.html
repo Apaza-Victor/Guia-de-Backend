@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m1-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identificar cuellos de botella · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a identificar cuellos de botella en CPU, memoria, I/O y red: qué herramienta usar para cada recurso y cómo leer los síntomas antes de optimizar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m1-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Identificar cuellos de botella</span>
+      </nav>
+      <h1 class="lesson-title">Identificar cuellos de botella</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Medir rendimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando un servicio se degrada, alguien tiene que responder «¿qué recurso se agotó?». La respuesta cae casi siempre en una de cuatro categorías: <strong>CPU</strong>, <strong>memoria</strong>, <strong>I/O</strong> (disco y red) o <strong>red/otra dependencia</strong>. Cada una tiene síntomas distintos y herramientas distintas. Confundirlas es la principal causa de optimizaciones que no arreglan nada.</p>
+        <p>La idea central: <strong>un sistema va a la velocidad de su recurso más escaso</strong>. Tú solo tienes que descubrir cuál es.</p>
+      </section>
+
+      <section>
+        <h2 id="cpu">Cuello de botella: CPU</h2>
+        <p>El procesador está al 100% y las peticiones se encolan. Síntomas clásicos: más CPU del servidor (o del contenedor) que se consume, las colas crecen, y subir la máquina mejora el rendimiento (escalado vertical ayuda). Este patrón indica lógica pesada: cálculo, serialización, regex, cifrado o ineficiencias de algoritmo.</p>
+        <p>En el servidor, el diagnóstico empieza por medir y ver qué hilo consume:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Uso de CPU en tiempo real. La columna %CPU alta de un proceso = CPU-bound
+top -b -n 1 | head -20
+#   PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+# 28401 root      20   0  482M  120M   42M R 100.0   0.6 812:07.12 node build.js
+
+# Historial de carga del sistema (load average de 1/5/15 min)
+uptime
+#  14:02:11 up 12 days,  3:21,  2 users,  load average: 3.4, 2.9, 2.1
+
+# VMSTAT: %us = usuario, %sy = sistema, wa = esperando I/O
+vmstat 1 5
+# procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+#  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+#  5  0      0  81240  18000 220000    0    0   300   100  500  900 70 15 10  5  0</code></pre>
+        <p>Regla rápida: <code>r</code> (processes en cola de JIT en <code>vmstat</code>) mayor que el número de núcleos es señal de cola de CPU; <code>us</code> alto = tu código; <code>sy</code> alto = syscalls/sistemas (context switches, red); <code>wa</code> alto = disco.</p>
+      </section>
+
+      <section>
+        <h2 id="memoria">Cuello de botella: memoria</h2>
+        <p>La memoria se agota de dos formas: <strong>pico</strong> (una petición que carga todo a RAM de golpe) y <strong>fuga</strong> (crecimiento lento hasta el swap o el OOM-kill). Síntomas: swap activo, procesos que empiezan a ralentizarse mientras el disco se llena de intercambio, y muertes súbitas por Out-Of-Memory.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Uso de memoria por proceso y total
+free -h
+#               total        used        free      shared  buff/cache   available
+# Mem:           16Gi       12.1Gi       774Mi       342Mi       3.1Gi       3.4Gi
+# Swap:          2.0Gi       1.8Gi       220Mi     <-- swap lleno = problema real
+
+# ¿Qué procesos comen más? RES = memoria residente en RAM
+ps aux --sort=-%mem | head -8
+# USER  PID %CPU %MEM VSZ  RSS COMMAND
+# root 28401 100 62.1 32G 9.8G node src/server.js</code></pre>
+        <p>Para fugas: perfila el heap (Node: <code>--heap-prof</code>; Python: tracemalloc) y dispara el mismo camino de código mil veces —una fuga se detecta porque la línea base de memoria no vuelve a bajar.</p>
+      </section>
+
+      <section>
+        <h2 id="io">Cuello de botella: I/O de disco</h2>
+        <p>El disco es decenas de miles de veces más lento que la RAM. Cuando <code>wa</code> (wait I/O) se dispara, hay un servicio escribiendo o leyendo de forma desmedida: logging excesivo, archivos temporales, o una base de datos sin índices que hace full-scans a disco (añade «tópico» con la lección de optimización de BD).</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Lectura/escritura por dispositivo y % de utilización
+iostat -x 1 3
+# Device            r/s     w/s     rMB/s     wMB/s   %util  await
+# sda             125.0    45.0      8.2       2.3     98.0  25.4  <-- %util al límite
+
+# ¿Qué proceso escribe? (respuesta casi siempre: tu logging o la BD)
+lsof -Pt 2 | awk '$8>1000000 {print $1, $8}' | head</code></pre>
+        <p>Cuando el disco es el límite, las optimizaciones de código no sirven: la respuesta es escribir menos (menos logs), leer menos (caché, índices) o mover datos a I/O asíncrono.</p>
+      </section>
+
+      <section>
+        <h2 id="red">Cuello de botella: red y dependencias</h2>
+        <p>A veces el más difícil de ver: el servicio responde bien localmente, pero en producción va lento. La latencia se va en la <strong>red</strong> —RTT al cliente, ancho de banda, DNS— o en una <strong>dependencia externa</strong> (una API de pagos, una cola remota) que no cumple su parte. Herramientas: <code>curl -w</code> (desglosa tiempos de red), traceroute, y, sobre todo, el trazado distribuido para saber a quién le estás esperando.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Desglose de tiempos de una petición HTTP
+curl -s -o /dev/null -w \
+  "DNS: %{time_namelookup}s
+   Conectar: %{time_connect}s
+   TTFB: %{time_starttransfer}s
+   Total: %{time_total}s
+   Bytes: %{size_download}\n" \
+  https://api.mi-servicio.com/usuarios/42
+
+# Si TTFB - Conectar es grande -> el servidor tarda en responder (o su dependencia tarda)
+# Si Conectar es grande -> problema de red al servidor, no del servidor</code></pre>
+        <p>El consejo operativo: si el % de tiempo de red es dominante, más CPU local no arregla nada; se resuelve acercando el contenido (CDN, módulo 3) o pidiendo al proveedor externo que cumpla su SLO.</p>
+      </section>
+
+      <section>
+        <h2 id="prioridad">Orden de actuación</h2>
+        <p>Diagnosticar antes de optimizar es media batalla. Secuencia recomendada cuando algo va lento:</p>
+        <ol>
+          <li>Reproduce con una pruebas de carga (ya sabes hacerlas).</li>
+          <li>Mira CPU/memoria/I/O/red del servidor <em>durante</em> la prueba.</li>
+          <li>Identifica el recurso saturado al 100% y queda atrapado hasta ahí.</li>
+          <li>Ese recurso marca la solución: CPU → perfil y optimiza código; memoria → capa cache y streaming; disco → caché e índices; red → CDN y dependencias.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Corre <code>vmstat 1 5</code> y <code>top</code> en una máquina con tu servicio desplegado durante una prueba de carga. Anota <code>us</code>, <code>wa</code>, <code>r</code> y el %MEM de tu proceso.</li>
+          <li>Clasifica tu servicio en una de las cuatro categorías de cuello de botella con esos números.</li>
+          <li>Responde: «¿es mejor invertir en más CPU, más RAM, un índice en la BD o una CDN?». Tu respuesta debe salir de los datos del punto 2.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Cuatro cuellos de botella típicos: CPU, memoria, disco (I/O) y red/dependencias.</li>
+          <li>CPU alta con <code>us</code> alto → optimiza código; con <code>wa</code> alto → el disco es el siguiente.</li>
+          <li>Memoria: distingue pico de fuga; swap lleno es bandera roja inmediata.</li>
+          <li>Disco: logs, archivos temporales y full-scans de BD son los sospechosos principales.</li>
+          <li>Red/dependencias: el desglose de <code>curl -w</code> y el trazado distribuido te dicen a quién esperas.</li>
+          <li>Diagnostica el recurso saturado antes de elegir la solución: cada cuello tiene un remedio distinto.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-performance-backend.html">¿Qué es performance?</a>
+          <a class="related-lessons__link" href="benchmarking-y-perfiles.html">Benchmarking y perfiles</a>
+          <a class="related-lessons__link" href="../modulo-02/optimizacion-de-bases-de-datos.html">Optimizar bases de datos</a>
+          <a class="related-lessons__link" href="../modulo-02/concurrencia-y-asincronia.html">Concurrencia y asincronía</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

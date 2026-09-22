@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m5-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Node con Postgres · Docker para Backend · Backend Academy</title>
+<meta name="description" content="El patrón clásico: API + Postgres en Compose, conexión por DNS de servicio, volume para datos, healthcheck que espera a la BD y un reto conectado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m5-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">API Node con Postgres</span>
+      </nav>
+      <h1 class="lesson-title">API Node con Postgres</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Docker en el Backend</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="compose">El compose de un backend real</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML · compose.yml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">services:
+  api:
+    build: .
+    environment:
+      DB_HOST: postgres        # = nombre de servicio, NO "localhost"
+      DB_PORT: 5432
+      DB_USER: app
+      DB_PASSWORD: ${DB_PASSWORD:-appdev}
+      DB_NAME: appdb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: ["3000:3000"]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-appdev}
+      POSTGRES_DB: appdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="conexion">Conectar bien (NO localhost)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JS · db.js</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript">import pg from "pg";
+
+const { Pool } = pg;
+
+export const pool = new Pool({
+  host: process.env.DB_HOST,      // "postgres", resuelto por DNS de la red
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  max: 10,
+  connectionTimeoutMillis: 3000,
+});</code></pre>
+          </div>
+        </figure>
+        <p>Dentro de la red de Compose, cada servicio tiene su dominio: el PostgreSQL del ejemplo es <code>postgres</code>, y el Redis del próximo tema será <code>redis</code>. Nada de IPs fijas.</p>
+      </section>
+
+      <section>
+        <h2 id="esperar">Esperar a la BD sin "sleep 30"</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">depends_on + condition: service_healthy espera al healthcheck
+de postgres ANTES de arrancar la API.
+Aun así, es normal que la migración tarde unos segundos más:
+la API reintenta la conexión y recién después levanta el server.</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JS · server.js (fragmento)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript">async function start() {
+  let ok = false;
+  for (let i = 0; i &lt; 10 &amp;&amp; !ok; i++) {
+    try { await pool.query("SELECT 1"); ok = true; }
+    catch { await sleep(1000); }
+  }
+  if (!ok) { console.error("BD no disponible"); process.exit(1); }
+  app.listen(3000, "0.0.0.0", () =&gt; console.log("api lista"));
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="probar">Probar el stack entero</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">docker compose up -d --wait     # espera a que todos estén healthy
+docker compose ps                # api: Up (healthy)
+curl localhost:3000/health       # {"status":"ok","db":"up"}
+
+docker compose exec postgres psql -U app -d appdb -c "SELECT 1"
+docker compose down -v           # borra TODO, incl. el volumen pg_data</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="migraciones">¿Y las migraciones?</h2>
+        <ul>
+          <li><strong>Entrada del DB init:</strong> para seed y esquemas iniciales, <code>docker-entrypoint-initdb.d</code> (solo corre la primera vez).</li>
+          <li><strong>Migraciones de verdad:</strong> corre un <em>job</em> en Compose (<code>command: npx prisma migrate deploy</code>) que depende de la BD healthy y luego sale.</li>
+          <li>Nunca supongas que un cambio llegó por casualidad: decláralo en el job, no lo des por hecho.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta el compose y verifica /health con la BD arriba.</li>
+          <li>Entra a Postgres desde el host sin publicar su puerto: <code>compose exec</code>.</li>
+          <li>Haz un <code>down -v</code> y confirma que se recrea limpio.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La API conecta al servicio por su nombre: <code>postgres</code>, nunca localhost.</li>
+          <li>healthcheck + <code>condition: service_healthy</code> ordenan el arranque.</li>
+          <li>Los datos viven en el volumen <code>pg_data</code>.</li>
+          <li>Migraciones = job declarado en Compose, no magia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="dockerizando-una-api-node.html">Dockerizando una API Node</a>
+          <a class="related-lessons__link" href="../modulo-03/bases-de-datos-con-volumenes.html">Bases de datos con volúmenes</a>
+          <a class="related-lessons__link" href="healthchecks-y-arranque.html">Healthchecks y arranque</a>
+          <a class="related-lessons__link" href="index.html">Módulo 5 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

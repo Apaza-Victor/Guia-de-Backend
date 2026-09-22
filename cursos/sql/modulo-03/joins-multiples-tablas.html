@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="joins-multiples-tablas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JOINs con múltiples tablas · SQL · Backend Academy</title>
+<meta name="description" content="Aprende a combinar tres o más tablas en SQL con tablas puente: encadenar INNER JOINs, aliases claros y ejemplos de todos los JOINs juntos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="joins-multiples-tablas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3 · JOINs</a><span class="sep">/</span>
+          <span class="current">JOINs con múltiples tablas</span>
+        </nav>
+        <h1 class="lesson-title">JOINs con múltiples tablas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · JOINs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Un reporte real rara vez vive en dos tablas: clientes → pedidos → productos, o tiendas → stock → artículos. La técnica es la misma de siempre, aplicada en cadena: <strong>unir dos, luego dos más</strong>.</p>
+        </section>
+
+        <section>
+          <h2 id="cadena">Encadenar JOINs</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- clientes → pedidos → pedido_productos → productos
+SELECT c.nombre, p.id AS pedido, pr.nombre AS producto, pp.cantidad
+FROM clientes c
+INNER JOIN pedidos p          ON p.cliente_id = c.id
+INNER JOIN pedido_productos pp ON pp.pedido_id = p.id
+INNER JOIN productos pr        ON pr.id = pp.producto_id;</code></pre>
+            </div>
+          </figure>
+          <p>El orden del motor ya no importa (el optimizador lo decide); lo que importa es la <strong>condición de unión</strong> en cada salto. El esquema N:M obliga a pasar por la tabla puente.</p>
+        </section>
+
+        <section>
+          <h2 id="orden">El sentido de la cadena</h2>
+          <p>Piensa en el flujo de llaves:</p>
+          <ul>
+            <li><code class="inline">pedidos</code> enlaza con <code class="inline">clientes</code> por <code class="inline">cliente_id</code>.</li>
+            <li><code class="inline">pedido_productos</code> enlaza con <code class="inline">pedidos</code> por <code class="inline">pedido_id</code>.</li>
+            <li><code class="inline">pedido_productos</code> enlaza con <code class="inline">productos</code> por <code class="inline">producto_id</code>.</li>
+          </ul>
+          <p>Cada JOIN necesita su clave; en una tabla puente salen <strong>dos</strong> condiciones.</p>
+        </section>
+
+        <section>
+          <h2 id="mezcla">Mezclar tipos de JOIN</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Todos los clientes, sus pedidos y productos de esos pedidos
+SELECT c.nombre, p.id, pr.nombre
+FROM clientes c
+LEFT JOIN pedidos p          ON p.cliente_id = c.id
+LEFT JOIN pedido_productos pp ON pp.pedido_id = p.id
+LEFT JOIN productos pr        ON pr.id = pp.producto_id
+
+-- Clientes sin pedido siguen saliendo, con NULLs.</code></pre>
+            </div>
+          </figure>
+          <p>Regla práctica: si quieres conservar un lado entero de la punta, propaga el LEFT encadenado. Si mezclas INNER después de un LEFT, te «recortas» de nuevo a la intersección.</p>
+        </section>
+
+        <section>
+          <h2 id="practica">El kit del día a día</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Facturado por producto: 4 tablas, una agregación
+SELECT pr.nombre, SUM(pp.cantidad * pr.precio) AS ingresos
+FROM productos pr
+INNER JOIN pedido_productos pp ON pp.producto_id = pr.id
+INNER JOIN pedidos p           ON p.id = pp.pedido_id
+INNER JOIN clientes c          ON c.id = p.cliente_id
+WHERE p.estado = 'pagado'
+GROUP BY pr.id, pr.nombre
+ORDER BY ingresos DESC;
+
+-- Ojo: un catálogo de productos nunca vendidos requiere LEFT + IS NULL.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="errores">Errores habituales</h2>
+          <ul>
+            <li>Saltarte la tabla puente (unir productos y pedidos directamente = duplicación o error).</li>
+            <li>Alias ambiguos: dos tablas con <code class="inline">nombre</code>; califica siempre la columna.</li>
+            <li>Sumar antes de agrupar (SUM de una fila repetida cuenta de más).</li>
+            <li>Dejar un LEFT injustificado que «ruge» el reporte.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Construye el reporte «clientes → pedidos → productos» con 4 tablas.</li>
+            <li>Cambia la punta a LEFT y comprueba que los clientes sin pedido muestran NULL.</li>
+            <li>Añade el total facturado por cliente con una agregación.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Los JOINs se encadenan: cada salto necesita su clave.</li>
+            <li>La tabla puente habilita relaciones N:M.</li>
+            <li>Propaga LEFT encadenado si quieres conservar un lado entero.</li>
+            <li>Califica columnas con alias y agrega con cuidado.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="inner-join.html">INNER JOIN</a>
+            <a class="related-lessons__link" href="left-right-join.html">LEFT y RIGHT JOIN</a>
+            <a class="related-lessons__link" href="../modulo-02/group-by.html">Agrupando con GROUP BY</a>
+            <a class="related-lessons__link" href="../../bases-datos/modulo-04/relaciones-uno-muchos.html">Relaciones 1:N y N:M</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

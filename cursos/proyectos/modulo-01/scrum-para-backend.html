@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-scrum-para-backend">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrum aplicado a backend · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a aplicar Scrum a un equipo de backend: sprints, roles, ceremonias y cómo convertir historias de usuario en historias técnicas de servidor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-scrum-para-backend"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Scrum aplicado a backend</span>
+      </nav>
+      <h1 class="lesson-title">Scrum aplicado a backend</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de gestión</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es-scrum">Qué es Scrum</h2>
+        <p><strong>Scrum</strong> es un marco de trabajo para desarrollar, entregar y sostener productos complejos sobre ciclos cortos llamados <strong>sprints</strong>. No prescribe <em>cómo programar</em>: prescribiría la caja de ritmo que obliga al equipo a planear, ejecutar, inspeccionar y adaptarse cada pocas semanas.</p>
+        <p>Para un equipo de backend, el sprint es el «pulso» del proyecto: define qué se promete, cuánto se entrega y qué tan rápido se adquiere feedback real del producto.</p>
+      </section>
+
+      <section>
+        <h2 id="roles">Los tres roles</h2>
+        <ul>
+          <li><strong>Product Owner (PO):</strong> dueño del backlog y del valor de negocio. Decide prioridades y aclara el «para qué». No necesariamente sabe SQL ni Docker, y no hace falta.</li>
+          <li><strong>Scrum Master:</strong> cuidador del proceso. Quita bloqueos, facilita ceremonias y protege al equipo de compromisos imposibles. A veces rota entre miembros.</li>
+          <li><strong>Equipo de desarrollo:</strong> backend, DevOps, QA técnico. Son auto-organizados: el equipo decide <em>cómo</em> se cumple el compromiso del sprint.</li>
+        </ul>
+        <p>La frontera entre roles es donde más se aprende en un backend: el PO sabe que «notificaciones push» tardan, pero no porque sí; el equipo sabe explicarle el porqué (proveedor, certificados, colas) sin tecnicismos inútiles.</p>
+      </section>
+
+      <section>
+        <h2 id="ceremonias">Las ceremonias: qué pasa en cada una</h2>
+        <ol>
+          <li><strong>Sprint Planning:</strong> el equipo elige un compromiso alcanzable del backlog y lo descompone en tareas. Planear es la única forma de saber si el sprint cabe.</li>
+          <li><strong>Daily:</strong> reunión corta (15 min) de sincronización: qué hice, qué haré, qué me bloquea. No es un reporte al jefe; es un radar de riesgos.</li>
+          <li><strong>Sprint Review:</strong> demostración y ajuste del producto con el PO. En backend, el criterio es «lo que se pudo desplegar», no «lo que se programó».</li>
+          <li><strong>Retrospectiva:</strong> mejora del proceso. Aquí salen decisas como «probemos trunk-based» o «reduzcamos el WIP».</li>
+        </ol>
+        <p>El detalle poco obvio: las ceremonias son <strong>inspección y adaptación</strong>. Si una se repite sin producir cambios, deja de ser útil y el equipo debe ajustarla o eliminarla.</p>
+      </section>
+
+      <section>
+        <h2 id="historias-tecnicas">Historias técnicas: cuando el usuario es el sistema</h2>
+        <p>No todo es una user story dirigida a un cliente. El backend tiene trabajo que beneficia al producto pero no al usuario final directamente: migraciones, índices, integraciones, refactors, seguridad. En Scrum estas se agregan al backlog igual que cualquier otra y se negocian con el PO.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "sprint": 14,
+  "capacidad": 34,
+  "items": [
+    { "id": "PYM-211", "tipo": "historia", "titulo": "Listar movimientos paginados", "puntos": 5 },
+    { "id": "PYM-212", "tipo": "historia", "titulo": "Cancelar suscripción (webhook)", "puntos": 8 },
+    { "id": "PYM-215", "tipo": "tecnica", "titulo": "Índice compuesto para conciliación", "puntos": 3 },
+    { "id": "PYM-216", "tipo": "tecnica", "titulo": "Spike: latencia del CDN en uploads", "puntos": 2 },
+    { "id": "PYM-217", "tipo": "deuda", "titulo": "Migrar cliente HTTP a retries con backoff", "puntos": 5 },
+    { "id": "PYM-218", "tipo": "bug", "titulo": "Corregir doble cargo por retry sin idempotencia", "puntos": 8 }
+  ]
+}</code></pre>
+        <p><strong>Spike:</strong> una historia de investigación acotada en el tiempo. Sirve para responder una pregunta técnica (¿funciona el SDK? ¿cuánto cuesta esa API? ¿qué orden de magnitud tiene?) y es honesta: su entregable es <em>información</em>, no código.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion-de-terminado">Definición de Terminado para backend</h2>
+        <p>La <strong>Definición de Terminado</strong> (DoD) es el contrato invisible del sprint: los criterios que una historia debe cumplir para contarse como entregada. Un DoD típico a nivel de servidor incluye:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Definición de Terminado (DoD) del equipo backend
+# [ ] Código revisado en PR por al menos un par
+# [ ] CI verde (lint + tests unitarios + tests de integración)
+# [ ] Migración de base de datos versionada y aplicada en staging
+# [ ] Cobertura del flujo crítico con test de integración
+# [ ] Documentación del endpoint/contrato actualizada
+# [ ] Desplegado en staging y verificado con datos reales
+# [ ] Sin secretos en el repositorio (revisión de .env*)
+
+# Verificación rápida en la terminal
+git diff --name-only --diff-filter=AM '*.env*' . | xargs -I{} echo "revisar: {}"
+npm run lint && npm test && npm run test:integration</code></pre>
+        <p>La potencia de una DoD escrita es que evita las discusiones de fin de sprint: «¿"listo" es que probaste el endpoint o que lo desplegaste?». Respondido de antemano.</p>
+      </section>
+
+      <section>
+        <h2 id="proyeccion">Medir el ritmo con la velocidad</h2>
+        <p>Al terminar el sprint se suman los puntos efectivamente completados. Esa cifra —la <strong>velocidad</strong>— es la materia prima del planning siguiente: si tu equipo promedia 34 puntos con 5 personas, comprometerse a 60 es futuro doom.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">velocidades = [34, 38, 31, 36, 33]
+
+def proyeccion(velocidades, sprints_restantes):
+    promedio = sum(velocidades) / len(velocidades)
+    return promedio * sprints_restantes
+
+# La velocidad es histórica, no una promesa moral
+print(proyeccion(velocidades, sprints_restantes=4))  # ~137 puntos</code></pre>
+        <p>La velocidad es un dato estadístico, no un KPI para castigar al equipo. Si usas el gráfico como vara, el equipo subestimará y perderá tu dato más valioso.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe el backlog de un sprint propio con al menos 6 items y sepáralos por tipo: historia, técnica, deuda y bug.</li>
+          <li>Redacta la Definición de Terminado de tu equipo en 7 puntos, incluyendo verificación real (CI, staging, revisión de secretos).</li>
+          <li>Calcula la velocidad promedio de 4 sprints pasados y decide cuántos puntos puedes comprometer para el próximo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Scrum estructura el trabajo en sprints con roles definidos y ceremonias de inspección y adaptación.</li>
+          <li>El equipo backend también pone historias técnicas, spikes y deuda en el backlog y las negocia con el PO.</li>
+          <li>La Definición de Terminado evita discusiones: establece qué significa «listo» para código de servidor.</li>
+          <li>La velocidad histórica guía el planning del siguiente sprint; se usa como dato, no como castigo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="metodologias-agiles.html">Metodologías ágiles</a>
+          <a class="related-lessons__link" href="requisitos-y-aclaraciones.html">Requerimientos y aclaraciones</a>
+          <a class="related-lessons__link" href="../modulo-02/planificacion-de-sprints.html">Planificación de sprints</a>
+          <a class="related-lessons__link" href="../modulo-02/deuda-tecnica.html">Deuda técnica</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="metodologias-agiles.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Metodologías ágiles</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="requisitos-y-aclaraciones.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Requerimientos y aclaraciones</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m3-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consumer groups y rebalanceo · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Domina consumer groups en Kafka: balanceo de carga, asignación de particiones, rebalancing, assignors, lag del consumidor y juicio para escalar consumidores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m3-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Consumer groups y rebalanceo</span>
+      </nav>
+      <h1 class="lesson-title">Consumer groups y rebalanceo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Kafka y event streaming</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Kafka no reparte los eventos a consumidores sueltos: los agrupa en <strong>consumer groups</strong>. Todos los miembros del grupo comparten la carga del topic —cada partición la procesa un único miembro— y los grupos diferentes leen el topic de forma independiente, como suscripciones distintas.</p>
+        <p>Este modelo resuelve el problema «colas + broadcast» de una vez: un grupo se comporta como una cola (2.º consumidor del grupo); dos grupos se comportan como pub/sub (cada grupo recibe todo).</p>
+      </section>
+
+      <section>
+        <h2 id="equilibrio">El equilibrio del grupo</h2>
+        <p>La regla de oro: <strong>toda partición es consumida por exactamente un miembro del grupo</strong>. Con 12 particiones:</p>
+        <ul>
+          <li>1 consumidor → consume las 12 particiones (poco paralelo).</li>
+          <li>3 consumidores → 4 particiones cada uno.</li>
+          <li>12 consumidores → 1 partición cada uno (máximo equilibrio).</li>
+          <li>17 consumidores → 12 trabajan y 5 se quedan ociosas (sobra).</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># topic pedidos con 6 particiones, grupo "facturacion"
+# consumidor-1  -> particiones 0,1,2
+# consumidor-2  -> particiones 3,4,5
+# consumidor-3  -> (recién llegado) espera rebalanceo</code></pre>
+        <p>Aquí se aplica la regla de la lección anterior: los consumidores horizontales se añaden hasta el número de particiones; pasada esa cifra, no aceleras nada.</p>
+      </section>
+
+      <section>
+        <h2 id="grupos">Grupos: misma carga, configs distintas</h2>
+        <p>El mismo topic puede ser leído por varios grupos, cada uno con su propio offset. Es la analogía «topic» del módulo 1 llevada a Kafka:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { Kafka } = require('kafkajs');
+const kafka = new Kafka({ brokers: ['localhost:9092'] });
+
+// Grupo A: reconstruye el estado del pedido (reads del orden completo)
+const a = kafka.consumer({ groupId: 'estado-pedidos' });
+await a.subscribe({ topic: 'pedidos', fromBeginning: true });
+await a.run({ eachMessage: async ({ message }) =>
+  aplicarEstado(JSON.parse(message.value)) });
+
+// Grupo B: solo analítica (puede leer desde el inicio o lo nuevo)
+const b = kafka.consumer({ groupId: 'analitica' });
+await b.subscribe({ topic: 'pedidos', fromBeginning: false });
+await b.run({ eachMessage: async ({ message }) =>
+  registrarMetrica(JSON.parse(message.value)) });
+
+// Cada grupo lleva SU offset; el avance de B no afecta a A.</code></pre>
+      </section>
+
+      <section>
+        <h2 id="rebalanceo">El rebalanceo y sus momentos de pausa</h2>
+        <p>Cuando un miembro entra o sale del grupo (o se cae), Kafka detona un <strong>rebalancing</strong>: el coordinador (un broker) reparte las particiones de nuevo entre los miembros vivos. Durante ese lapso, <strong>las particiones no se consumen</strong> (revoked) y el grupo pierde progreso temporal.</p>
+        <ul>
+          <li><strong>Eager rebalance:</strong> todos revocan todo y se reasigna desde cero. Simple, pero con «stop the world».</li>
+          <li><strong>Cooperative sticky:</strong> solo se reasignan las particiones afectadas (mínima disrupción). Ideal para procesos de larga duración.</li>
+          <li><strong>Session timeout:</strong> si un miembro no manda heartbeat en el tiempo fijado, se declara muerto y se rebalancea.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const consumidor = kafka.consumer({
+  groupId: 'estado-pedidos',
+  sessionTimeout: 10000,          // 10 s sin heartbeat => muerto
+  heartbeatInterval: 3000,
+  rebalanceTimeout: 30000,
+  // kafkajs con retry configura el partitionAssigner
+});
+
+// cb en rebalance: pausa y commit antes de soltar las particiones
+await consumidor.subscribe({
+  topic: 'pedidos',
+  fromBeginning: true,
+  beforeEachRebalance: () => consumidor.commitOffsets() // flush de offsets
+});</code></pre>
+        <p>El consejo de oro: <strong>commitea los offsets antes de devolver el control</strong>. Así, al rebalancear, el grupo retoma exactamente donde se quedó y no reprocesa.</p>
+      </section>
+
+      <section>
+        <h2 id="lag">Medir el lag: el termómetro del grupo</h2>
+        <p>El <strong>lag</strong> es la distancia entre el último evento escrito y el offset de un consumidor. Un lag creciente = los productores van más rápido que los consumidores. Es la métrica que más alertas dispara en un clúster sano:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># kafka-consumer-groups.sh: ver lag por partición
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 \
+  --describe --group estado-pedidos
+
+# Salida típica:
+# GROUP           TOPIC    PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG
+# estado-pedidos  pedidos  0          10042           10050           8
+# estado-pedidos  pedidos  1          5001            5180            179
+# estado-pedidos  pedidos  2          88              90              2
+
+# Lag alto y constante => añade consumidores (o particiones)</code></pre>
+        <ul>
+          <li><strong>LAG ≈ 0:</strong> grupo al día. Todo bien.</li>
+          <li><strong>LAG moderado y decreciente:</strong> está recuperando un atraso; normal tras un pico.</li>
+          <li><strong>LAG creciente:</strong> el sistema se ahoga: escalar consumidores, optimizar el procesado o subir particiones.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="consejos">Consumidores en producción: checklist</h2>
+        <ul>
+          <li><code>group.id</code> estable y <em>semántico</em>: un grupo por «rol», no por instancia.</li>
+          <li>Commit manual después de persistir efectos (at-least-once + idempotencia).</li>
+          <li>Heartbeat corto y procesado que respete el <code>max.poll.interval.ms</code> (si tardas más, te expulsan del grupo). Divide el trabajo pesado en batches.</li>
+          <li>Observa lag y estado del grupo con alertas: es tu primera señal de problemas.</li>
+          <li>Con procesos de larga duración, usa rebalanceo cooperativo para no parar todo.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Error clásico:</strong> lanzar un consumidor por instancia dentro del mismo grupo con la intención de duplicar el throughput, cuando las particiones no llegan. La asignación no se multiplica; se reparte. Revisa primero el lag y las particiones.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un topic de 4 particiones y consume con un grupo de 1 consumidor; luego con 4 y con 6. Describe cómo cambia la asignación en cada caso usando <code>kafka-consumer-groups.sh --describe</code>.</li>
+          <li>Lanza un consumo lento (sleep por evento) y genera tráfico para ver crecer el LAG. Escala a 4 consumidores y observa la recuperación.</li>
+          <li>Responde: ¿qué le pasaría a un consumidor que tarda 15 minutos en un evento, si su <code>max.poll.interval.ms</code> es 300000? ¿Y a la partición que estaba consumiendo?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un group.id = una vista de la misma cola; varios groups = varias vistas (pub/sub).</li>
+          <li>Cada partición la consume un único miembro del grupo: el paralelismo lo limita el nº de particiones.</li>
+          <li>Rebalancing reparte particiones al entrar/salir miembros; commitear antes de soltar evita reprocesos.</li>
+          <li>El lag mide cuánto te atrasas: la métrica más importante del consumo.</li>
+          <li>Escala consumidores hasta igualar particiones; controla heartbeats y tiempos de proceso.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="productores-y-consumidores.html">Productores y consumidores</a>
+          <a class="related-lessons__link" href="particiones-y-claves.html">Particiones y claves</a>
+          <a class="related-lessons__link" href="../modulo-02/workers-y-prefetch.html">Workers y prefetch</a>
+          <a class="related-lessons__link" href="../modulo-01/colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

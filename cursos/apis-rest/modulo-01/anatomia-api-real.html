@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="anatomia-api-real">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La anatomía de una API real · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a diseccionar una API real: URL, método, cabeceras, cuerpo y respuesta, con cURL y ejemplos del mundo real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="anatomia-api-real"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1 · Fundamentos de APIs</a><span class="sep">/</span>
+          <span class="current">La anatomía de una API real</span>
+        </nav>
+        <h1 class="lesson-title">La anatomía de una API real</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="la-peticion">Una petición HTTP, desnuda</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP request</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/productos/42 HTTP/1.1
+Host: api.tienda.test
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+User-Agent: TiendaApp/2.4 (Android)</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Método:</strong> GET — qué operación pedimos.</li>
+            <li><strong>RUTA (objetivo):</strong> qué recurso (la URL sin dominio).</li>
+            <li><strong>Versión del protocolo:</strong> HTTP/1.1 (o HTTP/2, HTTP/3).</li>
+            <li><strong>Host:</strong> a qué servidor. <code>Accept:</code> qué formato aceptamos.</li>
+            <li><strong>Authorization:</strong> quién pide. <strong>User-Agent:</strong> qué cliente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="la-respuesta">La respuesta</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP response</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Length: 312
+Cache-Control: public, max-age=300
+ETag: "3f7a91c"
+
+{
+  "id": 42,
+  "nombre": "Auriculares inalámbricos",
+  "precio": 129.95,
+  "moneda": "EUR"
+}</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Status line:</strong> código 200 + frase. El estado del mundo.</li>
+            <li><strong>Content-Type:</strong> qué es el cuerpo. <strong>Content-Length:</strong> cuanto pesa.</li>
+            <li><strong>Cache-Control / ETag:</strong> decisiones de caché (módulo 3).</li>
+            <li><strong>Cuerpo:</strong> JSON. Puede no haber cuerpo (204, por ejemplo).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="verla-con-curl">Verlo con cURL, no con imaginación</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># Solo las cabeceras: -I
+curl -I "https://api.tienda.test/api/v1/productos/42"
+
+# Todo el tren, cabeceras y cuerpo: -i
+curl -i -H "Accept: application/json" \
+     "https://api.tienda.test/api/v1/productos/42"
+
+# Con autenticación y cuerpo en POST
+curl -X POST "https://api.tienda.test/api/v1/pedidos" \
+     -H "Authorization: Bearer eyJhbGciOi..." \
+     -H "Content-Type: application/json" \
+     -d '{"producto_id": 42, "cantidad": 2}'</code></pre>
+            </div>
+          </figure>
+          <p>cURL es tu estetoscopio para cualquier API: con él ves exactamente qué se manda y qué se recibe.</p>
+        </section>
+
+        <section>
+          <h2 id="anatomia-endpoint">Anatomía de un endpoint</h2>
+          <p>Un <strong>endpoint</strong> = método + ruta (+ parámetros de ruta). El mismo recurso con verbos distintos es cuatro operaciones distintas.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET    /api/v1/productos        → colección
+GET    /api/v1/productos/42     → elemento
+POST   /api/v1/productos        → crear
+PUT    /api/v1/productos/42     → reemplazar
+DELETE /api/v1/productos/42     → eliminar</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Base URL:</strong> <code>https://api.tienda.test/api/v1</code>.</li>
+            <li><strong>Parámetros de ruta:</strong> <code>/productos/42</code> selecciona uno.</li>
+            <li><strong>Query params:</strong> <code>?page=2&limit=10&sort=precio</code> afinan la colección.</li>
+            <li>Consistencia total: mismo patrón en TODOS los recursos (módulo 3·5).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="api-flagship">Una API real que puedes tocar</h2>
+          <p>Ejemplos reales de Big Tech que muestran la anatomía hasta aquí:</p>
+          <ul>
+            <li><strong>GitHub REST API:</strong> <code>GET https://api.github.com/repos/{owner}/{repo}</code>.</li>
+            <li><strong>Stripe API:</strong> <code>https://api.stripe.com/v1/customers</code>.</li>
+            <li><strong>OpenWeather:</strong> <code>https://api.openweathermap.org/data/2.5/weather?q=Madrid</code>.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Con tu navegador visita un endpoint JSON público y observa la respuesta.</li>
+            <li>Usa <code>curl -i</code> en la terminal contra una API de prueba del curso.</li>
+            <li>Anota las partes de la petición y de la respuesta que aparecen.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Petición: método + ruta + host + cabeceras (+ cuerpo).</li>
+            <li>Respuesta: status line + cabeceras + cuerpo (JSON).</li>
+            <li>Endpoint = método + ruta (+ params).</li>
+            <li>cURL muestra el tren completo: verifica siempre lo que sucede por el cable.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="que-es-una-api.html">¿Qué es una API y para qué sirve?</a>
+            <a class="related-lessons__link" href="../modulo-02/metodos-http.html">Métodos HTTP</a>
+            <a class="related-lessons__link" href="../modulo-02/codigos-estado.html">Códigos de estado</a>
+            <a class="related-lessons__link" href="../modulo-02/cabeceras-peticion-respuesta.html">Cabeceras HTTP</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polimorfismo, abstracción e interfaces · Programación para Backend · Backend Academy</title>
+<meta name="description" content="Diseñar código flexible: interfaces, clases abstractas y comportamiento polimórfico.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css"></head>
+<body class="app-shell">
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html" aria-label="Backend Academy - Inicio">
+      <span class="brand__logo" aria-hidden="true"><i class="fa-solid fa-code"></i></span>
+      <span>Backend Academy<small>aprende a programar</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../cursos/proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle btn btn--icon" type="button" aria-label="Cambiar a modo oscuro">
+        <i class="fa-solid fa-moon" data-mode="light" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="lesson-layout lesson-layout--with-toc container">
+<aside class="sidebar" aria-label="Contenido del curso Programación para Backend">
+  <div class="sidebar__section">
+    <a class="sidebar__title" href="../../../cursos/programacion/index.html">Programación para Backend</a>
+    <div class="progress" data-progress="programacion" aria-label="Progreso del curso">
+      <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+      <span class="progress__label">0%</span>
+    </div>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Fundamentos de programación</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="variables-y-constantes" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="tipos-de-datos" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="operadores" href="../../../cursos/programacion/modulo-01/operadores.html">Operadores y expresiones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conversion-de-tipos" href="../../../cursos/programacion/modulo-01/conversion-de-tipos.html">Conversión de tipos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="entrada-salida" href="../../../cursos/programacion/modulo-01/entrada-salida.html">Entrada, salida y comentarios<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Control de flujo</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="condicionales" href="../../../cursos/programacion/modulo-02/condicionales.html">Condicionales: if, else y elseif<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="condicional-switch" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-while" href="../../../cursos/programacion/modulo-02/bucles-while.html">Bucles while y do-while<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-for-foreach" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="break-continue" href="../../../cursos/programacion/modulo-02/break-continue.html">break y continue: control fino de bucles<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Funciones</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="funciones" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="parametros-y-argumentos" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">Parámetros y argumentos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="ambito-de-variables" href="../../../cursos/programacion/modulo-03/ambito-de-variables.html">Ámbito (scope) de las variables<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="funciones-anonimas-callbacks" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="recursividad" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Estructuras de datos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="arrays" href="../../../cursos/programacion/modulo-04/arrays.html">Arrays: la base de los datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="arrays-asociativos" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conjuntos" href="../../../cursos/programacion/modulo-04/conjuntos.html">Conjuntos y colecciones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="objetos" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="estructuras-anidadas" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group is-open">
+    <h3 class="sidebar__group-title"><span>Programación Orientada a Objetos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="clases-y-objetos" href="../../../cursos/programacion/modulo-05/clases-y-objetos.html">Clases y objetos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="atributos-metodos-constructores" href="../../../cursos/programacion/modulo-05/atributos-metodos-constructores.html">Atributos, métodos y constructores<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="encapsulamiento" href="../../../cursos/programacion/modulo-05/encapsulamiento.html">Encapsulamiento: public, private y protected<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="herencia" href="../../../cursos/programacion/modulo-05/herencia.html">Herencia<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link is-active" data-lesson-id="polimorfismo-abstraccion-interfaces" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html" aria-current="page">Polimorfismo, abstracción e interfaces<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Código profesional</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="modularizacion" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="clean-code" href="../../../cursos/programacion/modulo-06/clean-code.html">Clean Code<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="principios-solid" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="dry-kiss" href="../../../cursos/programacion/modulo-06/dry-kiss.html">DRY y KISS<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="debugging" href="../../../cursos/programacion/modulo-06/debugging.html">Debugging y herramientas<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="manejo-de-errores" href="../../../cursos/programacion/modulo-06/manejo-de-errores.html">Manejo de errores y excepciones<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>  <div class="sidebar-footer">
+    <span><i class="fa-solid fa-code" aria-hidden="true"></i> Ejemplos en PHP 8.</span>
+    <a href="../../../cursos/programacion/index.html">Ver índice del curso</a>
+  </div>
+</aside>
+  <main class="lesson-main" id="main">
+<nav class="lesson-crumbs" aria-label="Ruta de navegación">
+  <a href="../../../index.html">Inicio</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../aprender/index.html">Cursos</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/index.html">Programación para Backend</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/modulo-05/index.html">módulo 05</a><span class="sep" aria-hidden="true">/</span>
+  <span class="current" aria-current="page">Polimorfismo, abstracción e interfaces</span>
+</nav>
+    <article class="lesson-article" data-lesson-id="polimorfismo-abstraccion-interfaces">
+      <header class="lesson-hero">
+        <h1 class="lesson-title">Polimorfismo, abstracción e interfaces</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-code" aria-hidden="true"></i> PHP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Programación Orientada a Objetos</span>
+          <label class="complete-toggle"><input type="checkbox"><span class="complete-toggle__box" aria-hidden="true">✓</span> Marcar como completada</label>
+        </div>
+      </header>
+      <div class="lesson-content">
+<section id="introduccion" aria-labelledby="introduccion-t">
+  <h2 id="introduccion-t">Introducción</h2>
+  <p>Llega la joya del diseño orientado a objetos: poder escribir código que funciona con muchas clases distintas sin conocer su tipo concreto. Eso es <strong>polimorfismo</strong>, y se logra con <strong>interfaces</strong> y <strong>clases abstractas</strong>.</p>
+</section><section id="definicion" aria-labelledby="definicion-t">
+  <h2 id="definicion-t">Definición</h2>
+  <p>Una <strong>interfaz</strong> declara métodos que las clases deben implementar (contrato sin código): <code class="inline">interface Repositorio { public function guardar(array $d): void; }</code>. Una <strong>clase abstracta</strong> separa implementación concreta y casos base: puede tener métodos implementados y <strong>métodos abstractos</strong> que las hijas deben completar. <strong>Polimorfismo</strong> = tratar objetos distintos por su interfaz común, de modo que <code class="inline">$factory-&gt;crear(...)</code> responda según la instancia real.</p>
+</section><section id="conceptos-clave" aria-labelledby="conceptos-clave-t">
+  <h2 id="conceptos-clave-t">Conceptos clave</h2>
+  <ul>
+  <li>Interfaz: qué métodos <em>hay</em> (contrato); la clase dirá <em>cómo</em>.</li>
+  <li><code class="inline">implements</code> conecta clase e interfaz; <code class="inline">extends</code> con abstracta.</li>
+  <li>Clase abstracta: no se instancia; obliga a implementar sus métodos abstract.</li>
+  <li><code class="inline">abstract</code> en el método = "píntalo tú, hija".</li>
+  <li>Polimorfismo: una variable tipada como interfaz acepta cualquier implementación.</li>
+</ul>
+</section><section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t">
+  <h2 id="ejemplo-basico-t">Ejemplo básico</h2>
+  <p>Una interfaz que dos clases implementan de forma distinta:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">interfaz.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">interface Repositorio {
+    public function guardar(array $datos): bool;
+}
+
+class RepositorioArchivo implements Repositorio {
+    public function guardar(array $datos): bool {
+        file_put_contents(&quot;datos.json&quot;, json_encode($datos));
+        return true;
+    }
+}
+
+class RepositorioMemoria implements Repositorio {
+    public function guardar(array $datos): bool {
+        echo &quot;Guardado en memoria (simulaci&#243;n): &quot; . json_encode($datos) . &quot;\n&quot;;
+        return true;
+    }
+}
+
+function persistir(Repositorio $r): void {
+    $r-&gt;guardar([&quot;clave&quot; =&gt; &quot;valor&quot;]);
+}
+
+persistir(new RepositorioArchivo());
+persistir(new RepositorioMemoria());</code></pre></div>
+</div>
+</section><section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t">
+  <h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2>
+  <p>Clase abstracta con API base y único método a completar:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">abstracta.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">abstract class Servicio {
+    abstract protected function preparar(): string;
+
+    public function ejecutar(): string {
+        return $this-&gt;preparar() . &quot; — ejecutado&quot;;
+    }
+}
+
+class ServicioEmail extends Servicio {
+    protected function preparar(): string {
+        return &quot;Creando conexi&#243;n SMTP&quot;;
+    }
+}
+
+echo (new ServicioEmail())-&gt;ejecutar();</code></pre></div>
+</div>
+</section><section id="ejemplo-real" aria-labelledby="ejemplo-real-t">
+  <h2 id="ejemplo-real-t">Ejemplo real</h2>
+  <p>El polimorfismo en acción: un validador que no conoce el detalle:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">polimorfismo.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">interface Validable {
+    public function esValido(): bool;
+}
+
+class Pedido implements Validable {
+    public function __construct(private float $total) {}
+    public function esValido(): bool { return $this-&gt;total &gt; 0; }
+}
+
+class Usuario implements Validable {
+    public function __construct(private string $email) {}
+    public function esValido(): bool { return str_contains($this-&gt;email, &quot;@&quot;); }
+}
+
+function procesar(Validable $objeto): string {
+    return $objeto-&gt;esValido() ? &quot;V&#225;lido — paso al siguiente flujo&quot; : &quot;Inv&#225;lido — rechazo&quot;;
+}
+
+echo procesar(new Pedido(45.5)) . &quot;\n&quot;;
+echo procesar(new Usuario(&quot;sin-arroba&quot;));</code></pre></div>
+</div>
+</section><section id="codigo" aria-labelledby="codigo-t">
+  <h2 id="codigo-t">Código completo</h2>
+  <p>Código completo: notificadores intercambiables en una única función de negocio:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">notificadores.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+interface Notificador {
+    public function enviar(string $mensaje): string;
+}
+
+class CorreoNotificador implements Notificador {
+    public function enviar(string $mensaje): string {
+        return &quot;Email: $mensaje&quot;;
+    }
+}
+
+class SMSNotificador implements Notificador {
+    public function enviar(string $mensaje): string {
+        return &quot;SMS: &quot; . substr($mensaje, 0, 160);
+    }
+}
+
+class SistemaInformes {
+    public function __construct(private Notificador $notificador) {}
+
+    public function reportar(string $texto): string {
+        $entregado = $this-&gt;notificador-&gt;enviar($texto);
+        return &quot;Informe enviado — $entregado&quot;;
+    }
+}
+
+$s = new SistemaInformes(new CorreoNotificador());
+echo $s-&gt;reportar(&quot;Ventas del d&#237;a arriba un 20%&quot;) . &quot;\n&quot;;
+
+$s2 = new SistemaInformes(new SMSNotificador());
+echo $s2-&gt;reportar(&quot;Alerta: servidor al 90% de CPU&quot;);</code></pre></div>
+</div>
+</section><section id="explicacion" aria-labelledby="explicacion-t">
+  <h2 id="explicacion-t">Explicación</h2>
+  <p>La interfaz <code class="inline">Repositorio</code> declara <code class="inline">guardar()</code>; cada clase implementa la mecánica. Como la función <code class="inline">persistir()</code> espera la interfaz, puede recibir cualquier implementación: eso es polimorfismo por <em>abstracción</em>.</p>
+<p>La clase abstracta aporta el "esqueleto": <code class="inline">ejecutar()</code> ya está listo y solo el método abstracto <code class="inline">preparar()</code> depende de la hija. Y el validador demuestra el poder real: una sola función procesa pedidos, usuarios o cualquier cosa <code class="inline">Validable</code> sin conocer su clase.</p>
+</section><section id="errores-comunes" aria-labelledby="errores-comunes-t">
+  <h2 id="errores-comunes-t">Errores comunes</h2>
+  <ul>
+  <li>Implementar una interfaz y olvidar algún método: error fatal de sintaxis.</li>
+  <li>Las clases abstractas no se instancian: intentar <code class="inline">new Abstracta()</code> falla.</li>
+  <li>Tipar con la clase concreta cuando podrías tipar con la interfaz.</li>
+  <li>Crear jerarquías solo para rellenar interfaces que no aportan contrato.</li>
+</ul>
+</section><section id="buenas-practicas" aria-labelledby="buenas-practicas-t">
+  <h2 id="buenas-practicas-t">Buenas prácticas</h2>
+  <ul>
+  <li>Programa contra interfaces, no contra implementaciones concretas.</li>
+  <li>Interfaces pequeñas (1-3 métodos) y con nombre de sustantivo capaz.</li>
+  <li>Usa clases abstractas cuando compartas implementación real entre hijas.</li>
+</ul>
+</section><section id="ejercicio" aria-labelledby="ejercicio-t">
+  <h2 id="ejercicio-t">Ejercicio</h2>
+  <div class="exercise">
+  <div class="exercise__head">
+    <h3>Almacenamiento intercambiable</h3>
+    <span class="badge badge--level-avanzado">Dificultad: Difícil</span>
+  </div>
+  <ol>
+    <li>Define la interfaz <code class="inline">Almacenamiento</code> con <code class="inline">guardar(string $clave, string $valor): void</code>.</li>
+    <li>Implementa <code class="inline">EnvMemoria</code> (print_r) y <code class="inline">EnvArchivo</code> (file_put_contents).</li>
+    <li>Escribe una función parametrizada por la interfaz que guarde y confirme; llámalo con ambas implementaciones.</li>
+  </ol>
+</div>
+</section><section id="resumen" aria-labelledby="resumen-t">
+  <h2 id="resumen-t">Resumen</h2>
+  <div class="summary">
+  <ul>
+    <li>Interfaces = contratos; clases abstractas = esqueleto con responsabilidades.</li>
+    <li>Polimorfismo: código que trabaja con la interfaz, no con la clase.</li>
+    <li>Inyección de dependencias en el constructor lo hace real: <code class="inline">__construct(private Notificador $n)</code>.</li>
+  </ul>
+</div>
+</section>
+      </div>
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../../../cursos/programacion/modulo-05/index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo</a>
+      </nav><div class="lesson-prevnext">
+  <a class="lesson-prevnext__link" href="../../../cursos/programacion/modulo-05/herencia.html">
+    <span class="label" aria-hidden="true">← Anterior</span>
+    <span class="title">Herencia</span>
+  </a>
+  <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../../../cursos/programacion/modulo-06/modularizacion.html">
+    <span class="label" aria-hidden="true">Siguiente →</span>
+    <span class="title">Modularización</span>
+  </a>
+</div>
+      <section class="related-block" aria-labelledby="rel-t">
+        <h2 id="rel-t">También puede interesarte</h2><div class="related-lessons">  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<br><span class="muted">Código profesional</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<br><span class="muted">Fundamentos de programación</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<br><span class="muted">Control de flujo</span></a></div>      </section>
+    </article>
+  </main><aside class="toc-rail" data-toc aria-label="Contenido de la página">
+  <h2>En esta página</h2>
+  <nav aria-label="Secciones de la lección">
+    <a href="#introduccion">Introducción</a>
+    <a href="#definicion">Definición</a>
+    <a href="#conceptos-clave">Conceptos clave</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-intermedio">Ejemplo intermedio</a>
+    <a href="#ejemplo-real">Ejemplo real</a>
+    <a href="#codigo">Código completo</a>
+    <a href="#explicacion">Explicación</a>
+    <a href="#errores-comunes">Errores comunes</a>
+    <a href="#buenas-practicas">Buenas prácticas</a>
+    <a href="#ejercicio">Ejercicio</a>
+    <a href="#resumen">Resumen</a>
+  </nav>
+</aside>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <h4><a href="../../../index.html">Backend Academy</a></h4>
+        <p>Plataforma en español para aprender desarrollo backend: de los fundamentos a la arquitectura de sistemas de alto tráfico.</p>
+      </div>
+      <div>
+        <h4>Cursos</h4>
+        <ul>
+          <li><a href="../../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../../cursos/programacion/index.html">Programación para Backend</a></li>
+          <li><a href="../../../cursos/php/index.html">PHP</a></li>
+          <li><a href="../../../cursos/nodejs/index.html">Node.js</a></li>
+          <li><a href="../../../cursos/python/index.html">Python</a></li>
+          <li><a href="../../../cursos/bases-datos/index.html">Bases de Datos</a></li>
+          <li><a href="../../../cursos/apis-rest/index.html">APIs REST</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap</a></li>
+          <li><a href="../../../retos/index.html">Retos</a></li>
+          <li><a href="../../../ejercicios/index.html">Ejercicios</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../dashboard/index.html">Mi progreso</a></li>
+          <li><a href="../../../favoritos/index.html">Favoritos</a></li>
+          <li><a href="../../../historial/index.html">Historial</a></li>
+          <li><a href="../../../acerca/index.html">Acerca de</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido educativo gratuito, en español.</span>
+      <span class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca</a>
+        <a href="../../../glosario/index.html">Glosario</a>
+        <a href="../../../roadmap/index.html">Roadmap</a>
+      </span>
+    </div>
+  </div>
+</footer><script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  try { if (window.AppTheme) AppTheme.init(); } catch (err) {}
+  try { if (window.AppProgress) AppProgress.init(); } catch (err) {}
+});
+</script></body>
+</html>

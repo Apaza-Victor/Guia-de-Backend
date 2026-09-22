@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m5-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red, Green, Refactor · Testing Backend · Backend Academy</title>
+<meta name="description" content="El ciclo Red-Green-Refactor con PHPUnit paso a paso: ver el fallo correcto, implementar lo mínimo, y refactorizar sin romper el verde.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m5-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Red, Green, Refactor</span>
+      </nav>
+      <h1 class="lesson-title">Red, Green, Refactor</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 15 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · TDD</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="ritmo">El ritmo que se aprende andando</h2>
+        <p>Tres estados, tres pasos, cero ambigüedad:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">ROJO     → escribe un test que fracase por la razón correcta
+VERDE    → implementa lo MÍNIMO para que pase
+REFACTOR → mejora el diseño CON el test como malla de red
+
+Repite con el siguiente comportamiento. Tamaño del paso:
+tan pequeño que nunca cojas miedo.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="rojo">ROJO: el fallo con motivo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · test primero</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class PorcentajeTest extends \PHPUnit\Framework\TestCase
+{
+    public function test_calcula_porcentaje_bien(): void
+    {
+        $p = new Porcentaje();
+
+        self::assertSame(25.0, $p-&gt;de(200, 12.5));
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Al correr: <em>«Class Porcentaje not found»</em>. Fallo correcto: <strong>el código no existe aún</strong>. Si el test fallara por otra razón, algo está mal en el propio test.</p>
+      </section>
+
+      <section>
+        <h2 id="verde">VERDE: el mínimo que pasa</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · implementación mínima</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class Porcentaje
+{
+    public function de(float $total, float $porciento): float
+    {
+        return $total * $porciento / 100;
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Sin florituras, sin casos extra, sin «podría servir para…». <strong>El código exacto para este test.</strong></p>
+      </section>
+
+      <section>
+        <h2 id="casos">Crecer con casos pequeños</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// Nuevo caso → nuevo rojo
+public function test_porcentaje_de_cero_es_cero(): void
+{
+    self::assertSame(0.0, (new Porcentaje())-&gt;de(0, 50));
+}
+
+// Ya pasa con la implementación actual → NO pidas más.
+// Caso de división especial aparecerá cuando exista.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="refactor">REFACTOR: cambiarlo sin tocar el verde</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// Antes
+public function de(float $t, float $p): float { return $t * $p / 100; }
+
+// Refactor: nombres que cuentan
+final class Porcentaje
+{
+    public function de(float $total, float $porcentaje): float
+    {
+        return $this-&gt;aplicar($total, $porcentaje);
+    }
+
+    private function aplicar(float $total, float $porcentaje): float
+    {
+        return $total * $porcentaje / 100;
+    }
+}
+// Suites: verde tras cada movimiento pequeño.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="peligros">Los tres errores clásicos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">✗ Saltarse el ROJO ("el code está claro")
+  → el test pasa de entrada: no sabes si detecta nada
+
+✗ Hacer de más en el VERDE ("total, ya lo completo")
+  → código sin test = deuda que hoy no ves
+
+✗ Refactorizar SIN suite ordenada
+  → la red no atrapa y el cambio rompe en silencio</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Implementa <code>IVA</code> (16 %) con TDD completo: rojo → verde → refactor.</li>
+          <li>Agrega 3 casos: base 0, base negativa, base con decimales.</li>
+          <li>Refactoriza a constantes y verifica el verde tras cada paso.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>ROJO: fallo con motivo correcto.</li>
+          <li>VERDE: mínimo indispensable.</li>
+          <li>REFACTOR: mejorar con red de seguridad.</li>
+          <li>Pasos pequeños, suite siempre corriendo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-tdd.html">¿Qué es TDD?</a>
+          <a class="related-lessons__link" href="../modulo-02/primer-test-phpunit.html">Primer test con PHPUnit</a>
+          <a class="related-lessons__link" href="tdd-en-api-rest.html">TDD aplicado a una API REST</a>
+          <a class="related-lessons__link" href="../modulo-03/test-data-fixtures-y-seeds.html">Fixtures y seeds</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

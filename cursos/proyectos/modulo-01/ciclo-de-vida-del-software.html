@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-ciclo-de-vida-del-software">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ciclo de vida del software · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende las fases del ciclo de vida del software —requerimientos, diseño, desarrollo, pruebas y operación— y el papel de un equipo backend en cada una de ellas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-ciclo-de-vida-del-software"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Ciclo de vida del software</span>
+      </nav>
+      <h1 class="lesson-title">Ciclo de vida del software</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de gestión</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Se te ocurre una idea (o llega un pedido del negocio), se dibuja un contrato de API, se escribe código, se prueba, se despliega y se opera durante meses. Ese recorrido tiene una estructura repetible que llamamos <strong>ciclo de vida del software</strong>: el conjunto de fases por las que pasa un producto desde que es una intención hasta que vive —y muere— en producción.</p>
+        <p>Entenderlo es la primera habilidad de gestión de un backend: te permite saber <em>en qué fase estás</em>, qué información te falta y quién debe aportarla. El código es solo una parte del camino.</p>
+      </section>
+
+      <section>
+        <h2 id="fases">Las fases clásicas</h2>
+        <p>El modelo en cascada (waterfall) propone avanzar en línea recta de una fase a la siguiente. Meramente entenderlo basta para ubicarte, aunque hoy casi nadie lo ejecuta al pie de la letra:</p>
+        <ol>
+          <li><strong>Requerimientos:</strong> qué debe hacer el sistema, con qué reglas y para quién.</li>
+          <li><strong>Diseño:</strong> arquitectura, modelo de datos y contratos entre componentes.</li>
+          <li><strong>Desarrollo:</strong> implementación — en backend, la API, los workers, las integraciones.</li>
+          <li><strong>Pruebas:</strong> verificación funcional y no funcional del sistema completo.</li>
+          <li><strong>Despliegue:</strong> publicación en el entorno de producción.</li>
+          <li><strong>Operación y mantenimiento:</strong> monitoreo, bugs, evoluciones y retirada.</li>
+        </ol>
+        <p>En la práctica el software moderno itera sobre estas fases en ciclos cortos. El backend participa en <em>todas</em>: aclara requerimientos técnicos en la fase 1, decide la base de datos en la 2, programa en la 3, escribe pruebas de servicio en la 4, automatiza el despliegue en la 5 y atiende alertas en la 6.</p>
+      </section>
+
+      <section>
+        <h2 id="entradas-y-salidas">Cada fase tiene entradas y salidas</h2>
+        <p>Una manera práctica de pensar el ciclo es como una cadena de <strong>artefactos</strong>: cada fase consume algo material (un documento, un esquema, un commit) y produce otro artefacto que alimenta la siguiente. Si un artefacto no existe, la fase siguiente se enamora de supuestos.</p>
+        <p>Por ejemplo, en un proyecto backend típico, el contrato de la API es el artefacto puente entre diseño y desarrollo. Establecerlo temprano evita que el frontend y el backend construyan cada uno sus propias reglas:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "openapi": "3.0.3",
+  "info": { "title": "API de pagos", "version": "1.0.0" },
+  "paths": {
+    "/v1/cargos": {
+      "post": {
+        "summary": "Crear un cargo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["monto", "moneda", "referencia"],
+                "properties": {
+                  "monto": { "type": "integer" },
+                  "moneda": { "type": "string", "enum": ["PEN", "USD"] },
+                  "referencia": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Cargo creado" },
+          "422": { "description": "Datos inválidos" }
+        }
+      }
+    }
+  }
+}</code></pre>
+        <p>Ese mismo contrato se convierte después en la base de las pruebas de integración y de la documentación para el equipo que consume la API.</p>
+      </section>
+
+      <section>
+        <h2 id="backend-en-las-fases">¿Qué hace el backend en cada fase?</h2>
+        <p>Aterricemos las fases con responsabilidades concretas de un equipo de servidores:</p>
+        <ul>
+          <li><strong>Requerimientos:</strong> convertir reglas de negocio en historias técnicas. Ejemplo: «el usuario no puede rebasar su línea de crédito» debe traducirse en una validación transaccional en servidor, no en el formulario.</li>
+          <li><strong>Diseño:</strong> elegir stack, modelar entidades, planear índices y decidir qué lógica vive en la base y cuál en la aplicación.</li>
+          <li><strong>Desarrollo:</strong> escribir endpoints, consumidores de colas, migraciones y todo lo que corre fuera del navegador.</li>
+          <li><strong>Pruebas:</strong> testear con datos reales, medir rendimiento y validar los casos borde que el frontend no puede cubrir.</li>
+          <li><strong>Operación:</strong> leer logs, revisar métricas, escalar y corregir defectos descubiertos por los usuarios.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si en tu equipo nadie puede responder «¿en qué fase estamos?», el proyecto ya está en modo cascada accidental: mucho trabajo al inicio, cero retroalimentación y una entrega gigante al final.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="evolucion">La evolución del modelo: iterar en vez de caminar en fila</h2>
+        <p>El problema del ciclo lineal es que descubre los errores demasiado tarde. La respuesta ágil fue <strong>recorrer el ciclo completo en pequeñas porciones</strong>: requerimientos parciales, un diseño ligero, una implementación pequeña que se prueba y se entrega, y de nuevo. Así el costo de una suposición equivocada en la fase 1 se paga en días, no en meses.</p>
+        <p>Un backend iterativo organiza el trabajo en incrementos que puedan ponerse en producción de forma independiente. Un ejemplo de plan básico de un incremento:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Incremento 1 — infraestructura base
+git init
+docker compose up -d postgres redis
+npx prisma migrate dev --name inicio
+
+# Incremento 2 — primer flujo de negocio (autenticación)
+npx prisma migrate dev --name identificacion
+npx jest auth --coverage
+
+# Incremento 3 — facturación con validación de saldo
+npx prisma migrate dev --name facturacion
+npx k6 run tests/carga/cobros.js</code></pre>
+        <p>Cada comando representa un mini-ciclo completo: diseño (migración), desarrollo (feature), verificación (tests y prueba de carga). Al final tienes algo desplegable, no un repositorio a medio construir.</p>
+      </section>
+
+      <section>
+        <h2 id="gestion-del-ciclo">Gestionar el ciclo en un equipo real</h2>
+        <p>Gestionar el ciclo de vida no es burocrático: es <strong>sincronizar artefactos</strong>. Concretamente:</p>
+        <ol>
+          <li>Mantén un único documento vivo de requerimientos (backlog), no un PDF congelado.</li>
+          <li>Acuerda el contrato de la API antes de empezar el código; evolucionarlo después cuesta caro.</li>
+          <li>Automatiza cada fase que se repita: migraciones, tests, despliegues.</li>
+          <li>Define la definición de «terminado» y aplícala igual a cada incremento.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma un proyecto backend que conozcas y enumera las 6 fases del ciclo, señalando en qué fase está ahora mismo.</li>
+          <li>Identifica el artefacto «puente» que conecta el diseño con el desarrollo (contrato OpenAPI, migración, esquema) y verifica si está documentado en el repositorio.</li>
+          <li>Escribe los comandos de un mini-ciclo completo (migración + test + deploy) para una feature nueva que te gustaría agregar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El ciclo de vida del software recorre requerimientos, diseño, desarrollo, pruebas, despliegue y operación.</li>
+          <li>Cada fase consume y produce artefactos; el contrato de API es el puente típico entre diseño y desarrollo del backend.</li>
+          <li>El modelo en cascada descubre errores tarde; el enfoque iterativo repite el ciclo en incrementos pequeños.</li>
+          <li>El backend participa en todas las fases, desde aclarar reglas hasta operar y escalar lo construido.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="metodologias-agiles.html">Metodologías ágiles</a>
+          <a class="related-lessons__link" href="scrum-para-backend.html">Scrum aplicado a backend</a>
+          <a class="related-lessons__link" href="requisitos-y-aclaraciones.html">Requerimientos y aclaraciones</a>
+          <a class="related-lessons__link" href="../modulo-02/planificacion-de-sprints.html">Planificación de sprints</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 1</span>
+        <span class="title">Fundamentos de gestión</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="metodologias-agiles.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Metodologías ágiles</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

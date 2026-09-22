@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repository y acceso a datos · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende el patrón Repository: aislar el acceso a datos detrás de una interfaz de colección para cambiar de base de datos sin tocar la lógica de negocio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Repository y acceso a datos</span>
+      </nav>
+      <h1 class="lesson-title">Repository y acceso a datos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La base de datos es un detalle de implementación, no parte del negocio. El patrón <strong>Repository</strong> media entre el dominio y la persistencia: expone operaciones como si fueran de una colección en memoria (<code class="inline">obtener</code>, <code class="inline">buscar</code>, <code class="inline">guardar</code>) y esconde SQL, ORM y conexiones.</p>
+        <p>El beneficio grande: la lógica de negocio habla un idioma de colección y puede testearse sin base de datos real.</p>
+      </section>
+
+      <section>
+        <h2 id="contrato">El contrato del repositorio</h2>
+        <p>Un repositorio se declara como interfaz en el «borde interior» de tu arquitectura:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+interface PedidoRepository
+{
+    public function obtener(int $id): Pedido;
+    public function buscarPorUsuario(int $usuarioId): array;
+    public function guardar(Pedido $pedido): void;
+    public function eliminar(Pedido $pedido): void;
+}</code></pre>
+          </div>
+        </figure>
+        <p>La interfaz usa términos del <strong>dominio</strong> (Pedido), no términos de base de datos. Su implementación concreta (Eloquent, Doctrine, PDO) vive en la infraestructura.</p>
+      </section>
+
+      <section>
+        <h2 id="implementacion">Implementación concreta</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+final class EloquentPedidoRepository implements PedidoRepository
+{
+    public function obtener(int $id): Pedido
+    {
+        $fila = PedidoModel::query()-&gt;findOrFail($id);
+        return Pedido::fromEstado($fila-&gt;estado, $fila-&gt;total);
+    }
+
+    public function buscarPorUsuario(int $usuarioId): array
+    {
+        return PedidoModel::query()
+            -&gt;where('usuario_id', $usuarioId)
+            -&gt;get()
+            -&gt;map(fn($f) =&gt; Pedido::fromEstado($f-&gt;estado, $f-&gt;total))
+            -&gt;all();
+    }
+
+    public function guardar(Pedido $pedido): void
+    {
+        PedidoModel::query()-&gt;updateOrCreate(
+            ['id' =&gt; $pedido-&gt;id()],
+            ['estado' =&gt; $pedido-&gt;estado(), 'total' =&gt; $pedido-&gt;total()]
+        );
+    }
+
+    public function eliminar(Pedido $pedido): void
+    {
+        PedidoModel::query()-&gt;where('id', $pedido-&gt;id())-&gt;delete();
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Observa cómo la entidad y el modelo se convierten en los dos extremos del repositorio: el dominio no sabe nada de Eloquent.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuándo vale la pena?</h2>
+        <ul>
+          <li><strong>Cuando la persistencia es compleja:</strong> consultas de negocio no triviales que se repiten.</li>
+          <li><strong>Cuando quieres tests rápidos:</strong> sustituir el repositorio por una implementación en memoria.</li>
+          <li><strong>Cuando hay posibilidad de cambiar de BD</strong> o usar distintos storages (SQL, cache, API externa).</li>
+        </ul>
+        <p>No lo fuerces en CRUD triviales: nadie necesita un repository para volcar una tabla simple si ya tienes un ORM con query builder.</p>
+      </section>
+
+      <section>
+        <h2 id="trampas">Trampas típicas</h2>
+        <ul>
+          <li><strong>Filtrar en el servicio:</strong> traer todo y filtrar en memoria; ese trabajo es del repositorio.</li>
+          <li><strong>Repositorios con SQL visible:</strong> exponer métodos tipo <code class="inline">query()</code> devuelve el detalle afuera.</li>
+          <li><strong>Anemic domain:</strong> repositorio que solo guarda DTOs sin aplicar reglas de negocio.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea una interfaz <code class="inline">UsuarioRepository</code> con 3 métodos y su implementación sobre tu ORM.</li>
+          <li>Escribe una implementación en memoria (array) para usarla en tests.</li>
+          <li>Reemplaza el acceso directo al modelo en tu controlador por el repositorio.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El Repository media entre dominio y persistencia con una interfaz de colección.</li>
+          <li>La interfaz usa lenguaje de dominio; la implementación escribe SQL/ORM.</li>
+          <li>Permite tests con repositorios en memoria.</li>
+          <li>No se aplica a CRUD triviales: es una herramienta, no una obligación.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="service-layer.html">Service Layer</a>
+          <a class="related-lessons__link" href="../patrones/repository-y-capa-de-datos.html">Repository y la capa de datos</a>
+          <a class="related-lessons__link" href="../modulo-05/casos-de-uso-y-entidades.html">Casos de uso y entidades</a>
+          <a class="related-lessons__link" href="inyeccion-de-dependencias.html">Inyección de dependencias</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-api-gateway">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Gateway · Microservicios · Backend Academy</title>
+<meta name="description" content="El patrón API Gateway en microservicios: punto de entrada único, agregación de respuestas, autenticación centralizada, rate limiting y el patrón BFF.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-api-gateway"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">API Gateway</span>
+      </nav>
+      <h1 class="lesson-title">API Gateway</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Comunicación</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Con varios microservicios, cada uno con su propia API, el cliente tendría que conocer todas las URLs, respetar contratos distintos y repetir autenticación en cada llamada. El <strong>API Gateway</strong> resuelve esto: es el <strong>único punto de entrada</strong> hacia el sistema; recibe la petición, la valida, la enruta al servicio correcto y devuelve la respuesta.</p>
+      </section>
+
+      <section>
+        <h2 id="responsabilidades">Responsabilidades típicas</h2>
+        <ul>
+          <li><strong>Enrutamiento:</strong> mapea una URL pública hacia el servicio interno correspondiente.</li>
+          <li><strong>Autenticación y autorización</strong> centralizada: valida JWT una sola vez en la puerta.</li>
+          <li><strong>Rate limiting:</strong> protege los servicios internos del uso abusivo.</li>
+          <li><strong>Agregación (composición):</strong> combina en una sola respuesta datos de varios servicios.</li>
+          <li><strong>Traducción de contratos:</strong> oculta el modelo interno y expone un contrato público estable.</li>
+          <li><strong>CORS, logging y tracing</strong> unificados.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="routing">Enrutamiento en la práctica</h2>
+        <p>Un gateway puede ser una solución ligera (nginx, Node con http-proxy) o una plataforma (Kong, Traefik, AWS API Gateway). Aquí un enrutador minimalista en JavaScript:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">const http = require("http");
+
+const RUTAS = {
+  "/api/usuarios": "http://servicio-usuarios:8080",
+  "/api/pedidos": "http://servicio-pedidos:8081",
+  "/api/pagos": "http://servicio-pagos:8082"
+};
+
+const server = http.createServer(async (req, res) => {
+  const base = Object.keys(RUTAS).find(r => req.url.startsWith(r));
+  if (!base) { res.writeHead(404); return res.end("Ruta no encontrada"); }
+
+  const destino = RUTAS[base];
+  const resto = req.url.slice(base.length);
+  const response = await fetch(destino + resto, {
+    method: req.method,
+    headers: { "authorization": req.headers.authorization || "" }
+  });
+  res.writeHead(response.status, { "content-type": "application/json" });
+  res.end(await response.text());
+});
+
+server.listen(80);</code></pre>
+          </div>
+        </figure>
+        <p>El cliente solo conoce el <code>/api/...</code> público; el despliegue interno de los servicios puede cambiar sin afectarle.</p>
+      </section>
+
+      <section>
+        <h2 id="agregacion">Agregación de respuestas</h2>
+        <p>A veces un solo endpoint del gateway debe combinar datos de varios servicios. Por ejemplo, mostrar una orden con los datos del cliente, el estado del envío y la factura. La agregación en paralelo evita sumar latencias:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript (agregación)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">async function obtenerResumenOrden(idOrden) {
+  // Llamadas en paralelo: no se suman las latencias
+  const [orden, envio, factura] = await Promise.all([
+    fetch("http://servicio-pedidos:8081/ordenes/" + idOrden).then(r => r.json()),
+    fetch("http://servicio-envios:8083/envios/" + idOrden).then(r => r.json()),
+    fetch("http://servicio-facturacion:8084/facturas/" + idOrden).then(r => r.json())
+  ]);
+
+  return {
+    id: orden.id,
+    total: orden.total,
+    estadoEnvio: envio.estado,
+    facturaPdf: factura.url
+  };
+}</code></pre>
+          </div>
+        </figure>
+        <p>El API Gateway se convierte entonces en un motor de composición para el frontend.</p>
+      </section>
+
+      <section>
+        <h2 id="auth">Autenticación centralizada</h2>
+        <p>Validar el token en el gateway simplifica a los servicios: todos asumen que una petición que llega ya está autenticada y solo deben validar permisos. El gateway propaga la identidad (por ejemplo, el id de usuario) en un header interno.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON (flujo)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "request": {
+    "url": "/api/pedidos",
+    "headers": { "authorization": "Bearer eyJhbGciOi..." }
+  },
+  "gateway": {
+    "accion": "validar_jwt",
+    "resultado": { "usuario_id": "CLI-42", "roles": ["cliente"] }
+  },
+  "forward": {
+    "url_interna": "http://servicio-pedidos:8081/pedidos",
+    "nuevos_headers": { "x-usuario-id": "CLI-42" }
+  }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="bff">El patrón BFF</h2>
+        <p>Cuando distintos clientes (web, móvil, TV) necesitan datos distintos, se usa un <strong>Backend for Frontend (BFF)</strong>: un gateway específico por tipo de cliente. El BFF móvil puede devolver payloads ligeros; el web, versiones más ricas. La idea clave: el cliente no decide cómo componer el sistema, el BFF sí.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (routing por cliente)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">gateways:
+  bff-web:
+    agregacion: completa
+    rate_limit: 600 req/min
+  bff-movil:
+    agregacion: ligera
+    rate_limit: 300 req/min
+    compression: gzip</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="riesgo">El riesgo: single point of failure</h2>
+        <p>El gateway es un punto que toca todo el tráfico. Si cae, todo cae. Los mitigantes:</p>
+        <ul>
+          <li>Replica el gateway (múltiples instancias detrás de un load balancer).</li>
+          <li>Mantenlo delgado: la lógica de negocio vive en los servicios.</li>
+          <li>Timeouts cortos hacia los servicios para no bloquear la puerta.</li>
+          <li>Monitoreo de latencia y tasas de error del propio gateway.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Define 6 rutas públicas de un e-commerce y qué servicio interno atiende cada una.</li>
+          <li>Diseña un endpoint agregado que combine pedido + envío + factura con llamadas en paralelo.</li>
+          <li>Compara un solo gateway global con BFF por cliente y decide cuál usarías aquí.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El API Gateway es el punto de entrada único hacia los microservicios.</li>
+          <li>Centraliza autenticación, rate limiting, logging y enrutamiento.</li>
+          <li>Agrega respuestas de varios servicios, preferiblemente en paralelo.</li>
+          <li>El patrón BFF especializa el gateway por tipo de cliente.</li>
+          <li>Debe ser delgado, replicado y con timeouts para no convertirse en punto único de fallo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="comunicacion-sincrona.html">Comunicación síncrona</a>
+          <a class="related-lessons__link" href="service-discovery.html">Service discovery</a>
+          <a class="related-lessons__link" href="contratos-y-versionado.html">Contratos y versionado</a>
+          <a class="related-lessons__link" href="../modulo-03/circuit-breaker.html">Circuit breaker</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

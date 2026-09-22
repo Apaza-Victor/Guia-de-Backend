@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m3-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboards efectivos · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende a diseñar dashboards accionables: qué medir con RED y USE, qué paneles usar, layout, umbrales y por qué menos es más.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m3-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Dashboards efectivos</span>
+      </nav>
+      <h1 class="lesson-title">Dashboards efectivos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Alertas y dashboards</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="accionable">Un dashboard accionable</h2>
+        <p>Un dashboard cumple su función cuando <strong>toma una decisión en segundos</strong>: ¿está bien? ¿está mal? ¿en qué parte? Si los paneles obligan a leer números y comparar mentalmente contra una referencia, el dashboard está fallando: los umbrales de color, el layout jerárquico y la leyenda adecuada hacen el trabajo de interpretación por ti.</p>
+        <p>Los dos anti-patrones que hay que evitar:</p>
+        <ul>
+          <li><strong>La pared de métricas:</strong> 200 paneles sin jerarquía que nadie sabe leer y menos actuar.</li>
+          <li><strong>El de la semana pasada:</strong> gráficas «por si acaso» que no alimentan ninguna decisión y que se miran una vez y se olvidan.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="red">Servicios: usar RED</h2>
+        <p>Para un panel de servicio, la primera fila es siempre RED (Rate, Errors, Duration). Estas 3 consultas cubren «¿cómo está mi API?» en ~10 segundos:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># Rate — peticiones por segundo, por servicio
+sum(rate(http_requests_total[5m])) by (service)
+
+# Errors — porcentaje de 5xx, por servicio
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+  / sum(rate(http_requests_total[5m])) by (service) * 100
+
+# Duration — p99 de latencia, por servicio
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))</code></pre>
+          </div>
+        </figure>
+        <p>Debajo de esa fila: desglose por ruta o por tenant (para el día a día), y un panel de los errores por tipo si existen etiquetas de código. Nada más: todo panel extra exige justificación.</p>
+      </section>
+
+      <section>
+        <h2 id="use">Infraestructura: usar USE</h2>
+        <p>Para las máquinas, nodos, procesos y discos, el marco es USE: utilización, saturación, errores. Sensor común del node_exporter:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># Utilization — CPU ocupada promedio por instancia
+100 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100)
+
+# Utilization — memoria en uso (1 - disponible/total)
+(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100
+
+# Saturation — I/O esperando en disco
+rate(node_disk_io_time_seconds_total[5m])
+
+# Errors — errores de red recibidos
+rate(node_network_receive_errs_total[5m])</code></pre>
+          </div>
+        </figure>
+        <p>La saturación importa más de lo que parece: un disco al 60 % de utilización con latencias altas está saturado; la cola es la señal que la CPU ocupada no muestra.</p>
+      </section>
+
+      <section>
+        <h2 id="layout">Layout y jerarquía</h2>
+        <ol>
+          <li><strong>Arriba: estado general.</strong> Una fila de «stat» o semáforo por servicio: ¿cumple el SLO? (verde/ámbar/rojo).</li>
+          <li><strong>Centro: la historia del síntoma.</strong> Las series temporales principales y su desglose.</li>
+          <li><strong>Abajo: el detalle de la causa.</strong> Desgloses, tablas, logs y traces.</li>
+        </ol>
+        <p>El guion mental que se responde con un dashboard: (1) ¿está caído? (2) ¿cuánto? (3) ¿dónde? Si no puedes responder en ese orden, reorganiza.</p>
+      </section>
+
+      <section>
+        <h2 id="detalle">Umbrales y diseño del panel</h2>
+        <p>Los umbrales pintan el semáforo sin que nadie haga aritmética. Y la unidad correcta hace la lectura instantánea (segundos, no «n*1e-3»). Panel JSON de referencia:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "title": "p99 latencia checkout",
+  "type": "timeseries",
+  "datasource": { "type": "prometheus", "uid": "prometheus" },
+  "fieldConfig": {
+    "defaults": {
+      "unit": "s",
+      "thresholds": {
+        "steps": [
+          { "color": "green", "value": 0 },
+          { "color": "yellow", "value": 0.3 },
+          { "color": "red", "value": 0.8 }
+        ]
+      }
+    }
+  },
+  "targets": [
+    {
+      "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"checkout-api\"}[5m])) by (le))",
+      "legendFormat": "p99"
+    }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+        <p>Con <code class="inline">unit: "s"</code> y los umbrales, el panel se lee en <em>verde bajo 300 ms, rojo sobre 800 ms</em> sin mirar el eje.</p>
+      </section>
+
+      <section>
+        <h2 id="menos">Menos es más</h2>
+        <ul>
+          <li>Un dashboard por <strong>decisión</strong>, no por herramienta: «estado de pago», «rendimiento de la API pública», «salud de la infra». No «grafana-dump».</li>
+          <li>Borra lo que nadie consultó en 30 días: si nadie lo miró, era decoración.</li>
+          <li>Las alertas viven en las alertas; el dashboard cuenta el «ahora».</li>
+          <li>Nombre claro con dueño y propósito en el texto del dashboard («¿qué pasa si esta página se pone roja?»).</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja en papel la jerarquía de tu dashboard ideal para tu servicio: 3 filas, con nombre de cada panel.</li>
+          <li>Construye la primera fila RED en Grafana con las 3 consultas PromQL de esta lección.</li>
+          <li>Revisa tu dashboard actual y elimina (o mueve a otro) 5 paneles que no alimentan una decisión.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un dashboard es accionable cuando responde «¿está bien?» en segundos.</li>
+          <li>Servicios → RED; infraestructura → USE. Poco más.</li>
+          <li>Umbrales, unidades y jerarquía hacen la lectura instantánea.</li>
+          <li>Un panel que nadie usa es gasto visual: se elimina o se justifica.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/grafana.html">Grafana</a>
+          <a class="related-lessons__link" href="../modulo-01/metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="slos-y-slis.html">SLOs, SLIs y SRE</a>
+          <a class="related-lessons__link" href="alertas-inteligentes.html">Alertas inteligentes</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="gitflow-y-estrategias">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitFlow y estrategias de flujo · Git y GitHub · Backend Academy</title>
+<meta name="description" content="GitFlow, GitHub Flow y trunk-based: compara estrategias de ramas y elige la que tu equipo pueda sostener.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="git-github" data-current="gitflow-y-estrategias"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Git y GitHub</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">GitFlow y estrategias de flujo</span>
+        </nav>
+        <h1 class="lesson-title">GitFlow y estrategias de flujo</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Git y GitHub</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Ramas y merges</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="reglas">Las ramas son reglas de equipo</h2>
+          <p>Una estrategia de ramas no es magia: es <strong>acuerdo</strong>. Qué rama es sagrada, quién fusiona, cuándo se libera. Sin reglas, cada quien hace su caos.</p>
+        </section>
+
+        <section>
+          <h2 id="gitflow">GitFlow clásico</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Ramas</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">main        -> siempre liberable (releases)
+develop     -> integracion diaria
+feature/*   -> salen de develop, vuelven a develop
+release/*   -> preparar una version concreta
+hotfix/*    -> arreglo urgente directo a main
+
+ventajas: disciplina clara
+costo: muchas ramas vivas, requiere quien coordine releases</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="githubflow">GitHub Flow (el más usado hoy)</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Ramas</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">main        -> siempre desplegable, verde
+feature/*   -> sale de main, y se fusiona en main via PULL REQUEST
+
+reglas de la casa:
+  main siempre pasa CI
+  todo lo nuevo llega por PR revisado
+  nada rompe main: si pasa, se arregla de inmediato
+
+flujo tipico:
+  git switch -c feature/ordenes
+  ... commits ...
+  git push origin feature/ordenes
+  - abre PR en GitHub, se revisa, se mergea -</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="trunk">Trunk-based</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Ramas</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">main        -> unico tronco de verdad
+todos       -> segmentos cortos (horas/dias) directamente sobre main
+
+ideal para CI fuerte y despliegues continuos
+mantiene main rojo solo minutos</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="decision">¿Cuál elegir?</h2>
+          <div class="table-wrap">
+          <table>
+            <thead><tr><th>Equipo</th><th>Flujo</th></tr></thead>
+            <tbody>
+              <tr><td>1-5 personas, despliegue continuo</td><td>GitHub Flow / trunk</td></tr>
+              <tr><td>Versiones planificadas, SO o apps empresariales</td><td>GitFlow</td></tr>
+              <tr><td>Releases con mantenimiento de ramas viejas</td><td>GitFlow con hotfix</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p>Reglas que siempre valen: main verde, PR revisados, ramas cortas, y eliminar ramas al fusionar.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Define el flujo de tu proyecto actual (si no hay, elige GitHub Flow).</li>
+            <li>Escribe las 4 reglas de tu equipo en el README.</li>
+            <li>Practica el ciclo completo feature → PR → main.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Estrategia = acuerdo de equipo, no mandamiento.</li>
+            <li>GitFlow: develop + features + releases + hotfixes.</li>
+            <li>GitHub Flow: main + features que llegan por PR.</li>
+            <li>Trunk: integración corta al tronco con CI.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="../modulo-04/pull-requests.html">Pull requests</a>
+            <a class="related-lessons__link" href="../modulo-03/index.html">Módulo 3 · GitHub y remotos</a>
+            <a class="related-lessons__link" href="../modulo-05/tags-y-releases.html">Tags y releases</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Git</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Ramas y merges</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub y remotos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Colaboración y PR</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Git avanzado</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

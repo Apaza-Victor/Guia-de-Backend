@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-resolvers">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resolvers · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende qué son los resolvers en GraphQL: la firma del resolver con parent, args, context e info, la cadena de resolución y los resolvers asíncronos con base de datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-resolvers"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Resolvers</span>
+      </nav>
+      <h1 class="lesson-title">Resolvers</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de GraphQL</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El schema dice <em>qué</em> existe; los <strong>resolvers</strong> dicen <em>cómo</em> se obtiene. Cada campo del schema tiene asociada una función, el resolver, que devuelve su valor: un dato de la base de datos, el resultado de una llamada a otra API o el resultado de computar algo en memoria.</p>
+        <p>Cuando llega una consulta, el motor de GraphQL recorre el árbol de campos y ejecuta un resolver por cada uno, componiendo la respuesta. Esto quiere decir que no hay "un resolver por query", sino <strong>un resolver por campo</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion">El campo como función</h2>
+        <p>En la práctica, los resolvers son un objeto con la misma forma que el schema. El resolver de un campo raíz de <code>Query</code> recibe los argumentos de la consulta y busca los datos:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    usuario: (parent, args, context) => {
+      return context.db.usuarios.find((u) => u.id === args.id);
+    },
+    posts: (parent, args, context) => context.db.obtenerPosts(),
+  },
+};</code></pre>
+        <p>Es un patrón muy directo: el nombre del campo en el objeto <code>resolvers</code> coincide con el nombre en el schema, y el valor devuelto pasa a formar parte de la respuesta.</p>
+      </section>
+
+      <section>
+        <h2 id="firma">La firma del resolver</h2>
+        <p>Cada resolver recibe cuatro argumentos estándar. En orden:</p>
+        <ul>
+          <li><code>parent</code> — el valor devuelto por el resolver del campo padre. Si es <code>Query</code>, suele ser <code>null</code> o el valor raíz.</li>
+          <li><code>args</code> — el objeto con los argumentos que recibió el campo en la consulta.</li>
+          <li><code>context</code> — un objeto compartido por toda la operación: base de datos, usuario autenticado, logger…</li>
+          <li><code>info</code> — metadatos del estado de ejecución (ruta, selección de campos, nombre de la operación).</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    articulo: (parent, args, context, info) => {
+      console.log('Operación:', info.operation.name?.value);
+      return context.db.articulos.findById(args.id);
+    },
+  },
+};</code></pre>
+        <p>En la práctica casi siempre usas <code>args</code> y <code>context</code>; <code>parent</code> lo necesitas para relaciones y <code>info</code> para casos avanzados como log costoso o directivas personalizadas.</p>
+      </section>
+
+      <section>
+        <h2 id="encadenamiento">La cadena de resolvers</h2>
+        <p>Cuando el schema anida tipos, GraphQL resuelve las relaciones encadenando resolvers. El resolver de <code>Post.autor</code> recibe en <code>parent</code> el objeto <code>post</code> que devolvió el resolver del padre, y con eso busca al usuario:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    post: (parent, args, context) => context.db.posts.findById(args.id),
+  },
+  Post: {
+    autor: (post, args, context) => context.db.usuarios.findById(post.autorId),
+  },
+};</code></pre>
+        <p>Fíjate en la ventaja enorme: <code>Post.autor</code> solo se ejecuta <strong>si la consulta lo pide</strong>. Si el cliente no selecciona <code>autor</code>, no se hace esa llamada. Ese aplazamiento es lo que permite que una API GraphQL no haga más trabajo del necesario. (También es el origen del famoso problema N+1, que resolverás en el módulo 3 con DataLoader.)</p>
+      </section>
+
+      <section>
+        <h2 id="context">El contexto</h2>
+        <p>El <code>context</code> se construye una vez por request y viaja a todos los resolvers. Es el lugar natural para el pool de base de datos, el usuario autenticado o un logger, evitando pasarlos de resolver en resolver:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({
+    db: pool,
+    usuarioActual: req.auth?.usuario ?? null,
+  }),
+});</code></pre>
+        <p>Con eso, cualquier resolver puede decidir si quien consulta tiene permiso para ver un dato:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    datosPrivados: (parent, args, context) => {
+      if (!context.usuarioActual) {
+        throw new Error('Autenticación requerida');
+      }
+      return context.db.cargarDatosPrivados(context.usuarioActual.id);
+    },
+  },
+};</code></pre>
+      </section>
+
+      <section>
+        <h2 id="async">Resolvers asíncronos</h2>
+        <p>Los resolvers pueden ser <code>async</code> porque GraphQL espera Promesas. Casi todo trabajo real de backend —una consulta SQL, un fetch a otra API— es asíncrono:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    pedidos: async (parent, args, context) => {
+      const { rows } = await context.db.query(
+        'SELECT * FROM pedidos WHERE usuario_id = $1',
+        [args.usuarioId],
+      );
+      return rows;
+    },
+  },
+};</code></pre>
+        <p>El motor ejecuta los resolvers de un nivel en paralelo y espera todas sus Promesas antes de bajar al siguiente nivel. Por eso una query con tres campos raíz puede lanzar tres búsquedas simultáneas, y una relación anidada espera primero al padre.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe los resolvers para el schema <code>usuario(id)</code> y <code>posts</code> usando un arreglo en memoria.</li>
+          <li>Añade un resolver de campo <code>Post.autor</code> que use <code>parent</code> para buscar al autor.</li>
+          <li>Haz un resolver <code>async</code> que consulte una tabla con <code>context.db.query</code>.</li>
+          <li>Responde por escrito: ¿por qué el resolver de <code>Post.autor</code> puede no ejecutarse nunca en una misma consulta?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Cada campo del schema tiene un resolver; no hay uno solo por query.</li>
+          <li>La firma es <code>(parent, args, context, info)</code>.</li>
+          <li>Las relaciones se resuelven encadenando resolvers a través de <code>parent</code>.</li>
+          <li>El <code>context</code> comparte BD, autenticación y utilidades entre todos los resolvers.</li>
+          <li>Los resolvers pueden ser asíncronos; GraphQL espera sus Promesas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="types-y-schema.html">Tipos y Schema</a>
+          <a class="related-lessons__link" href="queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="../modulo-02/apollo-server-basico.html">Apollo Server básico</a>
+          <a class="related-lessons__link" href="../modulo-03/dataloader-y-n-1.html">DataLoader y N+1</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="queries-y-mutations.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Queries y Mutations</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="introspeccion-y-tools.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Introspección y herramientas</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

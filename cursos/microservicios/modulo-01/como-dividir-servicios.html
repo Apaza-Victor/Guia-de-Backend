@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-como-dividir-servicios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo dividir servicios · Microservicios · Backend Academy</title>
+<meta name="description" content="Estrategias para dividir un sistema en microservicios: por dominio, por capacidad de negocio, por equipo y cómo elegir la granularidad correcta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-como-dividir-servicios"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Cómo dividir servicios</span>
+      </nav>
+      <h1 class="lesson-title">Cómo dividir servicios</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de microservicios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Dividir un sistema es la decisión más difícil y más permanente de la arquitectura de microservicios. Un buen corte produce servicios que evolucionan solos; un mal corte produce un <strong>monolito distribuido</strong>: todas las desventajas de lo distribuido, con ninguna ventaja.</p>
+        <p>Existen varias estrategias de división. La más madura es la <strong>por dominio</strong> (basada en DDD y bounded contexts); le siguen la división por capacidad de negocio y la división organizativa.</p>
+      </section>
+
+      <section>
+        <h2 id="por-dominio">División por dominio (bounded contexts)</h2>
+        <p>Si ya trazaste los bounded contexts de tu negocio (los vimos en la lección de bounded contexts), la división es casi directa: cada contexto acotado, o cada conjunto cohesivo de ellos, se convierte en un servicio.</p>
+        <ul>
+          <li><strong>Ventas</strong> → servicio de pedidos.</li>
+          <li><strong>Pagos</strong> → servicio de pagos y facturación.</li>
+          <li><strong>Inventario</strong> → servicio de stock y almacenes.</li>
+          <li><strong>Usuarios</strong> → servicio de cuentas y autenticación.</li>
+        </ul>
+        <p>Esta división produce los cortes más estables a largo plazo porque refleja la estructura del negocio, no la de un código concreto.</p>
+      </section>
+
+      <section>
+        <h2 id="por-capacidad">División por capacidad de negocio</h2>
+        <p>Cuando el dominio no está maduro, puedes dividir por <strong>capacidades de negocio</strong>: lo que una unidad del negocio hace de principio a fin. Por ejemplo, en una agencia de viajes:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">services:
+  busqueda-de-vuelos:
+    capacidad: buscar itinerarios disponibles
+  reservas:
+    capacidad: crear y cancelar reservas
+  pagos:
+    capacidad: procesar cobros y reembolsos
+  notificaciones:
+    capacidad: enviar confirmaciones por email</code></pre>
+          </div>
+        </figure>
+        <p>Cada capacidad es responsable de un resultado de negocio completo. Esta división funciona bien cuando el límite entre las capacidades está claro para los stakeholders, aunque el dominio técnico aún no lo esté.</p>
+      </section>
+
+      <section>
+        <h2 id="por-equipo">División por equipo (Conway y reverse Conway)</h2>
+        <p>Existe una ley de Conway que dice: «los sistemas se diseñan a imagen de las estructuras de comunicación de las organizaciones que los crean». Su corolario, el <strong>reverse Conway maneuver</strong>, propone aprovecharla a propósito: reorganiza los equipos primero y deja que la arquitectura siga a la organización.</p>
+        <ul>
+          <li>Si un equipo es dueño de un extremo a extremo de una capacidad, es natural que esa capacidad sea un servicio.</li>
+          <li>Si dos equipos tienen que coordinarse continuamente, probablemente están en el mismo servicio.</li>
+          <li>Un servicio debe poder desplegarse sin requerir despliegues simultáneos de otros equipos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="granularidad">Granularidad: ni nano ni macro</h2>
+        <p>La pregunta más común: <strong>¿qué tan pequeño debe ser un microservicio?</strong> La respuesta estándar de Sam Newman: “pequeño como para que un equipo quepa en su cabeza, y grande como para que valga la pena operar el costo de red y despliegue”.</p>
+        <p>Los <strong>nanoservicios</strong> (una clase, un método HTTP por servicio) multiplican el costo operativo y de red sin beneficio. Los <strong>servicios demasiado grandes</strong> vuelven a ser monolitos con trajes de microservicio.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> un servicio debe tener al menos una regla de negocio propia, sus propios datos y un motivo claro para ser desplegado por separado. Si no puedes explicar ese motivo en una frase, el corte es incorrecto.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="decomposition">Descomponer con eventos de dominio</h2>
+        <p>Una técnica práctica para validar el corte es modelar el <strong>flujo de eventos</strong>. Si dos módulos solo se comunican mediante eventos discretos (sin requerir respuestas en línea), son buenos candidatos a servicios separados. Aquí un ejemplo en Python de cómo un servicio reacciona a un evento de otro:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">def on_pedido_creado(event):
+    # El servicio de inventario reacciona al evento del servicio de pedidos
+    for linea in event["lineas"]:
+        reservar_stock(linea["producto"], linea["cantidad"])
+        # No devuelve nada al emisor: la comunicación es asíncrona</code></pre>
+          </div>
+        </figure>
+        <p>Si en cambio los módulos necesitan respuestas inmediatas en cada llamada (¿aceptaste el pago? ¿ubicaste el stock?), el límite puede ser demasiado fino para un corte por eventos.</p>
+      </section>
+
+      <section>
+        <h2 id="senales">Señales de buen corte</h2>
+        <ul>
+          <li><strong>Autonomía:</strong> el servicio puede cambiar y desplegarse sin coordinar con otros.</li>
+          <li><strong>Bajo acoplamiento:</strong> las llamadas entre servicios son las mínimas posibles.</li>
+          <li><strong>Alta cohesión:</strong> todo lo relacionado con una capacidad vive dentro del mismo servicio.</li>
+          <li><strong>Data isolation:</strong> cada servicio modifica únicamente sus propios datos.</li>
+          <li><strong>Failover contenido:</strong> un fallo en un servicio no impide el funcionamiento esencial de los demás.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un sistema real y propón 4 candidatos a servicio siguiendo la división por dominio.</li>
+          <li>Para cada candidato, define el evento que publicaría y dos consumidores de ese evento.</li>
+          <li>Evalúa si alguno de tus cortes es en realidad un nanoservicio y justifícalo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El corte más estable es por dominio usando bounded contexts.</li>
+          <li>La división por capacidad de negocio funciona cuando el dominio no está maduro.</li>
+          <li>La estructura de equipos influye y puede usarse a favor (reverse Conway).</li>
+          <li>La granularidad correcta evita nanoservicios y monolitos avezados en microservicios.</li>
+          <li>El flujo de eventos ayuda a validar cada corte.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="bounded-context.html">Bounded contexts</a>
+          <a class="related-lessons__link" href="monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="antipatrones.html">Antipatrones comunes</a>
+          <a class="related-lessons__link" href="../modulo-02/comunicacion-asincrona.html">Comunicación asíncrona</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

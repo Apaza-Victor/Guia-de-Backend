@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-http-vs-websockets">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP vs WebSockets · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Compara HTTP con WebSockets: el modelo petición-respuesta, el polling y long-polling frente al push real, y cuándo elegir cada tecnología.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-http-vs-websockets"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">HTTP vs WebSockets</span>
+      </nav>
+      <h1 class="lesson-title">HTTP vs WebSockets</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de WebSocket</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="request-response">El modelo petición-respuesta</h2>
+        <p>HTTP funciona como un buzón de correo: el cliente escribe una carta (la <strong>petición</strong>), espera a que llegue al servidor y recibe una carta de vuelta (la <strong>respuesta</strong>). Cada intercambio es una unidad completa: el cliente pregunta, el servidor contesta y la historia termina hasta la siguiente petición.</p>
+        <p>Este modelo es estupendo para leer recursos (una página, un JSON, una imagen) y para registrar acciones (crear un pedido, iniciar sesión). Pero el servidor <strong>nunca puede hablar por iniciativa propia</strong>: si ha pasado algo mientras el cliente está en silencio, la información queda esperando a que alguien pregunte.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Un cliente HTTP clásico: pregunta y espera respuesta.
+async function obtenerEstadoPedido(pedidoId) {
+  const respuesta = await fetch('/api/pedidos/' + pedidoId);
+  const pedido = await respuesta.json();
+  console.log('Estado actual:', pedido.estado);
+  return pedido;
+}
+
+// Si el pedido cambia a los 3 segundos, nosotros no nos enteramos
+// hasta que volvamos a preguntar. Ese es el problema que resuelve
+// la comunicación en tiempo real.
+obtenerEstadoPedido('PED-2041');</code></pre>
+      </section>
+
+      <section>
+        <h2 id="polling">Polling y long-polling</h2>
+        <p>Para simular «tiempo real» con HTTP puro, el truco clásico es el <strong>polling</strong>: el cliente pregunta a intervalos fijos, por ejemplo cada 5 segundos. Es simple, pero desperdicia recursos: la mayoría de las respuestas repiten información «nada ha cambiado», y la latencia media percibida es de hasta 5 segundos.</p>
+        <p>El <strong>long-polling</strong> mejora la latencia: el servidor retiene la petición abierta hasta que tenga algo que decir, y responde en el momento en que ocurre el evento; el cliente entonces abre otra petición inmediatamente. Fue la técnica dominante antes de WebSockets, pero consume una conexión por cliente de forma casi permanente y complica el servidor.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Polling: preguntar cada 4 segundos si hay novedades.
+const intervalo = setInterval(async () =&gt; {
+  const res = await fetch('/api/timbres/nuevos');
+  const timbres = await res.json();
+  if (timbres.length &gt; 0) {
+    console.log('¡Nueva notificación recibida!', timbres);
+  }
+}, 4000);
+
+// Detener el polling cuando el usuario cierra la sesión.
+function cerrarSesion() {
+  clearInterval(intervalo);
+}</code></pre>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Long-polling: la petición se queda "colgada" hasta que haya datos.
+async function escuchar() {
+  const res = await fetch('/api/eventos/largo');
+  const evento = await res.json();
+  procesarEvento(evento);
+  escuchar(); // y vuelta a preguntar, inmediatamente.
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="push">Push real con WebSockets</h2>
+        <p>Con WebSocket la situación cambia de raíz: la conexión se abre una vez y queda tendida un puente permanente. El servidor puede empujar (<em>push</em>) mensajes cuando ocurre un evento, sin que nadie pregunte, y el cliente también puede enviar datos sin esperar:</p>
+        <ul>
+          <li><strong>Latencia:</strong> de segundos (polling) a milisegundos (socket).</li>
+          <li><strong>Coste:</strong> una sola conexión TCP con unos pocos bytes de cabecera por cada mensaje, no un HTTP completo por consulta.</li>
+          <li><strong>Bidireccionalidad:</strong> el mismo canal sirve para enviar y recibir; en HTTP el envío de datos siempre requiere una petición aparte.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const socket = new WebSocket('wss://tienda.miweb.com/pedidos');
+
+socket.onmessage = (evento) =&gt; {
+  const pedido = JSON.parse(evento.data);
+  if (pedido.estado === 'en-camino') {
+    mostrarMapaEnVivo(pedido.id);
+  }
+};
+
+// El servidor decide cuándo avisar: push real, sin polling.
+socket.send(JSON.stringify({ tipo: 'suscribirse', pedidoId: 'PED-2041' }));</code></pre>
+      </section>
+
+      <section>
+        <h2 id="comparativa">Comparativa y cuándo elegir</h2>
+        <p>Ninguna tecnología es «mejor» en abstracto; cada una resuelve un problema distinto. Esta tabla resume las diferencias esenciales:</p>
+        <ul>
+          <li><strong>HTTP:</strong> petición-respuesta, sin estado por conexión, fácil de cachear y escalar con balanceadores sin más. Ideal para consultas y mutaciones puntuales.</li>
+          <li><strong>HTTP + polling:</strong> aceptable para novedades poco frecuentes y cuando no se puede usar un socket. Desperdicia peticiones.</li>
+          <li><strong>WebSocket:</strong> conexión persistente, bidireccional, de baja latencia. Ideal para chat, notificaciones y streaming, pero mantiene recursos vivos por cliente.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si el usuario necesita enterarse en menos de un segundo de lo que otros hacen, usa un socket. Si la página puede refrescarse cuando el propio usuario lo pide, HTTP es más simple y barato.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una aplicación real (tu red social, un messenger o un dashboard) y anota tres momentos donde use polling o push.</li>
+          <li>Calcula cuántas peticiones HTTP al día genera un polling de 5 segundos en una sola pestaña abierta 8 horas (8 h × 720 peticiones/hora).</li>
+          <li>Propón para cada caso anterior una alternativa: WebSocket, long-polling o mantener HTTP. Justifica brevemente cada elección.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>HTTP es petición-respuesta: el servidor solo habla cuando el cliente pregunta.</li>
+          <li>El polling pregunta por intervalos y el long-polling mantiene la petición abierta para reducir la latencia.</li>
+          <li>WebSocket es una conexión persistente y bidireccional: el push es inmediato.</li>
+          <li>Elige HTTP para consultas puntuales y WebSocket para lo que deba llegar en milisegundos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="introduccion-a-websockets.html">Introducción a WebSockets</a>
+          <a class="related-lessons__link" href="el-protocolo-websocket.html">El protocolo WebSocket</a>
+          <a class="related-lessons__link" href="cliente-websocket-web.html">Cliente WebSocket en el navegador</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="introduccion-a-websockets.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Introducción a WebSockets</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="el-protocolo-websocket.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">El protocolo WebSocket</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

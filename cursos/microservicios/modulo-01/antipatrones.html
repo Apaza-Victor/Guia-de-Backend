@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-antipatrones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Antipatrones comunes · Microservicios · Backend Academy</title>
+<meta name="description" content="Los errores más comunes al adoptar microservicios: monolito distribuido, nanoservicios, llamadas en cadena, dependencias ocultas y cómo detectarlos a tiempo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-antipatrones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Antipatrones comunes</span>
+      </nav>
+      <h1 class="lesson-title">Antipatrones comunes</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de microservicios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La mayoría de las adopciones de microservicios fracasan no porque la técnica sea mala, sino por antipatrones que mezclan <strong>todas las desventajas de lo distribuido con ninguna de sus ventajas</strong>. Conocer los más comunes te permite detectarlos antes de que se conviertan en deuda arquitectónica cara de revertir.</p>
+      </section>
+
+      <section>
+        <h2 id="monolito-distribuido">Monolito distribuido</h2>
+        <p>Es el antipatrón rey: servicios «independientes» pero que comparten la <strong>misma base de datos</strong>, el mismo esquema e incluso la misma transacción. Parece modular, pero técnicamente sigue siendo un monolito con tiempo de red.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">SQL (mal ejemplo)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="sql"><code class="language-sql" data-language="sql">-- Dos "microservicios" escribiendo en las mismas tablas:
+-- servicio-pedidos y servicio-usuarios comparten esta BD
+
+CREATE TABLE usuarios (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL,
+  saldo DECIMAL(10,2)
+);
+
+CREATE TABLE pedidos (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER REFERENCES usuarios(id),
+  total DECIMAL(10,2)
+);</code></pre>
+          </div>
+        </figure>
+        <p>Resultado: cualquier migración de esquema rompe a todos, no hay aislamiento de fallos y escalar un servicio no aísla el tráfico de base de datos. Si comparten esquema, <strong>no son servicios</strong>: son módulos repartidos en procesos distintos.</p>
+      </section>
+
+      <section>
+        <h2 id="nanoservicios">Nanoservicios</h2>
+        <p>Cuando el servicio tiene una única entidad o un único endpoint, se convierte en un <strong>nanoservicio</strong>: todo el costo de lo distribuido (red, despliegue, monitoreo, versionado) para una capacidad trivial.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (mal ejemplo)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml"># Cada método HTTP es "un servicio"
+services:
+  servicio-obtener-email:
+    endpoints:
+      - GET /usuarios/{id}/email
+  servicio-obtener-nombre:
+    endpoints:
+      - GET /usuarios/{id}/nombre
+  servicio-actualizar-telefono:
+    endpoints:
+      - PUT /usuarios/{id}/telefono</code></pre>
+          </div>
+        </figure>
+        <p>Estos tres «servicios» son una sola capacidad (gestión de usuarios) partida en pedazos. La granularidad correcta agrupa las operaciones cohesionadas de un contexto.</p>
+      </section>
+
+      <section>
+        <h2 id="cadenas">Llamadas síncronas en cadena</h2>
+        <p>Cuando para servir una petición un servicio debe llamar a otro, que llama a otro, que llama a otro, la latencia se suma y un fallo en cualquier eslabón tumba la petición completa. Es el síndrome del <strong>mayorista de noticias síncronas</strong>.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">// Mal: cadena síncrona profunda
+async function crearPedido(idCliente, idProducto) {
+  const usuario = await llamar("servicio-usuarios", `/usuarios/${idCliente}`);
+  const inventario = await llamar("servicio-inventario", `/productos/${idProducto}`);
+  const descuento = await llamar("servicio-ventas", `/descuentos/${idCliente}`);
+  const total = inventario.precio - descuento.valor;
+  const pedido = await llamar("servicio-pedidos", "/pedidos", { usuario, total });
+  const factura = await llamar("servicio-facturacion", "/facturas", { pedido });
+  return factura;
+}</code></pre>
+          </div>
+        </figure>
+        <p>Cada llamada agrega latencia y un punto de fallo. La mejora típica: el cliente hace <strong>una</strong> petición al API Gateway, y la agregación en paralelo (o asíncrona) reemplaza la cadena.</p>
+      </section>
+
+      <section>
+        <h2 id="dependencias-ocultas">Dependencias ocultas</h2>
+        <p>Servicios que se acoplan por fuera del contrato: comparten una cola sin documentar, leen el log del otro, asumen el orden de despliegue o usan variables globales de configuración. Son «favores» que se convierten en roturas silenciosas.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash (mal ejemplo)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="bash"><code class="language-bash" data-language="bash"># El servicio B "sabe" que el servicio A escribe su estado a este archivo
+tail -f /var/log/servicio-a/app.log | grep "PEDIDO_OK"
+
+# Si A cambia el formato del log o su cluster, B deja de funcionar:
+# dependencia no declarada, sin contrato ni timeout</code></pre>
+          </div>
+        </figure>
+        <p>Todo acoplamiento entre servicios debe pasar por el <strong>contrato</strong> de la interfaz y estar versionado. Los logs, archivos compartidos y esquemas son dependencias no declaradas.</p>
+      </section>
+
+      <section>
+        <h2 id="otro">Otros antipatrones a vigilar</h2>
+        <ul>
+          <li><strong>Migración «big bang»:</strong> convertir todo de una vez en microservicios en lugar de extraer incrementalmente.</li>
+          <li><strong>Sin service discovery:</strong> direcciones IP y puertos hardcodeados en los clientes.</li>
+          <li><strong>Sin observabilidad:</strong> no hay logs correlacionados ni trazas distribuidas, así que los fallos entre servicios son invisibles.</li>
+          <li><strong>Configuración duplicada:</strong> cada servicio reinventa la rueda de seguridad, reintentos y métricas.</li>
+          <li><strong>Contratos nunca versionados:</strong> cambiar el shape de un evento rompe a todos los consumidores a la vez.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="deteccion">Cómo detectarlos temprano</h2>
+        <p>Antes de escribir código, haz una <strong>revisión de líneas de comunicación</strong>: dibuja cada llamada entre servicios y pregunta por cada una «¿realmente necesito que sea síncrona?». Cuenta las bases de datos compartidas, los esquemas comunes y los despliegues que requieren coordinación. Cada uno de esos puntos es un antipatrón latente.</p>
+        <div class="callout">
+          <p><strong>Regla de oro:</strong> si dos servicios no pueden evolucionar y desplegarse de forma totalmente independiente, el corte está mal hecho. Corregir ese corte es carísimo: mejor rehacerlo hoy que pagarlo en producción.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Inspecciona un sistema que conozcas y busca evidencia de monolito distribuido (base de datos compartida entre «servicios»).</li>
+          <li>Lista 3 llamadas síncronas en cadena que podrían convertirse en eventos asíncronos.</li>
+          <li>Escribe una checklist de 4 preguntas para auditar un corte de servicios antes de que se construya.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El monolito distribuido une servicios que comparten base de datos o esquema.</li>
+          <li>Los nanoservicios fragmentan capacidades cohesionadas en piezas triviales.</li>
+          <li>Las cadenas síncronas acumulan latencia y puntos de fallo.</li>
+          <li>Las dependencias ocultas (logs, archivos, config) rompen contratos.</li>
+          <li>Revisar la topología de comunicaciones detecta antipatrones a tiempo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="como-dividir-servicios.html">Cómo dividir servicios</a>
+          <a class="related-lessons__link" href="../modulo-02/comunicacion-sincrona.html">Comunicación síncrona</a>
+          <a class="related-lessons__link" href="../modulo-03/resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

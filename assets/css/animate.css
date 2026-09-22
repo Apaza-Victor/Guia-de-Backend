@@ -1,0 +1,85 @@
+@keyframes preload-pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Card entrance stagger via inline --delay */
+.animate-in {
+  animation: fade-up 0.5s var(--ease-out) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.card {
+  will-change: transform;
+}
+
+.micro-pop {
+  animation: preload-pop 0.35s var(--ease-out) both;
+  animation-delay: var(--delay, 0s);
+}
+
+.chevron {
+  transition: transform var(--transition);
+}
+
+.is-open > .chevron {
+  transform: rotate(180deg);
+}
+
+/* Button press feedback with ripple-light marker */
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* Progress bar shimmer when loading */
+.progress--loading .progress__fill {
+  background: var(--bg-alt);
+  animation: shimmer 1.4s infinite;
+}
+
+/* Skeleton loaders: only for hero/hero-cards during transition */
+.hero.is-loading .hero-cards,
+.cards.is-loading {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.hero.is-loading .hero-card {
+  min-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero.is-loading .hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--bg-alt) 25%, var(--surface-2) 50%, var(--bg-alt) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+[data-theme="dark"] {
+  --shimmer-highlight: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.06) 75%
+  );
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

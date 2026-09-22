@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m6-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bounded contexts · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Bounded contexts en DDD: cómo cortar el dominio en contextos con sentido propio, lenguajes ubicuos distintos y la integración entre ellos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m6-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Bounded contexts</span>
+      </nav>
+      <h1 class="lesson-title">Bounded contexts</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Hexagonal y DDD</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un sistema grande no es «un solo dominio» con un único lenguaje: hay múltiples <strong>lenguajes ubicuos</strong> conviviendo. El <strong>bounded context</strong> define la frontera donde un modelo de dominio tiene <em>significado</em> — y fuera de ella, otro contexto puede llamar a la misma idea con otro nombre y otra regla. Cortar el dominio en contextos es la decisión más estratégica del DDD.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema del «modelo único»</h2>
+        <p>En un ecommerce, la palabra «Producto» significa cosas distintas según el área:</p>
+        <ul>
+          <li><strong>Catálogo:</strong> nombre, foto, descripción, precio.</li>
+          <li><strong>Inventario:</strong> stock, ubicación de bodega, lotes.</li>
+          <li><strong>Contabilidad:</strong> costo, depreciación, SKU contable.</li>
+          <li><strong>Recomendaciones:</strong> comportamiento de compra.</li>
+        </ul>
+        <p>Si obligas a los cuatro a compartir UNA clase Producto con todos esos campos, acabas con un monstruo acoplado y con reglas que se pisan. El context separa cada visión con su propio modelo.</p>
+      </section>
+
+      <section>
+        <h2 id="frontera">Definir la frontera</h2>
+        <p>La frontera es hoy un <strong>límite organizacional</strong>, tecnológico y lingüístico a la vez:</p>
+        <ol>
+          <li><strong>Equipo:</strong> cada context suele tener un equipo dueño (o al menos un responsable).</li>
+          <li><strong>Código:</strong> cada context = su módulo, su paquete, sus migraciones.</li>
+          <li><strong>Datos:</strong> cada context tiene su modelo de datos, aunque compartan la misma BD física o no.</li>
+        </ol>
+        <p>Vivir juntos no significa mezclarse: la frontera está en el idioma y el modelo, no necesariamente en el servidor.</p>
+      </section>
+
+      <section>
+        <h2 id="integracion">Cómo se integran</h2>
+        <p>Los contextos dialogan mediante patrones de traslación: <strong>anti-corruption layer</strong> (un traductor entre mundos), <strong>conformist</strong>/<strong>published language</strong> (adoptar el estándar del upstream), y <strong>customer-supplier</strong> y <strong>shared kernel</strong>. En la práctica, el contrato suele ser un <em>evento o API</em>:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (anti-corruption layer)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">namespace Inventario\Acl;   // Capa anti-corrupción
+
+// El contexto Inventario habla con Catálogo vía su propio idioma
+final class ProductoCatalogo
+{
+    public function __construct(
+        private string $sku,
+        private int $unidades,
+    ) {}
+
+    public static function desdeEvento(array $payload): self
+    {
+        // el payload del evento es el contracto del upstream
+        return new self(
+            sku: (string) $payload-&gt;sku,
+            unidades: (int) $payload-&gt;stock_actual,
+        );
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Inventario nunca importa la clase Producto de Catálogo; traduce a su modelo local. Así, si Catálogo cambia, Inventario no se rompe.</p>
+      </section>
+
+      <section>
+        <h2 id="donde">Las dos lecturas de «contexto»</h2>
+        <p><strong>No confundir en arquitectura «bound context» (DDD) con «módulo»</strong>: un módulo agrupa código del mismo context. «Context» se refiere a significado y reglas. Un microservicio a veces es un bounded context, pero no siempre hace falta fisart servidores para tenerlos: puedes tener contextos claros en un monolito modulado, y eso ya es un gran avance.</p>
+      </section>
+
+      <section>
+        <h2 id="ejercicio">Diseñar el mapa</h2>
+        <p>Un mapa de contextos (context map) dibuja equipos → contextos → contratos. Antes de escribir código de integración, el map es un documento de conversación entre equipos que responde: «¿quién necesita a quién, y bajo qué contrato?».</p>
+      </section>
+
+      <section class="exercise" id="ejercicio2">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja 3 bounded contexts de tu dominio y un ejemplo del mismo concepto con distinto significado en cada uno.</li>
+          <li>Define el idioma del upstream en un contrato mínimo (evento o API).</li>
+          <li>Coloca una anti-corruption layer para consumir datos ajenos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un bounded context da sentido propio a un modelo y su lenguaje ubicuo.</li>
+          <li>Un solo «Producto» comparte nombre en varios contextos, pero cada uno tiene el suyo.</li>
+          <li>La frontera es de significado y de modelo, no solo de servidores.</li>
+          <li>Se integran con contratos y con capas anti-corrupción.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+          <a class="related-lessons__link" href="ddd-modelado-tactico.html">DDD: modelado táctico</a>
+          <a class="related-lessons__link" href="../patrones/cqrs-lectura-escritura.html">CQRS</a>
+          <a class="related-lessons__link" href="../modulo-07/de-monolito-a-modulos.html">De monólito a módulos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

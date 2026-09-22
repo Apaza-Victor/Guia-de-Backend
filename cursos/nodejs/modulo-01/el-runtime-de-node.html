@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="el-runtime-de-node">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El runtime de Node: V8 y APIs nativas · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Entiende qué es un runtime, el motor V8 de Google, libuv y las APIs nativas que permiten a Node leer archivos, comunicarse por red y lanzar procesos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="el-runtime-de-node"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">El runtime de Node: V8 y APIs nativas</span>
+        </nav>
+        <h1 class="lesson-title">El runtime de Node: V8 y APIs nativas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Node.js</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="runtime">¿Qué es un runtime?</h2>
+          <p>Un <strong>runtime</strong> es el entorno que ejecuta tu código y le ofrece herramientas para interactuar con la máquina. El navegador es un runtime (con DOM, ventanas y eventos). Node.js es otro runtime: el mismo compilador de JavaScript, pero enfocado al servidor.</p>
+          <p>Suena simpático compararlo con un coche: el <strong>motor</strong> (<em>V8</em>) convierte el JavaScript en código de máquina, y el <strong>chasis</strong> y accesorios (<em>libuv, módulos core</em>) permiten circular: leer discos, escuchar red y lanzar procesos.</p>
+        </section>
+
+        <section>
+          <h2 id="v8">V8: el motor de Google</h2>
+          <p><strong>V8</strong> es el motor que Google desarrolló para Chrome y que Node adoptó. Su función: traducir JavaScript a código nativo muy rápido (compilación JIT) y gestionar la memoria mediante su recolector de basura.</p>
+          <ul>
+            <li><strong>JIT:</strong> compila el código en caliente mientras se ejecuta, optimizando las rutas más usadas.</li>
+            <li><strong>Gestión de memoria:</strong> el GC libera objetos que ya no se referencian, sin que tú lo hagas a mano.</li>
+            <li><strong>Tipos:</strong> JavaScript no declara tipos, pero V8 los infiere y genera optimizaciones internas.</li>
+          </ul>
+          <p>Puedes comprobarlo: un bucle de un millón de iteraciones en Node suele ejecutarse en milisegundos gracias a estas optimizaciones.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">console.time("suma");
+
+let suma = 0;
+for (let i = 0; i &lt; 1_000_000; i++) {
+  suma += i;
+}
+
+console.timeEnd("suma"); // suma: X ms
+console.log("Resultado:", suma);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="libuv">libuv: el sistema operativo en JavaScript</h2>
+          <p>Node no se limita a V8. La biblioteca <strong>libuv</strong> (escrita en C) es la que conecta con el sistema operativo: gestiona el <strong>event loop</strong>, las operaciones de red asíncronas, el sistema de archivos, timers y un <em>thread pool</em> para tareas pesadas.</p>
+          <p>Gracias a libuv, cuando llamas a <code class="inline">fs.readFile</code>, Node no se queda esperando parado: le pide a libuv que lea el archivo en segundo plano y sigue ejecutando tu código. Cuando el archivo está listo, el resultado vuelve a la cola del event loop.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const fs = require("node:fs");
+
+// Petición asíncrona: el programa NO se detiene aquí
+fs.readFile("datos.txt", "utf8", (err, contenido) => {
+  if (err) {
+    console.error("No se pudo leer:", err.message);
+    return;
+  }
+  console.log("Contenido:", contenido);
+});
+
+// Esto se ejecuta ANTES de que el archivo termine de leerse
+console.log("La lectura está en marcha...");</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="apis-nativas">Las APIs nativas de Node</h2>
+          <p>Sobre V8 y libuv, Node construye un conjunto de <strong>módulos core</strong> que cubren las necesidades clásicas de un servidor. Algunos de los más importantes:</p>
+          <ul>
+            <li><code class="inline">fs</code>: archivos y directorios.</li>
+            <li><code class="inline">http</code> / <code class="inline">https</code>: servidores y clientes HTTP.</li>
+            <li><code class="inline">path</code>: rutas y extensiones de archivos.</li>
+            <li><code class="inline">stream</code>: lectura y escritura por flujos.</li>
+            <li><code class="inline">crypto</code>: cifrado, hashes y generación segura de datos.</li>
+            <li><code class="inline">worker_threads</code>: paralelismo real con varios hilos.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const crypto = require("node:crypto");
+
+const contrasena = "clave-secreta-demo";
+const hash = crypto.createHash("sha256").update(contrasena).digest("hex");
+
+console.log("Hash SHA-256:", hash);
+console.log("Aleatorio seguro:", crypto.randomUUID());</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Ejecuta el bucle con <code class="inline">console.time</code> y anota cuántos milisegundos tarda tu máquina.</li>
+            <li>Crea un archivo <code class="inline">datos.txt</code>, ejecuta el ejemplo de <code class="inline">fs.readFile</code> y observa el orden de las salidas en consola.</li>
+            <li>Genera un UUID con <code class="inline">crypto.randomUUID()</code> y explícalo con palabras propias.</li>
+            <li>Lista todas las APIs que recuerdes de este capítulo y para qué sirve cada una.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Un runtime ejecuta tu código y le ofrece las herramientas del entorno.</li>
+            <li>V8 compila JavaScript a código nativo de forma optimizada.</li>
+            <li>libuv conecta Node con el sistema: event loop, red, archivos y timers.</li>
+            <li>Los módulos core (fs, http, crypto, stream…) son las APIs nativas de Node.</li>
+            <li>Las operaciones de E/S no bloquean: se piden en segundo plano y el resultado vuelve después.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

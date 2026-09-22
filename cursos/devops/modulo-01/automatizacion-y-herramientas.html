@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="automatizacion-y-herramientas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatización y herramientas · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="El panorama de herramientas en el ecosistema DevOps y la regla de oro: automatizar lo repetitivo. Git, CI, containers, config y monitoreo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="automatizacion-y-herramientas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Automatización y herramientas</span>
+      </nav>
+      <h1 class="lesson-title">Automatización y herramientas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a DevOps</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Existen cientos de herramientas DevOps. En lugar de memorizarlas, conviene organizarlas por <strong>categoría</strong>: cada categoría automatiza una parte del ciclo de vida. Elegir una herramienta por categoría y aprenderla bien rinde más que probar diez superficialmente.</p>
+      </section>
+
+      <section>
+        <h2 id="categorias">Las categorías esenciales</h2>
+        <ul>
+          <li><strong>Control de versiones:</strong> Git, la base de todo. Código, config y documentos versionados.</li>
+          <li><strong>CI/CD:</strong> GitHub Actions, GitLab CI, Jenkins, CircleCI. Automatizan build, test y deploy.</li>
+          <li><strong>Contenedores:</strong> Docker (empaquetar) y Kubernetes (orquestar). Reproducibilidad total.</li>
+          <li><strong>Configuración e infraestructura:</strong> Ansible, Terraform. "Infraestructura como código".</li>
+          <li><strong>Observabilidad:</strong> Prometheus + Grafana, ELK, Sentry. Métricas, logs y errores.</li>
+          <li><strong>Mensajería y automatización:</strong> Slack/Teams, scripts de SSH, webhooks que disparan acciones.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="regla">La regla de oro: automatizar lo repetitivo</h2>
+        <p>Un buen criterio para decidir qué automatizar es simple: <strong>si hiciste lo mismo dos veces, la tercera debe hacerlo una máquina</strong>. Se aplica a martillazos manuales como:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Manual y propenso a errores (lo que NO queremos)
+ssh servidor
+cd /var/www/api
+git pull
+npm install
+npm run build
+systemctl restart api
+# ¿me olvidé de migrar la base de datos?
+
+# Automatizado: el mismo flujo vive en un pipeline de CI
+# que se ejecuta solo y avisa en un canal de Slack.</code></pre>
+          </div>
+        </figure>
+        <p>No todo se automatiza el primer día. La estrategia recomendada es <strong>automatizar por etapas</strong>: 1) build y tests, 2) despliegue a staging, 3) despliegue a producción con supervisión, 4) rollback automático. Cada etapa da confianza para la siguiente.</p>
+      </section>
+
+      <section>
+        <h2 id="yaml">El idioma común: YAML</h2>
+        <p>La mayoría de las herramientas de CI/CD se configuran con YAML, incluido GitHub Actions. No hace falta dominarlo todo, pero sí sus tres conceptos: <strong>clave: valor</strong>, <strong>listas</strong> (con guiones) y <strong>mapas anidados</strong> (con indentación).</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">nombre: "config de ejemplo"
+lenguaje: python
+version: "3.12"
+etapas:          # lista de etapas
+  - build
+  - test
+  - deploy
+config:          # mapa anidado
+  python:
+    instalando: "poetry"
+    tests:
+      comando: pytest
+      con_caché: true</code></pre>
+          </div>
+        </figure>
+        <p>El YAML es sensible a la indentación (espacios, no tabuladores). Un error de indentación rompe la sintaxis; lo verás con un marcador claro en la interfaz del pipeline.</p>
+      </section>
+
+      <section>
+        <h2 id="decision">Cómo elegir</h2>
+        <ul>
+          <li>Los <strong>problemas preliminares</strong> (dependencias, entornos) suelen resolverse con contenedores.</li>
+          <li>Los <strong>problemas de velocidad</strong> (mucho empaquetado o test lento) se resuelven con caché y paralelización en CI.</li>
+          <li>Los <strong>problemas de fiabilidad</strong> se resuelven con pruebas y despliegues en fases.</li>
+          <li>Empieza con la herramienta que ya usa tu equipo (ej. GitHub) antes de añadir más piezas.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lista 5 tareas repetitivas de tu día a día y clasifica cuáles se pueden automatizar hoy.</li>
+          <li>Escribe en YAML un mini-pipeline de 3 etapas para un proyecto tuyo.</li>
+          <li>Elige una herramienta por categoría del ciclo de vida y, para cada una, anota qué problema te resuelve.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las herramientas DevOps se agrupan por categorías: git, CI/CD, contenedores, config y observabilidad.</li>
+          <li>La automatización debe dirigirse a lo repetitivo y aumentar en etapas.</li>
+          <li>YAML es el formato de configuración principal de la mayoría de los pipelines.</li>
+          <li>Empieza sencillo y amplía: automatizar el build primero, después el deploy.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

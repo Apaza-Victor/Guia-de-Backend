@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-seguridad-y-limitacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguridad y limitación · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a proteger una API GraphQL: limitar profundidad, complejidad y aliases, autenticar por contexto y autorizar por resolver o directiva.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-seguridad-y-limitacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Seguridad y limitación</span>
+      </nav>
+      <h1 class="lesson-title">Seguridad y limitación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Avanzado y producción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La flexibilidad de GraphQL es también su superficie de ataque: un cliente abusivo puede pedir consultas profundísimas, con miles de aliases o de complejidad enorme, y tumbar el servidor. A diferencia de REST, donde los endpoints son fijos, aquí el <strong>coste de una operación lo elige quien pregunta</strong>. La seguridad se convierte en un problema de control de coste + identidad + permisos.</p>
+      </section>
+
+      <section>
+        <h2 id="amenazas">El modelo de coste</h2>
+        <p>Tres trucos clásicos contra una API GraphQL:</p>
+        <ul>
+          <li><strong>Profundidad:</strong> anidar <code>posts → autor → posts → autor…</code> hasta agotar el stack o el tiempo.</li>
+          <li><strong>Aliases:</strong> repetir un mismo campo caro miles de veces en una operación.</li>
+          <li><strong>Complejidad:</strong> pedir listas muy largas o campos que requieren computación costosa en cada salto.</li>
+        </ul>
+        <p>El ejemplo abusivo con aliases muestra lo fácil que es inflar una query contra un servidor sin límites:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query Abuso {
+  a1: posts { titulo autor { nombre } }
+  a2: posts { titulo autor { nombre } }
+  a3: posts { titulo autor { nombre } }
+  # ... el atacante repite el campo cientos de veces
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="profundidad">Limitar la profundidad</h2>
+        <p>La regla de validación <code>graphql-depth-limit</code> rechaza operaciones que pasen un número de niveles. Siete niveles es un techo típico incluso para UIs ricas:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import depthLimit from "graphql-depth-limit";
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  validationRules: [depthLimit(7)],
+});</code></pre>
+        <p>Al ser una <em>validation rule</em>, la query se rechaza antes de ejecutar ningún resolver, sin tocar la base de datos. Es la primera línea de defensa y cuesta una línea.</p>
+      </section>
+
+      <section>
+        <h2 id="complejidad">Limitar la complejidad</h2>
+        <p>La complejidad computa un "precio" por nodo y tipo que la query puede visitar, y corta las operaciones que lo superan. La técnica <code>@complexity</code> permite declarar el coste por campo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { getComplexity, simpleEstimator } from "graphql-query-complexity";
+import { separateOperations } from "graphql";
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [
+    {
+      async requestDidStart({ request, document }) {
+        const complexity = getComplexity({
+          schema: server.schema,
+          operationName: request.operationName,
+          query: document,
+          variables: request.variables,
+          estimators: [simpleEstimator({ defaultComplexity: 1 })],
+        });
+        if (complexity > 1000) {
+          throw new GraphQLError(
+            `La operación es demasiado compleja (${complexity})`,
+            { extensions: { code: "TOO_COMPLEX" } },
+          );
+        }
+      },
+    },
+  ],
+});</code></pre>
+        <p>La complejidad se calcula sobre la operación <em>concretamente enviada</em>, así que captura tantos los aliases como los listados largos de una sola pasada.</p>
+      </section>
+
+      <section>
+        <h2 id="ratelimit">Rate limiting</h2>
+        <p>Además de la complejidad por operación, hay que limitar el ritmo. En GraphQL se suele medir la "unidad de cóstese" por usuario, no solo el número de peticiones:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { RedisRateLimiter } from "@gr2m/graphql-rate-limit";
+
+const rateLimiter = new RedisRateLimiter({
+  RedisClient: redis,
+  name: "coste_por_usuario",
+  points: 1000,
+  duration: 60 * 15,
+});
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({
+    usuarioActual: autenticar(req),
+    rate: rateLimiter,
+  }),
+});</code></pre>
+        <p>La clave de rate limit es el usuario autenticado; para IPs, un middleware en el proxy o Express cubre bien el caso anónimo.</p>
+      </section>
+
+      <section>
+        <h2 id="auth">Autenticación y autorización</h2>
+        <p>La <strong>autenticación</strong> (¿quién eres?) se resuelve en el contexto, leyendo el token de cada petición. La <strong>autorización</strong> (¿puedes ver esto?) se decide en el resolver:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import jwt from "jsonwebtoken";
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    return {
+      usuarioActual: token
+        ? jwt.verify(token, process.env.JWT_SECRET)
+        : null,
+    };
+  },
+});</code></pre>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    panelAdmin: (parent, args, context) => {
+      if (context.usuarioActual?.rol !== "ADMIN") {
+        throw new GraphQLError("Acceso denegado", {
+          extensions: { code: "FORBIDDEN", http: { status: 403 } },
+        });
+      }
+      return context.db.obtenerDatosAdmin();
+    },
+  },
+};</code></pre>
+        <p>Para no repetir el <code>if</code> en cada campo se usan <strong>directivas</strong> (<code>@auth(rol: [...])</code>) o una capa de autorización centralizada que envuelve los resolvers."</p>
+      </section>
+
+      <section>
+        <h2 id="introspeccion">Desactivar la introspección</h2>
+        <p>En una API pública, dejar la introspección activa regala un mapa completo del schema al atacante. Se desactiva por llave de entorno:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { ApolloServer } from "@apollo/server";
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: process.env.NODE_ENV !== "production",
+});</code></pre>
+        <p>En desarrollo sigues disfrutando de GraphiQL y, en producción, el camino de ataque con <code>__schema</code> desaparece. Si necesitas documentación pública, genera un schema estático en el pipeline.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Añade <code>depthLimit(7)</code> a tu servidor y comprueba que una query de 8 niveles se rechaza.</li>
+          <li>Calcula la complejidad de una operación con 50 aliases y establece un tope que la bloquee.</li>
+          <li>Implementa la autorización de <code>panelAdmin</code> con <code>context.usuarioActual</code> y un <code>code: "FORBIDDEN"</code>.</li>
+          <li>Activa la introspección solo en desarrollo y verifica que en producción <code>__schema</code> da error.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>En GraphQL el coste de la operación lo elige el cliente: hay que limitarlo.</li>
+          <li>La profundidad se acota con reglas de validación antes de ejecutar resolvers.</li>
+          <li>La complejidad pondera nodos, aliases y listas y corta operaciones costosas.</li>
+          <li>El rate limiting se aplica por usuario real y coste consumido.</li>
+          <li>Autenticar en el contexto + autorizar por resolver o directiva.</li>
+          <li>Desactiva la introspección en producción pública.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="dataloader-y-n-1.html">DataLoader y N+1</a>
+          <a class="related-lessons__link" href="subscriptions.html">Subscriptions</a>
+          <a class="related-lessons__link" href="../modulo-02/errores-y-estados.html">Errores y validación</a>
+          <a class="related-lessons__link" href="../modulo-01/introspeccion-y-tools.html">Introspección y herramientas</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="dataloader-y-n-1.html">
+        <span class="label">← Anterior</span>
+        <span class="title">DataLoader y N+1</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="federation-y-gateway.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Federation y gateway</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

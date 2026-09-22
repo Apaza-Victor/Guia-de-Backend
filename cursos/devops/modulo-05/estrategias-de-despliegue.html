@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="estrategias-de-despliegue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estrategias de despliegue · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Compara estrategias de despliegue para tu Backend: directo, rolling, blue-green y canary, con ventajas, riesgos y un ejemplo de rollback.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="estrategias-de-despliegue"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Estrategias de despliegue</span>
+      </nav>
+      <h1 class="lesson-title">Estrategias de despliegue</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Despliegue Continuo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">La pregunta clave: ¿cómo publicas?</h2>
+        <p><em>"Publicar"</em> puede significar cambiar un proceso que sirve una carpeta o reemplazar miles de contenedores. La <strong>estrategia de despliegue</strong> define cómo transicionamos de la versión vieja a la nueva: cuánto tarda, cuánto riesgo tiene y si interrumpe a los usuarios.</p>
+      </section>
+
+      <section>
+        <h2 id="recreate">Despliegue directo (recreate)</h2>
+        <p>Se detiene la versión actual y se levanta la nueva. Es el más simple y funciona bien fuera de horas punta, porque hay <strong>tiempo de inactividad</strong> (downtime).</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># con systemd: la API cae unos segundos
+sudo systemctl stop api.service
+cd /srv/api &amp;&amp; git pull
+pip install -r requirements.txt
+sudo systemctl start api.service</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="rolling">Despliegue rolling</h2>
+        <p>Se actualizan las instancias de <strong>una en una</strong>. Mientras una se reinicia, las demás sirven tráfico: hay <strong>cero downtime</strong>, pero durante unos instantes conviven dos versiones. Es la estrategia por defecto de Kubernetes (RollingUpdate) y de balanceadores como Nginx con un grupo multiple.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Nginx: dos servidores, actualizar de a uno
+# servidor A: 127.0.0.1:8001
+# servidor B: 127.0.0.1:8002
+
+# 1. Quitar A del upstream
+# 2. Actualizar A y reiniciar
+# 3. Re-agregar A, quitar B
+# 4. Actualizar B y reiniciar
+sudo nginx -s reload</code></pre>
+          </div>
+        </figure>
+        <p>El truco: como Nginx sigue balanceando hacia B mientras A se actualiza, los usuarios no notan el cambio.</p>
+      </section>
+
+      <section>
+        <h2 id="bluegreen">Blue-green</h2>
+        <p>Mantienes dos entornos idénticos: <strong>blue</strong> (actual) y <strong>green</strong> (nuevo). Despliegas la nueva versión en green, la pruebas, y entonces cambias el tráfico con un solo switch. Volver atrás es tan fácil como volver a mover el switch.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">[ Usuarios ] ──&gt; [ Nginx ] ──&gt; blue v1.2 (ACTIVO)
+                          └────&gt; green v1.3 (preparado)
+
+switch (reload nginx) →
+
+[ Usuarios ] ──&gt; [ Nginx ] ──&gt; blue v1.2 (reserva)
+                          └────&gt; green v1.3 (ACTIVO)</code></pre>
+          </div>
+        </figure>
+        <p>El rollback es instantáneo: un <code class="inline">nginx -s reload</code> vuelve a apuntar a blue.</p>
+      </section>
+
+      <section>
+        <h2 id="canary">Canary</h2>
+        <p>Es un blue-green pero parcial: la versión nueva recibe primero un <strong>pequeño porcentaje de tráfico</strong> (p. ej. 5%), se observan sus errores, y si todo va bien se aumenta la proporción hasta el 100%.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Fase 1: 95% v1.2 · 5% v1.3   ← observa
+Fase 2: 70% v1.2 · 30% v1.3
+Fase 3:  0% v1.2 · 100% v1.3 ← confirmado
+
+Si la tasa de error 5xx sube en fase 1 → volver a v1.2</code></pre>
+          </div>
+        </figure>
+        <p>Requiere balanceo que soporte pesos (Nginx <code class="inline">weight</code>, malla de servicio, o el deployment de una plataforma serverless).</p>
+      </section>
+
+      <section>
+        <h2 id="elegir">¿Cuál elijo?</h2>
+        <ul>
+          <li><strong>API interna / ventanas de mantenimiento:</strong> directo es suficiente.</li>
+          <li><strong>Servicio público con varias instancias:</strong> rolling.</li>
+          <li><strong>Máxima rapidez de rollback:</strong> blue-green.</li>
+          <li><strong>Tráfico alto y riesgo de migraciones:</strong> canary con métricas por fase.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Propón una estrategia para cada situación: API crítica de pagos, servicio interno de logs, y app en etapa muy temprana.</li>
+          <li>Compara blue-green y canary: ¿qué los diferencia y qué necesita cada uno?</li>
+          <li>Dibuja el momento exacto en que rollback de tu estrategia elegida sería más rápido.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El despliegue directo es simple pero tiene downtime.</li>
+          <li>Rolling actualiza de a una instancia sin interrumpir.</li>
+          <li>Blue-green y canary dan rollbacks casi instantáneos.</li>
+          <li>La estrategia correcta depende de tu tráfico y de tu tolerancia al riesgo.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m1-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garantías de entrega · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende garantías de entrega en mensajería: at-most-once, at-least-once y exactly-once, acknowledgments, redelivery, idempotencia y cómo elegir la adecuada.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m1-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Garantías de entrega</span>
+      </nav>
+      <h1 class="lesson-title">Garantías de entrega</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Imagina que el mensaje «cobrar 129,90 a la tarjeta de Paula» viaja por tu broker. El consumidor lo recibe y, justo antes de responder al broker, su máquina se cae. El broker no sabe si se procesó o no. Esta ambigüedad —la misma que tienen las redes y cualquier sistema distribuido— obliga a definir una <strong>garantía de entrega</strong>.</p>
+        <p>Hay tres garantías posibles, y señalar exactamente su coste y su peligro es la parte más importante de esta lección.</p>
+      </section>
+
+      <section>
+        <h2 id="at-most">At-most-once: máx. una vez</h2>
+        <p>El broker entrega el mensaje y no vuelve a preguntar nada. Si el consumidor se cae a mitad de proceso, el mensaje se pierde silenciosamente. Se usa cuando perder un mensaje es aceptable (telemetría, métricas, logs) y la latencia importa más que la completitud:</p>
+        <ul>
+          <li>Ventaja: máxima velocidad, mínima complejidad.</li>
+          <li>Riesgo: pérdida de mensajes sin notificación.</li>
+          <li>Ejemplo: contadores de analytics donde perder un evento no cambia el informe.</li>
+        </ul>
+        <p>En RabbitMQ, at-most se obtiene con autoACK y publicaciones no durables:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function consumirSinAck() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+  const q = await ch.assertQueue('metricas');
+
+  // noAck = true: el broker ya no reclama nada, entrega y olvida
+  ch.consume(q.queue, (msg) => {
+    registrarMetrica(JSON.parse(msg.content.toString()));
+  }, { noAck: true });
+
+  console.log('Consumiendo métricas: pérdidas aceptables');
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="at-least">At-least-once: mínimo una vez</h2>
+        <p>El consumidor devuelve un <strong>ACK (acknowledgment)</strong> solo cuando termina. Si el proceso falla sin ACK, el broker vuelve a entregar el mensaje. Garantiza que no se pierda nada, pero admite duplicados:</p>
+        <ul>
+          <li>Ventaja: ningún mensaje desaparece.</li>
+          <li>Riesgo: el mismo mensaje puede procesarse dos veces por culpa de un reintento.</li>
+          <li>Ejemplo: correos, facturación, integraciones — la mayoría del backend serio.</li>
+        </ul>
+        <p>La contramedida a los duplicados es la <strong>idempotencia</strong>: diseñar el procesamiento para que aplicar la misma operación dos veces produzca el mismo resultado. Antes de enviar el correo, registra el hash del mensaje en la base y verifica si ya se procesó:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function procesarConAck() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+  const q = await ch.assertQueue('pagos', { durable: true });
+
+  ch.consume(q.queue, async (msg) => {
+    const cobro = JSON.parse(msg.content.toString());
+    const yaProcesado = await dbExiste('cobros', cobro.idDeOperacion);
+
+    if (!yaProcesado) {
+      await apiPagos.cobrar(cobro.tarjeta, cobro.monto); // 1ª y única vez
+      await dbGuardar('cobros', cobro.idDeOperacion);
+    }
+
+    // Solo aquí, trabajo completado: confirmar al broker
+    ch.ack(msg);
+  }, { noAck: false });
+
+  console.log('Consumiendo pagos: mínimo una vez + idempotencia');
+}</code></pre>
+        <p>Fíjate: el ACK se envía <em>después</em> de persistir. Si el proceso muere antes del ACK, el broker reintentará, y la verificación de idempotencia evitará el doble cobro.</p>
+      </section>
+
+      <section>
+        <h2 id="exactly-once">Exactly-once: exactamente una vez</h2>
+        <p>El ideal matemático: cada mensaje se procesa exactamente una vez. En la práctica <strong>no existe de forma universal y gratuita</strong>; se alcanza por construcción, combinando transacciones entre el procesamiento y el ACK:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Exactly-once por transacción local: ACK + efecto en la misma base
+import json
+import psycopg2
+from psycopg2.extras import Json
+
+conn = psycopg2.connect('dbname=tienda user=app')
+cur = conn.cursor()
+
+def consumir(msg_id, payload):
+    with conn:
+        # Insertar el cobro y marcar el mensaje en la MISMA transacción
+        cur.execute(
+            'INSERT INTO cobros(msg_id, monto) VALUES (%s, %s)',
+            (msg_id, payload['monto'])
+        )
+        cur.execute('INSERT INTO acks(msg_id) VALUES (%s)', (msg_id,))
+    # Si el commit llegó, el trabajo está hecho Y el ACK registrado: una sola vez</code></pre>
+        <p>Kafka ofrece un modo <em>transactional producer</em> (exactly-once dentro de su propio ecosistema). Pero el estándar de la industria para la mayoría de los casos es: <strong>at-least-once + idempotencia</strong>, mucho más simple de operar.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> salvo casos muy calificados, usa at-least-once y haz el consumidor idempotente. El exactly-once «real» requiere transacciones distribuidas que cuestan latencia y complejidad desproporcionadas para la mayoría de negocios.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="redelivery">Redelivery y la causa de los duplicados</h2>
+        <p>El duplicado no aparece porque el broker sea caprichoso, sino por combinaciones normales de fallos:</p>
+        <ul>
+          <li><strong>Fallo antes del ACK:</strong> el mensaje se procesó pero el ACK nunca llegó → reintento duplicado.</li>
+          <li><strong>Conexión caída:</strong> RabbitMQ reencola mensajes «no confirmados» cuando un consumidor se desconecta.</li>
+          <li><strong>Timeout:</strong> ken el procesado tardó más que la ventana del broker y este volvió a entregar.</li>
+          <li><strong>Partición del cliente de Kafka:</strong> tras un rebalanceo, el offset se reprocesa desde el último commit.</li>
+        </ul>
+        <p>La respuesta no es culpar al broker, sino <strong>modelar la idempotencia desde el inicio</strong>: registra un identificador único en el mensaje (<code>idDeOperacion</code>, <code>eventId</code>) y úsalo como clave única en tu almacenamiento.</p>
+      </section>
+
+      <section>
+        <h2 id="mensaje-completo">Un mensaje completo para entrega confiable</h2>
+        <p>Reúne todo lo aprendido en esta lección y en la de mensajes vs eventos:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "mensaje",
+  "accion": "cobrar_pedido",
+  "version": 1,
+  "idDeOperacion": "op-8aa4c1",   // clave de idempotencia
+  "correlationId": "carr-orden-8842",
+  "entrega": "at-least-once",      // en espera de confirmación
+  "timestamp": "2026-01-12T09:41:02Z",
+  "payload": {
+    "pedidoId": "P-2026-0001",
+    "tarjetaUltimos4": "4242",
+    "monto": 129.90
+  }
+}</code></pre>
+        <p>Hasta los brokers más simples permiten interpretar este mensaje con ACK y deduplicación completa.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para cada escenario, elige la garantía: (a) registrar clics de usuario, (b) cobrar una tarjeta, (c) syncronizar inventario entre dos sistemas, (d) telemetría de servidores.</li>
+          <li>En el ejemplo de idempotencia, responde: ¿qué pasa si el proceso muere justo después del INSERT de <code>acks</code> pero antes de confirmar a la base externa? ¿Cómo lo evitarías?</li>
+          <li>Investiga el transactional producer de Kafka y explica con tus palabras por qué su exactly-once es local a Kafka, no global a tu sistema.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>At-most-once pierde mensajes sin avisar: útil para telemetría, no para negocio.</li>
+          <li>At-least-once con ACK garantiza que nada se pierde a costa de posibles duplicados.</li>
+          <li>Exactly-once universal no existe; se aproxima con transacciones o con idempotencia.</li>
+          <li>La idempotencia (clave única en el mensaje + verificación en el consumidor) es la herramienta maestra.</li>
+          <li>Regla general: at-least-once + consumidor idempotente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="mensajes-y-eventos.html">Mensajes vs eventos</a>
+          <a class="related-lessons__link" href="mensajeria-asincrona.html">Mensajería asíncrona</a>
+          <a class="related-lessons__link" href="../modulo-02/consumidor-resiliente.html">Consumidor resiliente</a>
+          <a class="related-lessons__link" href="../modulo-03/productores-y-consumidores.html">Productores y consumidores</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

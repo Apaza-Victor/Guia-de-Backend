@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 2 · Imágenes y Dockerfile · Docker para Backend · Backend Academy</title>
+<meta name="description" content="Imágenes y Dockerfile: crea imágenes reproducibles, entiende el sistema de capas, usa .dockerignore, multi-stage builds y publica en Docker Hub.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="route">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <a class="breadcrumb__item" href="../../../index.html">Inicio</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../../../cursos/index.html">Cursos</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../index.html">Docker para Backend</a>
+    <span class="breadcrumb__sep">/</span>
+    <span class="breadcrumb__item breadcrumb__item--current">Módulo 2</span>
+  </nav>
+
+  <div class="route-hero">
+    <div class="route-hero__meta"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span><span class="route-hero__lessons">6 lecciones</span><span class="route-hero__time">~60 min</span></div>
+    <h1 class="route-hero__title">Módulo 2 · Imágenes y Dockerfile</h1>
+    <p class="route-hero__lead">De un Dockerfile a una imagen reproducible: sistema de capas, caché, .dockerignore, multi-stage builds y publicación en el registry.</p>
+  </div>
+
+  <div class="progress" data-progress="docker">
+    <div class="progress__bar"><div class="progress__fill"></div></div>
+    <span class="progress__label">Progreso del curso</span>
+  </div>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
+    <ul class="route-goals">
+      <li>Escribir un Dockerfile que construya tu backend.</li>
+      <li>Entender las capas y la caché para builds rápidos.</li>
+      <li>Excluir lo que no debe entrar al contexto con .dockerignore.</li>
+      <li>Dominar el patrón multi-stage para imágenes de producción.</li>
+      <li>Optimizar tamaño, seguridad y arranque de la imagen.</li>
+      <li>Versionar y publicar imágenes en Docker Hub.</li>
+    </ul>
+  </section>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Lecciones</h2>
+    <div class="grid grid--2">
+      <a class="card-route" href="que-es-un-dockerfile.html">
+        <h3 class="card-route__title">¿Qué es un Dockerfile?</h3>
+        <p class="card-route__meta">FROM, RUN, COPY, CMD y el primer build</p>
+      </a>
+      <a class="card-route" href="capas-de-imagen.html">
+        <h3 class="card-route__title">Las capas de la imagen</h3>
+        <p class="card-route__meta">Caché de capas y por qué el orden importa</p>
+      </a>
+      <a class="card-route" href="dockerignore.html">
+        <h3 class="card-route__title">El build context y .dockerignore</h3>
+        <p class="card-route__meta">Lo que viaja al daemon y lo que no</p>
+      </a>
+      <a class="card-route" href="multi-stage-builds.html">
+        <h3 class="card-route__title">Multi-stage builds</h3>
+        <p class="card-route__meta">Compilar en un lado, correr en otro</p>
+      </a>
+      <a class="card-route" href="optimizando-imagenes.html">
+        <h3 class="card-route__title">Optimizando imágenes</h3>
+        <p class="card-route__meta">Menos peso, más seguridad, mismo resultado</p>
+      </a>
+      <a class="card-route" href="publicando-en-el-registry.html">
+        <h3 class="card-route__title">Publicando en el registry</h3>
+        <p class="card-route__meta">Tags, semver y Docker Hub</p>
+      </a>
+    </div>
+  </section>
+
+  <div class="lesson-prevnext">
+    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../modulo-01/index.html">
+      <span class="lesson-prevnext__tag">Anterior</span><strong>Módulo 1 · Fundamentos</strong>
+    </a>
+    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-03/index.html">
+      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 3 · Volúmenes y Redes</strong>
+    </a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

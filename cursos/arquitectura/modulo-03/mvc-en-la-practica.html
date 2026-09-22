@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m3-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MVC en la práctica · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a aplicar el patrón MVC de forma práctica en el backend: roles de modelo, vista y controlador, controladores delgados y las trampas más comunes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m3-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">MVC en la práctica</span>
+      </nav>
+      <h1 class="lesson-title">MVC en la práctica</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p><strong>MVC (Model-View-Controller)</strong> es el patrón más difundido del backend: separa el acceso a los datos (<strong>Model</strong>), la representación de la salida (<strong>View</strong>) y la orquestación de la petición (<strong>Controller</strong>). Todos los frameworks populares —Laravel, Express, Spring— lo usan en alguna forma.</p>
+        <p>Su valor real no es técnico: es <strong>disciplina</strong>. Establece dónde vive cada preocupación para que el código no se mezcle.</p>
+      </section>
+
+      <section>
+        <h2 id="roles">Los tres roles</h2>
+        <dl class="definition-list">
+          <dt>Controller</dt><dd>Recibe la petición, valida la entrada, llama al modelo (o servicio) y decide la respuesta. Debe ser <strong>delgado</strong>: solo orquesta.</dd>
+          <dt>Model</dt><dd>Representa los datos y la lógica de negocio asociada (entidades, repositorios, servicios). En backend suele ser la capa de dominio + datos.</dd>
+          <dt>View</dt><dd>Renderiza la salida: un template HTML o un JSON para la API. No contiene lógica de negocio.</dd>
+        </dl>
+        <p>El flujo clásico: <code class="inline">HTTP → Controller → Model → Controller → View → HTTP</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="fat">El anti-patrón del controller gordo</h2>
+        <p>El error número uno de MVC es el <strong>fat controller</strong>: miles de líneas que validan, consultan, calculan y serializan. Síntomas: métodos que no se pueden testear, SQL dentro del controlador y lógica duplicada entre endpoints.</p>
+        <p>La solución es extraer: <strong>validación → FormRequest</strong>; <strong>lógica de negocio → Service Layer</strong>; <strong>consultas → Repository</strong>. El controlador se queda con 5 líneas de orquestación.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: controlador delgado</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (Laravel-style)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+// MAL: controlador gordo
+final class PedidoController extends Controller
+{
+    public function store(Request $req)
+    {
+        $this-&gt;validate($req, ['usuario_id' =&gt; 'required']);
+        $total = 0;
+        foreach ($req-&gt;carrito as $p) {
+            $total += $p['precio'] * $p['cantidad'];
+        }
+        $total += $total * 0.16; // impuesto
+        DB::table('pedidos')-&gt;insert([
+            'usuario_id' =&gt; $req-&gt;usuario_id,
+            'total' =&gt; $total,
+        ]);
+        return response()-&gt;json(['ok' =&gt; true], 201);
+    }
+}
+
+// BIEN: controlador delgado, servicio hace el trabajo
+final class PedidoController extends Controller
+{
+    public function __construct(private PedidoService $service) {}
+
+    public function store(CrearPedidoRequest $req)
+    {
+        $pedido = $this-&gt;service-&gt;crear(
+            $req-&gt;usuario_id,
+            $req-&gt;carrito
+        );
+        return response()-&gt;json($pedido, 201);
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>El controlador ahora es un «traductor»: valida, llama y responde. La regla de cálculo de total e impuestos vive en el servicio, donde puede testearse sola.</p>
+      </section>
+
+      <section>
+        <h2 id="evolucion">MVC y las arquitecturas modernas</h2>
+        <p>MVC sigue siendo la puerta de entrada: el Controller = presentación, el Model crece hasta convertirse en <strong>dominio</strong> y aparecen las capas de servicio y repositorio. Clean Architecture y Hexagonal son refinamientos de esta misma separación, no su sustitución.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Identifica en tu código un controlador con más de 30 líneas y marca qué partes son validación, negocio y datos.</li>
+          <li>Extrae la lógica de cálculo a una clase de servicio (Service Layer).</li>
+          <li>Responde por escrito: ¿qué le pasa a un controller gordo cuando llega la segunda vista/API?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>MVC separa datos (modelo), salida (vista) y orquestación (controlador).</li>
+          <li>El controlador debe ser delgado: validar, llamar y responder.</li>
+          <li>El fat controller es el síntoma más peligroso; se cura con servicios y repositorios.</li>
+          <li>MVC es la base de las arquitecturas modernas de capas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="service-layer.html">Service Layer</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-02/arquitectura-en-capas.html">Arquitectura en capas</a>
+          <a class="related-lessons__link" href="repository-y-acceso-a-datos.html">Repository y acceso a datos</a>
+          <a class="related-lessons__link" href="inyeccion-de-dependencias.html">Inyección de dependencias</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

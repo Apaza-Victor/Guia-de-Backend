@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="autenticacion-y-autorizacion-por-capas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autenticación y autorización por capas · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Defensa en profundidad para APIs: verifica quien eres en cada frontera y decide que puedes hacer con roles y permisos en gateway, middleware y acción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="autenticacion-y-autorizacion-por-capas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Autenticación y autorización por capas</span>
+        </nav>
+        <h1 class="lesson-title">Autenticación y autorización por capas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Seguridad de APIs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="dos-cosas">Dos preguntas distintas</h2>
+          <p><strong>Autenticación</strong> responde "¿quién eres?" (el token vale). <strong>Autorización</strong> responde "¿qué puedes hacer?" (rol y permiso sobre la acción). Error clásico: solo validar el token y nunca decidir permisos → el atacante logueado hace lo que quiera.</p>
+        </section>
+
+        <section>
+          <h2 id="capas">Las tres capas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Esquema</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">1. Gateway / Nginx
+   - TLS, rate limit, whitelist de paths public.
+
+2. Middleware de la app
+   - Validar token (authn), cargar usuario y roles.
+   - Rutas /admin   =&gt; rol admin
+   - Rutas /user    =&gt; sesion valida
+
+3. La accion misma (failsafe interno)
+   - "este usuario puede borrar ESTE recurso?"
+   - aunque un middleware falle, la accion se protege sola.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="php">Middleware en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// capa 2: autenticacion
+function requiere_autenticacion(): array
+{
+    $header = $_SERVER["HTTP_AUTHORIZATION"] ?? "";
+    if (!preg_match("/^Bearer (.+)$/", $header, $m)) {
+        http_response_code(401);
+        exit(json_encode(["error" =&gt; "token no enviado"]));
+    }
+    $payload = verificar_jwt($m[1]);          // helper del modulo 4
+    if (!$payload) {
+        http_response_code(401);
+        exit(json_encode(["error" =&gt; "token invalido"]));
+    }
+    return $payload;                           // sub, roles, scopes
+}
+
+// capa 3: autorizacion por permiso
+function autoriza(string $permiso, array $payload, array $recursos): void
+{
+    $roles = $payload["roles"] ?? [];
+    $tiene = funcion_has($roles, $permiso);   // tu RBAC (modulo 5 autenticacion)
+    if (!$tiene) {
+        http_response_code(403);
+        exit(json_encode(["error" =&gt; "sin permiso"]));
+    }
+    // ademas, ownership: solo quien dueno del recurso puede mutarlo
+    if (($recursos["owner_id"] ?? null) !== $payload["sub"]) {
+        http_response_code(403);
+        exit(json_encode(["error" =&gt; "recurso de otro usuario"]));
+    }
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="basicas">Las fallas típicas</h2>
+          <ul>
+            <li>Confiar en un campo <code class="inline">rol</code> que manda el cliente.</li>
+            <li>Autorizar por ruta pero olvidar el recurso (IDOR).</li>
+            <li>403 en endpoints sensibles y 404 (no quieres que sepa que existen).</li>
+            <li>Usar el mismo middleware para admin y usuario común.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Divide tu API: pública, autenticada y de admin.</li>
+            <li>Añade ownership: un usuario no toca el recurso de otro.</li>
+            <li>Prueba con tokens de roles distintos y verifica 401/403.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>AuthN: quién eres · AuthZ: qué puedes hacer.</li>
+            <li>Tres capas: gateway, middleware, acción.</li>
+            <li>El rol vive en el token/servidor, nunca en el cliente.</li>
+            <li>El ownership protege de IDOR dentro de la capa de acción.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="../modulo-05/rate-limiting.html">Rate limiting</a>
+            <a class="related-lessons__link" href="../modulo-05/cors-bien-configurado.html">CORS bien configurado</a>
+            <a class="related-lessons__link" href="../modulo-05/validacion-estricta-de-entrada.html">Validación estricta de entrada</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

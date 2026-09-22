@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-seguimiento-y-medicion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento y medición · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a hacer seguimiento real del trabajo backend: burndown, velocity, dailys con foco en riesgo y revisión de sprint honesta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-seguimiento-y-medicion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Seguimiento y medición</span>
+      </nav>
+      <h1 class="lesson-title">Seguimiento y medición</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Planificación y seguimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="seguir-medir">Seguimiento ≠ reportar</h2>
+        <p>Seguir un sprint no es llenar de estados bonitos un PowerPoint del viernes. Es <strong>generar información temprana</strong> para que el equipo ajuste antes del desastre: si el trabajo se acumula, se corta alcance; si aparece un bloqueo, se ataca hoy.</p>
+        <p>La materia prima es mínima: qué se completó, qué quedó, quién está bloqueado. Con eso alcanza para tres instrumentos poderosos y baratos: el burndown, la velocity y la daily.</p>
+      </section>
+
+      <section>
+        <h2 id="burndown">El gráfico burndown</h2>
+        <p>El <strong>burndown</strong> dibuja los puntos restantes del sprint contra los días transcurridos. La línea ideal baja en línea recta hasta cero el último día; la línea real se compara con ella para responder «¿vamos bien?».</p>
+        <p>Su valor no está en la belleza: está en la <em>pendiente</em>. Una pendiente plana los primeros 5 días no es una tragedia (a veces recién se está entendiendo el problema); una que no baja el día 7 sí lo es, y conviene recortar alcance en lugar de aguantar la fe.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "sprint": 15,
+  "puntos_iniciales": 34,
+  "por_dia": [
+    { "dia": 1, "restante": 34 },
+    { "dia": 2, "restante": 33 },
+    { "dia": 3, "restante": 30 },
+    { "dia": 4, "restante": 30 },
+    { "dia": 5, "restante": 29 },
+    { "dia": 6, "restante": 24 },
+    { "dia": 7, "restante": 16 },
+    { "dia": 8, "restante": 9 },
+    { "dia": 9, "restante": 0 }
+  ],
+  "decisiones": [
+    "Día 6: se retiró la historia WEB-215 (índice) por bloqueo del DBA -> -3 pts",
+    "Día 8: la demo muestra auth y reembolso desplegados, no 'casi listos'"
+  ]
+}</code></pre>
+        <p>Regla de oro del burndown: cuando el alcance cambie, <strong>anótalo explícitamente</strong>. Un burndown que sube solo porque añadieron trabajo no es señal de caos: es señal de que alguien anda escondiendo decisiones.</p>
+      </section>
+
+      <section>
+        <h2 id="velocity">La velocity: memoria estadística</h2>
+        <p>La <strong>velocity</strong> es la suma de puntos completados por sprint. Su superpoder aparece después de 4-6 sprints: se vuelve la base más confiable para planificar el siguiente.</p>
+        <p>Pero la velocity funciona solo si los puntos se valoran igual cada vez. Si el equipo «infla» puntos cuando el negocio presiona, la velocity sube sin que suba la producción real, y el planning siguiente se comprometerá con la mentira.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">velocidades = [36, 33, 38, 34, 31, 37]
+# La tendencia vale más que el último número
+media = sum(velocidades) / len(velocidades)
+desviacion = (max(velocidades) - min(velocidades)) / 2
+
+print(f"Velocity media: {media:.1f} pts")
+print(f"Compromiso prudente: {media - desviacion:.1f} pts")
+print(f"Compromiso optimista: {media + desviacion:.1f} pts")</code></pre>
+        <p>Dato honesto: la velocity baja naturalmente cuando el equipo asume trabajo técnico (migraciones, refactors), y eso <em>también es producción</em>. Un equipo que solo mide puntos castiga su propia infraestructura.</p>
+      </section>
+
+      <section>
+        <h2 id="daily">La daily como radar de riesgo</h2>
+        <p>La reunión diaria tiene un formato ridículo y una función seria: forzar la sincronización de bloqueos. Para que sirva de verdad en un backend, la pregunta clave no es «¿qué hiciste?» sino <strong>«¿qué te está bloqueando?»</strong>.</p>
+        <p>Bloqueos típicos que la daily debe cazar:</p>
+        <ul>
+          <li>Un endpoint esperando credenciales del proveedor («llegaban hoy», día 6).</li>
+          <li>Una migración bloqueada por locks en la base de producción.</li>
+          <li>Un test de integración que depende de staging y staging está roto hace 2 días.</li>
+        </ul>
+        <p>Si la daily es solo un parte de estado («estuve con X»), está mal usada. El dueño de desbloquear es el equipo, no el PO: cada bloqueo debería salir de la reunión con alguien responsable y un tiempo límite.</p>
+      </section>
+
+      <section>
+        <h2 id="revision">La revisión de sprint honesta</h2>
+        <p>Al final del sprint, la revisión responde: <em>¿se cumplió el objetivo del sprint?</em>. La tentación es convertirla en un desfile de artefactos — diagramas, ramas, promesas. El criterio backend correcto es único: <strong>qué se puede desplegar hoy</strong>, y eso se demuestra con staging y una demo real.</p>
+        <p>Una plantilla de revisión que funciona:</p>
+        <ol>
+          <li>Objetivo del sprint anunciado en planning.</li>
+          <li>Historia por historia: ¿desplegada, verificada, o a medias y por qué?</li>
+          <li>Lo que quedó fuera, con motivo y con nueva estimación.</li>
+          <li>Dato crudo: velocity del sprint, sin interpretación emocional.</li>
+        </ol>
+        <p>La salida de la revisión alimenta el siguiente planning y —más importante— la retrospectiva, que es donde esas crudas realidades se convierten en cambios de proceso.</p>
+      </section>
+
+      <section>
+        <h2 id="metricas-de-verdad">Métricas de verdad para backend</h2>
+        <p>El burndown y la velocity miden avance; no miden <em>salud</em>. Para eso, los equipos de server agregan métricas operativas que cuentan otra historia:</p>
+        <ul>
+          <li><strong>Tiempo de flujo (cycle time):</strong> de «En desarrollo» a «Listo». Alto = cuellos de botella en review o staging.</li>
+          <li><strong>Tasa de bug en producción:</strong> cuántos de tus puntos producen incidencias posteriores.</li>
+          <li><strong>Deuda de review:</strong> PRs abiertos hace más de 48h.</li>
+          <li><strong>Estabilidad después del release:</strong> incidentes en las 24h posteriores al despliegue.</li>
+        </ul>
+        <p>Combinadas, vigilan lo que la velocidad oculta: un equipo puede «terminar» puntualmente y aun así hundir el producto con entregas frágiles.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el burndown de tu sprint actual con los restantes reales de hoy y señala si la pendiente te obligaría a recortar alcance.</li>
+          <li>Calcula tu velocity media de los últimos 4 sprints y propón un compromiso prudente para el siguiente.</li>
+          <li>Escribe las 3 métricas de salud (cycle time, bugs en producción, PRs viejos) que tu equipo medirá este mes.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Seguir un sprint es generar información temprana para ajustar, no reportar estados bonitos.</li>
+          <li>El burndown muestra si la pendiente baja; los cambios de alcance se anotan, no se esconden.</li>
+          <li>La velocity es memoria estadística para planificar, y se degrada si los puntos se inflan.</li>
+          <li>La daily caza bloqueos; la revisión mide qué se puede desplegar hoy; la retrospectiva convierte todo esto en mejora.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="planificacion-de-sprints.html">Planificación de sprints</a>
+          <a class="related-lessons__link" href="gestion-de-tareas.html">Gestión de tareas</a>
+          <a class="related-lessons__link" href="gestion-de-riesgos.html">Gestión de riesgos</a>
+          <a class="related-lessons__link" href="../modulo-03/lanzamiento-y-postmortem.html">Lanzamientos y postmortem</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="gestion-de-tareas.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Gestión de tareas</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="gestion-de-riesgos.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Gestión de riesgos</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

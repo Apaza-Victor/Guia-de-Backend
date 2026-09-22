@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mysql-vs-postgresql">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MySQL vs PostgreSQL · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Comparativa honesta entre MySQL y PostgreSQL: estándares, tipos, JSON, alcance de índices, transacciones, licencias y cuándo elegir cada motor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="mysql-vs-postgresql"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6 · MySQL y PostgreSQL</a><span class="sep">/</span>
+          <span class="current">MySQL vs PostgreSQL</span>
+        </nav>
+        <h1 class="lesson-title">MySQL vs PostgreSQL</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · MySQL y PostgreSQL</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>«¿MySQL o PostgreSQL?» es la pregunta del milenio en backend. La respuesta honesta: <strong>depende</strong>. Ambos son excelentes y modernos. Conocer sus diferencias te permite elegir con criterio y evitarte migraciones dolorosas.</p>
+        </section>
+
+        <section>
+          <h2 id="tabla">Comparativa honesta</h2>
+          <div class="toc-block toc-table">
+            <table>
+              <thead>
+                <tr><th>Aspecto</th><th>MySQL</th><th>PostgreSQL</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Cumplimiento del estándar SQL</td><td>Parcial, con extensiones propias</td><td>Muy alto, guiada por el estándar</td></tr>
+                <tr><td>Transacciones / MVCC</td><td>InnoDB (por defecto)</td><td>Nativo, muy maduro</td></tr>
+                <tr><td>JSON</td><td>JSON (<em>datatype</em>) + JSONB en variantes recientes</td><td>JSONB con índices GIN y consultas potentes</td></tr>
+                <tr><td>Funciones de ventana</td><td>Soportadas (8.0+)</td><td>Soportadas por décadas</td></tr>
+                <tr><td>Índices parciales / avanzados</td><td>Limitados</td><td>Índices parciales, expression indexes</td></tr>
+                <tr><td>Tipos geométricos / PostGIS</td><td>Pobres</td><td>Excelentes (datos geográficos)</td></tr>
+                <tr><td>Licencia</td><td>GPL / comercial (Oracle)</td><td>Open source (PostgreSQL License)</td></tr>
+                <tr><td>Rendimiento tipo de carga</td><td>Lecturas simples masivas</td><td>Escrituras complejas y analítica</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="cuando-mysql">Cuándo elegir MySQL</h2>
+          <ul>
+            <li>Ecosistema clásico LAMP y aprendizaje con la comunidad más grande.</li>
+            <li>Aplicaciones con mucha lectura simple y tablas planas (blogs, catálogos).</li>
+            <li>Equipos que ya dominan su sintaxis y sus herramientas.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="cuando-postgres">Cuándo elegir PostgreSQL</h2>
+          <ul>
+            <li>Datos que exigen integridad y tipos avanzados (JSONB, array, enum, geométricos).</li>
+            <li>Funciones de ventana, CTEs y analítica compleja (la encontrarás en el curso de SQL).</li>
+            <li>Consultas con lógica intensa; su optimizador suele hacerlo mejor.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="clave">La clave: fit con tu problema</h2>
+          <p>Ninguno «gana» en abstracto. Define primero tus requisitos: ¿geoespacial? ¿analítica pesada? ¿read-heavy simple? ¿equipo ya formado en uno? Eso responde la pregunta. Y un consejo profesional: si ambos te sirven, prueba con un prototipo pequeño antes de comprometerte.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea una cuenta en un servicio nube gratuito de cada motor (o usa los locales) y carga el mismo esquema en ambos.</li>
+            <li>Ejecuta la misma consulta con funciones de ventana en los dos y anota diferencias.</li>
+            <li>Escribe la decisión razonada para tu próximo proyecto: motor elegido y 3 motivos.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>MySQL: popular, rápido en lecturas simples, ecosistema enorme.</li>
+            <li>PostgreSQL: estándar, versátil, avanzado en tipos y analítica.</li>
+            <li>Ambos soportan transacciones ACID y JSON hoy.</li>
+            <li>La decisión sale de tus requisitos, no de modas.</li>
+            <li>Prototipar con tu caso real es el mejor árbitro.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="instalando-mysql.html">Instalando MySQL</a>
+            <a class="related-lessons__link" href="instalando-postgresql.html">Instalando PostgreSQL</a>
+            <a class="related-lessons__link" href="../modulo-05/propiedades-acid.html">Propiedades ACID</a>
+            <a class="related-lessons__link" href="../modulo-07/relacional-o-nosql.html">¿Relacional o NoSQL?</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

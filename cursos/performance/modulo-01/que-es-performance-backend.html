@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m1-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es performance? · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende qué es performance en un backend: latencia, throughput y percentiles p50/p95/p99. El vocabulario exacto para hablar de rendimiento con datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m1-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es performance?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es performance?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Medir rendimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando alguien dice «la API está lenta» no está diciendo nada técnico todavía. ¿Lenta para quién? ¿Cuánto es lento? ¿Lentitud promedio o lentitud en el peor momento? El rendimiento de un backend solo existe en forma de <strong>números medibles</strong>: tiempo de respuesta, peticiones por segundo y distribución de esos tiempos.</p>
+        <p>Este primer módulo construye ese vocabulario. La meta es que nunca más hables de rendimiento con intuición, sino con tres métricas concretas: <strong>latencia</strong>, <strong>throughput</strong> y <strong>percentiles</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="latencia">Latencia y throughput</h2>
+        <p>Son las dos medidas que lo resumen todo:</p>
+        <ul>
+          <li><strong>Latencia:</strong> cuánto tarda una sola petición en completarse. Se mide en milisegundos (ms). Es lo que percibe un usuario individual.</li>
+          <li><strong>Throughput:</strong> cuántas peticiones puede procesar el sistema por unidad de tiempo. Se mide en requests por segundo (RPS). Es lo que le importa al operador del sistema.</li>
+        </ul>
+        <p>Son inversamente dependientes: si la red o el servidor están saturados, el throughput no puede crecer sin que la latencia se dispare. Y un sistema con latency baja pero throughput bajo decepciona cuando llega mucha gente. Necesitas <em>ambas</em>.</p>
+        <div class="callout">
+          <p><strong>Ejemplo concreto:</strong> una API que responde en 80 ms a una petición pero solo aguanta 50 peticiones en simultáneo por nodo. El usuario individual está contento; con 5 000 usuarios simultáneos, las colas crecen y esa misma latencia pasa a 900 ms.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="percentiles">Percentiles: p50, p95, p99</h2>
+        <p>El «promedio» es una mentira estadística para sistemas en producción. Con quince respuestas lentas entre millones, el promedio casi no se mueve, pero esos quince usuarios vivieron un desastre. Por eso se usan <strong>percentiles</strong>: el valor por debajo del cual cae un porcentaje de las observaciones.</p>
+        <ul>
+          <li><strong>p50 (mediana):</strong> la mitad de las peticiones completan en este tiempo o menos. Representa la experiencia típica.</li>
+          <li><strong>p95:</strong> el 95% completa en este tiempo o menos. Solo el 5% es peor. Sensible a colas.</li>
+          <li><strong>p99:</strong> el 99% completa en este tiempo o menos. Es el «peor 1%», lo que ven tus usuarios de peor suerte y el que mejor descubre colas y timeouts.</li>
+        </ul>
+        <p>Calcular percentiles es trivial y no ocupa mucho CPU. Este ejemplo calcula p50, p95 y p99 desde una lista de latencias medidas en milisegundos:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import statistics
+
+latencias_ms = [82, 84, 87, 90, 91, 95, 120, 340, 1050, 2500, 71, 76]
+
+def percentil(datos, p):
+    ordenado = sorted(datos)
+    indice = max(0, int((p / 100) * len(ordenado)) - 1)
+    return ordenado[indice]
+
+print("p50:", percentil(latencias_ms, 50))
+print("p95:", percentil(latencias_ms, 95))
+print("p99:", percentil(latencias_ms, 99))
+print("promedio:", round(statistics.mean(latencias_ms), 1))
+
+# Salida típica:
+# p50: 89.5
+# p95: 2500
+# p99: 2500
+# promedio: 467.2</code></pre>
+        <p>Observa la diferencia: el promedio (467 ms) parece terrible, pero la mitad de las peticiones respondió en 90 ms. Y el p99 de 2,5 s delata un problema real de colas o de una dependencia externa lenta que el promedio escondía.</p>
+      </section>
+
+      <section>
+        <h2 id="midiendo">Midiendo en el mundo real</h2>
+        <p>Una forma rápida de medir latencia desde la terminal es disparar la misma petición muchas veces y extraer el percentil con <code>awk</code>:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># 100 peticiones, guardando solo el tiempo total (tiempo_total) de curl -w
+for i in $(seq 1 100); do
+  curl -s -o /dev/null -w "%{time_total}\n" https://api.mi-servicio.com/usuarios/42
+done | sort -n | awk 'NR == 50 {print "p50:", $1 "s"}
+                       NR == 95 {print "p95:", $1 "s"}
+                       NR == 99 {print "p99:", $1 "s"}'
+
+# Salida típica en un backend sano:
+# p50: 0.082s
+# p95: 0.131s
+# p99: 0.540s</code></pre>
+        <p>Y si quieres medir la latencia que aporta una función concreta dentro del código, el cronómetro de alta resolución de Node es tu amigo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { performance } = require('node:perf_hooks');
+
+async function perfila(fn, etiqueta) {
+  const inicio = performance.now();
+  await fn();
+  const ms = performance.now() - inicio;
+  console.log(`${etiqueta}: ${ms.toFixed(2)} ms`);
+  return ms;
+}
+
+// Uso:
+await perfila(() => usuarioService.obtenerPerfil(42), 'obtenerPerfil');
+await perfila(() => cache.set('perfil:42', perfil), 'set cache');</code></pre>
+        <p>Guarda estos tiempos y agrega el percentil al final del día: así empieza un panel de rendimiento real.</p>
+      </section>
+
+      <section>
+        <h2 id="cola">El efecto cola</h2>
+        <p>La causa número uno de p99 altos no es un algoritmo lento: es la <strong>cola</strong>. Si el servidor recibe más trabajo del que puede terminar, las peticiones esperan en fila mientras las anteriores se procesan. Cada petición extra que llega, espera más. Por eso la latencia crece más que proporcionalmente cuando el sistema se acerca a su límite.</p>
+        <p>Moraleja: monitoriza p95/p99 bajo carga, no solo en reposo. Una prueba en «modo pico» es la que revela dónde empieza a formarse la cola.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige tu endpoint más usado y mide 100 peticiones reales con el script de <code>curl</code> de arriba. Anota p50, p95 y p99.</li>
+          <li>Calcula la diferencia entre p50 y p99: si es mayor de 4-5 veces, hay cola o una dependencia externa lenta de por medio.</li>
+          <li>Escribe en una frase qué porcentaje de usuarios experimenta cada tiempo que mediste. Ejemplo: «el 95% responde en menos de 150 ms, pero el 1% más desafortunado espera casi un segundo».</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Performance se mide con latencia (tiempo por petición) y throughput (peticiones por segundo).</li>
+          <li>El promedio esconde problemas: usa p50, p95 y p99 para ver la experiencia típica y la del peor 1%.</li>
+          <li>El p99 alto casi siempre significa colas; se dispara antes de que el promedio mueva un milímetro.</li>
+          <li>Medir latencia desde curl o con <code>perf_hooks</code> es el primer paso hacia cualquier optimización seria.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="slo-y-presupuesto-de-rendimiento.html">SLO y presupuesto de rendimiento</a>
+          <a class="related-lessons__link" href="test-de-carga.html">Pruebas de carga</a>
+          <a class="related-lessons__link" href="cuellos-de-botalla.html">Identificar cuellos de botella</a>
+          <a class="related-lessons__link" href="../modulo-03/estrategia-de-rendimiento.html">Estrategia integral</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

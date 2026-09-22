@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-sticky-sessions-y-adaptadores">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sticky sessions y adaptadores · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Descubre la afinidad de sesión (sticky sessions), qué rompe sin ella, y cómo un Redis adapter como socket.io-redis sincroniza salas entre nodos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-sticky-sessions-y-adaptadores"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Sticky sessions y adaptadores</span>
+      </nav>
+      <h1 class="lesson-title">Sticky sessions y adaptadores</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalar y asegurar WebSockets</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="sticky">Session affinity: el cliente vuelve a casa</h2>
+        <p>Un WebSocket es una conexión <strong>larga</strong>: el handshake envía el token y la conexión permanece, pero el estado de esa sesión (usuario autenticado, salas registradas en memoria) vive en el nodo que la aceptó. Si el balanceador reenvía la siguiente conexión a otro nodo, el cliente se «des-autentica» o pierde sus salas.</p>
+        <p>Las <strong>sticky sessions</strong> (o session affinity) hacen que el balanceador dirija cada conexión de un mismo cliente SIEMPRE al mismo nodo, durante toda la vida de la sesión. En el reparto inicial (por ejemplo, con una cookie) se decide el nodo, y de ahí en adelante se respeta.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># nginx: ip_hash da afinidad por IP, simple pero imperfecta con IPv6/CGNAT.
+upstream chat_backend {
+    # sticky session por cookie, respetando la conexión larga del socket
+    sticky cookie srv_id;
+    server 10.0.0.11:8080;
+    server 10.0.0.12:8080;
+    server 10.0.0.13:8080;
+}
+
+server {
+    listen 443 ssl;
+    location /ws {
+        proxy_pass http://chat_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}</code></pre>
+        <p>Con <code>ip_hash</code> o una cookie de afinidad consigues que un mismo cliente termine siempre en la misma instancia, preservando su estado en memoria sin tocar una línea de tu código.</p>
+      </section>
+
+      <section>
+        <h2 id="que-rompe">Qué se rompe sin sticky sessions</h2>
+        <ul>
+          <li><strong>Autenticación de handshake en memoria:</strong> el token se validó en el nodo X; el nodo Y no conoce esa sesión para la nueva conexión.</li>
+          <li><strong>Salas registradas en Map:</strong> los clientes del «nodo A» no aparecen en la lista de la misma sala en el «nodo B».</li>
+          <li><strong>Presencia:</strong> un usuario conectado en dos pestañas puede acabar en dos nodos distintos y aparecer duplicado.</li>
+          <li><strong>Reconexión:</strong> si el cliente cae y reconecta yendo a otro nodo, su estado debe reconstruirse (o se pierde).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="redis-adapter">El adaptador de Redis</h2>
+        <p>Las sticky sessions mantienen a cada cliente en su nodo, pero ¿qué pasa si una sala tiene miembros en tres nodos? Ahí entran los <strong>adaptadores</strong>: componentes que sustituyen la memoria local por una capa compartida. El <code>@socket.io/redis-adapter</code> (sucesor práctico de <code>socket.io-redis</code>) usa dos canales y un pub/sub para que <code>emit</code>, <code>join</code>, <code>leave</code> y los broadcasts tengan alcance de clúster sin que tu código cambie.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Instalar: npm i socket.io @socket.io/redis-adapter ioredis
+const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const { createClient } = require('redis');
+
+const io = new Server(3000);
+
+// Dos clientes de Redis: un publicador y un suscriptor.
+const publicador = createClient({ url: 'redis://redis-cache:6379' });
+const suscriptor = publicador.duplicate();
+
+Promise.all([publicador.connect(), suscriptor.connect()]).then(() =&gt; {
+  io.adapter(createAdapter(publicador, suscriptor));
+});
+
+// A partir de aquí, join/leave y emit funcionan en todo el clúster:
+io.on('connection', (socket) =&gt; {
+  socket.on('entrar', (sala) =&gt; socket.join('partida:' + sala));
+  socket.on('ficha', (dato) =&gt; io.to('partida:' + dato.sala).emit('tablero', dato));
+});</code></pre>
+        <p>Con el adaptador, el broadcast a una sala cruza nodos de forma transparente: Redis entrega el evento al suscriptor de cada instancia y esa instancia lo reparte a sus clientes locales. Es el mismo principio del módulo anterior, automatizado.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando-cada-uno">¿Sticky, adaptador o ambos?</h2>
+        <ul>
+          <li><strong>Solo sticky + bus propio:</strong> válido con <code>ws</code>, cuando controlas tú el transporte (mapas de salas + Redis pub/sub manual).</li>
+          <li><strong>Solo adaptador:</strong> suficiente cuando el handshake no depende de estado del nodo (actúa de forma stateless) y las salas son lo único compartido.</li>
+          <li><strong>Ambos (recomendado):</strong> sticky para mantener el estado de sesión del nodo, adaptador para sincronizar salas y broadcasts. Así cada pieza cubre una brecha.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla de memoria:</strong> el sticky resuelve «¿a qué nodo va este cliente?». El bus/adaptador resuelve «¿cómo se entera el resto del mundo?». Son capas complementarias, no alternativas.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta dos instancias de Socket.IO con el adaptador de Redis y conecta dos clientes; verifica que el broadcast de sala cruza de nodo a nodo.</li>
+          <li>Desactiva el adaptador en una de las instancias y con los mismos clientes comprueba qué mensajes se pierden; anota el síntoma.</li>
+          <li>Describe en tres líneas qué pasaría con tu chat si tuvieras sticky sessions pero ningún adaptador.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las sticky sessions dirigen a cada cliente siempre al mismo nodo, preservando su estado en memoria.</li>
+          <li>Sin afinidad, la autenticación de handshake, las salas y la presencia se rompen entre nodos.</li>
+          <li>Los adaptadores de Redis reemplazan la memoria local por un pub/sub compartido.</li>
+          <li><code>@socket.io/redis-adapter</code> da alcance de clúster a join/leave/emit sin cambiar tu lógica.</li>
+          <li>Sticky y adaptador son complementarios: uno fija el nodo, el otro propaga los eventos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="escalado-horizontal.html">Escalado horizontal</a>
+          <a class="related-lessons__link" href="socket-io.html">Socket.IO</a>
+          <a class="related-lessons__link" href="despliegue-tras-proxy.html">Despliegue tras proxy</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="escalado-horizontal.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Escalado horizontal</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="seguridad-en-websockets.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Seguridad</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

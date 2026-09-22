@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-diseñar-un-sistema-distribuido">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diseñar un sistema distribuido · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Cierre del curso: checklist para diseñar un sistema distribuido, decisiones clave de arquitectura (CAP, sharding, replicación, fallos) y cómo evaluar el resultado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-diseñar-un-sistema-distribuido"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Diseñar un sistema distribuido</span>
+      </nav>
+      <h1 class="lesson-title">Diseñar un sistema distribuido</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y casos reales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Esta es la lección que junta todo el curso: un <strong>checklist reproducible</strong> para diseñar un sistema distribuido, seguido de las decisiones clave y una plantilla para evaluar el resultado. La idea no es memorizar recetas, sino tener un <em>orden para razonar</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="paso1">Paso 1: requisitos y restricciones</h2>
+        <p>Antes de dibujar nodos, define qué debe cumplir el sistema. Sin esto, toda decisión posterior es arbitraria:</p>
+        <ul>
+          <li><strong>Carga esperada:</strong> QPS pico, escrituras vs lecturas, tamaño de los datos.</li>
+          <li><strong>Latencia pretendida:</strong> ¿200 ms ya es tarde? ¿puede tolerar timeout en momentos de fallo?</li>
+          <li><strong>Disponibilidad objetivo:</strong> 99 % / 99,9 % / 99,99 % (define cuántos 9 necesitas).</li>
+          <li><strong>Consistencia necesaria:</strong> fuerte, causal o eventual, y en qué operaciones.</li>
+        </ul>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "proyecto": "catalogo-distribuido",
+  "requisitos": {
+    "qps_pico": 8000,
+    "ratio_lectura_escritura": "90/10",
+    "latencia_p99": "250ms",
+    "disponibilidad": "99.95%",
+    "consistencia": "eventual para lectura de precios; fuerte para stock"
+  }
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="paso2">Paso 2: particionar y replicar</h2>
+        <p>Con los requisitos claros, llegan las dos grandes decisiones estructurales:</p>
+        <ol>
+          <li><strong>Clave de partición (shard):</strong> por usuario, cliente, sala o región. Debe repartir la carga y no romper las consultas frecuentes.</li>
+          <li><strong>Modelo de replicación:</strong> leader-follower (simple), leaderless (quórums) o multi-leader (multiregión). Decide de paso el N, W y R.</li>
+        </ol>
+        <p>Regla práctica: empieza mínimo viable —un solo shard con réplicas de lectura— y escala cuando las mediciones lo pidan. Diseñar sharding prematuro complica sin necesidad.</p>
+      </section>
+
+      <section>
+        <h2 id="paso3">Paso 3: coordinación y fallos</h2>
+        <p>Añade después la «capa de cerebro» y la «capa de resiliencia»:</p>
+        <ul>
+          <li><strong>Elección de líder / locks:</strong> etcd, ZooKeeper, o el consenso de tu base si ya la provee.</li>
+          <li><strong>Timeouts y reintentos:</strong> backoff exponencial + jitter, siempre con idempotencia.</li>
+          <li><strong>Fusibles:</strong> para aislar dependencias enfermas.</li>
+          <li><strong>Degradación:</strong> qué sirve caché, qué se apaga, qué se mantiene crítica.</li>
+          <li><strong>Failover probado:</strong> que un nodo muerto no requiera un humano a las 3am.</li>
+        </ul>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml">servicios:
+  api-catalogo:
+    replicas: 4
+    dependencias:
+      - redis-cluster      # caché: degradable a cache-backed
+      - kafka              # eventos de cambio de stock
+      - postgres-cluster   # líder + 2 réplicas de lectura
+    politicas:
+      timeout_ms: 800
+      reintentos: 3
+      backoff: exponencial
+      fusible: on
+    degradacion:
+      con_cache: true
+      sin_origen: servir cache de 5 min
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="paso4">Paso 4: documentar decisiones (ADR)</h2>
+        <p>Cada decisión de arquitectura merece un <em>Architecture Decision Record</em> breve: contexto, decisión, alternativas y consecuencias. Es el seguro contra los «¿por qué hicimos esto?» dentro de un año:</p>
+        <pre class="code-block"><code class="language-markdown" data-language="text"># ADR-007: Consistencia del stock
+
+## Contexto
+El "stock" se lee desde réplicas con lag y eso provoca
+ventas duplicadas cuando el cliente reintenta.
+
+## Decisión
+Las escrituras de stock usan nivel CONSISTENCY=QUORUM
+(2 de 3 réplicas) y el endpoint de venta es idempotente
+con Idempotency-Key.
+
+## Alternativas
+- Transacciones 2PC rechazadas por el bloqueo de recursos.
+- Consistencia fuerte global rechazada por latencia.
+
+## Consecuencias
+(+) Lecturas de stock siempre frescas tras el quórum.
+(-) Las escrituras de stock son ~30 % más lentas.
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="evaluacion">Evaluar el diseño</h2>
+        <p>Antes de decir «terminado», responde estas seis preguntas con hechos (no intuiciones):</p>
+        <ol>
+          <li>¿Qué pasa si se cae el nodo X? ¿Alguien nota la caída?</li>
+          <li>¿Qué pasa si se corta la red entre dos zonas? (¿CP o AP elegido intencionalmente?)</li>
+          <li>Si duplico el tráfico mañana, ¿qué satura primero?</li>
+          <li>¿Los reintentos son idempotentes? ¿Pueden causar doble efecto?</li>
+          <li>¿Puedo medir latencia, errores y réplicas atrasadas en un dashboard?</li>
+          <li>¿Puedo probar el failover sin miedo cada semana?</li>
+        </ol>
+        <p>Si alguna respuesta te incomoda, esa es la siguiente iteración del diseño. <strong>Un sistema distribuido se termina cuando deja de ser un misterio qué pasa cuando algo falla.</strong></p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Diseña un «sistema de notificaciones distribuido» (envios por email/push) siguiendo los 4 pasos. Rellena el JSON de requisitos y el YAML de servicios.</li>
+          <li>Escribe un ADR de una decisión que tomaste (o tomarías) en tu proyecto real, con contexto, decisión, alternativas y consecuencias.</li>
+          <li>Responde las 6 preguntas de evaluación para el sistema que diseño en el punto 1.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Empieza por requisitos y restricciones medibles, no por elegir tecnologías.</li>
+          <li>Parten y replicas después: clave de sharding y modelo de replicación son las decisiones más difíciles de revertir.</li>
+          <li>Añade coordinación, timeouts, fusibles y degradación como una capa explícita.</li>
+          <li>Documenta con ADRs y evalúa con 6 preguntas que se responden con datos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="sharding-y-particionamiento.html">Sharding y particionamiento</a>
+          <a class="related-lessons__link" href="manejo-de-fallos-graceful.html">Manejo de fallos graceful</a>
+          <a class="related-lessons__link" href="../modulo-01/teorema-cap.html">Teorema CAP</a>
+          <a class="related-lessons__link" href="../modulo-02/consenso-distribuido.html">Consenso distribuido</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 2 · Implementación con Node.js · GraphQL</title>
+<meta name="description" content="Módulo 2 del curso GraphQL: Apollo Server básico, Express + GraphQL, argumentos y variables, manejo de errores y mutations con validación y transacciones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="container-narrow">
+
+    <nav class="breadcrumb" aria-label="Miga de pan">
+      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../index.html">GraphQL</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item" aria-current="page">Módulo 2 · Implementación con Node.js</span>
+    </nav>
+
+    <header class="lesson-hero">
+      <p class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></p>
+      <h1 class="lesson-title">Módulo 2 · Implementación con Node.js</h1>
+      <p class="section-subtitle">Lleva los conceptos al código: monta un servidor Apollo, intégralo a una app Express con contexto y base de datos, maneja argumentos, variables, errores y mutations con validación real y transacciones.</p>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 46 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Node.js y JavaScript</span>
+      </div>
+    </header>
+
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Levantar un servidor Apollo Server con typeDefs y resolvers.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Integrar GraphQL en una app Express y construir el context de cada request.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Pasar argumentos y variables con validación de tipos del schema.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender el formato de errores y personalizarlo con extensiones.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Escribir mutations con input types, validación y transacciones.</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Tu progreso</h2>
+        <div class="progress" data-progress="graphql">
+          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+          <span class="progress__label">0%</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Lecciones</h2>
+        <div class="grid-2">
+          <article class="card card--lesson card--link">
+            <h3><a href="apollo-server-basico.html">1 · Apollo Server básico</a></h3>
+            <p>Esquema, resolvers y el arranque de un servidor Apollo independiente.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">servidor</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="servidor-express-graphql.html">2 · Express + GraphQL</a></h3>
+            <p>Middleware, context personalizado e integración de una base de datos.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">integración</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="argumentos-y-variables.html">3 · Argumentos y variables</a></h3>
+            <p>Operaciones con variables, valores por defecto y validación de la API.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">operaciones</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="errores-y-estados.html">4 · Errores y validación</a></h3>
+            <p>Caminos de error, extensiones y cómo formatear errores de forma segura.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">errores</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="mutations-validaciones.html">5 · Mutations y validación</a></h3>
+            <p>Input types, validación en el resolver y transacciones de base de datos.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">mutations</span></div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../modulo-01/index.html">
+        <span class="label">← Módulo anterior</span>
+        <span class="title">Fundamentos de GraphQL</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Avanzado y producción</span>
+      </a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

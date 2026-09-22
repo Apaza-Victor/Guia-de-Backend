@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-sagas-y-transacciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sagas y transacciones distribuidas · Microservicios · Backend Academy</title>
+<meta name="description" content="Sagas y transacciones distribuidas en microservicios: coreografía vs orquestación, pasos compensatorios y por qué la transacción ACID no existe entre servicios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-sagas-y-transacciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Sagas y transacciones distribuidas</span>
+      </nav>
+      <h1 class="lesson-title">Sagas y transacciones distribuidas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Datos y resiliencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Pagar una orden toca a pagos, inventario y facturación: tres bases, ninguna transacción global que las abrace. La respuesta a «¿cómo mantengo consistencia sin ACID distribuido?» es la <strong>saga</strong>: una secuencia de pasos locales que juntos forman una operación de negocio, donde si un paso falla, los pasos ya hechos se <strong>compensan</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="compensacion">Compensación</h2>
+        <p>Cada paso de la saga tiene su <strong>paso inverso</strong>: reservar stock se compensa liberando stock; cobrar se compensa reembolsando. La saga acaba cuando todos los pasos tuvieron éxito o cuando tras un fallo todos los pasos previos fueron compensados (el sistema vuelve a un estado consistente).</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON (plan de saga con compensaciones)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "saga": "pedido_completo",
+  "steps": [
+    { "accion": "crear_pedido",             "compensacion": "cancelar_pedido" },
+    { "accion": "reservar_stock",           "compensacion": "liberar_stock" },
+    { "accion": "cobrar",                   "compensacion": "reembolsar" },
+    { "accion": "generar_factura",          "compensacion": "anular_factura" }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="coreografia">Coreografía: los eventos mandan</h2>
+        <p>En la <strong>coreografía</strong> no hay un jefe central: cada servicio, cuando termina su paso, publica un evento que dispara el siguiente. Los servicios ya están preparados del módulo 2 (comunicación asíncrona). Ventaja: mucho desacople y cero componente central; desventaja: difícil de ver el flujo entero y de controlar el orden.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (paso con compensación)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">@evento("pedido_creado")
+def reservar(inventario):
+    try:
+        inventario.reservar(evento["lineas"])
+    except SinStock as err:
+        # Falló: compensa publicando un evento de compensación
+        publicar("pedido_cancelado", evento)
+        return
+    publicar("stock_reservado", evento)</code></pre>
+          </div>
+        </figure>
+        <p>Cada servicio decide si avanza o si dispara la compensación. Nadie coordina, todos reaccionan.</p>
+      </section>
+
+      <section>
+        <h2 id="orquestacion">Orquestación: un coordinador</h2>
+        <p>En la <strong>orquestación</strong>, un servicio coordinador (el «orquestador») conoce toda la saga: llama a cada servicio por turno, decide si continúa y ejecuta las compensaciones en orden inverso si algo falla. Más control y trazabilidad, a cambio de un actor central que no debe convertirse en parte de la lógica de negocio de los ejecutores.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript (orquestador)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">async function ejecutarSaga(pedido) {
+  const pasos = [
+    { nombre: "crear_pedido",      hacer: () => api("pedidos").crear(pedido),          deshacer: () => {} },
+    { nombre: "reservar_stock",    hacer: () => api("inventario").reservar(pedido),    deshacer: () => api("inventario").liberar(pedido) },
+    { nombre: "cobrar",            hacer: () => api("pagos").cobrar(pedido),           deshacer: () => api("pagos").reembolsar(pedido) }
+  ];
+
+  const hechos = [];
+  for (const paso of pasos) {
+    try {
+      await paso.hacer();
+      hechos.push(paso);
+    } catch (err) {
+      console.error("Falló:", paso.nombre);
+      // Compensar en orden inverso
+      for (const hecho of hechos.reverse()) await hecho.deshacer();
+      throw err;
+    }
+  }
+  return "saga_completada";
+}</code></pre>
+          </div>
+        </figure>
+        <p>El coordinador puede persistir el estado de la saga (cada paso y su resultado) para poder retomar o compensar si él mismo se reinicia a mitad de camino.</p>
+      </section>
+
+      <section>
+        <h2 id="que-usar">¿Coreografía u orquestación?</h2>
+        <ul>
+          <li><strong>Coreografía:</strong> buena cuando los servicios ya reaccionan a eventos, se tolera el desacople y la saga es simple. Menos puntos de fallo centrales.</li>
+          <li><strong>Orquestación:</strong> necesaria cuando hay orden estricto, necesidad de estado intermedio, o quieres visibilidad completa del proceso y controlar la retentiva.</li>
+          <li>Las dos conviven: coreografía para pasos paralelos, orquestación para secuencias críticas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="estado">Persistencia del estado de la saga</h2>
+        <p>Una saga puede durar minutos o desde horas, entre paso y paso pueden llegar reintentos. Guardar el estado de cada saga (pendientes, hechos, compensados) es imprescindible para que un fallo del propio coordinador no deje la operación a medias:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+          <div class="code-block__body">
+            <pre data-lang="sql"><code class="language-sql" data-language="sql">CREATE TABLE sagas (
+  id TEXT PRIMARY KEY,
+  nombre TEXT NOT NULL,
+  estado TEXT NOT NULL DEFAULT 'en_progreso',
+  paso_actual INT NOT NULL DEFAULT 0,
+  pasos_completados JSONB NOT NULL DEFAULT '[]',
+  creada_en TIMESTAMPTZ NOT NULL DEFAULT now()
+);</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Diseña una saga coreografiada de 4 pasos con las compensaciones correspondientes.</li>
+          <li>Diseña la misma saga orquestada y compara los puntos de fallo.</li>
+          <li>Escribe el plan JSON de una saga de devolución de producto con 3 compensaciones.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Sin transacción global, la consistencia se logra con sagas: pasos locales + compensación.</li>
+          <li>Coreografía: eventos entre servicios sin jefe central, mucho desacople.</li>
+          <li>Orquestación: un coordinador que conoce el flujo y dispara compensaciones en orden inverso.</li>
+          <li>Cada paso exitoso necesita su paso inverso para deshacer el efecto.</li>
+          <li>Persistir el estado de la saga permite retomar tras reinicios y administrar la emergencia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/comunicacion-asincrona.html">Comunicación asíncrona</a>
+          <a class="related-lessons__link" href="bases-de-datos-por-servicio.html">Bases de datos por servicio</a>
+          <a class="related-lessons__link" href="resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-02/contratos-y-versionado.html">Contratos y versionado</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

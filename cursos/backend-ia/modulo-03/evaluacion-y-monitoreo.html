@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-evaluacion-y-monitoreo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluación y monitoreo · Backend para IA · Backend Academy</title>
+<meta name="description" content="Mide la calidad de tu integración de IA: eval sets propios, métricas como exactitud y Hamming, logs estructurados y observabilidad LLM en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-evaluacion-y-monitoreo"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Evaluación y monitoreo</span>
+      </nav>
+      <h1 class="lesson-title">Evaluación y monitoreo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Producción de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un LLM puede parecer excelente en las demos y degradarse en producción: cambias el prompt, el proveedor despliega una versión nueva del modelo y nadie se entera. La evaluación y el monitoreo son las dos caras del control de calidad de una feature de IA.</p>
+        <p>La <strong>evaluación</strong> responde «¿es buena hoy?» con un dataset propio. El <strong>monitoreo</strong> responde «¿sigue siendo buena ahora?» con datos de cada llamada real.</p>
+      </section>
+
+      <section>
+        <h2 id="evalsets">Construir un eval set propio</h2>
+        <p>No evalúes con el dataset genérico del proveedor: construye tu propio conjunto con casos reales de tu dominio. Veinte casos bien escogidos de tu servicio (reembolsos, envíos, etc.) valen más que miles de preguntas de ejemplo. Guarda cada par <em>caso → salida esperada</em> en código, para que forme parte de tu CI.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">CASOS_PRUEBA = [
+    {"input": "Reembolso del vuelo retrasado", "esperado": "reembolso",   "contexto": "viajes"},
+    {"input": "Cambiar la fecha de mi reserva", "esperado": "modificacion", "contexto": "viajes"},
+    {"input": "Mi pedido no ha llegado",        "esperado": "envio",       "contexto": "ecommerce"},
+]
+
+def evaluar_modelo(modelo, casos):
+    aciertos = 0
+    for caso in casos:
+        respuesta = modelo(caso["input"], caso["contexto"])
+        aciertos += 1 if respuesta["clase"] == caso["esperado"] else 0
+    return aciertos / len(casos)
+
+acc = evaluar_modelo(mi_modelo, CASOS_PRUEBA)
+print(f"Exactitud en el eval set: {acc:.1%}")</code></pre>
+        <p>El eval set crece con cada incidente: si un caso real salió mal, lo agregas al conjunto para que el siguiente cambio de prompt deba arreglarlo, no romperlo.</p>
+      </section>
+
+      <section>
+        <h2 id="metricas">Métricas clave de calidad</h2>
+        <p>Cuando tu modelo predice una etiqueta (categoría, sentimiento, intención), las métricas estándar se computan sobre un tensor de predicción y uno de referencia. Entre las clásicas: la <strong>exactitud</strong> (cuántas respuestas coinciden) y la <strong>distancia Hamming</strong> (en cuántos bites difieren las predicciones del objetivo).</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import torch
+
+def calcular_metricas(modelo, X_test, Y_test):
+    y_pred = modelo(X_test)  # (n, n_clases), valores en [0, 1]
+
+    def hamming(target, pred):
+        y1, _ = target.min(dim=1)   # límite inferior del objetivo
+        y2, _ = target.max(dim=1)   # límite superior del objetivo
+        repr_ = (y1 - 0.5).abs() + (y2 - 0.5).abs()
+        num = ((y2 - y1) - repr_) / 2
+        denom = ((y2 - y1) + repr_) / 2
+        return num.sum() / denom.sum()
+
+    metricas = {
+        "exactitud": (y_pred.round() == Y_test).float().mean().item(),
+        "hamming":   hamming(Y_test, y_pred).item(),
+    }
+    return metricas
+
+metricas = calcular_metricas(modelo, X_test, Y_test)
+print(metricas)
+# {"exactitud": 0.9, "hamming": 0.05}</code></pre>
+        <p>Deja tu umbral de aprobación fijado por contrato (por ejemplo «exactitud &gt; 0.85» en CI): cualquier cambio de prompt o de modelo que baje la métrica debe romper el despliegue, no sorprenderte en producción.</p>
+      </section>
+
+      <section>
+        <h2 id="observabilidad">Observabilidad de cada llamada</h2>
+        <p>En producción, un feature flag no te dice qué tan bien respondió el modelo. Registra por llamada: el prompt resumido (nunca PII en claro), los tokens reales, la latencia y si el resultado pasó la validación. Con esos logs puedes graficar tasa de respuestas válidas, costo por feature y regresiones tras cada cambio.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import json, time
+
+def escribir_log_llm(registro):
+    ruta = f"logs/llm/{registro['fecha'][:10]}.jsonl"
+    with open(ruta, "a", encoding="utf-8") as f:
+        f.write(json.dumps(registro, ensure_ascii=False) + "\\n")
+
+t_inicio = time.time()
+data = llama.chat(mensajes, max_tokens=300)
+latencia = time.time() - t_inicio
+
+escribir_log_llm({
+    "fecha":       time.strftime("%Y-%m-%dT%H:%M:%S"),
+    "feature":     "clasificar_ticket",
+    "modelo":      "gpt-4o-mini",
+    "tokens_entrada": data.usage.prompt_tokens,
+    "tokens_salida":  data.usage.completion_tokens,
+    "latencia_ms": round(latencia * 1000),
+    "ok":          status == 200,
+})</code></pre>
+        <p>Con esa base en JSONL (y un índice en tu proveedor de logs) construyes los tableros del módulo anterior: costo diario vs presupuesto, latencia p95 y el % de respuestas que superan la validación. Monitorear no es opcional: es la única forma de saber cuándo el proveedor cambia el comportamiento bajo tus pies.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un eval set de 10 casos reales de tu feature con su clase esperada y calcula la exactitud de tu modelo actual.</li>
+          <li>Añade un caso real que falló (regresión) y confirma que la exactitud baja; eso es tu umbral mínimo en CI.</li>
+          <li>Registra cada llamada en JSONL con tokens y latencia, y calcula el costo total del día con los precios de la lección de costos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El eval set propio (casos reales + salida esperada) es tu contrato de calidad ejecutable en CI.</li>
+          <li>Exactitud y Hamming miden cuánto se apartan las predicciones del objetivo; fija umbrales que rompan el despliegue.</li>
+          <li>La observabilidad registra prompt, tokens, latencia y validez por llamada.</li>
+          <li>Los logs estructurados alimentan los tableros de costo y las alertas de regresión.</li>
+          <li>Si cambias prompt o modelo, re-ejecuta el eval set completo: es tu red de seguridad.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="gestion-de-costos.html">Gestión de costos</a>
+          <a class="related-lessons__link" href="versionado-de-modelos.html">Versionado de modelos</a>
+          <a class="related-lessons__link" href="seguridad-y-guardrails.html">Seguridad y guardrails</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="seguridad-y-guardrails.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Seguridad y guardrails</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="versionado-de-modelos.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Versionado de modelos</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

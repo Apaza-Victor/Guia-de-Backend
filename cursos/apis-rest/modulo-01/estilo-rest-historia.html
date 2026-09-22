@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="estilo-rest-historia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El estilo REST y su historia · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende REST: de la tesis de Roy Fielding a la web moderna, sus 6 restricciones y por qué se impuso sobre SOAP y RPC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="estilo-rest-historia"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1 · Fundamentos de APIs</a><span class="sep">/</span>
+          <span class="current">El estilo REST y su historia</span>
+        </nav>
+        <h1 class="lesson-title">El estilo REST y su historia</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="origen">El origen: una tesis de 2000</h2>
+          <p>REST (<em>REpresentational State Transfer</em>) vio la luz en la tesis doctoral de <strong>Roy Fielding</strong> (2000) sobre los problemas de escalabilidad de la web. No es un estándar oficial, sino un <strong>estilo arquitectónico</strong>: un conjunto de restricciones que, combinadas, producen sistemas web escalables, simples y con mundos separados entre clientes y servidores.</p>
+        </section>
+
+        <section>
+          <h2 id="restricciones">Las seis restricciones</h2>
+          <ol>
+            <li><strong>Cliente‑servidor:</strong> separa la interfaz del almacenamiento.</li>
+            <li><strong>Stateless (sin estado):</strong> cada petición carga con todo lo necesario; el servidor no guarda la sesión del cliente.</li>
+            <li><strong>Cacheable:</strong> las respuestas declaran si se pueden cachear (y por cuánto).</li>
+            <li><strong>Interfaz uniforme:</strong> recursos identificados, representaciones, mensajes autodescriptivos e hipermedia.</li>
+            <li><strong>Sistema por capas:</strong> proxies, balanceadores y cachés intermedios deben poder existir sin que el cliente lo note.</li>
+            <li><strong>Código bajo demanda</strong> (opcional): entregar lógica ejecutable al cliente.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 id="actual">REST hoy: el REST práctico</h2>
+          <p>En el día a día, «API REST» se refiere a una web API que:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET    /api/v1/productos       → listar (colección)
+GET    /api/v1/productos/42    → uno (elemento)
+POST   /api/v1/productos       → crear
+PUT    /api/v1/productos/42    → reemplazar
+PATCH  /api/v1/productos/42    → actualizar parcialmente
+DELETE /api/v1/productos/42    → borrar</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>Identifica <strong>recursos</strong> por URL.</li>
+            <li>Usa los <strong>métodos HTTP</strong> como verbos.</li>
+            <li>Representa los recursos en <strong>JSON</strong>.</li>
+            <li>Comunica resultado con <strong>status codes</strong>.</li>
+            <li>Aplica <strong>hipermedia</strong> con moderación (links en las respuestas).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="competencia">Competidores: SOAP y RPC</h2>
+          <ul>
+            <li><strong>SOAP:</strong> XML pesado, contratos WSDL, verbos propios. Robustez empresarial, enorme overhead.</li>
+            <li><strong>RPC:</strong> llamar funciones remotas (XML‑RPC, JSON‑RPC, gRPC): «/getUser?id=7». Simple pero ríspido mientras el esquema crece.</li>
+            <li><strong>GraphQL:</strong> el cliente pide exactamente la forma (post-2015). Potente, pero con su curva de caché y seguridad.</li>
+          </ul>
+          <p>REST se impuso por simplicidad, legibilidad y aprovechamiento nativo del HTTP que ya cargaba con la escabilidad de toda la web.</p>
+        </section>
+
+        <section>
+          <h2 id="mitos">Mitos habituales</h2>
+          <ul>
+            <li>«Si responde JSON, es REST»: no; REST es una filosofía, JSON un formato. Puedes hacer «REST‑ish» en XML.</li>
+            <li>«REST exige verbos mágicos»: los estados y las URIs nomenjan acciones ni verbos en inglés.</li>
+            <li>«Stateless prohíbe cookies»: prohíbe depender de sesiones <em>de servidor</em>, no el envío de credenciales por petición.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Elige un recurso (películas, turnos, pedidos) y escribe las 6 URIs del patrón.</li>
+            <li>Explica con tus palabras qué significa «sin estado».</li>
+            <li>Compara SOAP vs REST y justifica por qué elegirías REST.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>REST nació en la tesis de Fielding (2000) como estilo arquitectónico.</li>
+            <li>Sus 6 restricciones buscan escala, simplicidad y desacoplamiento.</li>
+            <li>El REST práctico: recursos en URL, verbos HTTP, JSON y status codes.</li>
+            <li>Se impuso por su sencillez frente a SOAP y RPC.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="recursos-representaciones-json.html">Recursos y representaciones con JSON</a>
+            <a class="related-lessons__link" href="../modulo-02/metodos-http.html">Métodos HTTP</a>
+            <a class="related-lessons__link" href="../modulo-03/nombrando-recursos-plural.html">Nombrando recursos</a>
+            <a class="related-lessons__link" href="anatomia-api-real.html">La anatomía de una API real</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

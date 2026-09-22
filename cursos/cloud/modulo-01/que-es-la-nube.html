@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="que-es-la-nube">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es la nube? · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Qué es el cloud computing, la virtualización, la elasticidad y por qué la nube domina el Backend moderno.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="que-es-la-nube"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es la nube?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es la nube? Por qué domina el Backend</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Más que un servidor lejano</h2>
+        <p>La <strong>nube</strong> (cloud computing) es el modelo de entregar recursos informáticos —servidores, almacenamiento, bases de datos— <b>por internet, a demanda y pagando por uso</b>. No es un servidor "flotante": sigue siendo hardware real, pero gestionado por un proveedor que lo comparte entre miles de clientes con <strong>virtualización</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="virtualizacion">El truco: la virtualización</h2>
+        <p>Un solo servidor físico corre <em>muchas máquinas virtuales</em> (VMs) aisladas gracias a un hipervisor. A ti te toca una VM con su CPU, RAM y disco virtuales: la <strong>instancia</strong>. Por eso puedes "crear un servidor" en segundos, justo cuando lo necesitas, en vez de pedir una máquina que tarda semanas en llegar.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Servidor físico (máquina real del proveedor)
+├── VM-A  ← tu API (2 vCPU, 4 GB RAM)
+├── VM-B  ← la API del cliente B
+└── VM-C  ← una base de datos de otro cliente
+
+Hipervisor: crea/aisla/elimina VMs al instante</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="elasticidad">Elasticidad y pago por uso</h2>
+        <ul>
+          <li><strong>Elasticidad:</strong> el recurso crece o se reduce según la demanda real (escalar en un pico, liberar en valle).</li>
+          <li><strong>Pago por uso:</strong> pagas por lo que consumiste (por hora/mes), no por anticipado. La inversión inicial de un datacenter propio se convierte en gasto operativo mensual.</li>
+          <li><strong>Self-service:</strong> todo se pide desde la consola o la CLI, sin llamadas ni formularios.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="porque">Por qué el Backend vive en la nube</h2>
+        <ul>
+          <li>Despliegues al instante y entornos de prueba reproducibles (dev, staging, prod).</li>
+          <li>Escalado horizontal: de 1 a 100 instancias según el tráfico.</li>
+          <li>Servicios gestionados (bases de datos, cachés, colas) que quitan el mantenimiento.</li>
+          <li>Failover y respaldo: si una zona cae, otra sigue sirviendo.</li>
+        </ul>
+        <p>Una API moderna corre típicamente en una VM o en funciones, usa una base gestionada y archiva archivos en un bucket: todo dentro del mismo proveedor.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Explica con tus palabras la relación entre hipervisor, VM e instancia.</li>
+          <li>Menciona dos escenarios donde la elasticidad ahorra dinero y dos donde sería un riesgo.</li>
+          <li>Piensa en tu último proyecto: ¿cuáles de sus piezas vivirían mejor en la nube?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La nube entrega cómputo bajo demanda, por internet y con pago por uso.</li>
+          <li>La virtualización permite crear VMs (instancias) en segundos.</li>
+          <li>Elasticidad + self-service + servicios gestionados definen la experiencia cloud.</li>
+          <li>El Backend moderno se construye sobre estos recursos y no sobre racks propios.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

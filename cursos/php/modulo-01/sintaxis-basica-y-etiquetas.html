@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sintaxis-basica-y-etiquetas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sintaxis básica y etiquetas PHP · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Domina las etiquetas de PHP, los comentarios, la sensibilidad a mayúsculas y el final de instrucciones para leer y escribir código limpio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="sintaxis-basica-y-etiquetas"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Sintaxis básica y etiquetas PHP</span>
+        </nav>
+        <h1 class="lesson-title">Sintaxis básica y etiquetas PHP</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a PHP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="etiquetas">Las etiquetas de PHP</h2>
+          <p>PHP es un lenguaje de <strong>plantilla</strong>: se escribe mezclado con HTML y solo se ejecuta la porción marcada por las etiquetas de apertura y cierre. La etiqueta completa es <code class="inline">&lt;?php ... ?&gt;</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTML con PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Mi página&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p&gt;Este texto lo escribe el navegador sin pasar por PHP.&lt;/p&gt;
+    &lt;?php
+        echo "&lt;p&gt;Este texto lo genera PHP en el servidor.&lt;/p&gt;";
+    ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Cuando el servidor recibe una petición, procesa el archivo de arriba a abajo: lo que está dentro de las etiquetas se ejecuta como programa PHP y lo que está fuera se envía tal cual al cliente.</p>
+          <ul>
+            <li><code class="inline">&lt;?php ?&gt;</code>: la etiqueta estándar, la única recomendada.</li>
+            <li><code class="inline">&lt;?= ?&gt;</code>: etiqueta corta de eco, equivalente a <code class="inline">&lt;?php echo ?&gt;</code>.</li>
+            <li><code class="inline">&lt;? ?&gt;</code>: etiqueta corta normal, desaconsejada y a menudo desactivada.</li>
+          </ul>
+          <p>En un archivo formado solo por código PHP se recomienda <strong>no cerrar la etiqueta</strong> al final: el carácter de cierre puede añadir un espacio o salto de línea accidental a la respuesta, un error clásico que genera el aviso <em>«headers already sent»</em>.</p>
+        </section>
+
+        <section>
+          <h2 id="instrucciones">Instrucciones y punto y coma</h2>
+          <p>Cada instrucción de PHP termina con un <strong>punto y coma</strong> (<code class="inline">;</code>). Es el equivalente al punto final de una oración: si lo omites, el intérprete no sabe dónde acaba la sentencia y lanza un error de sintaxis.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+echo "Primera instrucción";
+echo "Segunda instrucción";
+
+$total = 10 + 5;
+echo "El total es $total";
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Los espacios y saltos de línea no importan para la ejecución, igual que en JavaScript o Python. La indentación es solo para que el código sea legible. Hay una excepción: estructuras como <code class="inline">if</code>, <code class="inline">for</code> o <code class="inline">foreach</code> no llevan punto y coma después del bloque, solo al final de las instrucciones internas.</p>
+        </section>
+
+        <section>
+          <h2 id="comentarios">Comentarios</h2>
+          <p>Los comentarios no se ejecutan: sirven para documentar y aclarar el código. PHP reconoce tres estilos.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Comentario de una línea, estilo C
+
+# Otro comentario de una línea, estilo shell
+
+/*
+ * Comentario multilínea.
+ * Muy útil para explicar bloques complejos.
+ */
+
+echo "El código real va después";
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="mayusculas">Sensibilidad a mayúsculas</h2>
+          <p>En PHP las <strong>variables</strong> y los <strong>nombres de archivo/claves</strong> distinguen mayúsculas, pero las <strong>palabras clave del lenguaje</strong> (if, echo, foreach…) y los <strong>nombres de funciones</strong> no distinguen. Es decir: <code class="inline">ECHO</code> funciona, pero <code class="inline">$Nombre</code> y <code class="inline">$nombre</code> son variables distintas.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$nombre = "Ana";
+$Nombre = "Luis";
+
+// Las dos variables son DIFERENTES
+echo $nombre;  // Ana
+echo $Nombre;  // Luis
+
+// La función no distingue: ambas llamadas funcionan
+ECHO "Fin";
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Como buena práctica, define un estilo y mantenlo siempre: <code class="inline">$camelCase</code> para variables y <code class="inline">snake_case</code> para funciones es una combinación muy común en proyectos PHP.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea <code class="inline">perfil.php</code> con un encabezado HTML <code class="inline">&lt;h1&gt;</code> y dos instrucciones de <code class="inline">echo</code> dentro de PHP.</li>
+            <li>Añade un comentario multilínea que explique qué hace tu script.</li>
+            <li>Elimina a propósito el punto y coma de una instrucción y ejecuta el archivo. Lee el mensaje de error y corrige el fallo.</li>
+            <li>Comprueba que <code class="inline">echo</code> y <code class="inline">ECHO</code> producen el mismo resultado.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El código se escribe entre <code class="inline">&lt;?php ?&gt;</code>; la etiqueta corta <code class="inline">&lt;?= ?&gt;</code> solo imprime.</li>
+            <li>Cada instrucción termina con punto y coma.</li>
+            <li>Los comentarios se escriben con <code class="inline">//</code>, <code class="inline">#</code> o <code class="inline">/* */</code>.</li>
+            <li>Las variables distinguen mayúsculas; las palabras clave del lenguaje no.</li>
+            <li>En archivos de solo PHP se omite la etiqueta de cierre final.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

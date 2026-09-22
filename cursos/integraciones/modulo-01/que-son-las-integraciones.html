@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-que-son-las-integraciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué son las integraciones? · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende qué es una integración, cuáles son sus tipos, por qué importa en el negocio y a qué riesgos te expone conectar sistemas de terceros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-que-son-las-integraciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué son las integraciones?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué son las integraciones?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Ningún producto real es una isla. Aunque tu aplicación pudiera cobrar, autenticar, enviar correos y almacenar archivos por sí sola, reconstruir funcionalidades maduras como pasarelas de pago o redes sociales solo conduce a meses de trabajo y a sistemas con errores que otros ya resolvieron. Una <strong>integración</strong> es el proceso de conectar dos o más sistemas para que intercambien datos y actúen como una sola unidad de negocio.</p>
+        <p>El backend moderno pasa gran parte de su existencia integrando: consumir una API de pagos, recibir eventos de un proveedor de correo, sincronizar datos con un ERP o delegar la autenticación a Google. Cuando ese trabajo se hace bien, el producto gana utilidades por día; cuando se hace mal, cada fallo del proveedor se convierte en un fallo tuyo.</p>
+      </section>
+
+      <section>
+        <h2 id="tipos">Tipos de integración</h2>
+        <p>Las integraciones se pueden clasificar por la <strong>dirección del flujo</strong> de datos y por el <strong>modelo de comunicación</strong>:</p>
+        <ul>
+          <li><strong>Consumo de APIs:</strong> tu backend llama a un servicio de terceros para leer o crear datos (geocodificar una dirección, registrar un pago).</li>
+          <li><strong>Exposición de APIs:</strong> un tercero consume tu API (tu plataforma como proveedor de datos para clientes o socios).</li>
+          <li><strong>Eventos entrantes (webhooks):</strong> el proveedor te avisa cuando algo ocurre en su sistema (un pago confirmado, un repositorio actualizado).</li>
+          <li><strong>Eventos salientes:</strong> tu sistema notifica a otros cuando cambia tu estado interno (publicar eventos de dominio).</li>
+          <li><strong>Sincronización batch:</strong> intercambio masivo programado (sincronizar inventario cada noche con el ERP).</li>
+        </ul>
+        <p>Cada tipo exige herramientas distintas: timeouts y reintentos para las llamadas síncronas, colas y verificación de firmas para los eventos, y validación de archivos para los lotes. Un buen inventario de integraciones documenta exactamente eso:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "integraciones": [
+    { "nombre": "pagos", "tipo": "api",       "modelo": "sincrono", "critica": true },
+    { "nombre": "stripe_eventos", "tipo": "webhook", "modelo": "evento", "critica": true },
+    { "nombre": "crm_sync", "tipo": "batch",  "modelo": "lote",     "critica": false }
+  ]
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="valor-de-negocio">El valor de negocio</h2>
+        <p>Integrar no es un capricho técnico: es la forma de comprar <strong>capacidad probada</strong> en lugar de reconstruirla. Los motivos más frecuentes:</p>
+        <ul>
+          <li><strong>Velocidad de salida al mercado:</strong> pagar con Stripe sale antes que certificar tu propio procesador de tarjetas.</li>
+          <li><strong>Economía de escala:</strong> mantener una pasarela de pago, un datacenter o una red de correo cuesta muchísimo más que consumirla.</li>
+          <li><strong>Ecosistema:</strong> «inicia sesión con Google» reduce la fricción de registro y con ella el abandono del embudo.</li>
+          <li><strong>Cumplimiento:</strong> proveedores certificados (PCI-DSS, SOC 2) te dan garantías regulatorias que tú no podrías afrontar solos.</li>
+        </ul>
+        <p>Para las sincronizaciones batch el patrón es siempre el mismo: leer el origen, transformar y escribir en el destino, registrando el estado de cada lote:</p>
+<pre class="code-block"><code class="language-python" data-language="python">def sincronizar_inventario(lote: list[dict]) -> dict:
+    sincronizados = 0
+    for item in lote:
+        crm.actualizar_stock(sku=item["sku"], stock=item["stock"])
+        sincronizados += 1
+    return {"lote": len(lote), "sincronizados": sincronizados}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: integrar un servicio de correo</h2>
+        <p>Imagina que tu aplicación necesita enviar un correo cada vez que un usuario completa un pedido. La versión ingenua abre un socket SMTP con tu propio servidor. La versión integrada delega en un servicio transaccional de terceros con plantillas, trackeo y métricas de entrega:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">import { send } from '@acme/email-service';
+
+export async function notificarPedido(pedido, cliente) {
+  const resultado = await send({
+    to: cliente.email,
+    template: 'pedido-confirmado',
+    context: { nroPedido: pedido.id, total: pedido.total }
+  });
+  return resultado.messageId;
+}</code></pre>
+        <p>Después de la llamada, tu código no conoce la infraestructura del proveedor: solo conoce un <code>messageId</code>. Ese nivel de abstracción es precisamente lo que convierte un cable eléctrico entre sistemas en una integración mantenible.</p>
+      </section>
+
+      <section>
+        <h2 id="riesgos">Los riesgos de una integración</h2>
+        <p>Integrar también significa ceder control. Los riesgos más comunes:</p>
+        <ul>
+          <li><strong>Dependencia de la disponibilidad ajena:</strong> si el proveedor cae, tu función de pago cae. Por eso se diseñan timeouts, reintentos y degradaciones.</li>
+          <li><strong>Contratos que cambian:</strong> una API puede deprecated campos y quitar endpoints sin avisar; por eso se versiona y se monitoriza.</li>
+          <li><strong>Límites de uso:</strong> rate limits y cuotas pueden interrumpir tu servicio si no gestionas el consumo.</li>
+          <li><strong>Privacidad:</strong> mandar datos a terceros implica contratos, cifrado en tránsito y, según la normativa, consentimiento del usuario.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> toda integración se comporta como un proveedor poco fiable. Diseña para el fracaso antes que para el éxito: el éxito también llega, pero el fracaso siempre llega antes.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un producto real (una tienda en línea, un SaaS, una app de delivery) y lista sus 5 integraciones más evidentes.</li>
+          <li>Clasifica cada una según el tipo: consumo de API, exposición, webhook entrante, evento saliente o sincronización batch.</li>
+          <li>Para la integración más crítica, responde por escrito: ¿cómo falla, qué pasa sí el proveedor cae 5 minutos y qué datos intercambia con él?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Integración es conectar sistemas para intercambiar datos y actuar como una sola unidad de negocio.</li>
+          <li>Se clasifican por dirección (consumo/exposición) y modelo (síncrono, eventos, batch).</li>
+          <li>Aportan velocidad y escala, pero ceden disponibilidad y control a terceros.</li>
+          <li>La clave está en abstraer al proveedor detrás de una capa propia y diseñar para el fracaso.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="patrones-de-integracion.html">Patrones de integración</a>
+          <a class="related-lessons__link" href="webhooks.html">Webhooks</a>
+          <a class="related-lessons__link" href="gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-errores-reintentos.html">Errores y reintentos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="que-es-un-jwt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es un JWT y sus partes? · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="JSON Web Token explicado: las tres partes (header, payload, firma), cómo se codifica en Base64URL y por qué no debes guardar secretos en el payload.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="que-es-un-jwt"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">¿Qué es un JWT y sus partes?</span>
+        </nav>
+        <h1 class="lesson-title">¿Qué es un JWT y sus partes?</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · JWT</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Un pase firmado</h2>
+          <p>Un <strong>JWT</strong> (JSON Web Token) es un token que transporta datos (claims) y una <strong>firma</strong> que garantiza que nadie los alteró. Es similar a un pase de entrada: quien lo muestra presenta su identidad sin tener que preguntar a cada paso. La gran diferencia frente a las sesiones de servidor es que la validación es <strong>stateless</strong>: el servidor verifica la firma y confía en lo que dice el token, sin consultar una base de datos.</p>
+        </section>
+
+        <section>
+          <h2 id="partes">Las tres partes</h2>
+          <p>El token tiene la forma <code class="inline">HEADER.PAYLOAD.SIGNATURE</code>, tres segmentos separados por puntos, cada uno codificado en <strong>Base64URL</strong>:</p>
+          <ul>
+            <li><strong>Header:</strong> metadatos como el algoritmo de firma (típicamente <code class="inline">HS256</code> o <code class="inline">RS256</code>) y el tipo (<code class="inline">JWT</code>).</li>
+            <li><strong>Payload:</strong> los claims (datos). Contiene registradas: <code class="inline">sub</code> (sujeto), <code class="inline">exp</code> (expiración), <code class="inline">iat</code> (emisión), <code class="inline">iss</code> (emisor) y otras propias como <code class="inline">rol</code>.</li>
+            <li><strong>Signature:</strong> resultado de aplicar el algoritmo al header+payload con una clave secreta o privada.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JWT</span></div>
+            <div class="code-block__body">
+              <pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJzdWIiOiI0MiIsInJvbCI6ImFkbWluIiwiZXhwIjoxNzI4ODAwMDAwfQ.
+H5Qb2FGV4s0u-3mR7Z1qHLg-bJ0eX8wHCdoQ1fV2AjI</code></pre>
+            </div>
+          </figure>
+          <p>Descifra la realidad de cada parte en <code class="inline">jwt.io</code>: header y payload son <strong>legibles</strong> sin la clave. Solo la firma exige el secreto.</p>
+        </section>
+
+        <section>
+          <h2 id="privacidad">No es cifrado, es firma</h2>
+          <p>El JWT <strong>no está cifrado</strong>: cualquiera puede decodificar el payload. Nunca pongas datos sensibles (contraseñas, tarjetas, secretos). La protección está en la firma: el payload no puede <em>modificarse</em> sin que la firma deje de verificar. Si quieres que el contenido sea confidencial, usa <strong>JWE</strong> (version cifrada), un nivel más avanzado.</p>
+        </section>
+
+        <section>
+          <h2 id="php">Decodificar sin librería</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function decodificarPayload(string $token): ?array
+{
+    $partes = explode(".", $token);
+    if (count($partes) !== 3) return null;
+
+    $payload = json_decode(base64_decode(strtr($partes[1], "-_", "+/")), true);
+    return is_array($payload) ? $payload : null;
+}
+
+$claims = decodificarPayload($token);
+// ["sub" =&gt; "42", "rol" =&gt; "admin", "exp" =&gt; 1728800000]</code></pre>
+            </div>
+          </figure>
+          <p>Ver la firma en producción se hace con una librería (Firebase JWT o lcobucci/jwt en PHP); codificarla a mano es solo para aprendizaje.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Genera un token en jwt.io y decodifica sus tres partes por separado.</li>
+            <li>Cambia un carácter del payload y observa que la firma falla al verificar.</li>
+            <li>Escribe una lista de claims que <strong>no</strong> deberían viajar en un JWT.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>JWT = header + payload + firma en Base64URL.</li>
+            <li>El payload es legible: no viene cifrado.</li>
+            <li>La firma garantiza integridad, no confidencialidad.</li>
+            <li>Valida con librerías, no a mano, en producción.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="firmando-tokens-hs256-rs256.html">Firmando tokens: HS256 y RS256</a>
+            <a class="related-lessons__link" href="access-tokens-y-expiracion.html">Access tokens y expiración</a>
+            <a class="related-lessons__link" href="refresh-tokens-y-rotacion.html">Refresh tokens y rotación</a>
+            <a class="related-lessons__link" href="almacenamiento-seguro-en-el-cliente.html">Almacenamiento seguro en el cliente</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

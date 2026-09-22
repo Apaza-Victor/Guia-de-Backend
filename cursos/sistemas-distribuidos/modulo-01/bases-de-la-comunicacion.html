@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-bases-de-la-comunicacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comunicación entre nodos · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Los fundamentos de la comunicación entre nodos: RPC, idempotencia, garantías de entrega at-most-once, at-least-once y exactly-once en sistemas distribuidos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-bases-de-la-comunicacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Comunicación entre nodos</span>
+      </nav>
+      <h1 class="lesson-title">Comunicación entre nodos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Los nodos de un sistema distribuido se comunican por red mediante mensajes. El problema fundamental: <strong>una llamada remota (RPC) puede fallar de tres maneras</strong>, pero para el llamador siempre parecen una: «no sé qué pasó».</p>
+        <ol>
+          <li>El mensaje nunca llegó.</li>
+          <li>El mensaje llegó, se procesó, pero la respuesta se perdió.</li>
+          <li>El mensaje llegó, el servicio se cayó a mitad del procesamiento.</li>
+        </ol>
+        <p>Como viste en la lección de fallas parciales, tu código debe vivir con esa incertidumbre. Esta lección cubre las herramientas para hacerlo: <strong>RPC con timeouts</strong>, <strong>idempotencia</strong> y las <strong>garantías de entrega</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="rpc">RPC y llamadas remotas</h2>
+        <p>Una llamada a procedimiento remoto (RPC) disfraza una comunicación de red con el aspecto de una llamada local. Frameworks como gRPC, Thrift o los clientes HTTP de toda la vida hacen esto. La tentación es tratarla como síncrona y local; la realidad es que puede fallar, tardar o repetirse.</p>
+        <p>Patrón básico: llamar con un <strong>timeout</strong> y decidir qué se hace si no llega la respuesta a tiempo.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const TOLERANCIA_MS = 2000;
+
+async function llamarConTimeout(receta) {
+    const controlador = new AbortController();
+    const temporizador = setTimeout(() => controlador.abort(), TOLERANCIA_MS);
+    try {
+        const resp = await fetch(receta.url, { signal: controlador.signal });
+        return await resp.json();
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            // No sabemos si el nodo procesó la petición.
+            throw new Error('TIMEOUT: estado desconocido');
+        }
+        throw error;
+    } finally {
+        clearTimeout(temporizador);
+    }
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="idempotencia">Idempotencia</h2>
+        <p>Una operación es <strong>idempotente</strong> si aplicarla varias veces produce el mismo resultado que aplicarla una vez. Es la defensa natural contra los reintentos: si reintentamos una petición que ya se ejecutó, no queremos cobrar dos veces ni duplicar el pedido.</p>
+        <ul>
+          <li><code>GET</code> y <code>PUT</code> de HTTP son idempotentes por definición; <code>DELETE</code> también lo es en práctica.</li>
+          <li><code>POST</code> no lo es: crea un recurso nuevo cada vez. Por eso se usa la <strong>clave de idempotencia</strong>.</li>
+        </ul>
+        <p>Ejemplo real en la cabecera de una pasarela de pagos:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">POST /v1/cargos
+Content-Type: application/json
+Idempotency-Key: pago-orden-48231-c7f1
+
+{
+  "monto": 4990,
+  "moneda": "MXN",
+  "ordenId": "48231"
+}
+</code></pre>
+        <p>El servidor guarda la clave junto con la respuesta. Si llega de nuevo la misma clave, devuelve la respuesta guardada en lugar de cobrar otra vez:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">def cobrar(cliente, clave_idempotencia, monto):
+    respuesta_previa = almacen.get(clave_idempotencia)
+    if respuesta_previa:
+        return respuesta_previa, "duplicada"
+
+    respuesta = pasarela.crear_cargo(monto)
+    almacen.set(clave_idempotencia, respuesta)
+    return respuesta, "nueva"
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="garantias">Garantías de entrega</h2>
+        <p>La red y los protocolos definen cuántas veces puede llegar un mensaje:</p>
+        <ul>
+          <li><strong>At-most-once (a lo sumo una vez):</strong> el mensaje se envía una vez, sin reintento. Puede perderse, pero nunca se duplica. Ideal para lecturas o telemetría.</li>
+          <li><strong>At-least-once (al menos una vez):</strong> se reintenta hasta confirmar. Puede duplicarse, por lo que el consumidor/operación debe ser idempotente. Es la garantía por defecto de colas como Kafka y SQS.</li>
+          <li><strong>Exactly-once (exactamente una vez):</strong> ni se pierde ni se duplica. Es la más cara y, en la práctica, se emula combinando at-least-once + idempotencia en el procesamiento (por ejemplo, en transacciones de Kafka Streams o <code>INSERT ... ON CONFLICT</code>).</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> apunta a «at-least-once + idempotencia». Garantizar realmente exactly-once en la red es imposible; se logra que el <em>efecto</em> sea único.</p>
+        </div>
+        <p>Un reintento con <em>backoff exponencial</em> implementa at-least-once evitando sobrecargar al servicio:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import time
+
+def enviar_con_reintento(cliente, mensaje, max_intentos=5):
+    intentos = 0
+    while intentos &lt; max_intentos:
+        try:
+            return cliente.enviar(mensaje)
+        except TransientFailure:
+            espera = 0.2 * (2 ** intentos)   # 0.2, 0.4, 0.8, 1.6, 3.2 s
+            time.sleep(espera)
+            intentos += 1
+    raise PermanentFailure("mensaje no entregado tras reintentos")
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="modelos-comunicacion">Modelos de comunicación</h2>
+        <ul>
+          <li><strong>Request/Reply síncrono:</strong> el cliente espera la respuesta (REST, gRPC). Fácil de razonar; sensible a timeouts y encadenamiento de fallos.</li>
+          <li><strong>Mensajería asíncrona:</strong> el cliente publica en una cola y sigue su vida (RabbitMQ, Kafka, SQS). Descopla a los participantes; la entrega pasa a ser responsabilidad del broker.</li>
+        </ul>
+        <p>La regla de oro del backend distribuido: <strong>la comunicación débilmente acoplada y asíncrona aguanta mejor los fallos</strong>, porque no hay una cadena de esperas que se rompa.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Busca en tu código una llamada HTTP que haga <code>POST</code> y evalúa: ¿qué pasaría si el cliente reintentara automáticamente la petición?</li>
+          <li>Añade una clave de idempotencia (un UUID por operación) a ese flujo y escribe el pseudocódigo del controlador que la valida.</li>
+          <li>Clasifica estas operaciones como at-most-once, at-least-once o exactly-once: un evento de auditoría, un débito de tarjeta, una lectura de inventario por caché.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Toda RPC puede fallar de tres formas indistinguibles: no llegó, se procesó y se perdió la respuesta, o murió a medias.</li>
+          <li>La idempotencia (claves, PUT/DELETE) permite reintentar sin efectos duplicados.</li>
+          <li>Las garantías de entrega van de at-most-once a exactly-once; lo pragmático es at-least-once + idempotencia.</li>
+          <li>La comunicación asíncrona desacopla nodos y mejora la tolerancia a fallos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-un-sistema-distribuido.html">¿Qué es un sistema distribuido?</a>
+          <a class="related-lessons__link" href="modelos-de-fallos.html">Modelos de fallo</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-fallos-graceful.html">Manejo de fallos graceful</a>
+          <a class="related-lessons__link" href="../modulo-02/transacciones-distribuidas.html">Transacciones distribuidas</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

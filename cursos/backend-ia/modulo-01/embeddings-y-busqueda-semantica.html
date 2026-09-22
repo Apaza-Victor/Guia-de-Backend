@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-embeddings-y-busqueda-semantica">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embeddings y búsqueda semántica · Backend para IA · Backend Academy</title>
+<meta name="description" content="Convierte textos en vectores, calcula similitud coseno y construye el primer buscador semántico de tu backend, base del RAG.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-embeddings-y-busqueda-semantica"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Embeddings y búsqueda semántica</span>
+      </nav>
+      <h1 class="lesson-title">Embeddings y búsqueda semántica</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Una búsqueda por palabras clave falla cuando el usuario escribe «cómo reembolso» y tu documento dice «devolución de dinero»: ninguna letra coincide, pero el significado es el mismo. Los <strong>embeddings</strong> resuelven eso: convierten cada texto en un vector posicionado según su significado, y buscar pasa de comparar letras a comparar <em>distancias</em>.</p>
+        <p>Esta técnica es la pieza que le da memoria a los modelos con tus propios documentos —el RAG—, así que dominarla aquí te deja listo para el módulo siguiente.</p>
+      </section>
+
+      <section>
+        <h2 id="generar">Generar un embedding desde el backend</h2>
+        <p>Cada texto (un documento, una pregunta, una reseña) se envía al modelo de embeddings y se guarda el vector resultante junto con el texto original en tu base de datos.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from openai import OpenAI
+
+client = OpenAI()
+
+documentos = [
+    "Política de devolución: se aceptan cambios dentro de 30 días.",
+    "El envío a domicilio tarda entre 2 y 5 días hábiles.",
+    "Puedes pagar con tarjeta, transferencia o PayPal."
+]
+
+respuesta = client.embeddings.create(
+    model="text-embedding-3-small",
+    input=documentos
+)
+
+for i, dato in enumerate(respuesta.data):
+    print(f"Documento {i}: {len(dato.embedding)} dimensiones")
+    # Documento 0: 1536 dimensiones</code></pre>
+        <p>Una sola llamada acepta varios textos a la vez (batching), lo que reduce peticiones y coste. Guarda cada vector con un identificador y el texto de origen: así podrás devolver el fragmento original cuando una búsqueda coincida.</p>
+      </section>
+
+      <section>
+        <h2 id="similitud">Similitud coseno</h2>
+        <p>Para saber qué tan parecidos son dos textos, calculamos el <strong>coseno del ángulo</strong> entre sus vectores: cuanto más cerca de 1, más parecidos; cercano a 0, nada que ver. En Python se calcula con un producto punto y dos normas:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import math
+
+def similitud_coseno(a, b):
+    if len(a) != len(b):
+        raise ValueError("Los vectores deben tener la misma dimensión")
+    dot = sum(x * y for x, y in zip(a, b))
+    norma_a = math.sqrt(sum(x * x for x in a))
+    norma_b = math.sqrt(sum(y * y for y in b))
+    if norma_a == 0 or norma_b == 0:
+        return 0.0
+    return dot / (norma_a * norma_b)
+
+consulta = "¿Puedo devolver mi compra?"
+# Vamos a suponer que estos son los embeddings reales del proveedor
+vector_consulta = [0.91, -0.20, 0.15, 0.40]
+vector_documento1 = [0.88, -0.18, 0.21, 0.35]  # política de devolución
+vector_documento2 = [0.10, 0.84, -0.22, -0.11] # envío a domicilio
+
+print(similitud_coseno(vector_consulta, vector_documento1))  # ~0.99
+print(similitud_coseno(vector_consulta, vector_documento2))  # ~0.07</code></pre>
+        <p>Con embeddings reales, la consulta «¿Puedo devolver mi compra?» se acercará mucho al documento de la <em>política de devolución</em> y casi nada al de envíos, aunque ninguna palabra coincida exactamente.</p>
+      </section>
+
+      <section>
+        <h2 id="buscador">Un buscador semántico en memoria</h2>
+        <p>Para pocos miles de documentos, un barrido lineal es suficiente para empezar y entender el patrón:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">def buscar(consulta, indice, top_k=3):
+    vector = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=[consulta]
+    ).data[0].embedding
+
+    puntuados = [
+        (similitud_coseno(vector, doc["embedding"]), doc["texto"])
+        for doc in indice
+    ]
+    puntuados.sort(reverse=True)
+    return puntuados[:top_k]
+
+indice = [
+    {"texto": "Política de devolución: cambios dentro de 30 días.", "embedding": emb[0]},
+    {"texto": "Envío a domicilio: 2 a 5 días hábiles.", "embedding": emb[1]},
+    {"texto": "Medios de pago: tarjeta, transferencia o PayPal.", "embedding": emb[2]},
+]
+
+for puntuacion, texto in buscar("¿Me devuelven el dinero si no me gusta?", indice):
+    print(f"{puntuacion:.2f} → {texto}")</code></pre>
+        <p>Este código es un RAG en miniatura sin que el modelo de chat intervenga: ya sabes qué fragmentos responderán a cada pregunta. Cuando el índice crezca, ese barrido lineal se reemplaza por una <strong>vector database</strong> con índices ANN (como pgvector, Qdrant o Weaviate), que hace lo mismo en milisegundos.</p>
+      </section>
+
+      <section>
+        <h2 id="preciso-recall">Sobre precisión y filtros</h2>
+        <ul>
+          <li><strong>Sin filtros:</strong> la búsqueda semántica por sí sola puede recuperar textos del tema equivocado. Combínala con filtros de metadatos (categoría, fecha, idioma).</li>
+          <li><strong>Normaliza:</strong> muchos embeddings ya vienen normalizados; verifica la unidad de medida de tu proveedor antes de comparar.</li>
+          <li><strong>Hibrida:</strong> los mejores buscadores combinan keyword (BM25) con semántica, sobre todo con nombres propios o códigos como «pedido 1234».</li>
+          <li><strong>Umbral mínimo:</strong> define un corte de similitud (por ejemplo 0.7) y devuelve «no encontré respuesta» en lugar de forzar contexto irrelevante.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Genera los embeddings de 5 documentos propios sobre tu proyecto (FAQs, fragmentos de documentación).</li>
+          <li>Escribe una función <code>buscar(consulta, top_k=2)</code> con similitud coseno y pruébala con 3 preguntas que no compartan palabras con los documentos.</li>
+          <li>Imprime las puntuaciones: identifica qué consultas recuperan el documento correcto y cuáles fallan, y anota en qué guardarías metadatos para filtrar mejor.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un embedding es un vector que representa el significado de un texto.</li>
+          <li>La similitud coseno compara ángulos entre vectores: es la medida estándar en búsqueda semántica.</li>
+          <li>Generas embeddings por API y guardas vector + texto original en tu base de datos.</li>
+          <li>Un barrido lineal alcanza para prototipar; las vector databases escalan la misma idea.</li>
+          <li>Filtra por metadatos, define umbrales y mezcla con búsqueda por palabras para mejores resultados.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="lenguaje-natural-y-llms.html">Lenguaje natural y LLMs</a>
+          <a class="related-lessons__link" href="prompts-y-completions.html">Prompts y completions</a>
+          <a class="related-lessons__link" href="../modulo-02/rag-basico.html">RAG básico</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="prompts-y-completions.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Prompts y completions</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Features con IA</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

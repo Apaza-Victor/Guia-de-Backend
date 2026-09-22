@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MySQL · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de MySQL: instalación, creación de bases de datos y tablas, tipos de datos, constraints, CRUD, índices, usuarios y permisos, backups y joins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">MySQL</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🐬 MySQL</h1>
+          <p class="section-subtitle">El motor de base de datos relacional más difundido. De la instalación a los backups: bases, tablas, tipos, constraints, CRUD, índices y permisos.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Bases de datos</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="instalacion">Instalación rápida</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Debian / Ubuntu
+sudo apt update
+sudo apt install mysql-server
+sudo mysql_secure_installation
+
+# Con Docker (la vía más limpia para desarrollo)
+docker run --name mysql-demo \
+  -e MYSQL_ROOT_PASSWORD=secreto \
+  -e MYSQL_DATABASE=app \
+  -p 3306:3306 \
+  -d mysql:8
+
+# Acceder
+mysql -u root -p
+docker exec -it mysql-demo mysql -u root -p</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="bases-tablas">Crear bases y tablas</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">CREATE DATABASE IF NOT EXISTS blog
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE blog;
+
+CREATE TABLE usuarios (
+  id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  nombre     VARCHAR(100) NOT NULL,
+  email      VARCHAR(190) NOT NULL UNIQUE,
+  password   VARCHAR(255) NOT NULL,
+  activo     TINYINT(1) NOT NULL DEFAULT 1,
+  creado_en  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE posts (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id  INT UNSIGNED NOT NULL,
+  titulo      VARCHAR(200) NOT NULL,
+  contenido   TEXT,
+  publicado   BOOLEAN DEFAULT FALSE,
+  creado_en   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_posts_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Modificar estructura
+ALTER TABLE usuarios ADD COLUMN telefono VARCHAR(20) AFTER email;
+ALTER TABLE usuarios DROP COLUMN telefono;
+DROP TABLE posts;
+DROP DATABASE blog;</code></pre>
+                </div>
+              </div>
+              <p><code class="inline">utf8mb4</code> soporta emojis y todo Unicode; el antigua <code class="inline">utf8</code> en MySQL no cubre emojis.</p>
+            </section>
+
+            <section>
+              <h2 id="tipos">Tipos de datos</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Familia</th><th>Ejemplos típicos</th></tr></thead>
+                  <tbody>
+                    <tr><td>Numéricos enteros</td><td><code class="inline">TINYINT</code>, <code class="inline">SMALLINT</code>, <code class="inline">INT</code>, <code class="inline">BIGINT</code> (con <code class="inline">UNSIGNED</code> para no negativos)</td></tr>
+                    <tr><td>Decimales</td><td><code class="inline">DECIMAL(10,2)</code> para dinero; <code class="inline">FLOAT</code> solo aproximaciones</td></tr>
+                    <tr><td>Cadenas</td><td><code class="inline">CHAR(n)</code> fijo, <code class="inline">VARCHAR(n)</code> variable, <code class="inline">TEXT</code>, <code class="inline">JSON</code></td></tr>
+                    <tr><td>Fechas</td><td><code class="inline">DATE</code>, <code class="inline">DATETIME</code>, <code class="inline">TIMESTAMP</code>, <code class="inline">TIME</code>, <code class="inline">YEAR</code></td></tr>
+                    <tr><td>Opciones</td><td><code class="inline">ENUM('a','b')</code>, <code class="inline">SET</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <ul>
+                <li>Dinero: <code class="inline">DECIMAL</code>, nunca <code class="inline">FLOAT</code>.</li>
+                <li>IDs: <code class="inline">BIGINT UNSIGNED AUTO_INCREMENT</code> o <code class="inline">CHAR(36)</code> para UUID.</li>
+                <li>Hashes: <code class="inline">CHAR(64)</code> para SHA-256, <code class="inline">VARCHAR(255)</code> para bcrypt.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 id="constraints">Constraints</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Constraint</th><th>Efecto</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">PRIMARY KEY</code></td><td>Identificador único y no nulo de la tabla.</td></tr>
+                    <tr><td><code class="inline">FOREIGN KEY</code></td><td>Valida que el valor exista en la tabla referenciada.</td></tr>
+                    <tr><td><code class="inline">UNIQUE</code></td><td>No admite duplicados (crea un índice).</td></tr>
+                    <tr><td><code class="inline">NOT NULL</code></td><td>Obliga a tener valor.</td></tr>
+                    <tr><td><code class="inline">CHECK</code></td><td>Regla de validación (<code class="inline">CHECK (edad &gt;= 0)</code>) en MySQL 8.0.16+.</td></tr>
+                    <tr><td><code class="inline">DEFAULT</code></td><td>Valor usado si no se envía.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">CREATE TABLE pedidos (
+  id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id BIGINT UNSIGNED NOT NULL,
+  total    DECIMAL(10,2) NOT NULL CHECK (total &gt; 0),
+  estado   ENUM('pendiente', 'pagado', 'enviado') NOT NULL DEFAULT 'pendiente',
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
+);
+
+-- ON DELETE CASCADE  → borra las filas hijas con el padre
+-- ON DELETE RESTRICT → impide borrar el padre si tiene hijos
+-- ON UPDATE CASCADE  → actualiza la clave en los hijos</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="crud">INSERT, UPDATE y DELETE</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">INSERT INTO usuarios (nombre, email, password)
+VALUES ('Ada', 'ada@dev.io', '$2y$10$...');
+
+-- Insertar varias filas a la vez
+INSERT INTO posts (usuario_id, titulo) VALUES
+  (1, 'Primer post'),
+  (1, 'Segundo post');
+
+-- INSERT ... ON DUPLICATE KEY UPDATE (upsert)
+INSERT INTO usuarios (id, nombre, email) VALUES (1, 'Ada', 'ada@dev.io')
+ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
+
+-- UPDATE siempre con WHERE (¡si no, actualiza todo!)
+UPDATE usuarios
+SET activo = 0, password = '$2y$10$nuevo'
+WHERE id = 10;
+
+-- DELETE también: con WHERE
+DELETE FROM posts WHERE id = 5;   -- si BORRAS sin WHERE, adiós
+
+-- Afectadas / líneas
+SELECT ROW_COUNT();</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="indices">Índices</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">CREATE INDEX idx_posts_usuario ON posts(usuario_id);
+CREATE INDEX idx_posts_fecha ON posts(creado_en);
+CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
+
+EXPLAIN SELECT * FROM posts WHERE usuario_id = 3;
+
+-- Examinar los índices de una tabla
+SHOW INDEX FROM posts;
+
+-- Quitar un índice
+DROP INDEX idx_posts_fecha ON posts;
+
+-- Motor: InnoDB usa índices agrupados (PK determina el físico)
+-- Recomendado: indexar columnas de WHERE, JOIN, ORDER BY y FK</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="usuarios-permisos">Usuarios y permisos</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">-- Crear usuario (el @ indica desde qué host se conecta)
+CREATE USER 'app'@'localhost' IDENTIFIED BY 'password-seguro';
+CREATE USER 'app'@'%' IDENTIFIED BY 'password-seguro';    -- desde cualquiera
+
+-- Dar permisos
+GRANT SELECT, INSERT, UPDATE, DELETE ON blog.* TO 'app'@'localhost';
+GRANT ALL PRIVILEGES ON blog.* TO 'app'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;
+
+-- Ver permisos y revocarlos
+SHOW GRANTS FOR 'app'@'localhost';
+REVOKE DELETE ON blog.* FROM 'app'@'localhost';
+
+-- Cambiar contraseña
+ALTER USER 'app'@'localhost' IDENTIFIED BY 'nueva';
+
+-- Borrar usuario
+DROP USER 'app'@'localhost';
+
+-- Aplicar cambios (damos de alta al reload)
+FLUSH PRIVILEGES;</code></pre>
+                </div>
+              </div>
+              <p>Designa el mínimo privilegio posible. La aplicación casi nunca necesita <code class="inline">DROP</code> ni <code class="inline">ALTER</code> en producción.</p>
+            </section>
+
+            <section>
+              <h2 id="backup">Backups</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Respaldar una base (estructura + datos)
+mysqldump -u root -p blog &gt; backup_blog.sql
+
+# Respaldar varias bases y todo el servidor
+mysqldump -u root -p --databases blog app &gt; backups.sql
+mysqldump -u root -p --all-databases &gt; todo.sql
+
+# Solo estructura (sin datos)
+mysqldump -u root -p --no-data blog &gt; estructura.sql
+
+# Restaurar
+mysql -u root -p blog &lt; backup_blog.sql
+
+# Con Docker
+docker exec mysql-demo mysqldump -u root -psecreto blog &gt; backup.sql
+docker exec -i mysql-demo mysql -u root -psecreto blog &lt; backup.sql</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="joins-mysql">SELECT avanzado y joins</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">MySQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-mysql">SELECT u.nombre, COUNT(p.id) AS posts_publicados
+FROM usuarios u
+LEFT JOIN posts p ON p.usuario_id = u.id AND p.publicado = TRUE
+GROUP BY u.id, u.nombre
+ORDER BY posts_publicados DESC
+LIMIT 10;
+
+-- Paginación
+SELECT * FROM posts
+ORDER BY id DESC
+LIMIT 20 OFFSET 40;                     -- página 3 con 20/fila
+
+-- Condicionales en SELECT
+SELECT
+  nombre,
+  CASE
+    WHEN edad &gt;= 60 THEN 'senior'
+    WHEN edad &gt;= 30 THEN 'adulto'
+    ELSE 'joven'
+  END AS franja
+FROM usuarios;
+
+-- JSON (MySQL 5.7+)
+SELECT JSON_EXTRACT(datos, '$.pais') FROM clientes WHERE id = 1;</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Define siempre una <strong>PRIMARY KEY</strong> y claves foráneas con el mismo tipo exacto de dato.</li>
+                <li>Motor <strong>InnoDB</strong> siempre (transacciones y FK).</li>
+                <li>Nunca formes consultas concatenando texto; usa prepared statements en el backend.</li>
+                <li>Usa <code class="inline">utf8mb4_unicode_ci</code> en bases nuevas.</li>
+                <li>Backups automáticos programados (cron) y restauración probada, no solo programada.</li>
+                <li>No hagas <code class="inline">SELECT *</code> desde la aplicación; pide columnas.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="postgresql.html">Siguiente: PostgreSQL <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

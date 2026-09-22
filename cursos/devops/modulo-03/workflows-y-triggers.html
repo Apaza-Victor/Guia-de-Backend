@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="workflows-y-triggers">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflows y triggers · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="La estructura de un workflow de GitHub Actions, la carpeta .github/workflows y los eventos (triggers) que disparan el pipeline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="workflows-y-triggers"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Workflows y triggers</span>
+      </nav>
+      <h1 class="lesson-title">Workflows y triggers</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · GitHub Actions</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p><strong>GitHub Actions</strong> es la plataforma de CI/CD integrada en GitHub. Todo el pipeline se describe con archivos YAML en una carpeta especial llamada <code class="inline">.github/workflows</code>. Cada archivo define un <strong>workflow</strong> (flujo de trabajo, la traducción de "pipeline"), y un <strong>trigger</strong> (evento) decide cuándo se ejecuta.</p>
+      </section>
+
+      <section>
+        <h2 id="estructura">Estructura de un workflow</h2>
+        <p>Un workflow mínimo tiene tres bloques: <code class="inline">name</code> (nombre visible), <code class="inline">on</code> (el trigger) y <code class="inline">jobs</code> (las tareas). Las lecciones siguientes exploran jobs y steps; aquí nos centramos en las dos primeras claves.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">name: CI básica
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Ejecutando CI"</code></pre>
+          </div>
+        </figure>
+        <p>Archivo: <code class="inline">.github/workflows/ci.yml</code>. En cuanto hagas <code class="inline">git push</code> —o abras un pull request hacia <code class="inline">main</code>—, el workflow aparece en la pestaña <em>Actions</em> del repositorio.</p>
+      </section>
+
+      <section>
+        <h2 id="triggers">Eventos (triggers) más usados</h2>
+        <ul>
+          <li><strong>push:</strong> se ejecuta al hacer push a una rama o ruta.</li>
+          <li><strong>pull_request:</strong> se ejecuta al abrir o actualizar una PR (ideal para CI).</li>
+          <li><strong>schedule:</strong> programación estilo cron, por ejemplo revisiones nocturnas.</li>
+          <li><strong>workflow_dispatch:</strong> botón manual para ejecutarlo cuando quieras.</li>
+          <li><strong>release:</strong> al publicar una versión. Típico para deploy a producción.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">on:
+  push:
+    paths:            # solo si tocan esta ruta
+      - "src/**"
+      - "tests/**"
+  schedule:
+    - cron: "0 3 * * 1"   # lunes a las 03:00 UTC
+  workflow_dispatch:       # botón manual
+    inputs:
+      entorno:
+        description: "staging o prod"
+        required: true
+        default: staging</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="filtros">Filtros y restricciones</h2>
+        <p>Si quieres un pipeline que solo corra en pull requests y no en pushes directos, o viceversa, usa los filtros de cada evento. También puedes excluir rutas con <code class="inline">paths-ignore</code> para no ejecutar CI cuando cambia solo la documentación:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">on:
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - "*.md"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="contextos">Contextos útiles</h2>
+        <p>GitHub Actions expone <strong>contextos</strong>: objetos con información de la ejecución. Los más usados son <code class="inline">github</code> (repo, actor, ref), <code class="inline">secrets</code> (secretos) y <code class="inline">vars</code> (variables). Se acceden con la sintaxis <code class="inline">${{ ... }}</code>.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">steps:
+  - name: Mostrar contexto
+    run: |
+      echo "Repositorio: ${{ github.repository }}"
+      echo "Rama: ${{ github.ref_name }}"
+      echo "Autor: ${{ github.actor }}"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea en tu repositorio la carpeta <code class="inline">.github/workflows</code> y un archivo <code class="inline">ci.yml</code> con dos triggers: push a <code class="inline">main</code> y pull_request.</li>
+          <li>Haz push a una rama distinta y comprueba que el workflow NO se ejecuta por el trigger de push.</li>
+          <li>Añade el trigger <code class="inline">workflow_dispatch</code> con un input <code class="inline">entorno</code> y lánzalo manualmente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los workflows viven en <code class="inline">.github/workflows</code> y se escriben en YAML.</li>
+          <li>El trigger <code class="inline">on</code> define cuándo se ejecuta el pipeline.</li>
+          <li>Los filtros por rama y por ruta afinan cuándo corre.</li>
+          <li>Los contextos <code class="inline">github</code>, <code class="inline">secrets</code> y <code class="inline">vars</code> proveen datos a la ejecución.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

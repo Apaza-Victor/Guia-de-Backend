@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trazas distribuidas · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende qué son las trazas distribuidas: spans, traceId, propagación de contexto entre servicios y bases de OpenTelemetry.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m1-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Trazas distribuidas</span>
+      </nav>
+      <h1 class="lesson-title">Trazas distribuidas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="problema">El problema que resuelven</h2>
+        <p>Cuando una petición toca la API, un servicio de búsqueda, una base de datos y una cola, cada componente logra su propio tiempo. La suma de «tiempo medio» no te dice dónde se esperó de verdad. Las <strong>trazas distribuidas</strong> reconstruyen el camino completo de una petición: qué llamó a quién, en qué orden, en cuánto tiempo y dónde falló.</p>
+        <p>Los dos conceptos base:</p>
+        <dl class="definition-list">
+          <dt>Span</dt><dd>una unidad de trabajo con nombre, tiempo de inicio, duración, atributos y su padre. Un span puede ser una llamada HTTP, una consulta SQL, un publish a una cola.</dd>
+          <dt>Trace</dt><dd>el árbol de spans que comparte un traceId: la petición completa de extremo a extremo.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2 id="anatomia">Anatomía de una traza</h2>
+        <p>Observa el árbol: cada span tiene un <code class="inline">parentSpanId</code>. El span raíz (root) no tiene padre. Los hijos comparten el mismo <code class="inline">traceId</code>.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "spans": [
+    {
+      "name": "POST /v1/checkout",
+      "spanId": "00f067aa0ba902b7",
+      "parentSpanId": "0000000000000000",
+      "startTime": "2026-02-18T10:04:11.500Z",
+      "durationMs": 850,
+      "attributes": { "http.route": "/v1/checkout" }
+    },
+    {
+      "name": "GET /v1/inventory", 
+      "spanId": "1a2b3c4d5e6f7081",
+      "parentSpanId": "00f067aa0ba902b7",
+      "startTime": "2026-02-18T10:04:11.540Z",
+      "durationMs": 120,
+      "attributes": { "http.route": "/v1/inventory" }
+    },
+    {
+      "name": "SELECT stock",
+      "spanId": "0b3f9d4c8e1a7062",
+      "parentSpanId": "1a2b3c4d5e6f7081",
+      "startTime": "2026-02-18T10:04:11.560Z",
+      "durationMs": 640,
+      "attributes": { "db.system": "postgresql", "db.operation": "SELECT" }
+    }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+        <p>La petición tardó 850 ms en total. El span «SELECT stock» tardó 640 de esos 850. Esa es la diferencia entre ver el porcentaje total y ver <em>dónde está el cuello de botella</em>: la consulta a inventor toma tres cuartas partes del tiempo.</p>
+      </section>
+
+      <section>
+        <h2 id="propagacion">Propagación de contexto</h2>
+        <p>Para encadenar los spans entre servicios, el traceId y el spanId deben <strong>viajar</strong> con la petición. El estándar W3C define el header <code class="inline">traceparent</code>:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">http</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-http" data-language="http">traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+              |  |trace-id (32 hex)             |span-id (16 hex) |-flags</code></pre>
+          </div>
+        </figure>
+        <p>Cuando la API llama a inventario por HTTP, el cliente inyecta ese header. Inventario lo lee, crea su span hijo, responde, y el contexto vuelve al padre. Si usas colas o Kafka, la propagación se hace en las cabeceras del mensaje. Esto ya lo resuelve la instrumentación automática de OpenTelemetry, pero es imprescindible entenderlo para las integraciones manuales.</p>
+      </section>
+
+      <section>
+        <h2 id="instrumentacion">Instrumentación manual con OpenTelemetry</h2>
+        <p>Con la API de OpenTelemetry puedes crear spans manuales alrededor de operaciones que el auto-instrumento no cubre:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const { trace } = require('@opentelemetry/api');
+const tracer = trace.getTracer('checkout');
+
+async function procesarCompra(userId, items) {
+  const span = tracer.startSpan('checkout.procesar');
+  span.setAttribute('checkout.items', items.length);
+  span.setAttribute('checkout.user', userId);
+
+  try {
+    const stock = await consultarStock(items); // span hijo: propagación automática
+    span.setAttribute('stock.disponible', stock.ok);
+    return stock;
+  } catch (err) {
+    span.setAttribute('error', true);
+    span.recordException(err);
+    throw err;
+  } finally {
+    span.end();
+  }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Las llamadas HTTP y de BD hechas dentro del span activo heredan el contexto: el «SELECT stock» de inventario aparecerá colgado de <code class="inline">checkout.procesar</code> sin que toques la librería de la base de datos.</p>
+      </section>
+
+      <section>
+        <h2 id="muestreo">Muestreo</h2>
+        <p>Guardar la traza de cada petición es caro. Lo habitual es el <strong>muestreo</strong>: un porcentaje del tráfico se tracea (5 %–10 % es un punto de partida común). Eso alcanza para ver distribuciones y errores recurrentes; cuando una petición concreta falla, la correlación por traceId te sigue dando el detalle del caso.</p>
+        <div class="callout">
+          <p><strong>En la práctica:</strong> muestrea menos (1–5 %) el tráfico normal, y muestrea el 100 % de las peticiones con error o de más de N ms. Esa estrategia doble te da el mapa y la evidencia del incidente.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="para-que-ver">Para qué usarlas</h2>
+        <ul>
+          <li><strong>Encontrar latencia:</strong> ver el span que más tarda en el árbol.</li>
+          <li><strong>Descubrir dependencias:</strong> qué servicio telefonea a quién (dependencies graph).</li>
+          <li><strong>Investigar errores:</strong> traceId de un fallo → logs de todos los servicios.</li>
+          <li><strong>Validar hipótesis:</strong> ¿la base de datos se satura? Ordena las trazas por duración del span de BD.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el árbol de spans de una petición que cruce API → BD → cola de notificaciones.</li>
+          <li>Escribe el header traceparent que enviaría tu servicio al llamar a otro.</li>
+          <li>Busca en tu proyecto una operación que hoy tarda «mucho» y describe cómo la dividirías en 3 spans para localizar el costo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Una traza es un árbol de spans con un traceId común y relaciones parentSpanId.</li>
+          <li>El contexto se propaga entre servicios con headers (W3C traceparent) o cabeceras de mensajes.</li>
+          <li>OpenTelemetry instrumenta lo común automáticamente y permite spans manuales.</li>
+          <li>El muestreo equilibra el coste de almacenamiento con la utilidad diagnóstica.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="los-tres-pilares.html">Los tres pilares</a>
+          <a class="related-lessons__link" href="logs-estructurados.html">Logs estructurados</a>
+          <a class="related-lessons__link" href="../modulo-02/opentelemetry.html">OpenTelemetry</a>
+          <a class="related-lessons__link" href="../modulo-02/jaeger-y-zipkin.html">Jaeger y Zipkin</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

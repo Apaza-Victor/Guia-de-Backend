@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m1-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El ciclo de vida del contenedor · Docker para Backend · Backend Academy</title>
+<meta name="description" content="Imágenes inmutables, capas de la imagen, copy-on-write, namespaces y cgroups: las piezas que hacen posible el ciclo de vida de un contenedor Docker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m1-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">El ciclo de vida</span>
+      </nav>
+      <h1 class="lesson-title">El ciclo de vida</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="estados">Los estados del contenedor</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">imagen (pull/build)
+   │ docker create
+   ▼
+ created ──docker start──► running
+   ▲                          │ docker stop  (SIGTERM → SIGKILL)
+   │                          ▼
+   └── docker rm ◄───────── exited
+                            (sigue ocupando disco hasta rm)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="inmutable">Las imágenes son inmutables</h2>
+        <p>Una imagen jamás se modifica. Cuando "editas" un archivo dentro de un contenedor, Docker utiliza una <strong>capa de escritura privada</strong> para ese contenedor (mecanismo <em>copy-on-write</em>). Dos contenedores de la misma imagen comparten capas de lectura y divergen solo en su capa privada.</p>
+      </section>
+
+      <section>
+        <h2 id="namespaces">namespaces: el "ilusión" de máquina</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">El kernel de Linux ofrece espacios aislados para:
+  PID   → procesos que el contenedor "ve" (PID 1 dentro = su main)
+  NET   → su propia pila de red (interfaces, puertos)
+  MOUNT → su propio árbol de archivos (root)
+  USER  → sus propios UID/GID (root dentro ≠ root del host)
+  IPC, UTS ... (IPC, hostname)...</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cgroups">cgroups: los límites de recursos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Limita CPU y memoria para que un contenedor no devore el host
+docker run -d --name api-limitada --cpus="0.5" --memory="256m" node:20 \
+  node /app/server.js
+
+docker stats                      # consume de cada contenedor en vivo
+docker update --memory="512m" api-limitada   # ajustar en caliente</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="ver-por-dentro">Ver las capas reales de una imagen</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">docker history nginx:alpine
+# Muestra las capas de arriba a abajo con tamaño y comando
+# Con esto comprendes POR QUÉ una imagen pesa lo que pesa
+# y cómo ordenar mejor las instrucciones del Dockerfile (M2)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Corre <code>docker run -d --cpus="0.5" --memory="128m" nginx:alpine</code> y mira <code>docker stats</code>.</li>
+          <li>Ejecuta <code>docker history</code> en tu imagen y anota sus capas.</li>
+          <li>Inspecciona con <code>docker inspect</code> los límites aplicados.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Imágenes inmutables; el contenedor tiene capa de escritura propia.</li>
+          <li>namespaces: vista aislada de procesos, red y archivos.</li>
+          <li>cgroups: límites reales de CPU y memoria por contenedor.</li>
+          <li>Parar no borra: hay que <code>rm</code> para liberar disco.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-un-contenedor.html">¿Qué es un contenedor?</a>
+          <a class="related-lessons__link" href="primeros-comandos.html">Primeros comandos</a>
+          <a class="related-lessons__link" href="limpieza-y-buenas-practicas.html">Limpieza y buenas prácticas</a>
+          <a class="related-lessons__link" href="index.html">Módulo 1 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

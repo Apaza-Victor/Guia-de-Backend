@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="group-by">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agrupación con GROUP BY · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende GROUP BY en SQL con COUNT, SUM, AVG, MIN y MAX: resúmenes por categoría, por día y las combinaciones con JOIN para análisis de datos reales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="group-by"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4 · Relaciones y consultas</a><span class="sep">/</span>
+          <span class="current">Agrupación con GROUP BY</span>
+        </nav>
+        <h1 class="lesson-title">Agrupación con GROUP BY</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Relaciones y consultas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>El <code class="inline">GROUP BY</code> convierte filas individuales en <strong>grupos resumidos</strong>. En vez de «300 pedidos», responde «cuántos pedidos hubo por mes»: una fila por grupo. Es la herramienta de los reportes, los dashboards y los «top» de cualquier sistema.</p>
+        </section>
+
+        <section>
+          <h2 id="agregaciones">Las funciones de agregación</h2>
+          <ul>
+            <li><code class="inline">COUNT(*)</code>: número de filas del grupo.</li>
+            <li><code class="inline">SUM(columna)</code>: suma de valores.</li>
+            <li><code class="inline">AVG(columna)</code>: promedio.</li>
+            <li><code class="inline">MIN(columna)</code> / <code class="inline">MAX(columna)</code>: extremos.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Ventas por categoría (resumen clásico)
+SELECT categoria, COUNT(*) AS productos, AVG(precio) AS precio_medio
+FROM productos
+GROUP BY categoria;
+
+-- Coste total por cliente
+SELECT cliente_id, SUM(total) AS gasto_total
+FROM pedidos
+GROUP BY cliente_id;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="regla">La regla de oro de GROUP BY</h2>
+          <p>Todas las columnas del <code class="inline">SELECT</code> que <strong>no</strong> sean agregaciones deben estar <strong>en el GROUP BY</strong>. Si no es así, el SQL pasa «sin seguro» en algunos motores y el resultado es arbitrario:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- CORRECTO: nombre está en el GROUP BY
+SELECT ciudad, nombre, COUNT(*) AS n
+FROM clientes GROUP BY ciudad, nombre;
+
+-- MAL: seleccionar nombre sin agruparlo produce resultados indefinidos
+SELECT ciudad, nombre, COUNT(*) AS n
+FROM clientes GROUP BY ciudad;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="con-join">GROUP BY + JOIN: reportes reales</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Facturación por mes
+SELECT DATE_FORMAT(p.fecha, '%Y-%m') AS mes, SUM(p.total) AS facturado
+FROM pedidos p
+GROUP BY mes
+ORDER BY mes;
+
+-- Clientes con más pedidos (top 5)
+SELECT c.nombre, COUNT(p.id) AS pedidos
+FROM clientes c
+JOIN pedidos p ON p.cliente_id = c.id
+GROUP BY c.id, c.nombre
+ORDER BY pedidos DESC
+LIMIT 5;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="filtros">Filtrar grupos: GROUP BY vs WHERE</h2>
+          <p><code class="inline">WHERE</code> filtra <strong>filas</strong> antes de agrupar. Para filtrar <strong>grupos ya agrupados</strong> se usa <code class="inline">HAVING</code>, que verás a fondo en el curso de SQL:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Categorías con más de 5 productos
+SELECT categoria, COUNT(*) AS n
+FROM productos
+GROUP BY categoria
+HAVING n &gt; 5;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Calcula «cantidad de posts por usuario» en tu red social de práctica.</li>
+            <li>Calcula el promedio de «likes» por día usando DATE_FORMA/CAST.</li>
+            <li>Escribe un reporte con JOIN y GROUP BY: «gasto total por cliente que ha gastado más de 100».</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>GROUP BY agrupa filas para resumirlas con agregaciones.</li>
+            <li>Las columnas no agregadas del SELECT deben estar en el GROUP BY.</li>
+            <li>COUNT, SUM, AVG, MIN y MAX resumen cada grupo.</li>
+            <li>GROUP BY se combina con JOIN para reportes entre tablas.</li>
+            <li>WHERE filtra filas; HAVING filtra grupos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="joins-inner-left-right.html">JOINs: inner, left y right</a>
+            <a class="related-lessons__link" href="subconsultas-basicas.html">Subconsultas básicas</a>
+            <a class="related-lessons__link" href="../modulo-03/order-limit.html">Ordenando y limitando resultados</a>
+            <a class="related-lessons__link" href="../../sql/modulo-02/having.html">Curso SQL: Filtrando grupos con HAVING</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

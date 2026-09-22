@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ámbito (scope) de las variables · Programación para Backend · Backend Academy</title>
+<meta name="description" content="Local, global y estático: dónde vive cada variable y cómo acceder a ella.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css"></head>
+<body class="app-shell">
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html" aria-label="Backend Academy - Inicio">
+      <span class="brand__logo" aria-hidden="true"><i class="fa-solid fa-code"></i></span>
+      <span>Backend Academy<small>aprende a programar</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../cursos/proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle btn btn--icon" type="button" aria-label="Cambiar a modo oscuro">
+        <i class="fa-solid fa-moon" data-mode="light" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="lesson-layout lesson-layout--with-toc container">
+<aside class="sidebar" aria-label="Contenido del curso Programación para Backend">
+  <div class="sidebar__section">
+    <a class="sidebar__title" href="../../../cursos/programacion/index.html">Programación para Backend</a>
+    <div class="progress" data-progress="programacion" aria-label="Progreso del curso">
+      <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+      <span class="progress__label">0%</span>
+    </div>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Fundamentos de programación</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="variables-y-constantes" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="tipos-de-datos" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="operadores" href="../../../cursos/programacion/modulo-01/operadores.html">Operadores y expresiones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conversion-de-tipos" href="../../../cursos/programacion/modulo-01/conversion-de-tipos.html">Conversión de tipos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="entrada-salida" href="../../../cursos/programacion/modulo-01/entrada-salida.html">Entrada, salida y comentarios<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Control de flujo</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="condicionales" href="../../../cursos/programacion/modulo-02/condicionales.html">Condicionales: if, else y elseif<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="condicional-switch" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-while" href="../../../cursos/programacion/modulo-02/bucles-while.html">Bucles while y do-while<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-for-foreach" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="break-continue" href="../../../cursos/programacion/modulo-02/break-continue.html">break y continue: control fino de bucles<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group is-open">
+    <h3 class="sidebar__group-title"><span>Funciones</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="funciones" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="parametros-y-argumentos" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">Parámetros y argumentos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link is-active" data-lesson-id="ambito-de-variables" href="../../../cursos/programacion/modulo-03/ambito-de-variables.html" aria-current="page">Ámbito (scope) de las variables<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="funciones-anonimas-callbacks" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="recursividad" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Estructuras de datos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="arrays" href="../../../cursos/programacion/modulo-04/arrays.html">Arrays: la base de los datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="arrays-asociativos" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conjuntos" href="../../../cursos/programacion/modulo-04/conjuntos.html">Conjuntos y colecciones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="objetos" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="estructuras-anidadas" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Programación Orientada a Objetos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="clases-y-objetos" href="../../../cursos/programacion/modulo-05/clases-y-objetos.html">Clases y objetos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="atributos-metodos-constructores" href="../../../cursos/programacion/modulo-05/atributos-metodos-constructores.html">Atributos, métodos y constructores<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="encapsulamiento" href="../../../cursos/programacion/modulo-05/encapsulamiento.html">Encapsulamiento: public, private y protected<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="herencia" href="../../../cursos/programacion/modulo-05/herencia.html">Herencia<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="polimorfismo-abstraccion-interfaces" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Código profesional</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="modularizacion" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="clean-code" href="../../../cursos/programacion/modulo-06/clean-code.html">Clean Code<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="principios-solid" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="dry-kiss" href="../../../cursos/programacion/modulo-06/dry-kiss.html">DRY y KISS<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="debugging" href="../../../cursos/programacion/modulo-06/debugging.html">Debugging y herramientas<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="manejo-de-errores" href="../../../cursos/programacion/modulo-06/manejo-de-errores.html">Manejo de errores y excepciones<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>  <div class="sidebar-footer">
+    <span><i class="fa-solid fa-code" aria-hidden="true"></i> Ejemplos en PHP 8.</span>
+    <a href="../../../cursos/programacion/index.html">Ver índice del curso</a>
+  </div>
+</aside>
+  <main class="lesson-main" id="main">
+<nav class="lesson-crumbs" aria-label="Ruta de navegación">
+  <a href="../../../index.html">Inicio</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../aprender/index.html">Cursos</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/index.html">Programación para Backend</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/modulo-03/index.html">módulo 03</a><span class="sep" aria-hidden="true">/</span>
+  <span class="current" aria-current="page">Ámbito (scope) de las variables</span>
+</nav>
+    <article class="lesson-article" data-lesson-id="ambito-de-variables">
+      <header class="lesson-hero">
+        <h1 class="lesson-title">Ámbito (scope) de las variables</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Intermedio</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-code" aria-hidden="true"></i> PHP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Funciones</span>
+          <label class="complete-toggle"><input type="checkbox"><span class="complete-toggle__box" aria-hidden="true">✓</span> Marcar como completada</label>
+        </div>
+      </header>
+      <div class="lesson-content">
+<section id="introduccion" aria-labelledby="introduccion-t">
+  <h2 id="introduccion-t">Introducción</h2>
+  <p>¿Por qué una variable no se ve desde cualquier parte? Porque cada variable nace en un <strong>ámbito</strong> (scope) y muere al salir de él. Entender el scope evita el 80 % de los bugs de variables y te enseña a compartir estado cuando toca.</p>
+</section><section id="definicion" aria-labelledby="definicion-t">
+  <h2 id="definicion-t">Definición</h2>
+  <p>El <strong>ámbito</strong> es la zona del script donde una variable existe y es visible. En PHP: las variables creadas dentro de una función son <em>locales</em> (muertas al terminar), las del nivel superior del archivo son <em>globales</em> (accesibles en el script) y las marcadas <code class="inline">static</code> conservan su valor entre llamadas a la función. Una función <strong>no ve las variables globales sin declararlas</strong> dentro con <code class="inline">global</code>.</p>
+</section><section id="conceptos-clave" aria-labelledby="conceptos-clave-t">
+  <h2 id="conceptos-clave-t">Conceptos clave</h2>
+  <ul>
+  <li>Variables locales: existen solo dentro de la función.</li>
+  <li>Variables globales: visibles en el script, no automáticamente dentro de funciones.</li>
+  <li><code class="inline">global $x;</code> importa una variable global al interior de la función.</li>
+  <li><code class="inline">static $n = 0;</code> conserva el valor entre llamadas.</li>
+  <li>Una función no ve las variables del ámbito desde el que se llama: pásale los datos como argumentos.</li>
+</ul>
+</section><section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t">
+  <h2 id="ejemplo-basico-t">Ejemplo básico</h2>
+  <p>Dos variables con el mismo nombre en ámbitos distintos no se pisan:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">scopes.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$saludo = &quot;global&quot;;
+
+function decir(): void {
+    $saludo = &quot;local&quot;;
+    echo $saludo . &quot;\n&quot;;   // local
+}
+
+decir();
+echo $saludo . &quot;\n&quot;;       // global (no se toc&#243;)</code></pre></div>
+</div>
+</section><section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t">
+  <h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2>
+  <p>Con <code class="inline">global</code> la función puede leer y escribir la variable exterior:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">global.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$contador = 0;
+
+function registrarVisita(): void {
+    global $contador;
+    $contador++;
+}
+
+registrarVisita();
+registrarVisita();
+echo $contador;   // 2</code></pre></div>
+</div>
+</section><section id="ejemplo-real" aria-labelledby="ejemplo-real-t">
+  <h2 id="ejemplo-real-t">Ejemplo real</h2>
+  <p><code class="inline">static</code> conserva el valor entre llamadas sin exponer nada fuera:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">static.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">function siguienteId(): int {
+    static $ultimo = 0;
+    $ultimo++;
+    return $ultimo;
+}
+
+echo siguienteId() . &quot; &quot;;   // 1
+echo siguienteId() . &quot; &quot;;   // 2
+echo siguienteId();         // 3</code></pre></div>
+</div>
+</section><section id="codigo" aria-labelledby="codigo-t">
+  <h2 id="codigo-t">Código completo</h2>
+  <p>Código completo: contador de peticiones con estado estático, sin tocar globales:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">contador-peticiones.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+function contadorPeticiones(string $clave): int {
+    static $conteo = [];
+    if (!isset($conteo[$clave])) {
+        $conteo[$clave] = 0;
+    }
+    $conteo[$clave]++;
+    return $conteo[$clave];
+}
+
+echo &quot;Login: &quot; . contadorPeticiones(&quot;LOGIN&quot;) . &quot;\n&quot;;
+echo &quot;Login: &quot; . contadorPeticiones(&quot;LOGIN&quot;) . &quot;\n&quot;;
+echo &quot;API:   &quot; . contadorPeticiones(&quot;API&quot;) . &quot;\n&quot;;</code></pre></div>
+</div>
+</section><section id="explicacion" aria-labelledby="explicacion-t">
+  <h2 id="explicacion-t">Explicación</h2>
+  <p>En <code class="inline">scopes.php</code> las dos <code class="inline">$saludo</code> viven en mundos separados: se llaman igual pero nada las conecta. Esto es una protección: una función no puede romper variables ajenas por accidente.</p>
+<p><code class="inline">global</code> abre esa puerta, pero crea dependencias ocultas: quien lee la función no sabe qué toca. <code class="inline">static</code> es más fino: el estado vive dentro de la función y sobrevive entre llamadas, ideal para secuenciadores como el de IDs. En el contador real usamos un array estático con claves para llevar varios contadores a la vez.</p>
+</section><section id="errores-comunes" aria-labelledby="errores-comunes-t">
+  <h2 id="errores-comunes-t">Errores comunes</h2>
+  <ul>
+  <li>Creer que la función ve las variables del script: sin <code class="inline">global</code> nace una local vacía.</li>
+  <li>Abusar de <code class="inline">global</code>: acoplar la función a su entorno la hace inreutilizable.</li>
+  <li>Reinicializar una variable <code class="inline">static</code> en cada llamada con <code class="inline">=</code> en vez de usar el valor guardado.</li>
+  <li>Confundir <code class="inline">global</code> con <code class="inline">static</code>: uno importa de fuera, el otro conserva dentro.</li>
+</ul>
+</section><section id="buenas-practicas" aria-labelledby="buenas-practicas-t">
+  <h2 id="buenas-practicas-t">Buenas prácticas</h2>
+  <ul>
+  <li>Pasa datos por parámetros y devuelve resultados; evita <code class="inline">global</code>.</li>
+  <li>Usa <code class="inline">static</code> solo para estado interno persistente sencillo.</li>
+  <li>Si necesitas estado compartido complejo, una clase (módulo 5) es mejor estructura.</li>
+</ul>
+</section><section id="ejercicio" aria-labelledby="ejercicio-t">
+  <h2 id="ejercicio-t">Ejercicio</h2>
+  <div class="exercise">
+  <div class="exercise__head">
+    <h3>Ticket numerado</h3>
+    <span class="badge badge--level-intermedio">Dificultad: Media</span>
+  </div>
+  <ol>
+    <li>Crea una función <code class="inline">nuevaTicket(): int</code> con una <code class="inline">static $num</code> que incremente y devuelva.</li>
+    <li>Llámalas 3 veces y muestra los números (deben ser 1, 2, 3).</li>
+    <li>Añade una variable global <code class="inline">$taquilla = "Central"</code> y una función con <code class="inline">global</code> que imprima "Taquilla: $taquilla — Ticket N".</li>
+  </ol>
+</div>
+</section><section id="resumen" aria-labelledby="resumen-t">
+  <h2 id="resumen-t">Resumen</h2>
+  <div class="summary">
+  <ul>
+    <li>Cada ámbito protege sus variables: local, global y estático.</li>
+    <li><code class="inline">global</code> importa variables exteriores; úsalo con cuidado.</li>
+    <li><code class="inline">static</code> conserva el valor entre llamadas.</li>
+  </ul>
+</div>
+</section>
+      </div>
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../../../cursos/programacion/modulo-03/index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo</a>
+      </nav><div class="lesson-prevnext">
+  <a class="lesson-prevnext__link" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">
+    <span class="label" aria-hidden="true">← Anterior</span>
+    <span class="title">Parámetros y argumentos</span>
+  </a>
+  <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">
+    <span class="label" aria-hidden="true">Siguiente →</span>
+    <span class="title">Funciones anónimas y callbacks</span>
+  </a>
+</div>
+      <section class="related-block" aria-labelledby="rel-t">
+        <h2 id="rel-t">También puede interesarte</h2><div class="related-lessons">  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<br><span class="muted">Funciones</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<br><span class="muted">Estructuras de datos</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<br><span class="muted">Código profesional</span></a></div>      </section>
+    </article>
+  </main><aside class="toc-rail" data-toc aria-label="Contenido de la página">
+  <h2>En esta página</h2>
+  <nav aria-label="Secciones de la lección">
+    <a href="#introduccion">Introducción</a>
+    <a href="#definicion">Definición</a>
+    <a href="#conceptos-clave">Conceptos clave</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-intermedio">Ejemplo intermedio</a>
+    <a href="#ejemplo-real">Ejemplo real</a>
+    <a href="#codigo">Código completo</a>
+    <a href="#explicacion">Explicación</a>
+    <a href="#errores-comunes">Errores comunes</a>
+    <a href="#buenas-practicas">Buenas prácticas</a>
+    <a href="#ejercicio">Ejercicio</a>
+    <a href="#resumen">Resumen</a>
+  </nav>
+</aside>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <h4><a href="../../../index.html">Backend Academy</a></h4>
+        <p>Plataforma en español para aprender desarrollo backend: de los fundamentos a la arquitectura de sistemas de alto tráfico.</p>
+      </div>
+      <div>
+        <h4>Cursos</h4>
+        <ul>
+          <li><a href="../../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../../cursos/programacion/index.html">Programación para Backend</a></li>
+          <li><a href="../../../cursos/php/index.html">PHP</a></li>
+          <li><a href="../../../cursos/nodejs/index.html">Node.js</a></li>
+          <li><a href="../../../cursos/python/index.html">Python</a></li>
+          <li><a href="../../../cursos/bases-datos/index.html">Bases de Datos</a></li>
+          <li><a href="../../../cursos/apis-rest/index.html">APIs REST</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap</a></li>
+          <li><a href="../../../retos/index.html">Retos</a></li>
+          <li><a href="../../../ejercicios/index.html">Ejercicios</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../dashboard/index.html">Mi progreso</a></li>
+          <li><a href="../../../favoritos/index.html">Favoritos</a></li>
+          <li><a href="../../../historial/index.html">Historial</a></li>
+          <li><a href="../../../acerca/index.html">Acerca de</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido educativo gratuito, en español.</span>
+      <span class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca</a>
+        <a href="../../../glosario/index.html">Glosario</a>
+        <a href="../../../roadmap/index.html">Roadmap</a>
+      </span>
+    </div>
+  </div>
+</footer><script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  try { if (window.AppTheme) AppTheme.init(); } catch (err) {}
+  try { if (window.AppProgress) AppProgress.init(); } catch (err) {}
+});
+</script></body>
+</html>

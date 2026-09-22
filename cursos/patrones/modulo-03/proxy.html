@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proxy · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Proxy en backend: controlar accesos y diferir operaciones costosas, con ejemplos PHP de caché, autorización y lazy loading.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Proxy</span>
+      </nav>
+      <h1 class="lesson-title">Proxy</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Estructurales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Proxy</strong> es un doble que se hace pasar por el objeto real y añade control antes de delegar: <strong>caché</strong>, <strong>autorización</strong> o <strong>carga perezosa</strong>. El consumidor no nota la diferencia porque el proxy tiene la misma interfaz.</p>
+      </section>
+
+      <section>
+        <h2 id="tipos">Tipos que más verás en backend</h2>
+        <ul>
+          <li><strong>Proxy de caché:</strong> devuelve el dato ya calculado; la operación real solo corre en el miss.</li>
+          <li><strong>Proxy de protección:</strong> valida permisos antes de delegar (usado por middleware y ORMs).</li>
+          <li><strong>Proxy remoto:</strong> representa un servicio en otro proceso o red (gRPC clients, HTTP clients).</li>
+          <li><strong>Proxy virtual (lazy):</strong> difiere la creación de un objeto costoso hasta que se usa.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="codigo">Proxy de caché en acción</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">interface ReporteCliente
+{
+    public function resumen(string $clienteId): array;
+}
+
+// Objeto real: costoso, consulta una BD de BI
+final class ReporteReal implements ReporteCliente
+{
+    public function resumen(string $clienteId): array
+    {
+        return bastanteCostoso($clienteId); // 800 ms
+    }
+}
+
+// Proxy: misma interfaz, caché por delante
+final class ReporteCacheado implements ReporteCliente
+{
+    public function __construct(
+        private ReporteReal $real,
+        private Cache $cache,
+    ) {}
+
+    public function resumen(string $clienteId): array
+    {
+        return $this-&gt;cache-&gt;record('reporte:' . $clienteId, fn() =&gt; $this-&gt;real-&gt;resumen($clienteId), 300);
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>El negocio sigue pidiendo <code>ReporteCliente</code>; la primera llamada es costosa, las siguientes vuelan.</p>
+      </section>
+
+      <section>
+        <h2 id="proteccion">Proxy de protección con autorización</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class PagoProtegido implements PagoGateway
+{
+    public function __construct(
+        private PagoGateway $real,
+        private Autorizador $auth,
+    ) {}
+
+    public function cobrar(string $token, float $monto): void
+    {
+        if (! $this-&gt;auth-&gt;puede($token, 'cobrar')) {
+            throw new AccesoDenegado('Sin permiso de cobro');
+        }
+        $this-&gt;real-&gt;cobrar($token, $monto);
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cuando">Proxy vs. Decorator</h2>
+        <p>Ambos envuelven un objeto con la misma interfaz, pero la <strong>intención</strong> es distinta:</p>
+        <ul>
+          <li><strong>Proxy</strong> controla el <em>acceso</em> y el <em>costo</em> de la llamada (se mantiene neutro hacia la lógica).</li>
+          <li><strong>Decorator</strong> añade <em>comportamiento</em> a las responsabilidades del objeto (lo enriquece).</li>
+        </ul>
+        <p>En la práctica detectarás el tipo por el propósito: «¿controlo al otro (proxy) o lo potencio (decorator)?».</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una llamada lenta o con permisos en tu proyecto.</li>
+          <li>Define la interfaz compartida y escribe un proxy que cachee o valide.</li>
+          <li>Cambia la inyección a usar el proxy y mide la mejora.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Proxy: doble de un objeto real que controla acceso o costo.</li>
+          <li>Variantes: caché, protección, remoto y lazy.</li>
+          <li>Comparte interfaz; el consumidor no nota el cambio.</li>
+          <li>Diferéncialo del Decorator por la intención (control vs. refuerzo).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="decorator.html">Decorator</a>
+          <a class="related-lessons__link" href="adapter.html">Adapter</a>
+          <a class="related-lessons__link" href="../modulo-05/repository-y-capa-de-datos.html">Repository y la capa de datos</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-06/hexagonal-puertos-adaptadores.html">Hexagonal: puertos y adaptadores</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-lanzamiento-y-postmortem">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lanzamientos y postmortem · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a lanzar un backend con calma usando feature flags, a cerrar cada ciclo con retrospectiva y a escribir postmortems constructivos que convierten incidentes en mejoras.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-lanzamiento-y-postmortem"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Lanzamientos y postmortem</span>
+      </nav>
+      <h1 class="lesson-title">Lanzamientos y postmortem</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Comunicación y entrega</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="lanzar-con-calma">El lanzamiento como el momento más sereno</h2>
+        <p>La paradoja del release backend es que el momento de más riesgo debería verse como el más tranquilo del ciclo: si el despliegue depende de los nervios de una persona a medianoche, algo está mal gestionado. Un lanzamiento maduro es una <strong>checklist repetida</strong> que ya se ensayó, no un acto de fe.</p>
+        <p>Todo lo que vimos en los módulos anteriores confluye aquí: el contrato probado en la CI, el staging verificado, la estrategia de deploy y el plan de rollback listo. Si alguno falta, el release se pospone — no se «lanza y a ver».</p>
+      </section>
+
+      <section>
+        <h2 id="feature-flags">Feature flags: separar el despliegue del lanzamiento</h2>
+        <p>El superpoder de management que mejor resuelve el miedo al release es el <strong>feature flag</strong>: poder desplegar código «dormido» y activarlo cuando se quiera, sin volver a desplegar. Así, desplegar y lanzar dejan de ser lo mismo:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># config de flags (ejemplo en JSON de configuración)
+curl -X POST https://flags.miservidor.com/api/flags \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -d '{"nombre":"reembolso_automatico","estado":"desactivada"}'
+
+# En el código el destino decide (leído en el arranque o en caliente)
+# if (flags["reembolso_automatico"]) { /* ruta nueva */ } else { /* ruta antigua */ }
+
+# Lanzamiento progresivo: activar para 5% de clientes
+curl -X PATCH https://flags.miservidor.com/api/flags/reembolso_automatico \
+  -d '{"estado":"activada","rollout":0.05}'</code></pre>
+        <p>Beneficios directos: release <em>independiente de la sincronización</em> (el código puede esperar días), kill-switch instantáneo (desactivar sin deploy de emergencia) y canary a porcentajes. El costo: tiene un flag por cada característica; los flags se <strong>retiran</strong> cuando la feature está estable, o se vuelven deuda.</p>
+      </section>
+
+      <section>
+        <h2 id="checklist-release">La checklist de release que evita sorpresas</h2>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "release": "v2.4.0 · reembolsos automáticos",
+  "checklist": [
+    { "paso": "CI verde en main con los tests de integración", "ok": true },
+    { "paso": "Despliegue en staging y prueba manual del flujo crítico", "ok": true },
+    { "paso": "Migraciones aplicadas y reversibles, backup creado", "ok": true },
+    { "paso": "Contrato validado (OpenAPI) y documentación lista", "ok": true },
+    { "paso": "Feature flag desactivado por defecto", "ok": true },
+    { "paso": "Alertas de error rate, latencia y 5xx configuradas", "ok": true },
+    { "paso": "Plan de rollback aprobado y ensayado en staging", "ok": true }
+  ],
+  "responsable": "ana@equipo",
+  "ventana": "lunes 09:00-11:00 (hora de menor tráfico de pagos)"
+}</code></pre>
+        <p>Fíjate en la <strong>ventana</strong>: elegir el momento de menor riesgo y con gente despierta es parte del plan. El release no «se hace a las 3am para no molestar»: se hace a la hora con la mejor relación riesgo/cobertura de alertas.</p>
+      </section>
+
+      <section>
+        <h2 id="retrospectiva">La retrospectiva: cerrar el ciclo</h2>
+        <p>Después del lanzamiento, el ciclo Scrum se cierra con la <strong>retrospectiva</strong> — la única ceremonia cuyo propósito es mejorar el proceso, no el producto. Su formato clásico es el trío:</p>
+        <ul>
+          <li><strong>Lo que salió bien:</strong> para repetirlo (y escriturarlo, para que no se olvide).</li>
+          <li><strong>Lo que salió mal:</strong> sin culpas, con su causa raíz.</li>
+          <li><strong>Lo que mejoraremos:</strong> máximo 2-3 acciones concretas con dueño y fecha, que entren al backlog del siguiente sprint.</li>
+        </ul>
+        <p>El test de una retrospectiva útil es a los 15 días: <em>¿las acciones acordadas se ejecutaron? ¿o fueron puras palabras lindas?</em> Si no entran al tablero, la retrospectiva fue una tertulia.</p>
+      </section>
+
+      <section>
+        <h2 id="postmortem">El postmortem sin culpables</h2>
+        <p>Los incidentes de producción son inevitables; lo evitable es repetirlos. El <strong>postmortem</strong> (o revisión de incidente) es el documento que transforma una caída en aprendizaje concreto. Sus reglas de oro:</p>
+        <ol>
+          <li><strong>Sin culpables:</strong> se analizan condiciones y decisiones, no personas. La frase prohibida: «¿por qué no pensó X?».</li>
+          <li><strong>Cronología factual:</strong> qué pasó, en qué orden, con horas y evidencia (logs, métricas, commits).</li>
+          <li><strong>Causa raíz real:</strong> no la próxima (el input mal formateado) sino la profunda (no había validación; el flag se lanzó sin canario).</li>
+          <li><strong>Acciones accionables UNA por causa:</strong> cada acción con dueño y fecha, y se convierte en ticket.</li>
+        </ol>
+        <p>Una estructura mínima de postmortem que sirve en cualquier equipo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "incidente": "INC-2026-09-22 · double cargo en te mla",
+  "fecha": "2026-09-22T14:05Z",
+  "impacto": "437 cargos duplicados (se compensó manualmente)",
+  "cronologia": [
+    "13:40  deploy a prod de v2.4 (flag reembolso desactivado)",
+    "13:55  error rate de cobros sube a 4.3%",
+    "14:00  rollback a v2.3",
+    "14:05  normalizado",
+    "14:20  postmortem convocado"
+  ],
+  "causa_raiz": "retry del consumidor reenviaba el cargo sin clave de idempotencia perdida en el release actual",
+  "acciones": [
+    { "accion": "idempotencia por Idempotency-Key en los cargos", "dueño": "bruno", "fecha": "2026-10-01" },
+    { "accion": "alertas de error rate por endpoint", "dueño": "ana", "fecha": "2026-09-29" }
+  ]
+}</code></pre>
+        <p>El postmortem no castiga: <strong>protege</strong>. Alguien que sabe que el incidente se analiza sin resolver culpables reportará temprano y sin miedo, y eso vale más que cualquier sistema de responsabilidad.</p>
+      </section>
+
+      <section>
+        <h2 id="cultura">Cultura de entrega: el ciclo se respira</h2>
+        <p>Para cerrar el curso: la gestión de proyectos backend no es un conjunto de fórmulas; es una <strong>cultura de entregas pequeñas, medidas y revisadas</strong>. Si este ciclo —planificar según capacidad, seguir con datos, comunicar por escrito, revisar en equipo, desplegar con rollback y aprender con postmortems— se repite con disciplina, lo que era riesgo se convierte en rutina.</p>
+        <p>Y cada ciclo, la velocidad, la estabilidad y la confianza del equipo suben un poco. Eso es lo que finalmente distingue un proyecto bien gestionado de uno que solo tiene suerte.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una feature próxima en tu proyecto y escribe cómo la desplegarías con feature flag, incluida la activación progresiva por porcentaje.</li>
+          <li>Redacta tu checklist de release en 7 pasos y asigna a cada uno su responsable y su señal de verificación.</li>
+          <li>Reconstruye un incidente (o inventa uno plausible) en un postmortem de 4 secciones con 2 acciones accionables y dueño.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un lanzamiento maduro es una checklist repetida y ensayada, no un acto de fe a medianoche.</li>
+          <li>Los feature flags separan desplegar de lanzar: kill-switch y canary sin nuevo deploy.</li>
+          <li>La retrospectiva cierra el ciclo con acciones reales que entran al backlog.</li>
+          <li>El postmortem sin culpables convierte incidentes en mejoras con causa raíz y acciones con dueño.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="entornos-y-despliegue.html">Entornos y despliegue</a>
+          <a class="related-lessons__link" href="comunicacion-en-el-equipo.html">Comunicación en el equipo</a>
+          <a class="related-lessons__link" href="../modulo-02/seguimiento-y-medicion.html">Seguimiento y medición</a>
+          <a class="related-lessons__link" href="../modulo-02/gestion-de-riesgos.html">Gestión de riesgos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="entornos-y-despliegue.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Entornos y despliegue</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
+        <span class="label">Curso →</span>
+        <span class="title">Gestión de Proyectos Backend</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

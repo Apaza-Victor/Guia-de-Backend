@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m3-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postgres con contenedores · Testing Backend · Backend Academy</title>
+<meta name="description" content="Levantar Postgres en Docker para tests de integración: docker compose para CI, variables de entorno por entorno y patrones testcontainers en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m3-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Postgres con contenedores</span>
+      </nav>
+      <h1 class="lesson-title">Postgres con contenedores</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 15 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Integración</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="porque">Por qué Postgres real en tests</h2>
+        <p>SQLite no habla exactamente el SQL de Postgres: los índices <code>JSONB</code>, el <code>ON CONFLICT</code>, las funciones y los tipos se comportan distinto. Los tests de integración con la misma BD que producción <strong>eliminan la clase más cara de bugs falsos</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="compose">docker-compose para la BD de tests</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML · docker-compose.test.yml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">services:
+  db-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: secreto_test
+      POSTGRES_DB: app_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># levantar solo para testear
+docker compose -f docker-compose.test.yml up -d
+composer test
+docker compose -f docker-compose.test.yml down
+
+# tmpfs = datos en memoria: rápido y nada persiste</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="env">Env por entorno, no valores quemados</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">.env.dev       → DB_HOST=localhost:5432/app
+.env.test      → DB_HOST=localhost:5433/app_test
+.env.ci        → DB_HOST=postgres:5432/app_test (dentro de CI)
+
+La app lee APP_ENV y carga el archivo correspondiente.
+Nunca valores de la BD en el código. Nunca.</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · acceso a env</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$dsn = sprintf(
+    'pgsql:host=%s;port=%s;dbname=%s',
+    getenv('DB_HOST') ?: 'localhost',
+    getenv('DB_PORT') ?: '5432',
+    getenv('DB_NAME') ?: 'app',
+);</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="patron">Patrón: una BD por suite, rollback por test</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · PHPUnit</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">abstract class BasePgTest extends \PHPUnit\Framework\TestCase
+{
+    protected static \PDO $pdo;
+
+    public static function setUpBeforeClass(): void
+    {
+        // una vez: abrir conexión y crear esquema
+        self::$pdo = new \PDO(getenv('TEST_DSN'));
+        self::$pdo-&gt;exec(file_get_contents(__DIR__.'/schema.sql'));
+    }
+
+    protected function setUp(): void
+    {
+        self::$pdo-&gt;beginTransaction();   // mundo limpio por test
+    }
+
+    protected function tearDown(): void
+    {
+        self::$pdo-&gt;rollBack();          // nada se queda en la BD
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>El <code>schema.sql</code> se genera a partir de tus migraciones. En el CI lo mismo: subimos migraciones y después los tests corren en transacciones.</p>
+      </section>
+
+      <section>
+        <h2 id="ci">CI: como una tubería por commit</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML · GitHub Actions</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">job:
+  services:
+    postgres:
+      image: postgres:16-alpine
+      env:
+        POSTGRES_DB: app_test
+        POSTGRES_USER: app
+        POSTGRES_PASSWORD: secreto_test
+      ports:
+        - 5432:5432
+  steps:
+    - uses: actions/checkout@v4
+    - run: composer install
+    - run: vendor/bin/phpunit --testsuite Integration
+      env:
+        TEST_DSN: "pgsql:host=localhost;port=5432;dbname=app_test"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cuidado">Trampas con la BD real en CI</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">✗ Dos runs paralelos sobre la MISMA bd app_test → se pisan
+  → esquema cargado una sola vez y rollback por test
+✗ DDL con COMMIT implícito (CREATE TABLE afuera de la
+  transacción) rompe el rollback
+✗ Depender del horario: timezone de CI ≠ local
+  → inyecta fechas o fija la zona en el container
+✗ El puerto 5433 ya está ocupado → usa un puerto efímero
+  (5433-5499) documentado por env</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea <code>docker-compose.test.yml</code> con Postgres 16 en memoria.</li>
+          <li>Escribe una clase base con rollback por test.</li>
+          <li>Porta tu repositorio de usuarios a un test contra Postgres real.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Postgres real elimina bugs falsos de SQLite.</li>
+          <li>docker compose + tmpfs = datos en memoria para tests.</li>
+          <li>Esquema una vez, transacción y rollback por test.</li>
+          <li>Env por entorno; nunca credenciales en el código.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="testing-bases-de-datos.html">Testing de bases de datos</a>
+          <a class="related-lessons__link" href="../modulo-06/integracion-con-github-actions.html">Tests en GitHub Actions</a>
+          <a class="related-lessons__link" href="../modulo-04/flujos-completos-api.html">Flujos completos de API</a>
+          <a class="related-lessons__link" href="../modulo-06/limpiando-tests-inestables.html">Limpando tests inestables</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

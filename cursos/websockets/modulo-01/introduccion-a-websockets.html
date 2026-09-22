@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-introduccion-a-websockets">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introducción a WebSockets · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Aprende qué son los WebSockets, la comunicación full-duplex y la diferencia entre las URL ws:// y wss:// para construir aplicaciones en tiempo real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-introduccion-a-websockets"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Introducción a WebSockets</span>
+      </nav>
+      <h1 class="lesson-title">Introducción a WebSockets</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de WebSocket</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Imagina un chat en el que el servidor te avisa al instante cuando llega un mensaje, sin que tengas que recargar la página ni preguntar «¿hay algo nuevo?». El mecanismo que lo hace posible es el <strong>WebSocket</strong>: un protocolo de comunicación que abre una conexión persistente entre el navegador (o cliente) y el servidor, y que permite enviar mensajes en ambas direcciones de forma continua.</p>
+        <p>A diferencia de HTTP, donde cada conversación empieza con una petición y termina con una respuesta, un WebSocket se abre una sola vez y permanece conectado durante toda la sesión, intercambiando miles de mensajes por esa misma conexión abierta.</p>
+        <p>Usamos WebSockets cuando la información debe llegar casi en tiempo real: chats, notificaciones, tableros colaborativos, juegos multijugador, cotización de acciones o el estado de un pedido en un sistema de delivery.</p>
+      </section>
+
+      <section>
+        <h2 id="full-duplex">Comunicación full-duplex</h2>
+        <p>El adjetivo <strong>full-duplex</strong> describe que las dos partes pueden hablar a la vez por el mismo canal: el cliente envía, el servidor envía, y ambos reaccionan en tiempo real sin esperar turnos. Es como una llamada telefónica: mientras tú hablas, la otra persona puede interrumpirte, y viceversa.</p>
+        <ul>
+          <li><strong>Simplex:</strong> una sola dirección. Como una radio comercial: solo se transmite.</li>
+          <li><strong>Half-duplex:</strong> ambas direcciones, pero no a la vez. Como un walkie-talkie: presionas y hablas, sueltas y escuchas.</li>
+          <li><strong>Full-duplex:</strong> ambas direcciones simultáneamente. WebSocket es full-duplex.</li>
+        </ul>
+        <p>Esta propiedad es la que diferencia a WebSocket de un simple push del servidor: el cliente también puede enviar datos en cuanto la conexión existe, sin esperar a que el servidor «pregunte».</p>
+      </section>
+
+      <section>
+        <h2 id="ws-wss">Las URLs ws:// y wss://</h2>
+        <p>Las conexiones WebSocket usan sus propios esquemas de URL, muy parecidos a los de HTTP. La única diferencia visible entre una y otra es la seguridad de la capa de transporte:</p>
+        <ul>
+          <li><code>ws://</code> — WebSocket sin cifrar, el equivalente de <code>http://</code>. Útil para desarrollo local y pruebas.</li>
+          <li><code>wss://</code> — WebSocket sobre TLS (el mismo cifrado que usa HTTPS), el equivalente de <code>https://</code>. Obligatorio en producción sobre el puerto 443.</li>
+        </ul>
+        <p>En el navegador, una misma conexión puede comenzar como HTTPS y usar los datos de la página para actualizarse por <code>wss</code>. Conviene recordar la regla de oro: <strong>si tu página se sirve por HTTPS, los sockets deben ser wss://</strong>, o el navegador los bloqueará por contenido mixto.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const socket = new WebSocket('wss://api.miservidor.com/notificaciones');
+
+socket.onopen = () =&gt; {
+  console.log('Conexión establecida sobre wss://');
+  socket.send(JSON.stringify({ tipo: 'suscripcion', canal: 'resumen-de-precios' }));
+};
+
+socket.onmessage = (evento) =&gt; {
+  const mensaje = JSON.parse(evento.data);
+  console.log('Evento recibido:', mensaje.tipo);
+};</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cuando-usar">¿Cuándo usar WebSockets?</h2>
+        <p>WebSocket no es la respuesta a todo: aporta valor cuando la latencia importa y cuando hay comunicación bidireccional frecuente. Algunos casos ideales:</p>
+        <ul>
+          <li><strong>Chats y mensajería:</strong> los mensajes de otros usuarios deben aparecer al instante.</li>
+          <li><strong>Notificaciones en vivo:</strong> avisos de eventos, alertas del sistema, campañas que llegan mientras el usuario navega.</li>
+          <li><strong>Colaboración en tiempo real:</strong> editores compartidos, tableros kanban, pizarras de dibujo.</li>
+          <li><strong>Streaming de estado o métricas:</strong> paneles de monitoreo, colas de trabajo, progreso de tareas largas.</li>
+          <li><strong>Juegos y apps interactivas:</strong> sincronización de posiciones y acciones entre varios jugadores.</li>
+        </ul>
+        <p>En cambio, para consultas puntuales (por ejemplo, cargar el perfil de un usuario) sigue siendo preferible una API REST o GraphQL normal sobre HTTP: crean y cierran conexiones cortas y escalan sin mantener tantos recursos vivos.</p>
+      </section>
+
+      <section>
+        <h2 id="modelo-mensaje">El mensaje: texto o binario</h2>
+        <p>Por un socket viajan <strong>mensajes</strong>, no peticiones ni respuestas. Un mensaje puede ser texto (lo más común, casi siempre JSON) o datos binarios (imágenes, audio, buffers). El navegador los entrega a través del evento <code>onmessage</code> y decide codificación.</p>
+        <p>La práctica habitual es usar un pequeño sobre JSON que indica el tipo de evento y sus datos; así el servidor puede enrutar cada mensaje sin acoplarse a un formato rígido:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "mensaje_nuevo",
+  "datos": {
+    "canal": "soporte",
+    "autor": "ana",
+    "texto": "¿Puedes revisar mi pedido?",
+    "enviadoEn": "2026-09-21T10:32:00Z"
+  }
+}</code></pre>
+        <p>Más adelante verás que este patrón de <em>tipo + datos</em> es la base de librerías como Socket.IO, que lo convierten en un concepto central llamado <em>eventos</em>.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Abre la consola de desarrollador de tu navegador y ejecuta <code>new WebSocket('wss://echo.websocket.events')</code> para crear una conexión de prueba.</li>
+          <li>Escucha <code>onopen</code> y <code>onmessage</code> con la consola y responde al servidor con un mensaje JSON: <code>socket.send(JSON.stringify({tipo:'hola'}))</code>.</li>
+          <li>Cierra la conexión con <code>socket.close()</code> y escribe en una frase cuándo usarías <code>wss://</code> en vez de <code>ws://</code> en un producto real.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>WebSocket es un protocolo de comunicación sobre TCP que mantiene una conexión persistente entre cliente y servidor.</li>
+          <li>Es full-duplex: ambas partes envían y reciben mensajes simultáneamente.</li>
+          <li>Se conecta con las URLs <code>ws://</code> (sin cifrar) y <code>wss://</code> (cifrada con TLS).</li>
+          <li>Es ideal para chats, notificaciones y datos en vivo; HTTP sigue siendo mejor para consultas puntuales.</li>
+          <li>Los mensajes viajan como texto (normalmente JSON) o datos binarios.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="http-vs-websockets.html">HTTP vs WebSockets</a>
+          <a class="related-lessons__link" href="el-protocolo-websocket.html">El protocolo WebSocket</a>
+          <a class="related-lessons__link" href="estado-de-la-conexion.html">Estados de la conexión</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 1</span>
+        <span class="title">Fundamentos de WebSocket</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="http-vs-websockets.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">HTTP vs WebSockets</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

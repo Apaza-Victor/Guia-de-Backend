@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-escalado-horizontal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalado horizontal · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Aprende a escalar WebSockets de forma horizontal: múltiples nodos, sticky sessions y Redis pub/sub como bus de mensajes entre instancias.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-escalado-horizontal"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Escalado horizontal</span>
+      </nav>
+      <h1 class="lesson-title">Escalado horizontal</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalar y asegurar WebSockets</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="el-problema">El problema de un solo nodo</h2>
+        <p>Un servidor WebSocket mantiene <strong>estado en memoria</strong>: el objetivo y sus salas, la presencia, los usuarios conectados. En un proceso único eso funciona, pero agota sus límites cuando crecen las conexiones concurrentes: cada socket vivo ocupa memoria, descriptores de archivo y un hilo del event loop.</p>
+        <p>El escalado vertical (una máquina más gorda) aporta tarde o temprano un techo físico. La respuesta natural es el <strong>escalado horizontal</strong>: repartir los clientes entre varias instancias del servidor. Pero entonces nace un enemigo nuevo: una sala puede tener a sus miembros en tres nodos distintos, y el mensaje que llega al nodo A debe llegar también a los clientes del nodo B.</p>
+      </section>
+
+      <section>
+        <h2 id="multiples-nodos">Múltiples instancias, un mismo servicio</h2>
+        <p>Ante un balanceador, los clientes caen a cualquiera de las instancias disponibles. Cada instancia conoce solo A SUS conexiones. Para que el sistema siga pareciendo uno solo necesitamos resolver dos cosas:</p>
+        <ul>
+          <li><strong>Mantener la sesión:</strong> que el cliente vuelva siempre a la misma instancia (sticky sessions, la siguiente lección).</li>
+          <li><strong>Propagar el mensaje:</strong> que un evento emitido en un nodo se replique en los demás (Redis pub/sub, esta lección).</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Topología típica de un servicio real-time horizontal:
+#
+#              ┌──────────────────┐
+#              │  Load balancer   │  (nginx / HAProxy / ALB)
+#              └────────┬─────────┘
+#        ┌──────────┬───┴────┬──────────┐
+#        ▼          ▼        ▼          ▼
+#   ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+#   │ ws :1  │ │ ws :2  │ │ ws :3  │ │ ws :4  │
+#   └───┬────┘ └───┬────┘ └───┬────┘ └───┬────┘
+#       └──────────┴────┬─────┴──────────┘
+#                       ▼
+#               ┌──────────────┐
+#               │  Redis       │
+#               │  (pub/sub)   │
+#               └──────────────┘</code></pre>
+      </section>
+
+      <section>
+        <h2 id="redis-pubsub">Redis pub/sub como bus de mensajes</h2>
+        <p>La solución clásica es un <strong>bus de mensajes</strong> donde todos los nodos se suscriben a un canal (por ejemplo <code>socket-events</code>) y publican cada evento que debe propagarse. La idea:</p>
+        <ol>
+          <li>El nodo A recibe un mensaje «chat en sala general».</li>
+          <li>El nodo A publica ese evento en el canal de Redis.</li>
+          <li>Todos los nodos (incluido A) reciben el evento por el suscriptor de Redis.</li>
+          <li>Cada nodo reenvía el mensaje a los clientes de su sala local.</li>
+        </ol>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { WebSocketServer } = require('ws');
+const { createClient } = require('redis');
+
+const wss = new WebSocketServer({ port: 8080 });
+
+// Canales de Redis
+const BUS = 'socket-events';
+
+// Suscriptor: escucha eventos de otros nodos y los reenvía localmente.
+const suscriptor = createClient();
+await suscriptor.connect();
+await suscriptor.subscribe(BUS, (mensaje) =&gt; {
+  const evento = JSON.parse(mensaje);
+  reenviarLocal(evento); // a los clientes de ESTE nodo
+});
+
+// Publicador: difunde un evento a todos los nodos.
+const publicador = createClient();
+await publicador.connect();
+
+function propagar(tipo, datos, sala) {
+  const evento = JSON.stringify({ tipo, datos, sala, emitidoEn: Date.now() });
+  publicador.publish(BUS, evento);
+}
+
+// Cuando llega de un cliente local, propagamos y también reenviamos.
+wss.on('connection', (ws) =&gt; {
+  ws.on('message', (datos) =&gt; {
+    const m = JSON.parse(String(datos));
+    propagar(m.tipo, m.datos, m.sala);   // a otros nodos vía Redis
+    reenviarLocal(m);                     // a este nodo
+  });
+});
+
+function reenviarLocal(evento) {
+  for (const cliente of wss.clients) {
+    if (cliente.readyState === cliente.OPEN) {
+      cliente.send(JSON.stringify({ tipo: evento.tipo, datos: evento.datos }));
+    }
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="sala-global">Salas con alcance global</h2>
+        <p>Cuando hay salas, el bus se vuelve aún más útil: publicas con el nombre de la sala en el payload, y cada nodo entrega solo a los clientes locales que pertenecen a esa sala. Optamos por canal único con campo sala (no un canal por sala) para no multiplicar las suscripciones.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function propagarASala(sala, tipo, datos) {
+  publicador.publish(BUS, JSON.stringify({ tipo, datos, sala }));
+}
+
+function reenviarALaSalaLocal(sala, tipo, datos) {
+  const miembros = salasLocales.get(sala);
+  if (!miembros) return;
+  const marco = JSON.stringify({ tipo, datos });
+  for (const ws of miembros) {
+    if (ws.readyState === ws.OPEN) ws.send(marco);
+  }
+}
+
+// Suscriptor de Redis: reconstruir el evento en este nodo.
+suscriptor.subscribe(BUS, (msj) =&gt; {
+  const ev = JSON.parse(msj);
+  reenviarALaSalaLocal(ev.sala, ev.tipo, ev.datos);
+});</code></pre>
+        <div class="callout">
+          <p><strong>Think before you echo:</strong> si publicas en Redis y a la vez reenvías en local, no publiques de vuelta lo que llega del suscriptor (marcar el evento con <code>emitidoEn</code> y un nodoId suele bastar). El patrón es «una sola fuente de verdad en el bus».</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="alternativas">Alternativas al pub/sub manual</h2>
+        <ul>
+          <li><strong>Socket.IO + adapter:</strong> la librería trae adaptadores oficiales que hacen exactamente esto: <code>@socket.io/redis-adapter</code> propaga cambios de salas y broadcasts sin tocar el transporte.</li>
+          <li><strong>Colas (Kafka, NATS, RabbitMQ):</strong> cuando necesitas persistencia o rejugabilidad de eventos además de difusión.</li>
+          <li><strong>Nube gestionada (AWS API Gateway, Ably, Pusher):</strong> el bus y la red de sockets son un servicio; pagas tú por conexión y mensajes.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta dos instancias de tu servidor de la lección 2 del módulo anterior (con Redis instalado o Docker) en puertos 8081 y 8082.</li>
+          <li>Conéctate con dos clientes, uno a cada puerto, y comprueba que un mensaje de la sala «general» llega a ambos nodos.</li>
+          <li>Apaga Redis y anota qué pasa con los mensajes inter-nodo; documenta por qué el sistema sigue funcionando mal por dentro pero los nodos no fallan.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un nodo WebSocket mantiene estado en memoria: por eso el escalado horizontal complica las salas y la presencia.</li>
+          <li>El escalado horizontal necesita sticky sessions (misma sesión) + un bus de mensajes entre nodos.</li>
+          <li>Redis pub/sub es el bus clásico: publicar en un canal y estar suscrito a él desde cada instancia.</li>
+          <li>Cada nodo reenvía solo a sus clientes locales de la sala; el bus hace el resto.</li>
+          <li>Socket.IO/adaptadores y servicios gestionados ahorran el transporte manual.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="sticky-sessions-y-adaptadores.html">Sticky sessions y adaptadores</a>
+          <a class="related-lessons__link" href="broadcast-de-mensajes.html">Broadcast y salas</a>
+          <a class="related-lessons__link" href="socket-io.html">Socket.IO</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 3</span>
+        <span class="title">Escalar y asegurar WebSockets</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="sticky-sessions-y-adaptadores.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Sticky sessions y adaptadores</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

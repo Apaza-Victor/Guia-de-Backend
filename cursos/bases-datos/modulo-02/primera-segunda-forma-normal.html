@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="primera-segunda-forma-normal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Primera y segunda forma normal · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende la normalización de bases de datos: primera y segunda forma normal con ejemplos SQL reales que eliminan duplicados y dependencias parciales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="primera-segunda-forma-normal"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2 · Modelado y diseño</a><span class="sep">/</span>
+          <span class="current">Primera y segunda forma normal</span>
+        </nav>
+        <h1 class="lesson-title">Primera y segunda forma normal</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Modelado y diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>La <strong>normalización</strong> es el proceso de organizar las tablas para <strong>reducir la redundancia y evitar anomalías</strong> al insertar, actualizar o borrar. Se organiza en «formas normales» (1FN, 2FN, 3FN…), cada una más estricta que la anterior.</p>
+          <p>No es teoría de academia: un esquema no normalizado provoca errores reales como direcciones escritas de tres formas distintas o «fantasmas» al buscar un producto.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo-mal">El modelo problemático</h2>
+          <p>Imagina una tabla que mezcla pedidos con productos:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Tabla pedidos</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-text">id | cliente      | productos                | total
+-- | ------------ | ------------------------ | -----
+1  | Ana          | Camiseta, Gorra         | 44
+2  | Luis         | Camiseta, Camiseta, Taza| 59</code></pre>
+            </div>
+          </figure>
+          <p>Problemas visibles: <strong>varios valores en una columna</strong> (productos), y en la segunda fila la repetición de «Camiseta» deja ambigua la cantidad. Consultar «¿cuántas camisetas vendimos?» obliga a romper texto, y con datos reales es un desastre.</p>
+        </section>
+
+        <section>
+          <h2 id="primera-fn">Primera forma normal (1FN)</h2>
+          <p>Reglas de la 1FN:</p>
+          <ul>
+            <li>Los valores de cada columna son <strong>atómicos</strong> (no listas separadas por comas).</li>
+            <li>No se repiten <strong>grupos de columnas</strong> (no <code class="inline">producto_1, producto_2, producto_3</code>).</li>
+            <li>Toda fila es <strong>identificable</strong> por su clave primaria.</li>
+          </ul>
+          <p>La solución natural que ya conoces es sacar los productos a otra tabla:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE pedidos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente VARCHAR(100) NOT NULL,
+    total DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE pedido_items (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    pedido_id INT NOT NULL,
+    producto VARCHAR(100) NOT NULL,
+    cantidad INT NOT NULL,
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
+);</code></pre>
+            </div>
+          </figure>
+          <p>Cada celda contiene ahora un solo valor. Este esquema ya cumple 1FN.</p>
+        </section>
+
+        <section>
+          <h2 id="segunda-fn">Segunda forma normal (2FN)</h2>
+          <p>La 2FN se aplica cuando una tabla tiene una <strong>clave primaria compuesta</strong> (dos o más columnas). Exige que:</p>
+          <ul>
+            <li>La tabla cumpla 1FN.</li>
+            <li><strong>Ningún atributo dependa de solo una parte de la clave</strong> (que no haya dependencias parciales).</li>
+          </ul>
+          <p>Ejemplo a corregir, una tabla <code class="inline">detalles</code> con clave compuesta (pedido_id, producto_id):</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- MAL: nombre_precio depende solo de producto_id (dependencia parcial)
+CREATE TABLE detalles_bad (
+    pedido_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    cantidad INT NOT NULL,
+    nombre_producto VARCHAR(100),
+    precio DECIMAL(8,2),
+    PRIMARY KEY (pedido_id, producto_id)
+);</code></pre>
+            </div>
+          </figure>
+          <p>Aquí <code class="inline">nombre_producto</code> y <code class="inline">precio</code> pertenecen al producto, no a la relación pedido-producto: se repetirían en cada pedido que lo incluya y habría que actualizarlos en mil filas si el precio cambia. Solución: separar el <strong>Producto</strong> en su propia tabla y dejar en el detalle solo cantidades:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE productos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    precio DECIMAL(8,2) NOT NULL
+);
+
+CREATE TABLE detalles_good (
+    pedido_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    cantidad INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (pedido_id, producto_id),
+    FOREIGN KEY (pedido_id)  REFERENCES pedidos(id),
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+);</code></pre>
+            </div>
+          </figure>
+          <p>Ahora cada atributo depende de la <strong>clave completa</strong> y no de una parte.</p>
+        </section>
+
+        <section>
+          <h2 id="chequeo">Cómo comprobar cada forma</h2>
+          <ul>
+            <li><strong>1FN:</strong> ¿hay celda con lista o grupo repetido? ¿asoma algún atributo dentro de otro?</li>
+            <li><strong>2FN:</strong> ¿hay clave compuesta? ¿un atributo depende solo de una de sus columnas?</li>
+            <li>Cuando las dos preguntas anteriores estén resueltas, estás listo para la 3FN.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Diseña una tabla <code class="inline">inscripciones</code> (estudiante, curso, año, nombre_curso) y detecta la dependencia parcial antes de normalizar.</li>
+            <li>Normalízala a 2FN separando el curso.</li>
+            <li>Explica qué anomalía ocurriría si quisieras renombrar un curso sin normalizar.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Normalizar reduce redundancia y evita anomalías de inserción, actualización y borrado.</li>
+            <li>1FN exige valores atómicos y grupos de columnas separados.</li>
+            <li>2FN exige que cada atributo dependa de la clave completa.</li>
+            <li>Las relaciones N:M suelen revisarse con las formas normales.</li>
+            <li>La normalización se completa con la tercera forma (siguiente lección).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="tercera-forma-normal-desnormalizacion.html">Tercera forma normal y desnormalización</a>
+            <a class="related-lessons__link" href="modelo-entidad-relacion.html">Modelo entidad-relación</a>
+            <a class="related-lessons__link" href="cardinalidad.html">Cardinalidad de las relaciones</a>
+            <a class="related-lessons__link" href="../modulo-03/create-table.html">Creando tablas con CREATE TABLE</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

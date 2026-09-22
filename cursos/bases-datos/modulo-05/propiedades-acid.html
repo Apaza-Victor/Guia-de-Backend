@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="propiedades-acid">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propiedades ACID · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende las propiedades ACID (Atomicidad, Consistencia, Aislamiento, Durabilidad), la base de la fiabilidad de cualquier base de datos relacional.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="propiedades-acid"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5 · Transacciones y concurrencia</a><span class="sep">/</span>
+          <span class="current">Propiedades ACID</span>
+        </nav>
+        <h1 class="lesson-title">Propiedades ACID</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Transacciones y concurrencia</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>ACID es el acr&oacute;nimo de <strong>Atomicity, Consistency, Isolation, Durability</strong> (atomicidad, consistencia, aislamiento y durabilidad). Son las cuatro garantías que permiten confiar en una base de datos relacional incluso cuando un proceso falla a mitad o miles de usuarios escriben a la vez.</p>
+        </section>
+
+        <section>
+          <h2 id="atomicidad">Atomicidad</h2>
+          <p>Una transacción es <strong>todo o nada</strong>. Si falla cualquier operación, se deshace todo lo anterior. La transferencia bancaria clásica: retirar 100 y añadir 100 son un único paquete indivisible.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">BEGIN;
+UPDATE cuentas SET saldo = saldo - 100 WHERE id = 1;
+UPDATE cuentas SET saldo = saldo + 100 WHERE id = 2;
+COMMIT;  -- si algo falla antes, ROLLBACK deshace ambas</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="consistencia">Consistencia</h2>
+          <p>La base de datos pasa de un estado válido a otro estado válido. Las <strong>restricciones</strong> (PK, FK, NOT NULL, CHECK, UNIQUE) son el guardián de la consistencia: la BD rechaza cualquier transacción que viole una regla, como un saldo negativo si lo prohíbe un CHECK.</p>
+        </section>
+
+        <section>
+          <h2 id="aislamiento">Aislamiento</h2>
+          <p>Las transacciones que se ejecutan en paralelo no se «ven» a medias: cada una opera como si estuviera sola. El grado real de aislamiento se negocia con los niveles que verás en la cuarta lección; un aislamiento total es más lento, así que los motores ofrecen equilibrios.</p>
+        </section>
+
+        <section>
+          <h2 id="durabilidad">Durabilidad</h2>
+          <p>Un <code class="inline">COMMIT</code> confirmado queda <strong>escrito en disco</strong> de forma permanente: ni un apagón ni un crash lo pierden. El motor escribe primero en el log (WAL, <em>write-ahead log</em>) y luego en los datos, de forma que puede recuperar lo confirmado ante un fallo.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo">Ejemplo: el vuelo doble</h2>
+          <p>Si dos personas reservan la última butaca a la vez, solo una debe ganar. Sin aislamiento, ambas leen «queda una», ambas la reservan y hay overbooking. Con ACID, la segunda espera o falla, y el sistema queda consistente. Este escenario lo resuelven los bloqueos, tu próxima lección.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Define con tus palabras cada propiedad ACID.</li>
+            <li>Identifica qué propiedad falla en: (a) un servidor que se apaga tras el COMMIT, (b) dos vendedores que venden el mismo stock.</li>
+            <li>Explica la «restricción de unicidad» como herramienta de consistencia.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Atomicidad: todo o nada.</li>
+            <li>Consistencia: nunca romper las restricciones.</li>
+            <li>Aislamiento: las transacciones paralelas no se entrometen.</li>
+            <li>Durabilidad: lo confirmado sobrevive a cualquier fallo.</li>
+            <li>ACID convierte a los SGBD relacionales en sistemas fiables.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="transacciones.html">Transacciones: BEGIN, COMMIT y ROLLBACK</a>
+            <a class="related-lessons__link" href="bloqueos-concurrencia.html">Bloqueos y concurrencia</a>
+            <a class="related-lessons__link" href="niveles-aislamiento.html">Niveles de aislamiento</a>
+            <a class="related-lessons__link" href="../modulo-03/delete-seguro.html">Borrado seguro con claves foráneas</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

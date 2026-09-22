@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 2 · Patrones · System Design</title>
+<meta name="description" content="Módulo 2 del curso System Design: arquitectura en capas, monolito frente a sistema distribuido, patrones de colas y eventos, patrones de durabilidad y caché, y consistencia con consenso.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="container-narrow">
+
+    <nav class="breadcrumb" aria-label="Miga de pan">
+      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../index.html">System Design</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item" aria-current="page">Módulo 2 · Patrones</span>
+    </nav>
+
+    <header class="lesson-hero">
+      <p class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></p>
+      <h1 class="lesson-title">Módulo 2 · Patrones</h1>
+      <p class="section-subtitle">Los patrones que se repiten en todo sistema a escala: separar responsabilidades en capas, decidir entre monolito y arquitectura distribuida, desacoplar con colas y eventos, cachear sin perder durabilidad y elegir el equilibrio correcto entre consistencia y consenso.</p>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 47 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> System Design</span>
+      </div>
+    </header>
+
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Organizar el sistema en capas con reglas de dependencia claras.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Ponderar los trade-offs entre un monolito y un sistema distribuido antes de escoger.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar patrones de colas y eventos: prioridad, dead letter y fanout.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Combinar caché y durabilidad con read-through, write-through y CDN.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender CAP, consistencia eventual y cómo el consenso (Raft/Paxos) crea orden.</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Tu progreso</h2>
+        <div class="progress" data-progress="system-design">
+          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+          <span class="progress__label">0%</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Lecciones</h2>
+        <div class="grid-2">
+          <article class="card card--lesson card--link">
+            <h3><a href="arquitectura-en-capas.html">1 · Arquitectura en capas</a></h3>
+            <p>Presentación, lógica de negocio y datos: flujos y reglas de dependencia.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">patrón</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="monolitica-vs-distribuida.html">2 · Monolito vs distribuida</a></h3>
+            <p>Trade-offs de cada opción y cómo decidir cuándo usar cada una.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">arquitectura</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="cola-y-eventos-patterns.html">3 · Patrones de colas y eventos</a></h3>
+            <p>Colas, dead letter, prioridades y fanout a suscriptores.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">mensajería</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="dedicla-y-caching-patterns.html">4 · Patrones de durabilidad y caché</a></h3>
+            <p>Read-through, write-through, write-back, invalidation y CDN.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">rendimiento</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="consistencia-consenso.html">5 · Consistencia y consenso</a></h3>
+            <p>CAP, consistencia eventual y algoritmos de consenso como Raft y Paxos.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">distribución</span></div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../modulo-01/index.html">
+        <span class="label">← Módulo anterior</span>
+        <span class="title">Fundamentos</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Diseño completo</span>
+      </a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

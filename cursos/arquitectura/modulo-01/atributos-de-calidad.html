@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m1-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requisitos y atributos de calidad · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende qué son los atributos de calidad en arquitectura de software: rendimiento, disponibilidad, mantenibilidad y cómo guían cada decisión estructural.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m1-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Requisitos y atributos de calidad</span>
+      </nav>
+      <h1 class="lesson-title">Requisitos y atributos de calidad</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un sistema «bonito» por dentro que tarda 30 segundos en responder una petición es un fracaso. Una aplicación que funciona perfecto pero que no se puede mantener es una bomba de tiempo. La arquitectura no se hace para el gusto del programador: se hace para cumplir <strong>los atributos de calidad</strong> —las propiedades no funcionales que el sistema debe garantizar.</p>
+        <p>Los requisitos funcionales dicen <em>qué</em> hace el sistema. Los atributos de calidad dicen <em>cómo de bien</em> lo hace: rápido, seguro, disponible, fácil de cambiar.</p>
+      </section>
+
+      <section>
+        <h2 id="principales">Los atributos principales</h2>
+        <ul>
+          <li><strong>Rendimiento (performance):</strong> latencia (tiempo por petición), throughput (peticiones por segundo) y capacidad de respuesta.</li>
+          <li><strong>Escalabilidad:</strong> capacidad de crecer añadiendo recursos (más CPU/RAM) o más instancias.</li>
+          <li><strong>Disponibilidad:</strong> porcentaje de tiempo que el sistema responde correctamente; los «nueves»: 99.9 %, 99.99 %.</li>
+          <li><strong>Confiabilidad:</strong> que funcione de forma consistente sin fallos, y que los fallos se recuperen solos.</li>
+          <li><strong>Seguridad:</strong> proteger datos, autenticar usuarios, prevenir ataques como inyecciones o XSS.</li>
+          <li><strong>Mantenibilidad:</strong> facilidad para entender, modificar y testear el código sin introducir errores.</li>
+          <li><strong>Testabilidad:</strong> cuán fácil es probar cada componente de forma aislada.</li>
+        </ul>
+        <p>No todos son igual de importantes en todos los proyectos. Un panel interno tolera downtime; una pasarela de pagos no. Priorizar es tu primer trabajo como arquitecto.</p>
+      </section>
+
+      <section>
+        <h2 id="scenarios">Definiendo atributos con escenarios</h2>
+        <p>Un atributo suelto («que sea rápido») no sirve de nada. Hay que convertirlo en un <strong>escenario medible</strong>. La estructura clásica tiene seis partes:</p>
+        <dl class="definition-list">
+          <dt>Fuente del estímulo</dt><dd>quién origina la petición (un usuario, otro servicio, un bot).</dd>
+          <dt>Estímulo</dt><dd>qué acción se ejecuta (una búsqueda, un login).</dd>
+          <dt>Entorno</dt><dd>en qué condiciones (pico de tráfico, horario normal).</dd>
+          <dt>Artefacto</dt><dd>qué parte del sistema se ve afectada.</dd>
+          <dt>Respuesta</dt><dd>qué debe ocurrir (responder en menos de 200 ms).</dd>
+          <dt>Medida de la respuesta</dt><dd>el número: <code class="inline">p95 = 200 ms</code>, <code class="inline">99.99 % uptime</code>.</dd>
+        </dl>
+        <p>Ejemplo completo: <em>«Cuando 10 000 usuarios (fuente) hacen login a la vez (estímulo) durante el Black Friday (entorno), la API (artefacto) responde correctamente (respuesta) en menos de 500 ms en el percentil 95 (medida)».</em> Ese sí es un requisito real.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo-code">De la medida al contrato</h2>
+        <p>En código, los atributos se traducen en tasques concretos. Mira este SLO (Service Level Objective) expresado como condición comprobable:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">service: checkout-api
+versions: 1.4.2
+slo:
+  availability: 99.95%
+  latency:
+    p50: "&lt; 100ms"
+    p95: "&lt; 500ms"
+    p99: "&lt; 1s"
+  traffic: 8 rps max
+  error_budget: 0.05%
+owner: team-pagos</code></pre>
+          </div>
+        </figure>
+        <p>El <strong>error budget</strong> es el tiempo que el sistema puede fallar sin violar el SLO. Con 99.95 % de disponibilidad mensual, puedes estar caído ~22 minutos al mes. Cuando agotas el presupuesto, dejas de lanzar features y te dedicas a estabilizar.</p>
+      </section>
+
+      <section>
+        <h2 id="priorizar">Priorizar es decidir</h2>
+        <p>Los atributos compiten entre sí. Una caché agresiva mejora el rendimiento y perjudica la consistencia. Una base distribuida mejora la disponibilidad y complica las transacciones. Por eso, el orden de prioridad debe quedar <strong>escrito</strong> y debe ser conocido por todo el equipo: guiará miles de decisiones pequeñas que lo hacen automático.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para un carrito de compras con pagos y un foro de fans, define los 3 atributos de calidad más importantes de cada uno. ¿Coinciden?</li>
+          <li>Escribe un escenario medible para la búsqueda de productos de tu proyecto (fuente, estímulo, entorno, artefacto, respuesta, medida).</li>
+          <li>Escribe un pequeño SLO en YAML para dos endpoints: uno público y uno de pagos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los atributos de calidad describen <em>cómo de bien</em> funciona el sistema, no <em>qué</em> hace.</li>
+          <li>Rendimiento, escalabilidad, disponibilidad, seguridad y mantenibilidad son los más usados.</li>
+          <li>Un buen requisito de calidad es un escenario con medida concreta.</li>
+          <li>Los SLO y error budgets traducen los atributos a números gestionables.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-arquitectura-software.html">¿Qué es arquitectura de software?</a>
+          <a class="related-lessons__link" href="decisiones-y-trade-offs.html">Decisiones y trade-offs</a>
+          <a class="related-lessons__link" href="rol-del-arquitecto.html">El rol del arquitecto en el equipo</a>
+          <a class="related-lessons__link" href="../modulo-02/monolito-vs-microservicios.html">Monolito vs microservicios</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

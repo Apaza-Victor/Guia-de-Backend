@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m2-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workers y prefetch · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende a construir colas de trabajo en RabbitMQ: workers, round-robin, reparto justo con basicQos (prefetch), ACKs manuales y cómo escalar el procesamiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m2-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Workers y prefetch</span>
+      </nav>
+      <h1 class="lesson-title">Workers y prefetch</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · RabbitMQ y colas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Hasta aquí hemos visto colas y exchanges. Ahora el caso que justifica a RabbitMQ en casi todos los backends: <strong>repartir trabajo pesado entre varios procesos</strong>. El patrón se llama <strong>cola de trabajo</strong> (work queue): un productor publica tareas, y un cierto número de workers las consumen en paralelo.</p>
+        <p>El truco está en la repartición. RabbitMQ, por defecto, entrega los mensajes en <strong>round-robin</strong>: al primer worker, luego al segundo, al tercero, y vuelta. Cada mensaje va a un solo consumidor. Así se reparte la carga… pero no siempre de forma justa. Ahí entra el <strong>prefetch</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="round-robin">Round-robin y el problema de la carga</h2>
+        <p>El round-robin reparte por <em>orden de llegada al broker</em>, no por capacidad. Si el worker A tarda 1 segundo por tarea y el B tarda 5 (o puede procesar 3 a la vez), el reparto se desequilibra: el broker ya entregó las tareas 1-2-3-4 a A y B por turnos, sin saber que A va más lento.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Productor encola 6 tareas con round-robin
+# El broker entrega: tarea1->A, tarea2->B, tarea3->A, tarea4->B...
+# Si A es rápido, la fila de B crece; si B es lento, la de B se atasca.</code></pre>
+        <p>Solo cuando los mensajes se consumen y confirmamos con <code>basicAck</code> es que el broker puede saber en qué punto vamos de cada cola.</p>
+      </section>
+
+      <section>
+        <h2 id="prefetch">El prefetch (basicQos): reparto justo</h2>
+        <p><code>prefetch(N)</code> limita cuántos mensajes «en vuelo» (no confirmados) puede tener un consumidor. El broker no le envía más mientras no confirme alguno. Resultado: el worker estable, rápido, recibe más; el lento no acumula.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function worker() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+  const q = await ch.assertQueue('tareas', { durable: true });
+
+  // Reparto justo: máx. 1 mensaje no confirmado por worker
+  ch.prefetch(1);
+
+  ch.consume(q.queue, async (msg) => {
+    if (!msg) return;
+    const tarea = JSON.parse(msg.content.toString());
+
+    console.log('Procesando', tarea.id);
+    await procesarTarea(tarea);      // trabajo real (puede tardar)
+    console.log('Lista', tarea.id);
+
+    ch.ack(msg);                     // libera el cupo del prefetch
+  }, { noAck: false });
+
+  console.log('Worker esperando con prefetch=1');
+}
+
+process.on('SIGINT', async () => {
+  await conn.close();
+  process.exit(0);
+});</code></pre>
+        <p>Con varios workers <code>prefetch(1)</code> los mensajes se reparten por disponibilidad real: el más veloz termina y pide el siguiente.</p>
+      </section>
+
+      <section>
+        <h2 id="productor">El productor de la cola de trabajo</h2>
+        <p>Publicar tareas duras con persistencia para que ningún trabajo se pierda si se reinician los workers:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Productor en Python: tareas con persistente = True
+import pika, json
+
+conexion = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+canal = conexion.channel()
+canal.queue_declare(queue='tareas', durable=True)
+
+for i in range(1, 101):
+    tarea = json.dumps({'id': i, 'tipo': 'generar_reporte', 'anio': 2026})
+    canal.basic_publish(
+        exchange='',
+        routing_key='tareas',
+        body=tarea.encode(),
+        properties=pika.BasicProperties(delivery_mode=2)  # persistent
+    )
+
+conexion.close()
+print('100 tareas publicadas')</code></pre>
+        <p>Persistencia = mensajes a disco con el flag <code>delivery_mode=2</code> + cola durable. Las tareas sobreviven al reinicio del broker.</p>
+      </section>
+
+      <section>
+        <h2 id="escala">Escalar añadiendo workers</h2>
+        <p>La belleza de la cola de trabajo: <strong>escalar = crear otro proceso</strong>. Levantas tres instancias del mismo worker y RabbitMQ se encarga de repartir. No hay sticky sessions, no hay pérdida de distribución; los workers son idénticos e intercambiables.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Tres workers del mismo código, tres procesos
+node worker.js &
+node worker.js &
+node worker.js &
+
+# O con PM2
+pm2 start worker.js -i 4 --name cola-tareas
+# pm2 cluster: 4 workers compitiendo por la misma cola</code></pre>
+        <div class="callout">
+          <p><strong>Atención a los estados:</strong> un worker es seguro de multiplicar solo si no guarda estado local. Si necesita estado (qué archivo lleva, en qué página va), guárdalo en la base o Redis, nunca en memoria del proceso.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="consejos">Consejos de producción</h2>
+        <ul>
+          <li><strong>prefetch bajo:</strong> <code>1</code> o <code>2</code> para tareas pesadas; sube a 10-50 para tareas ligeras y rápidas.</li>
+          <li><strong>ACK siempre al final:</strong> dentro del <code>try</code> del trabajo, nunca antes.</li>
+          <li><strong>Maneja errores:</strong> si la tarea falla, decide entre <code>nack</code> (reintento) y <code>requeue: false</code> + DLQ (veneno). Lo verás en la próxima lección.</li>
+          <li><strong>Mensajes pequeños y planos:</strong> evita meter binarios grandes en la cola; guarda la referencia (ID, URL del bucket) y deja que el worker descargue.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Implementa el worker de Node.js con <code>prefetch(1)</code> y publica 100 tareas desde el productor Python. Verifica en el panel que se consumen en paralelo.</li>
+          <li>Modifica uno de los workers para que tarde 5 s por tarea y el otro 100 ms. Sin prefetch, ¿qué observas en las colas? ¿Y con <code>prefetch(1)</code>?</li>
+          <li>Responde: ¿qué le pasaría a una tarea cuyo worker muere a mitad de procesamiento y nunca llama a <code>ack</code>?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Patrón work queue: una cola, N workers idénticos procesando en paralelo.</li>
+          <li>El round-robin reparte por orden; el prefetch reparte por disponibilidad.</li>
+          <li><code>basicQos(prefetch=1)</code> limita mensajes no confirmados por worker → reparto justo.</li>
+          <li>Escalar colas de trabajo = levantar más procesos del mismo worker.</li>
+          <li>Persistencia (cola durable + mensajes persistentes) para no perder tareas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="consumidor-resiliente.html">Consumidor resiliente</a>
+          <a class="related-lessons__link" href="rabbitmq-conceptos.html">RabbitMQ: conceptos</a>
+          <a class="related-lessons__link" href="../modulo-01/garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="../modulo-03/consumer-groups.html">Consumer groups y rebalanceo</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="modelos-de-servicio-iaas-paas-saas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelos de servicio: IaaS, PaaS, SaaS · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Compara IaaS, PaaS y SaaS: qué controlas, qué delega el proveedor y ejemplos reales en AWS, GCP y Azure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="modelos-de-servicio-iaas-paas-saas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Modelos de servicio: IaaS, PaaS, SaaS</span>
+      </nav>
+      <h1 class="lesson-title">Modelos de servicio: IaaS, PaaS, SaaS</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">La pregunta: ¿quién gestiona qué?</h2>
+        <p>En la nube hay una escala: desde "te doy las máquinas y tú te encargas del resto" (IaaS) hasta "te doy la aplicación lista" (SaaS). La decisión es cuánta <strong>responsabilidad operativa</strong> delegas al proveedor a cambio de control.</p>
+      </section>
+
+      <section>
+        <h2 id="iaas">IaaS: infraestructura como servicio</h2>
+        <p>El proveedor entrega <strong>recursos básicos</strong>: VMs, almacenamiento, redes, firewalls. Todo lo demás (sistema operativo, runtime, dependencias, tu código) es tuyo.</p>
+        <ul>
+          <li><strong>Control total:</strong> configuras el kernel, el SO, los puertos, todo.</li>
+          <li><strong>Responsabilidad total:</strong> patchear, asegurar, escalar y mantener es tu trabajo.</li>
+          <li><strong>Ejemplos:</strong> AWS EC2, Google Compute Engine, Azure Virtual Machines. Un VPS es IaaS.</li>
+        </ul>
+        <p>Ideal cuando necesitas raíz, software específico o cumplimiento personalizado. La contrapartida: horas de operación en cada máquina.</p>
+      </section>
+
+      <section>
+        <h2 id="paas">PaaS: plataforma como servicio</h2>
+        <p>El proveedor añade la <strong>plataforma</strong>: SO parcheado, runtime (Python/Node/Java), escalado, load balancing. Tú subes tu código o imagen y listo.</p>
+        <ul>
+          <li><strong>Olvídate del sistema:</strong> nada de parches de seguridad ni configurar Nginx.</li>
+          <li><strong>Escalado automático</strong> incluido en muchos casos.</li>
+          <li><strong>Ejemplos:</strong> AWS Elastic Beanstalk / App Runner, Google Cloud Run, Azure App Service; IaaS gestionado como RDS también es PaaS.</li>
+        </ul>
+        <p>La via más común para APIs de producción: despliegas tu contenedor y la plataforma lo sirve y escala.</p>
+      </section>
+
+      <section>
+        <h2 id="saas">SaaS: software como servicio</h2>
+        <p>El cape es la <strong>aplicación completa</strong>, lista para usar por internet. No despliegas nada; pagas por usarla.</p>
+        <ul>
+          <li><strong>Cero desarrollo:</strong> el producto ya está terminado y gestionado.</li>
+          <li><strong>Ejemplos:</strong> Gmail, Google Drive, Slack, Notion, y servicios internos como Sentry o Supabase (para un usuario final) funcionan como SaaS.</li>
+        </ul>
+        <p>Un backendista consume SaaS todo el tiempo: monitoreo, CRM, correo, analytics. No lo despliegas, lo integras.</p>
+      </section>
+
+      <section>
+        <h2 id="tabla">Comparativa de responsabilidad</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Responsabilidad      | IaaS        | PaaS        | SaaS
+--------------------|-------------|-------------|-------------
+Aplicación/Business | TÚ          | TÚ          | Proveedor
+Datos               | TÚ          | Parcial     | Proveedor
+Runtime             | TÚ          | Proveedor   | Proveedor
+OS                  | TÚ          | Proveedor   | Proveedor
+Virtualización      | Proveedor   | Proveedor   | Proveedor
+Hardware            | Proveedor   | Proveedor   | Proveedor
+                   ↑ más control  →  menos operación ↑</code></pre>
+          </div>
+        </figure>
+        <p>La regla de oro: <strong>usa la capa más gestionada que cubra tu necesidad</strong>. Para una API, PaaS suele ser el equilibrio justo entre control y ahorro.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica estos servicios: Gmail, la VM de tu API, RDS, Google Drive, Cloud Run, tu propio laptop.</li>
+          <li>¿Quién patchea el SO en cada modelo? ¿Y quién responde el soporte de tu app?</li>
+          <li>Elige el modelo para desplegar una API de pagos con requisitos de auditoría. Justifica.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>IaaS = máquinas crudas; tú gestionas hasta el SO.</li>
+          <li>PaaS = plataforma lista; subes tu código y olvidas el sistema.</li>
+          <li>SaaS = aplicación terminada que solo usas.</li>
+          <li>Elige la capa más gestionada que aún te dé el control que necesitas.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

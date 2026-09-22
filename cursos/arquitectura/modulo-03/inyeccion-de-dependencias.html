@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m3-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inyección de dependencias · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende la inyección de dependencias: constructor injection, contenedores de DI, configuración de servicios y cómo mejora la testabilidad y el desacoplamiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m3-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Inyección de dependencias</span>
+      </nav>
+      <h1 class="lesson-title">Inyección de dependencias</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>inyección de dependencias (DI)</strong> consiste en una regla simple: un objeto <em>recibe</em> sus dependencias desde fuera (por constructor, setter o método) en lugar de crearlas él mismo. Es la técnica estrella para desacoplar, y junto a las interfaces es el motor que hace funcionar Service Layer y Repository.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema: acoplamiento por creación</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (sin DI)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+final class PedidoService
+{
+    private EloquentPedidoRepository $repo;
+
+    public function __construct()
+    {
+        // El servicio 'elige' su implementación: acoplamiento
+        $this-&gt;repo = new EloquentPedidoRepository();
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Aquí PedidoService ya no puede trabajar con un repositorio en memoria en los tests, ni cambiar de base de datos sin reescribirse. La dependencia está cosida a la implementación concreta.</p>
+      </section>
+
+      <section>
+        <h2 id="solucion">La solución: inyectar la abstracción</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (con DI)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+final class PedidoService
+{
+    public function __construct(private PedidoRepository $repo) {}
+}
+
+// Uso en producción: se inyecta la implementación real
+$service = new PedidoService(new EloquentPedidoRepository());
+
+// Uso en tests: se inyecta una implementación falsa
+$service = new PedidoService(new EnMemoriaPedidoRepository());</code></pre>
+          </div>
+        </figure>
+        <p>El servicio depende de la <strong>abstracción</strong> (la interfaz), no de la clase concreta. Quién construye los objetos lo decide el «composición root»: el punto de arranque del sistema.</p>
+      </section>
+
+      <section>
+        <h2 id="contenedor">Contenedor de DI</h2>
+        <p>Cuando el árbol de dependencias crece, registrarlas a mano se vuelve tedioso. Ahí entra el <strong>contenedor de inyección</strong>: un registro que sabe cómo construir cada servicio. Laravel tiene su contenedor; PHP-DI y Symfony Service Container son opciones independientes.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (config por código)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$container-&gt;set(PedidoRepository::class, EloquentPedidoRepository::class);
+$container-&gt;set('pago.gateway', fn() =&gt; new StripeGateway(getenv('STRIPE_KEY')));
+$container-&gt;set(Cobrador::class, fn($c) =&gt; new CobradorPorGateway($c-&gt;get('pago.gateway')));</code></pre>
+          </div>
+        </figure>
+        <p>El contenedor resuelve las dependencias automáticamente: al pedir <code class="inline">PedidoService</code>, construye su repositorio, y el repositorio su conexión, y así hacia abajo. Cambiar un servicio concreto requiere tocar <strong>un solo registro</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="anti">Anti-patrones de DI</h2>
+        <ul>
+          <li><strong>Service Locator:</strong> el objeto pregunta al contenedor «dame X» en tiempo de ejecución; eso oculta las dependencias y rompe la testabilidad.</li>
+          <li><strong>Contenedor como object graph global:</strong> pasar <code class="inline">$container</code> a todo el proyecto equivale a acoplar todo al contenedor.</li>
+          <li><strong>Constructor gigante:</strong> más de 3-4 dependencias en un constructor suele indicar que la clase hace demasiado (déficit de SRP).</li>
+        </ul>
+        <p>La DI es valiosa cuando la usas para <strong>poder sustituir</strong> dependencias; si nunca sustituyes nada, al menos la testabilidad ya justifica el patrón.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Localiza un <code class="inline">new Repositorio()</code> dentro de un servicio y muévelo al constructor.</li>
+          <li>Declara la interfaz del repositorio y registra las dos implementaciones (real y falsa) en un contenedor o a mano.</li>
+          <li>Escribe un test que use la implementación en memoria sin tocar base de datos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>DI = el objeto recibe sus dependencias desde fuera, no las crea.</li>
+          <li>Depender de abstracciones (interfaces) permite sustituir implementaciones.</li>
+          <li>El contenedor de DI centraliza la construcción del grafo de objetos.</li>
+          <li>Evita Service Locator y constructores con demasiadas dependencias.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="diagrama-de-dependencias.html">El diagrama de dependencias</a>
+          <a class="related-lessons__link" href="../modulo-02/modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+          <a class="related-lessons__link" href="../patrones/dependency-injection.html">Dependency Injection</a>
+          <a class="related-lessons__link" href="../modulo-05/regla-de-dependencia.html">La regla de dependencia</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

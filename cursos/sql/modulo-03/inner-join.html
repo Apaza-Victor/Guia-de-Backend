@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="inner-join">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INNER JOIN · SQL · Backend Academy</title>
+<meta name="description" content="Aprende INNER JOIN en SQL: la intersección entre tablas, sintaxis con INNER JOIN y JOIN implícito, y errores comunes como la duplicación de filas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="inner-join"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3 · JOINs</a><span class="sep">/</span>
+          <span class="current">INNER JOIN</span>
+        </nav>
+        <h1 class="lesson-title">INNER JOIN</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · JOINs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>El <code class="inline">INNER JOIN</code> devuelve solo las filas donde <strong>ambas tablas tienen pareja</strong>. Si un cliente no tiene pedidos, no aparece; si un pedido apunta a un cliente que ya no existe (no debería pasar con integridad referencial), tampoco. Es la intersección.</p>
+        </section>
+
+        <section>
+          <h2 id="sintaxis">Sintaxis moderna</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT clientes.nombre, pedidos.total
+FROM clientes
+INNER JOIN pedidos
+  ON pedidos.cliente_id = clientes.id;
+
+-- Con alias: más corto y legible
+SELECT c.nombre, p.total
+FROM clientes c
+INNER JOIN pedidos p
+  ON p.cliente_id = c.id;</code></pre>
+            </div>
+          </figure>
+          <p>Cuando las columnas se llaman igual (<code class="inline">cliente_id</code> en las dos tablas) puedes usar <code class="inline">USING(cliente_id)</code>, pero la forma con <code class="inline">ON</code> es de largo la más explícita y flexible.</p>
+        </section>
+
+        <section>
+          <h2 id="historia">El JOIN implícito (la vieja escuela)</h2>
+          <p>El WHERE con «coma» sigue funcionando: la base lo reedita como INNER JOIN.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT c.nombre, p.total
+FROM clientes c, pedidos p
+WHERE p.cliente_id = c.id;
+
+-- Peligroso: olvidarse del WHERE provoca un CROSS JOIN
+-- (producto cartesiano: cada cliente × cada pedido)</code></pre>
+            </div>
+          </figure>
+          <p>Escribe siempre <code class="inline">INNER JOIN ... ON</code>: el código deja claro qué es condición de unión y qué es filtro.</p>
+        </section>
+
+        <section>
+          <h2 id="duplicados">El error de las filas duplicadas</h2>
+          <p>Imagina un cliente con 3 pedidos y otro con 2. El INNER JOIN devuelve 5 filas: el nombre del cliente se <strong>repite</strong> en cada una. No es un bug, es cómo funciona la combinación:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT c.nombre, p.total
+FROM clientes c
+INNER JOIN pedidos p ON p.cliente_id = c.id;
+
+-- Datos de ejemplo
+-- Ana: 2 pedidos → filas (Ana, 50) y (Ana, 30)
+-- Bea: 1 pedido  → (Bea, 90)
+-- Leo: 0 pedidos → no aparece en el INNER JOIN</code></pre>
+            </div>
+          </figure>
+          <p>Si sumas los totales tras el JOIN, cada pedido cuenta una vez; la duplicación solo se nota cuando seleccionas columnas del «lado uno» de la relación.</p>
+        </section>
+
+        <section>
+          <h2 id="filter">Combinar JOIN y filtro</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT c.nombre, p.total, p.fecha
+FROM clientes c
+INNER JOIN pedidos p ON p.cliente_id = c.id
+WHERE p.total &gt; 100
+ORDER BY p.fecha DESC;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Une clientes y pedidos y devuelve solo los pagados.</li>
+            <li>Escribe el mismo INNER JOIN en estilo moderno y en estilo antiguo.</li>
+            <li>Predice cuántas filas devuelve un JOIN con 3 clientes (2, 1 y 0 pedidos) antes de ejecutarlo.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>INNER JOIN = solo parejas que existen en ambas tablas.</li>
+            <li>Obligatorio el <code class="inline">ON</code> con la condición de igualdad de claves.</li>
+            <li>Los alias hacen la consulta legible.</li>
+            <li>Las filas del lado «uno» se repiten por cada «muchos».</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="left-right-join.html">LEFT y RIGHT JOIN</a>
+            <a class="related-lessons__link" href="joins-multiples-tablas.html">JOINs con múltiples tablas</a>
+            <a class="related-lessons__link" href="../modulo-02/group-by.html">Agrupando con GROUP BY</a>
+            <a class="related-lessons__link" href="../../bases-datos/modulo-04/joins-inner-left-right.html">Primera mirada a los JOINs</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

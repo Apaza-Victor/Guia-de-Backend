@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m7-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estrategias de evolución · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Cómo evolucionar la arquitectura día a día: arquetipos de evolución, strangler fig, branch by abstraction y el roadmap hacia la arquitectura objetivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m7-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 7</a><span class="sep">/</span>
+        <span class="current">Estrategias de evolución</span>
+      </nav>
+      <h1 class="lesson-title">Estrategias de evolución</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · En la práctica</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La arquitectura nunca «termina»: evoluciona con el negocio. La diferencia entre una evolución sana y una caótica es la <strong>estrategia</strong>. Aquí verás los patrones de evolución que permiten cambiar piso mientras el tren sigue rodando: <em>strangler fig</em>, <em>branch by abstraction</em> y el roadmap hacia una arquitectura objetivo.</p>
+      </section>
+
+      <section>
+        <h2 id="estado">Estado, objetivo y deuda</h2>
+        <p>Toda evolución empieza con tres mapas:</p>
+        <ol>
+          <li><strong>Estado actual:</strong> lo que existe hoy, con sus olores (el diagrama de dependencias real).</li>
+          <li><strong>Estado objetivo:</strong> la arquitectura que quieres (capas, módulos, reglas).</li>
+          <li><strong>Ruta:</strong> la secuencia incremental, jugable para el negocio.</li>
+        </ol>
+        <p>Sin objetivo, el refactor de un día se convierte en refactor de cada día (y ninguno aporta).</p>
+      </section>
+
+      <section>
+        <h2 id="strangler">Strangler fig: ahogar al viejo poco a poco</h2>
+        <p>Inspirado en la higuera estranguladora que envuelve un árbol: se introduce un componente nuevo que, poco a poco, <strong>roba</strong> responsabilidades al viejo hasta que este queda vacío y se elimina. En backend se ve en la migración a microservicios, en el cambio de base de datos o en la sustitución de un monolito:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Pipeline de evolución</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">[ Flujos actuales ] --&gt; proxy/router --&gt; [ Nuevo módulo ] (adopta un flujo)
+                                                    |
+                              [ viejo módulo ] (pierde flujos, se encoge)
+                                                    ▼
+                                              (eliminar cuando vacío)</code></pre>
+          </div>
+        </figure>
+        <p>La ruta se mide en <strong>flujos migrados</strong>, no en semanas. Cada flujo nuevo comprado por el negocio reduce el viejo sin parar el servicio.</p>
+      </section>
+
+      <section>
+        <h2 id="bbya">Branch by abstraction</h2>
+        <p>Para cambios gordos que no se pueden partir (pasar de SQL a un repo nuevo), el truco es insertar una <strong>abstracción</strong> como SEAM entre el mundo que usa la vieja implementación y la nueva:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// 1. Crear la interfaz y que el código trabaje contra ella
+interface CatalogoRepository {
+    public function buscar(string $q): array;
+}
+
+// 2. Vieja implementación (SQL actual)
+final class SqlCatalogo implements CatalogoRepository { ... }
+
+// 3. Nueva implementación (API externa) coexistiene debajo
+final class ApiCatalogo implements CatalogoRepository { ... }
+
+// 4. con un switch controlado por config/feature flag:
+$catalogo = $flagNuevo ? new ApiCatalogo() : new SqlCatalogo();</code></pre>
+          </div>
+        </figure>
+        <p>Puedes correr ambas en paralelo, comparar resultados y eliminar la vieja cuando confíes. Cambias el elefante mordiendo de a un bocado.</p>
+      </section>
+
+      <section>
+        <h2 id="roadmap">El roadmap honesto</h2>
+        <ul>
+          <li><strong>Prioriza por riesgo, no por estética:</strong> primero el acoplamiento que más duele en el despliegue y los tests.</li>
+          <li><strong>Cada PR de arquitectura trae beneficio propio</strong> (un test que falla hoy por el enredo).</li>
+          <li><strong>El negocio sabe de tiempos, no de flechas:</strong> cuéntalo como «migrar pagos reducirá el time-to-fix de 4h a 30 min».</li>
+          <li><strong>Corrige al máximo de capacidad disponible:</strong> un 10-20% del sprint continuo vence a la «gran migración parada».</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el estado actual y el objetivo de una parte de tu sistema.</li>
+          <li>Elige el patrón apropiado para un cambio concreto (strangler o branch by abstraction).</li>
+          <li>Escribe el roadmap en flujos migrados o bloques medibles.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La evolución sana tiene estado actual, objetivo y ruta.</li>
+          <li>Strangler fig: ahogar lo viejo migrando flujos de a poco.</li>
+          <li>Branch by abstraction: trabajan dos implementaciones detrás de una interfaz.</li>
+          <li>El roadmap se vende en beneficios medibles, no en teoría.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="refactoring-de-arquitectura.html">Refactoring de arquitectura</a>
+          <a class="related-lessons__link" href="de-monolito-a-modulos.html">De monólito a módulos</a>
+          <a class="related-lessons__link" href="../modulo-04/olores-de-diseno.html">Olores de diseño y deuda técnica</a>
+          <a class="related-lessons__link" href="comunicando-decisiones-al-equipo.html">Comunicando decisiones al equipo</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

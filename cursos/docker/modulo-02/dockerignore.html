@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m2-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El build context y .dockerignore · Docker para Backend · Backend Academy</title>
+<meta name="description" content="El contexto es todo lo que viaja al daemon: aprende a excluir node_modules, .git y secrets con un .dockerignore bien escrito.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m2-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">El build context y .dockerignore</span>
+      </nav>
+      <h1 class="lesson-title">El build context y .dockerignore</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Imágenes y Dockerfile</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="contexto">Qué es el contexto</h2>
+        <p>El <code>.</code> del <code>docker build -t x .</code> es el <strong>contexto</strong>: todo su contenido viaja al daemon antes de construir. `node_modules`, `.git`, logs o un .env tuyo suben al engine <em>aunque no los copies</em>. Por eso necesitas el <code>.dockerignore</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="dockerignore">El .dockerignore mínimo de un backend</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto · .dockerignore</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">.git
+.gitignore
+node_modules
+npm-debug.log*
+.env
+.env.*
+coverage
+dist/coverage
+*.log
+.DS_Store
+docker-compose*.yml</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="porque">Por qué importa (y cuánto)</h2>
+        <ul>
+          <li><strong>Seguridad:</strong> secretos y claves de tu máquina no deben entrar.</li>
+          <li><strong>Velocidad:</strong> un repo de 200MB se envía entero en cada build.</li>
+          <li><strong>Paridad:</strong> evita que se copie <code>node_modules</code> de tu SO y rompa la imagen Linux.</li>
+          <li><strong>Cache:</strong> los <code>COPY</code> que incluyen carpetas grandes invalidan capas en vano.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="sintaxis">Sintaxis: cómo se limpia la lista</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">node_modules          → carpeta en cualquier nivel
+/node_modules          → solo en la raíz del contexto
+**/*.log              → logs en cualquier profundidad
+!src/**/keep.me       → el "!" re-incluye lo excluido antes
+# los comentarios ayudan; no uses rutas absolutas</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="verificar">Verificar lo que entra</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Qué se está enviando como contexto (en el log del build):
+# => [context] sending 12.5MB  (balancea y compara)
+# Si crece de golpe: algo de tu carpeta está entrando sin querer
+
+# Diagnóstico rápido informal:
+docker build --no-cache --progress=plain .  | grep '=> [internal]'</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un <code>.dockerignore</code> en tu proyecto de backend.</li>
+          <li>Comenta <code>node_modules</code> → el contexto se dispara.</li>
+          <li>Mide las diferencias del <code>sending context</code> en dos builds.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Todo el contexto viaja al daemon, copies o no.</li>
+          <li>node_modules, .git, logs y .env no deben entrar.</li>
+          <li>El <code>!</code> re-incluye; los comentarios documentan.</li>
+          <li>Un contexto gordo = build lento + riesgo de secretos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="capas-de-imagen.html">Las capas de la imagen</a>
+          <a class="related-lessons__link" href="optimizando-imagenes.html">Optimizando imágenes</a>
+          <a class="related-lessons__link" href="que-es-un-dockerfile.html">¿Qué es un Dockerfile?</a>
+          <a class="related-lessons__link" href="index.html">Módulo 2 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-consenso-distribuido">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consenso distribuido · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende el problema del consenso en sistemas distribuidos: Paxos, Raft, elección de líderes, términos y log replicado, y sistemas que los implementan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-consenso-distribuido"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Consenso distribuido</span>
+      </nav>
+      <h1 class="lesson-title">Consenso distribuido</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Replicación y consistencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>consenso</strong> es el problema de lograr que varios nodos se pongan de acuerdo sobre un valor, incluso cuando algunos fallan. Suena simple, pero el teorema de FLP demostró que, en un sistema asíncrono, <strong>es imposible garantizar consenso con fallos no detectables</strong>. Por eso los algoritmos reales usan hipótesis pragmáticas: timeouts y mayorías.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema del consenso</h2>
+        <ul>
+          <li><strong>Acuerdo:</strong> todos los nodos correctos deciden el mismo valor.</li>
+          <li><strong>Validez:</strong> el valor decidido fue propuesto por algún nodo.</li>
+          <li><strong>Terminación:</strong> los nodos correctos eventualmente deciden.</li>
+        </ul>
+        <p>Si un nodo cae y se reinicia, o si la red divide el cluster, queremos que todos sigan decidiendo lo mismo. La herramienta práctica es el <strong>quórum de mayoría</strong>: una decisión no se cierra hasta que la confirman más de la mitad de los nodos.</p>
+      </section>
+
+      <section>
+        <h2 id="raft">Raft: el consenso didáctico</h2>
+        <p>Raft divide el problema en tres subproblemas: <strong>elección de líder</strong>, <strong>replicación de log</strong> y <strong>seguridad</strong>.</p>
+        <ol>
+          <li>Cada nodo está en estado <em>líder</em>, <em>seguidor</em> o <em>candidato</em>.</li>
+          <li>El tiempo se parte en <strong>términos</strong>; cada término puede tener un líder.</li>
+          <li>Los seguidores esperan <em>latidos</em> (heartbeats) del líder. Si expira un <em>election timeout</em> aleatorio, el seguidor pasa a candidato, pide votos y gana si obtiene mayoría.</li>
+          <li>El líder recibe las escrituras, las escribe en su log y las replica; una entrada del log se <strong>commite</strong> cuando la mayoría la confirma.</li>
+        </ol>
+        <p>El truco del timeout aleatorio evita que dos candidatos gocen todos los votos y se peleen eternamente (aunque pueden empate y hay que repetir).</p>
+      </section>
+
+      <section>
+        <h2 id="raft-codigo">Raft en código simplificado</h2>
+        <p>Este esqueleto (Node.js) captura el «heartbeat que renueva el mandato»:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const ESTADOS = { SEGUIDOR: 0, CANDIDATO: 1, LIDER: 2 };
+
+class NodoRaft {
+  constructor(id, peers) {
+    this.id = id;
+    this.peers = peers;
+    this.estado = ESTADOS.SEGUIDOR;
+    this.term = 0;
+    this.ultimoLatido = Date.now();
+    this.electionTimeout = 150 + Math.random() * 150; // ms aleatorio
+  }
+
+  // Seguidor: si no llega latido del líder, lanza elección
+  tick() {
+    if (this.estado === ESTADOS.SEGUIDOR &&
+        Date.now() - this.ultimoLatido > this.electionTimeout) {
+      this.estado = ESTADOS.CANDIDATO;
+      this.term += 1;
+      this.votarPorMiMismo();
+    }
+  }
+
+  recibirLatido(termLider) {
+    if (termLider &lt; this.term) return; // ignorar líder de término viejo
+    this.term = termLider;
+    this.estado = ESTADOS.SEGUIDOR;
+    this.ultimoLatido = Date.now();
+  }
+}
+</code></pre>
+        <p>La decisión «cuál es el líder» y las escrituras aprobadas quedan en un <strong>log replicado</strong>: cada entrada con su término, confirmada por la mayoría:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "cluster": "catalogo-raft",
+  "termino_actual": 7,
+  "lider": "nodo-2",
+  "log_replicado": [
+    { "indice": 41, "termino": 5, "comando": "set clave-stock=a-01",  "confirmado": true },
+    { "indice": 42, "termino": 7, "comando": "start member=nodo-4",   "confirmado": true },
+    { "indice": 43, "termino": 7, "comando": "dec clave-cupo=03",     "confirmado": false }
+  ]
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="paxos">Paxos: el abuelo</h2>
+        <p>Paxos (Lamport, 1990) resuelve el mismo problema con dos fases (<em>prepare</em> y <em>accept</em>) y propositores que compiten. Es elegante pero notoriamente difícil de implementar; la mayoría de sistemas modernos (etcd, Consul, TiKV, CockroachDB) usa <strong>Raft</strong> o variantes.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># etcd implementa Raft y expone un API mínima de consenso:
+etcdctl put "clave-distribuida" "v1"        # escribe a través del líder
+etcdctl get "clave-distribuida"             # lee con tupla de consenso
+etcdctl endpoint status --write-out=table   # término y líder actuales
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="eleccion-lider">Elección de líder en la práctica</h2>
+        <p>En un sistema con un único líder, la elección es consenso. Los equivalentes comerciales:</p>
+        <ul>
+          <li><strong>PostgreSQL:</strong> failover con repmgr/Patroni (que a su vez usa etcd o ZooKeeper).</li>
+          <li><strong>Kafka:</strong> cada partición elige un líder entre sus réplicas con su propio protocolo (KRaft).</li>
+          <li><strong>Redis Cluster:</strong> la promoción de réplicas usa votos con majority.</li>
+        </ul>
+        <p>El objetivo siempre es el mismo: que ante la muerte del líder actual, <strong>exactamente uno</strong> nuevo tome el control, sin split-brain.</p>
+        <div class="callout">
+          <p><strong>Split-brain:</strong> dos líderes vivos en el mismo clúster escribiendo a la vez. La mayoría de quórum (más de N/2 nodos) es lo que impide elegir dos líderes.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="flp">Limitaciones y costes</h2>
+        <p>El consenso garantiza seguridad (acuerdo y validez) a costa de la <strong>liveness</strong> bajo fallos: si pierdes mayoría, el sistema se detiene hasta recuperarla. Además, cada decisión exige una ida y vuelta de mensajes; por eso el consenso <em>por operación</em> es caro y se usa solo en operaciones críticas.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Con 5 nodos que implementan Raft, ¿cuántos deben aprobar una escritura para commit? ¿Cuántos pueden caer sin frenar el sistema?</li>
+          <li>Explica con tus palabras por qué un «election timeout aleatorio» reduce la probabilidad de que dos candidatos se peleen por el liderazgo.</li>
+          <li>Investiga y describe qué pasa en etcd cuando el número de nodos caídos supera la mayoría (quorate lost).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El consenso logra acuerdo, validez y terminación entre nodos con fallos.</li>
+          <li>La mayoría de quórum es el mecanismo que impide dos líderes (split-brain).</li>
+          <li>Raft divide el problema en elección de líder, replicación de log y seguridad; usa términos y timeouts aleatorios.</li>
+          <li>Paxos fue el primer algoritmo famoso, pero Raft es el que implementan etcd, Consul y otros.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/teorema-cap.html">Teorema CAP</a>
+          <a class="related-lessons__link" href="replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="transacciones-distribuidas.html">Transacciones distribuidas</a>
+          <a class="related-lessons__link" href="../modulo-03/clusteres-y-bloques.html">Clústeres y coordinación</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

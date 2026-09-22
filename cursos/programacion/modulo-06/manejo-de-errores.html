@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manejo de errores y excepciones · Programación para Backend · Backend Academy</title>
+<meta name="description" content="try/catch, excepciones personalizadas y errores que no tumban el servidor.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css"></head>
+<body class="app-shell">
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html" aria-label="Backend Academy - Inicio">
+      <span class="brand__logo" aria-hidden="true"><i class="fa-solid fa-code"></i></span>
+      <span>Backend Academy<small>aprende a programar</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../cursos/proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle btn btn--icon" type="button" aria-label="Cambiar a modo oscuro">
+        <i class="fa-solid fa-moon" data-mode="light" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="lesson-layout lesson-layout--with-toc container">
+<aside class="sidebar" aria-label="Contenido del curso Programación para Backend">
+  <div class="sidebar__section">
+    <a class="sidebar__title" href="../../../cursos/programacion/index.html">Programación para Backend</a>
+    <div class="progress" data-progress="programacion" aria-label="Progreso del curso">
+      <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+      <span class="progress__label">0%</span>
+    </div>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Fundamentos de programación</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="variables-y-constantes" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="tipos-de-datos" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="operadores" href="../../../cursos/programacion/modulo-01/operadores.html">Operadores y expresiones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conversion-de-tipos" href="../../../cursos/programacion/modulo-01/conversion-de-tipos.html">Conversión de tipos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="entrada-salida" href="../../../cursos/programacion/modulo-01/entrada-salida.html">Entrada, salida y comentarios<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Control de flujo</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="condicionales" href="../../../cursos/programacion/modulo-02/condicionales.html">Condicionales: if, else y elseif<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="condicional-switch" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-while" href="../../../cursos/programacion/modulo-02/bucles-while.html">Bucles while y do-while<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-for-foreach" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="break-continue" href="../../../cursos/programacion/modulo-02/break-continue.html">break y continue: control fino de bucles<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Funciones</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="funciones" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="parametros-y-argumentos" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">Parámetros y argumentos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="ambito-de-variables" href="../../../cursos/programacion/modulo-03/ambito-de-variables.html">Ámbito (scope) de las variables<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="funciones-anonimas-callbacks" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="recursividad" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Estructuras de datos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="arrays" href="../../../cursos/programacion/modulo-04/arrays.html">Arrays: la base de los datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="arrays-asociativos" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conjuntos" href="../../../cursos/programacion/modulo-04/conjuntos.html">Conjuntos y colecciones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="objetos" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="estructuras-anidadas" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Programación Orientada a Objetos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="clases-y-objetos" href="../../../cursos/programacion/modulo-05/clases-y-objetos.html">Clases y objetos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="atributos-metodos-constructores" href="../../../cursos/programacion/modulo-05/atributos-metodos-constructores.html">Atributos, métodos y constructores<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="encapsulamiento" href="../../../cursos/programacion/modulo-05/encapsulamiento.html">Encapsulamiento: public, private y protected<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="herencia" href="../../../cursos/programacion/modulo-05/herencia.html">Herencia<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="polimorfismo-abstraccion-interfaces" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group is-open">
+    <h3 class="sidebar__group-title"><span>Código profesional</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="modularizacion" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="clean-code" href="../../../cursos/programacion/modulo-06/clean-code.html">Clean Code<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="principios-solid" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="dry-kiss" href="../../../cursos/programacion/modulo-06/dry-kiss.html">DRY y KISS<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="debugging" href="../../../cursos/programacion/modulo-06/debugging.html">Debugging y herramientas<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link is-active" data-lesson-id="manejo-de-errores" href="../../../cursos/programacion/modulo-06/manejo-de-errores.html" aria-current="page">Manejo de errores y excepciones<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>  <div class="sidebar-footer">
+    <span><i class="fa-solid fa-code" aria-hidden="true"></i> Ejemplos en PHP 8.</span>
+    <a href="../../../cursos/programacion/index.html">Ver índice del curso</a>
+  </div>
+</aside>
+  <main class="lesson-main" id="main">
+<nav class="lesson-crumbs" aria-label="Ruta de navegación">
+  <a href="../../../index.html">Inicio</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../aprender/index.html">Cursos</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/index.html">Programación para Backend</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/modulo-06/index.html">módulo 06</a><span class="sep" aria-hidden="true">/</span>
+  <span class="current" aria-current="page">Manejo de errores y excepciones</span>
+</nav>
+    <article class="lesson-article" data-lesson-id="manejo-de-errores">
+      <header class="lesson-hero">
+        <h1 class="lesson-title">Manejo de errores y excepciones</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Intermedio</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-code" aria-hidden="true"></i> PHP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Código profesional</span>
+          <label class="complete-toggle"><input type="checkbox"><span class="complete-toggle__box" aria-hidden="true">✓</span> Marcar como completada</label>
+        </div>
+      </header>
+      <div class="lesson-content">
+<section id="introduccion" aria-labelledby="introduccion-t">
+  <h2 id="introduccion-t">Introducción</h2>
+  <p>Un script que muere al primer error no vale para un servidor que atiende miles de peticiones. El <strong>manejo de errores</strong> decide qué pasa cuando algo falla: si suena la alarma, si se registra, si se degrada con elegancia o si responde al usuario con un código correcto.</p>
+</section><section id="definicion" aria-labelledby="definicion-t">
+  <h2 id="definicion-t">Definición</h2>
+  <p>PHP distingue <strong>errores</strong> (avisos, advertencias y fatales del motor) y <strong>excepciones</strong> (<code class="inline">Exception</code> y sus hijas), que se lanzan con <code class="inline">throw</code> y se capturan con <code class="inline">try { ... } catch (MiTipo $e) { ... }</code>. La prioridad del <code class="inline">catch</code> importa: va de lo más específico a lo genérico. El bloque <code class="inline">finally</code> siempre se ejecuta (cierre de conexiones, por ejemplo). PHP 8 mejora los errores preexistentes y exige tipado.</p>
+</section><section id="conceptos-clave" aria-labelledby="conceptos-clave-t">
+  <h2 id="conceptos-clave-t">Conceptos clave</h2>
+  <ul>
+  <li><code class="inline">throw new Excepcion(...)</code> lanza; <code class="inline">try/catch</code> captura.</li>
+  <li>Excepciones específicas primero: <code class="inline">catch (InvalidArgumentException $e)</code>.</li>
+  <li><code class="inline">finally</code> se ejecuta siempre, haya o no error.</li>
+  <li><code class="inline">getMessage()</code> y <code class="inline">getCode()</code> extraen contexto del error.</li>
+  <li>Nada capturado = error fatal = petición caída.</li>
+</ul>
+</section><section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t">
+  <h2 id="ejemplo-basico-t">Ejemplo básico</h2>
+  <p>El mínimo que todo backend usa:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">try-catch.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">function dividir(float $a, float $b): float {
+    if ($b === 0.0) {
+        throw new DivisionByZeroError(&quot;No se puede dividir entre cero&quot;);
+    }
+    return $a / $b;
+}
+
+try {
+    echo dividir(10, 0);
+} catch (DivisionByZeroError $e) {
+    echo &quot;Error: &quot; . $e-&gt;getMessage();
+}</code></pre></div>
+</div>
+</section><section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t">
+  <h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2>
+  <p>Máscaras-las específicas según el tipo de fallo:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">multi-excepcion.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">function guardarUsuario(array $datos): void {
+    if ($datos[&quot;edad&quot;] &lt; 0) {
+        throw new InvalidArgumentException(&quot;La edad no puede ser negativa&quot;);
+    }
+    if ($datos[&quot;edad&quot;] &gt; 120) {
+        throw new RangeException(&quot;Edad fuera de rango&quot;);
+    }
+    // … persiste en BD
+}
+
+try {
+    guardarUsuario([&quot;edad&quot; =&gt; -3]);
+} catch (InvalidArgumentException $e) {
+    echo &quot;Datos inv&#225;lidos: &quot; . $e-&gt;getMessage();
+} catch (RangeException $e) {
+    echo &quot;Rango: &quot; . $e-&gt;getMessage();
+} finally {
+    echo &quot; (registro de intento completado)&quot;;
+}</code></pre></div>
+</div>
+</section><section id="ejemplo-real" aria-labelledby="ejemplo-real-t">
+  <h2 id="ejemplo-real-t">Ejemplo real</h2>
+  <p>Excepciones propias para que el dominio hable:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">excepcion-propia.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">class PagoRechazado extends RuntimeException {}
+
+function cobrar(string $tarjeta, float $monto): string {
+    if (strlen($tarjeta) !== 16) {
+        throw new PagoRechazado(&quot;N&#250;mero de tarjeta incompleto&quot;);
+    }
+    return &quot;Pago de $monto procesado&quot;;
+}
+
+try {
+    echo cobrar(&quot;4242&quot;, 99.9);
+} catch (PagoRechazado $e) {
+    echo &quot;El cliente no pudo pagar: &quot; . $e-&gt;getMessage() . &quot; — devolvemos la vista de error&quot;;
+}</code></pre></div>
+</div>
+</section><section id="codigo" aria-labelledby="codigo-t">
+  <h2 id="codigo-t">Código completo</h2>
+  <p>Código completo: una API segura que responde con códigos y conserva la trazabilidad:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">api-errores.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+class ApiError extends RuntimeException {}
+
+function procesarPeticion(string $cuerpo): string {
+    $datos = json_decode($cuerpo, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new ApiError(&quot;JSON malformado&quot;, 400);
+    }
+    if (!isset($datos[&quot;email&quot;])) {
+        throw new ApiError(&quot;Falta el campo email&quot;, 422);
+    }
+    // … l&#243;gica de negocio
+    return &quot;ok&quot;;
+}
+
+function responder(string $cuerpo): void {
+    try {
+        $resultado = procesarPeticion($cuerpo);
+        echo &quot;200 OK: &quot; . $resultado . &quot;\n&quot;;
+    } catch (ApiError $e) {
+        http_response_code($e-&gt;getCode());
+        echo $e-&gt;getCode() . &quot; &quot; . $e-&gt;getMessage() . &quot;\n&quot;;
+        error_log(&quot;[API] C&#243;digo {$e-&gt;getCode()}: {$e-&gt;getMessage()}&quot;);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo &quot;500 Error interno\n&quot;;
+        error_log(&quot;[API] No controlado: &quot; . $e-&gt;getMessage());
+    }
+}
+
+responder(&#39;{&quot;email&quot;:&quot;ada@x.com&quot;}&#39;);   // 200
+responder(&#39;{&quot;email&quot;:&quot;sin arroba&quot;}&#39;);  // 200 (validaci&#243;n real la har&#237;a otro)</code></pre></div>
+</div>
+</section><section id="explicacion" aria-labelledby="explicacion-t">
+  <h2 id="explicacion-t">Explicación</h2>
+  <p>El <code class="inline">try/catch</code> rodea solo el tramo arriesgado y el error se convierte en un flujo controlado en vez de un fatl. Con varias excepciones, el backend puede responder distinto según el tipo de fallo — datos inválidos, rango, red— y <code class="inline">finally</code> garantiza la limpieza.</p>
+<p>Las excepciones propias (<code class="inline">PagoRechazado</code>, <code class="inline">ApiError</code>) hacen que el mensaje hable el idioma del negocio y lleven <em>códigos HTTP</em> (<code class="inline">getCode()</code>). La API final muestra el patrón estelar: errores esperados → respuesta 4xx con traza en log; errores inesperados → 500 genérico sin filtrar detalles al cliente.</p>
+</section><section id="errores-comunes" aria-labelledby="errores-comunes-t">
+  <h2 id="errores-comunes-t">Errores comunes</h2>
+  <ul>
+  <li>Swallowing errors: <code class="inline">catch (Exception $e) { }</code> vacío que esconde todo.</li>
+  <li>Capturar la excepción genérica antes de la específica (nunca se alcanza la segunda).</li>
+  <li>Exponer <code class="inline">$e-&gt;getMessage()</code> al cliente: revela estructura interna.</li>
+  <li>Olvidar <code class="inline">finally</code>: conexiones y locks que nunca se cierran.</li>
+</ul>
+</section><section id="buenas-practicas" aria-labelledby="buenas-practicas-t">
+  <h2 id="buenas-practicas-t">Buenas prácticas</h2>
+  <ul>
+  <li>Lanza temprano y específico; captura tarde y con contexto.</li>
+  <li>Registra siempre (error_log) y responde mensajes seguros.</li>
+  <li>Una sola responsabilidad por excepción capturada.</li>
+</ul>
+</section><section id="ejercicio" aria-labelledby="ejercicio-t">
+  <h2 id="ejercicio-t">Ejercicio</h2>
+  <div class="exercise">
+  <div class="exercise__head">
+    <h3>Matrícula a prueba de fallos</h3>
+    <span class="badge badge--level-intermedio">Dificultad: Media</span>
+  </div>
+  <ol>
+    <li>Crea <code class="inline">matricular(string $email, int $edad): void</code> que lance <code class="inline">InvalidArgumentException</code> si el email no tiene "@".</li>
+    <li>Envuelve la llamada en try/catch y muestra un mensaje amistoso.</li>
+    <li>Añade un <code class="inline">finally</code> que registre en el log la intención de matrícula.</li>
+  </ol>
+</div>
+</section><section id="resumen" aria-labelledby="resumen-t">
+  <h2 id="resumen-t">Resumen</h2>
+  <div class="summary">
+  <ul>
+    <li><code class="inline">try/catch</code> doma lo inesperado; <code class="inline">finally</code> hace la limpieza.</li>
+    <li>Excepciones específicas y propias para un dominio expresivo.</li>
+    <li>Log interno + respuesta segura al cliente.</li>
+  </ul>
+</div>
+</section>
+      </div>
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../../../cursos/programacion/modulo-06/index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo</a>
+      </nav><div class="lesson-prevnext">
+  <a class="lesson-prevnext__link" href="../../../cursos/programacion/modulo-06/debugging.html">
+    <span class="label" aria-hidden="true">← Anterior</span>
+    <span class="title">Debugging y herramientas</span>
+  </a>
+  <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../../../cursos/programacion/index.html">
+    <span class="label" aria-hidden="true">Siguiente →</span>
+    <span class="title">Índice del curso</span>
+  </a>
+</div>
+      <section class="related-block" aria-labelledby="rel-t">
+        <h2 id="rel-t">También puede interesarte</h2><div class="related-lessons">  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<br><span class="muted">Fundamentos de programación</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<br><span class="muted">Control de flujo</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<br><span class="muted">Funciones</span></a></div>      </section>
+    </article>
+  </main><aside class="toc-rail" data-toc aria-label="Contenido de la página">
+  <h2>En esta página</h2>
+  <nav aria-label="Secciones de la lección">
+    <a href="#introduccion">Introducción</a>
+    <a href="#definicion">Definición</a>
+    <a href="#conceptos-clave">Conceptos clave</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-intermedio">Ejemplo intermedio</a>
+    <a href="#ejemplo-real">Ejemplo real</a>
+    <a href="#codigo">Código completo</a>
+    <a href="#explicacion">Explicación</a>
+    <a href="#errores-comunes">Errores comunes</a>
+    <a href="#buenas-practicas">Buenas prácticas</a>
+    <a href="#ejercicio">Ejercicio</a>
+    <a href="#resumen">Resumen</a>
+  </nav>
+</aside>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <h4><a href="../../../index.html">Backend Academy</a></h4>
+        <p>Plataforma en español para aprender desarrollo backend: de los fundamentos a la arquitectura de sistemas de alto tráfico.</p>
+      </div>
+      <div>
+        <h4>Cursos</h4>
+        <ul>
+          <li><a href="../../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../../cursos/programacion/index.html">Programación para Backend</a></li>
+          <li><a href="../../../cursos/php/index.html">PHP</a></li>
+          <li><a href="../../../cursos/nodejs/index.html">Node.js</a></li>
+          <li><a href="../../../cursos/python/index.html">Python</a></li>
+          <li><a href="../../../cursos/bases-datos/index.html">Bases de Datos</a></li>
+          <li><a href="../../../cursos/apis-rest/index.html">APIs REST</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap</a></li>
+          <li><a href="../../../retos/index.html">Retos</a></li>
+          <li><a href="../../../ejercicios/index.html">Ejercicios</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../dashboard/index.html">Mi progreso</a></li>
+          <li><a href="../../../favoritos/index.html">Favoritos</a></li>
+          <li><a href="../../../historial/index.html">Historial</a></li>
+          <li><a href="../../../acerca/index.html">Acerca de</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido educativo gratuito, en español.</span>
+      <span class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca</a>
+        <a href="../../../glosario/index.html">Glosario</a>
+        <a href="../../../roadmap/index.html">Roadmap</a>
+      </span>
+    </div>
+  </div>
+</footer><script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  try { if (window.AppTheme) AppTheme.init(); } catch (err) {}
+  try { if (window.AppProgress) AppProgress.init(); } catch (err) {}
+});
+</script></body>
+</html>

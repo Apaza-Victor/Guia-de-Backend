@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-dedicla-y-caching-patterns">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrones de durabilidad y caché · System Design · Backend Academy</title>
+<meta name="description" content="Aprende los patrones de caché (read-through, write-through, write-back, invalidation) y cómo se combinan con durabilidad y CDN en system design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-dedicla-y-caching-patterns"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Patrones de durabilidad y caché</span>
+      </nav>
+      <h1 class="lesson-title">Patrones de durabilidad y caché</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Velocidad y resistencia no se pelean: se combinan</h2>
+        <p>La caché acelera las lecturas; la durabilidad protege los datos contra fallas. El arte del diseño está en combinarlas sin que el sistema devuelva datos viejos cuando el producto exige lo actual, ni pierda escrituras que el cliente ya dio por hechas.</p>
+        <p>Cada patrón de caché responde a una pregunta distinta: <strong>¿cuándo entra el dato en la caché?</strong> y <strong>¿quién es responsable de mantenerlo fresco?</strong></p>
+      </section>
+
+      <section>
+        <h2 id="cache-aside">Cache-aside (lazy loading)</h2>
+        <p>Es el patrón más usado. La aplicación consulta la caché; si no está (miss), va a la base, rellena la caché y devuelve. La caché se llena <em>lazy</em>, solo cuando se lee.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import redis
+
+cache = redis.Redis(host="cache", decode_responses=True)
+TTL = 300
+
+def leer_catalogo(producto_id: int) -> dict:
+    clave = f"producto:{producto_id}"
+    if (valor := cache.get(clave)) is not None:
+        return {"datos": valor, "fuente": "cache"}
+
+    datos = catalogo_db.get(producto_id)      # cache miss
+    if datos is None:
+        return None
+    cache.setex(clave, TTL, datos)             # rellena con TTL
+    return {"datos": datos, "fuente": "bd"}
+
+def actualizar_catalogo(producto_id: int, datos: dict) -> None:
+    catalogo_db.upsert(producto_id, datos)
+    cache.delete(f"producto:{producto_id}")    # invalida, no sobrescribe</code></pre>
+        <p>Detalles sutiles que hacen que este patrón funcione o truene:</p>
+        <ul>
+          <li><strong>Invalidar en la escritura:</strong> borrar la clave (no sobreescribir con lo nuevo) evita carreras de escritura concurrente.</li>
+          <li><strong>Proteger el miss:</strong> si la base cae, un miss masivo «golpea» la base de golpe (estampida). Un candado por clave (<em>single flight</em>) lo controla.</li>
+          <li><strong>TTL:</strong> es la red de seguridad por si una invalidación se pierde; la entrada expira sola.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="write-through">Write-through y write-back</h2>
+        <p>Cuando el patrón necesita frescura casi inmediata, la escritura también pasa por la caché:</p>
+        <ul>
+          <li><strong>Write-through:</strong> la escritura va a la caché y a la base en la misma operación. Lecturas siempre frescas; la escritura paga el doble de latencia.</li>
+          <li><strong>Write-back:</strong> la escritura solo va a la caché; la base se actualiza después en segundo plano. Escrituras rapidísimas, pero hay una ventana donde el dato vive solo en memoria: si el nodo muere sin volcar, se pierde.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python"># Write-back con vaciado diferido
+def escribir_contador(usuario_id: int, delta: int) -> None:
+    clave = f"contador:{usuario_id}"
+    cache.incrby(clave, delta)                 # rápido: solo en memoria
+    cola_sincronizacion.enqueue("flush", clave, delta)   # drenado en batch
+
+def vaciador(nodo: int) -> None:
+    lote = cola_sincronizacion.dequeue_many(500)
+    for clave, delta in lote:
+        contadores_db.incrby(clave.split(":")[1], delta)
+    # Se vuelca un lote; las métricas del contador se mantienen al día</code></pre>
+        <p>Write-back se usa cuando la escritura es el camino crítico (métricas, contadores, like en posts) y la consistencia puede ser eventual. Nunca para datos que deben aceptar sin discusión al instante (una transacción bancaria, un pedido).</p>
+      </section>
+
+      <section>
+        <h2 id="coherencia">Coherencia y estampidas</h2>
+        <p>Dos problemas clásicos de cualquier caché distribuida:</p>
+        <ul>
+          <li><strong>Coherencia:</strong> cuánto puede tardar en verse un cambio. Elijes con el TTL y con el patrón: cache-aside con invalidation da ventanas de segundos; write-through, casi cero.</li>
+          <li><strong>Estampida (thundering herd):</strong> cuando la clave expira y llegan mil peticiones a la vez, todas golpean la base. Soluciones: <em>single flight</em> (una sola petición rellena), TTL con jitter (expiración aleatoria) o categorías con probabilidad de cache.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python">import random, threading, time
+
+lock_cache = threading.Lock()
+
+def leer_con_estampida_controlada(clave: str, cargar):
+    if (valor := cache.get(clave)) is not None:
+        return valor
+    with lock_cache:                       # single flight por nodo
+        if (valor := cache.get(clave)) is not None:
+            return valor
+        valor = cargar()                   # solo esto golpea la base
+        ttl = 300 + random.randint(0, 60)  # jitter evita expiración sincronizada
+        cache.setex(clave, ttl, valor)
+    return valor</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cdn-durabilidad">CDN y durabilidad</h2>
+        <p>La CDN es «la caché de cerca del usuario»: sirve estáticos o incluso respuestas de API desde un borde global. Sus cabeceras HTTP son el control de frescura; el <code>Cache-Control</code> y el <code>ETag</code> deciden si el navegador o la CDN reutilizan la copia:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "cabeceras_publicadas_por_el_origen": {
+    "Cache-Control": "public, max-age=86400, stale-while-revalidate=600",
+    "ETag": "W/\"a1b2c3\""
+  },
+  "flujo": {
+    "1er_acceso": "cd1: miss → origen → se almacena en el borde",
+    "2do_acceso": "cd2: hit → borde → sin tocar el origen",
+    "revalidacion": "If-None-Match: a1b2c3 → 304 si no cambió"
+  }
+}</code></pre>
+        <p>Y la <strong>durabilidad</strong> convive con todo esto: la fuente de verdad siempre es el almacenamiento persistente (la base o el object storage). La caché, la CDN y el write-back son capas de velocidad; ninguna debe considerarse la única copia de un dato irremplazable. La regla que no falla: <em>si se pierde la memoria de todos los nodos, el dato debe seguir existiendo</em>.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un recurso caliente de tu sistema: ¿usarías cache-aside, write-through o write-back? Justifica mirando la frescura requerida y el costo de lectura vs escritura.</li>
+          <li>Implementa en pseudocódigo la invalidación de caché al actualizar el perfil de un usuario (cache-aside con borrado en escritura).</li>
+          <li>Explica qué pasa, con el patrón write-back, si el nodo de caché muere antes de vaciar el lote. ¿Qué falta añadir para no perder ese dato?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Cache-aside llena la caché solo al leer y elimina claves al escribir; es el patrón predeterminado.</li>
+          <li>Write-through da frescura a costa de latencia de escritura; write-back da escrituras rápidas con riesgo de pérdida temporal.</li>
+          <li>La coherencia se controla con TTL, invalidación y, si hace falta, revalidación al escribir.</li>
+          <li>Las estampidas se evitan con single flight y TTL con jitter.</li>
+          <li>CDN + cabeceras HTTP cachean en el borde; la durabilidad siempre vive en el almacenamiento persistente, no en la caché.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="cola-y-eventos-patterns.html">Patrones de colas y eventos</a>
+          <a class="related-lessons__link" href="bloques-de-construccion.html">Bloques de construcción</a>
+          <a class="related-lessons__link" href="estimaciones-de-capacidad.html">Estimaciones de capacidad</a>
+          <a class="related-lessons__link" href="diseno-de-un-feed.html">Caso: feed (newsfeed)</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="cola-y-eventos-patterns.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Patrones de colas y eventos</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="consistencia-consenso.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Consistencia y consenso</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

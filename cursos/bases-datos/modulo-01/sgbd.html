@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sgbd">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SGBD: sistemas de gestión de bases de datos · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Descubre qué es un SGBD (DBMS), qué componentes tiene, cuáles son los motores más usados y cómo eliges entre MySQL, PostgreSQL, SQLite o MongoDB.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="sgbd"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1 · Fundamentos</a><span class="sep">/</span>
+          <span class="current">SGBD: sistemas de gestión de bases de datos</span>
+        </nav>
+        <h1 class="lesson-title">SGBD: sistemas de gestión de bases de datos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>La base de datos es la información; el <strong>SGBD</strong> (Sistema de Gestión de Bases de Datos, o <em>DBMS</em> en inglés) es el programa que la administra. Puedes compararlo con un edificio: los datos son lo que hay adentro, y el SGBD es el edificio, la seguridad, el ascensor y el personal de mantenimiento: todo lo que hace posible guardar y sacar cajas de forma ordenada.</p>
+          <p>Formalmente, un SGBD es el <strong>software encargado de almacenar, consultar, modificar y proteger los datos</strong>, y de permitir que muchas aplicaciones y usuarios los usen a la vez sin conflictos.</p>
+        </section>
+
+        <section>
+          <h2 id="funciones">Qué hace un SGBD</h2>
+          <p>El SGBD es mucho más que un «cuaderno digital». Sus responsabilidades principales son:</p>
+          <ul>
+            <li><strong>Persistencia:</strong> escribe los datos en disco de forma que sobrevivan a reinicios.</li>
+            <li><strong>Concurrencia:</strong> permite que miles de peticiones lean y escriban al mismo tiempo.</li>
+            <li><strong>Integridad:</strong> aplica reglas: tipos de datos, valores obligatorios, unicidad de claves.</li>
+            <li><strong>Recuperación:</strong> si ocurre un fallo, puede restaurar el estado consistente.</li>
+            <li><strong>Seguridad:</strong> gestiona usuarios, contraseñas y permisos de acceso.</li>
+            <li><strong>Optimización:</strong> decide cómo ejecutar cada consulta de la forma más rápida posible.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="motores">Los SGBD del mundo real</h2>
+          <p>Cuando hablamos de «bases de datos» en el día a día, normalmente nos referimos al par <strong>SGBD + motor de almacenamiento</strong>. Los más usados en backend son:</p>
+          <ul>
+            <li><strong>MySQL:</strong> el relacional más popular en aplicaciones web. Fácil, rápido y con enorme comunidad.</li>
+            <li><strong>PostgreSQL:</strong> el relacional avanzado. Funciones, extensiones, JSON y gran robustez.</li>
+            <li><strong>SQLite:</strong> base embebida, un solo archivo, ideal para desarrollo y aplicaciones pequeñas.</li>
+            <li><strong>MongoDB:</strong> NoSQL basado en documentos JSON; gran flexibilidad y escala horizontal.</li>
+          </ul>
+          <p>Según el contexto se habla de «instalar MySQL», «crear una base en PostgreSQL» o «conectarse a la base de datos de producción»: casi siempre te refieres al SGBD y a los datos que administra.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo">Conexión: una primera prueba con SQLite</h2>
+          <p>SQLite es perfecto para probar sin instalar nada. En Python, estas pocas líneas crean un SGBD en un archivo, insertan un registro y lo leen:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">import sqlite3
+
+con = sqlite3.connect("local.db")
+cur = con.cursor()
+
+cur.execute("CREATE TABLE IF NOT EXISTS clientes (id INTEGER PRIMARY KEY, nombre TEXT)")
+cur.execute("INSERT INTO clientes (nombre) VALUES ('Ana')")
+con.commit()
+
+for fila in cur.execute("SELECT * FROM clientes"):
+    print(fila)  # (1, 'Ana')
+con.close()</code></pre>
+            </div>
+          </figure>
+          <p>Aquí acabaron de ocurrir varias funciones del SGBD: crear el archivo físico, validar la tabla, insertar datos y devolver resultados. En los módulos 3 a 6 usarás motores reales como MySQL y PostgreSQL.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Investiga (o pregunta a tu compañera/o) cuál es el SGBD que usa el proyecto en el que trabajas o uno de tus favoritos. ¿Es relacional o NoSQL?</li>
+            <li>Ejecuta el ejemplo de Python con SQLite y añade una segunda tabla llamada <code class="inline">pedidos</code> con una columna <code class="inline">total</code>.</li>
+            <li>Explica con tus palabras la diferencia entre la base de datos (los datos) y el SGBD (el programa).</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El SGBD es el software que administra los datos.</li>
+            <li>Gestiona persistencia, concurrencia, integridad, recuperación, seguridad y optimización.</li>
+            <li>Los motores más usados son MySQL, PostgreSQL, SQLite y MongoDB.</li>
+            <li>Escoger motor depende del proyecto, no hay uno «mejor» absoluto.</li>
+            <li>En el backend, le pides datos al SGBD mediante consultas (SQL u otras).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="que-es-una-base-de-datos.html">¿Qué es una base de datos?</a>
+            <a class="related-lessons__link" href="tablas-registros-columnas.html">Tablas, registros y columnas</a>
+            <a class="related-lessons__link" href="../modulo-03/create-table.html">Creando tablas con CREATE TABLE</a>
+            <a class="related-lessons__link" href="../modulo-07/que-es-nosql.html">¿Qué es NoSQL y por qué existe?</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

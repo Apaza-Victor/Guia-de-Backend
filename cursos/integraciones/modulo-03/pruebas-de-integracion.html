@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-pruebas-de-integracion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas de integración · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a probar integraciones: mocks de la API externa, pruebas de contrato, sandbox de proveedores y testcontainers para entornos efímeros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-pruebas-de-integracion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Pruebas de integración</span>
+      </nav>
+      <h1 class="lesson-title">Pruebas de integración</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Robustez</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Probar una integración tiene una dificultad que no tienen los tests normales: <strong>el proveedor no es tuyo</strong>. No puedes elegir cuándo responde, ni forzar un 500 a propósito, ni reproducir un timeout exacto en producción. La estrategia se arma en tres niveles: <strong>mocks</strong> para tu CI (rápidos y deterministas), <strong>contratos</strong> para detectar cambios del proveedor y <strong>sandbox</strong> para verificar el flujo completo de verdad antes de ir a producción.</p>
+      </section>
+
+      <section>
+        <h2 id="mocks">Mocks: tu CI no depende del proveedor</h2>
+        <p>En la suite de tests la API externa se sustituye por un mock controlado. Así pruebas tu lógica —parseo, errores, reintentos— sin red y sin cuota:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import pytest
+from unittest.mock import patch
+
+@patch("integraciones.geocode.httpx.get")
+def test_geocodificacion_ok(mock_get):
+    mock_get.return_value = RespuestaFalsa(
+        status_code=200,
+        json_data={"status": "OK", "results": [{
+            "geometry": {"location": {"lat": 19.4, "lng": -99.1}}
+        }]},
+    )
+    coordinadas = geocodificar("Av. Siempre Viva 742")
+    assert coordinadas["lat"] == 19.4</code></pre>
+        <p>Un test con mock es la única forma de probar el caso «el proveedor devuelve un 503» sin esperar a que eso ocurra en la vida real.</p>
+      </section>
+
+      <section>
+        <h2 id="contratos">Pruebas de contrato</h2>
+        <p>Una prueba de contrato verifica que la <strong>respuesta real</strong> del proveedor sigue teniendo la forma que tu código espera. Se ejecuta contra el sandbox de forma periódica (cron o CI programado) y no corresponde al release normal:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">// test/contrato.proveedor.spec.js — contra el sandbox del proveedor
+test('el estado del pedido sigue devolviendo status y trackingUrl', async () => {
+  const resp = await clienteProveedor.obtener('pedido-123');
+  expect(resp).toMatchObject({
+    status: expect.any(String),
+    trackingUrl: expect.any(String)
+  });
+});</code></pre>
+        <p>Cuando el proveedor cambia el JSON sin avisar, esta prueba te avisa antes de que el cambio llegue a tus usuarios.</p>
+      </section>
+
+      <section>
+        <h2 id="sandbox">El sandbox del proveedor</h2>
+        <p>Para el flujo completo y real (registrar un pago de prueba, verificar un webhook firmado) existe el <strong>sandbox</strong>: el entorno de pruebas del proveedor con tarjetas y datos falsos, misma API y casi mismo comportamiento. Antes de tocar producción, la integración debe pasar por sandbox con casos felices y casos de error. La clave de sandbox y la de producción son distintas — tenerlo claro desde el día uno evita cobrar a un cliente real con una prueba mal hecha.</p>
+      </section>
+
+      <section>
+        <h2 id="testcontainers">Testcontainers: infraestructura en el test</h2>
+        <p>Las integraciones viven rodeadas de infraestructura propia: Redis para la cola, PostgreSQL para deduplicación, el servidor de correo de prueba. <strong>Testcontainers</strong> levanta esos servicios en contenedores efímeros dentro de la suite y los apaga al terminar:</p>
+<pre class="code-block"><code class="language-python" data-language="python">with PostgresContainer("postgres:16") as db:
+    conexion = db.get_connection_url()
+    # apuntar la app de pruebas a este postgres y correr las assertions</code></pre>
+        <p>El resultado: pruebas de integración <em>de verdad</em> (con Redis real, con Postgres real) que no dependen de lo que haya instalado en tu máquina. Un solo comando de test reproduce el entorno completo en cualquier developer.</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "entorno_test": {
+    "contenedores": {
+      "postgres": "postgres:16",
+      "redis": "redis:7-alpine",
+      "maildev": "maildev/maildev:latest"
+    },
+    "mocks": ["proveedor-pagos", "proveedor-geocoder"],
+    "sandbox": { "proveedor-cobros": true }
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="que-probar">Qué probar de cada integración</h2>
+        <ul>
+          <li>Respuesta feliz y cada <strong>código de error</strong> que tu código maneja (400, 401, 429, 503).</li>
+          <li>El comportamiento de <strong>timeout</strong>: que se corte y no cuelgue el request.</li>
+          <li>Que los <strong>reintentos</strong> respeten backoff y no disparen el efecto dos veces.</li>
+          <li>Que una <strong>firma inválida</strong> en el webhook sea rechazada.</li>
+          <li>Que el <strong>mapper</strong> traduzca campos renombrados o ausentes.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si una integración no se puede testear sin red, no está lista; si no se puede testear con errores provocados, no está probada.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un test con mock para el caso «el proveedor devuelve 503 y el retry respeta el backoff».</li>
+          <li>Crea una prueba de contrato contra el sandbox de una API pública de tu interés.</li>
+          <li>Levanta un servicio con Testcontainers en tu proyecto y escribe un test de integración real contra él.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Mocks: tu CI funciona sin red ni cuota del proveedor.</li>
+          <li>Contratos: detectan cambios silenciosos del JSON del proveedor.</li>
+          <li>Sandbox: verifica el flujo completo real antes de producción.</li>
+          <li>Testcontainers reproducen la infraestructura de la integración en cada test.</li>
+          <li>Cada código de error que manejas debe tener su test.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/patrones-de-integracion.html">Patrones de integración</a>
+          <a class="related-lessons__link" href="manejo-de-errores-reintentos.html">Errores y reintentos</a>
+          <a class="related-lessons__link" href="env-vars-y-secrets.html">Configuración y secretos</a>
+          <a class="related-lessons__link" href="monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

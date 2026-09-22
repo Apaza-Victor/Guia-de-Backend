@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m2-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exchanges y routing · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende los tipos de exchange de RabbitMQ: direct, fanout, topic y headers, con ejemplos de bindings y routing keys para cada patrón de enrutado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m2-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Exchanges y routing</span>
+      </nav>
+      <h1 class="lesson-title">Exchanges y routing</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · RabbitMQ y colas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>RabbitMQ ofrece <strong>cuatro tipos de exchange</strong>, y cada uno define una política distinta para decidir qué colas reciben un mensaje. Elegir el tipo correcto es la decisión de diseño central de cualquier sistema con RabbitMQ.</p>
+        <ul>
+          <li><strong>direct:</strong> una cola, una routing key exacta.</li>
+          <li><strong>fanout:</strong> broadcast a todas las colas sin mirar keys.</li>
+          <li><strong>topic:</strong> routing key con patrones y comodines.</li>
+          <li><strong>headers:</strong> reglas sobre headers del mensaje, no sobre keys.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="direct">Direct: la ruta exacta</h2>
+        <p>El binding declara una routing key literal; el mensaje llega si su routing key coincide <strong>exactamente</strong>. Varias colas pueden ligarse con la misma key (cada una recibe una copia) o con keys distintas.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function directDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  await ch.assertExchange('tareas', 'direct', { durable: true });
+  await ch.assertQueue('colas-procesar', { durable: true });
+  await ch.assertQueue('colas-fallar', { durable: true });
+
+  // Binding exacto: solo "critica" entra a colas-fallar
+  await ch.bindQueue('colas-procesar', 'tareas', 'critica');
+  await ch.assertQueue('colas-importante');
+  await ch.bindQueue('colas-importante', 'tareas', 'critica');
+
+  // Llega a "colas-procesar" y también a "colas-importante"
+  ch.publish('tareas', 'critica', Buffer.from('reiniciar-cola'));
+  await conn.close();
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="fanout">Fanout: broadcast total</h2>
+        <p>El exchange <code>fanout</code> <strong>ignora la routing key</strong> y entrega una copia a <em>todas</em> las colas ligadas. Es el «topic puro»: cada suscriptor recibe cada evento, sin filtros. Perfecto para eventos globales que todo el mundo debe ver.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">async function fanoutDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  await ch.assertExchange('notificaciones', 'fanout', { durable: true });
+  const qEmail = await ch.assertQueue('fork-email');
+  const qSms = await ch.assertQueue('fork-sms');
+  const qPush = await ch.assertQueue('fork-push');
+
+  // Sin key: todas las colas reciben TODO
+  await ch.bindQueue(qEmail.queue, 'notificaciones', '');
+  await ch.bindQueue(qSms.queue, 'notificaciones', '');
+  await ch.bindQueue(qPush.queue, 'notificaciones', '');
+
+  ch.publish('notificaciones', 'ignorar-esta-key',
+    Buffer.from('{"mensaje": "pedido enviado"}'));
+  // email, sms y push reciben la misma copia
+  await conn.close();
+}</code></pre>
+        <p>Si mañana quieres notificar también por WhatsApp, declaras una cola nueva y la lías a <code>notificaciones</code>: el productor no cambia una sola línea.</p>
+      </section>
+
+      <section>
+        <h2 id="topic">Topic: routing con comodines</h2>
+        <p>Rebusca la routing key contra patrones separados por puntos. Dos comodines:</p>
+        <ul>
+          <li><code>*</code> (asterisco): sustituye a <strong>una</strong> palabra.</li>
+          <li><code>#</code> (almohadilla): sustituye a <strong>cero o más</strong> palabras.</li>
+        </ul>
+        <p>Es la combinación perfecta de direct (filtra) y fanout (multidestino).</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">async function topicDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  await ch.assertExchange('eventos', 'topic', { durable: true });
+  await ch.assertQueue('facturacion', { durable: true });
+  await ch.assertQueue('stock', { durable: true });
+
+  // facturacion escucha TODO lo de pedidos; stock solo stock
+  await ch.bindQueue('facturacion', 'eventos', 'pedido.*');
+  await ch.bindQueue('stock', 'eventos', 'pedido.procesado');
+
+  ch.publish('eventos', 'pedido.creado', Buffer.from('{...}'));
+  // -> facturacion (pedido.*) SÍ, stock (pedido.procesado) NO
+
+  ch.publish('eventos', 'pedido.procesado', Buffer.from('{...}'));
+  // -> facturacion SÍ, stock SÍ
+  await conn.close();
+}</code></pre>
+        <p>Con <code>#</code> puedes capturar árboles enteros: <code>usuario.#</code> recibe <code>usuario.creado</code> y <code>usuario.cuenta.bloqueada</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="headers">Headers: routing por atributos</h2>
+        <p>Cuando la decisión depende del contenido (no de la key), usa headers. El binding declara atributos y una regla <code>x-match</code> (<code>all</code>/<code>any</code>). Es menos común y más lento; úsalo con moderación.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function headersDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  await ch.assertExchange('auditoria', 'headers', { durable: true });
+  const q = await ch.assertQueue('solo-privado');
+
+  // Binding: entra si el header es "auditor" y prioridad alta (x-match=all)
+  await ch.bindQueue(q.queue, 'auditoria', '', {
+    'x-match': 'all', auditor: 'cicd', prioridad: 'alta'
+  });
+
+  ch.publish('auditoria', '', Buffer.from('despliegue a prod'), {
+    headers: { auditor: 'cicd', prioridad: 'alta' }
+  });
+  await conn.close();
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo usar cada uno</h2>
+        <ul>
+          <li><strong>direct →</strong> colas de tareas por prioridad o tipo: <code>critica</code>, <code>normal</code>.</li>
+          <li><strong>fanout →</strong> notificaciones y eventos globales donde todos deben enterarse.</li>
+          <li><strong>topic →</strong> eventos de dominio con jerarquía: <code>pedido.creado</code>, <code>pago.aprobado</code>.</li>
+          <li><strong>headers →</strong> routing complejo por metadatos que no caben en una key (evitar si puedes).</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Si tu routing se complica,</strong> recuerda que puedes encadenar: exchange → cola → otro exchange. Modulariza el enrutado en piezas pequeñas y legibles en vez de una cascada de cabeceras.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Diseña los bindings para que: la cola <code>alertas-rojas</code> reciba <code>alerta.#</code> y la cola <code>alertas-app</code> reciba <code>alerta.app.*</code>. ¿Qué llega a cada una para la key <code>alerta.app.critica</code>?</li>
+          <li>Implementa con fanout una difusión de <code>status.up</code> a tres servicios que deben reiniciar su caché.</li>
+          <li>Responde: ¿por qué no se debe usar fanout para una cola de tareas de facturación donde cada factura debe procesarse una sola vez?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Direct: coincidencia exacta de la routing key.</li>
+          <li>Fanout: broadcast incondicional a todas las colas ligadas.</li>
+          <li>Topic: patrones con <code>*</code> (una palabra) y <code>#</code> (cero o más).</li>
+          <li>Headers: reglas sobre atributos del mensaje con <code>x-match</code>.</li>
+          <li>El exchange elegido define la semántica de tu sistema (trabajo vs evento).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="rabbitmq-conceptos.html">RabbitMQ: conceptos</a>
+          <a class="related-lessons__link" href="../modulo-01/colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+          <a class="related-lessons__link" href="workers-y-prefetch.html">Workers y prefetch</a>
+          <a class="related-lessons__link" href="../modulo-03/particiones-y-claves.html">Particiones y claves</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backups-restauracion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backups y restauración · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende a hacer backups reales con mysqldump y pg_dump, el concepto de WAL y la prueba de fuego: restaurar una base de datos desde cero.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="backups-restauracion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6 · MySQL y PostgreSQL</a><span class="sep">/</span>
+          <span class="current">Backups y restauración</span>
+        </nav>
+        <h1 class="lesson-title">Backups y restauración</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · MySQL y PostgreSQL</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>El día que se borra algo importante, no importa lo bien que diseñaste tu esquema: importa <strong>si el respaldo y la restauración funcionan</strong>. Un backup que nunca se prueba no es un backup. En esta lección haces ambas cosas.</p>
+        </section>
+
+        <section>
+          <h2 id="mysql-backup">Backup con mysqldump</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Shell</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-shell"># Volcado lógico: genera archivo con CREATE + INSERT
+mysqldump -u root -p ecommerce &gt; ecommerce_dump.sql
+
+# Solo estructura, sin datos
+mysqldump -u root -p --no-data ecommerce &gt; esquema.sql
+
+# Restaurar (¡la prueba de fuego!)
+mysql -u root -p -e "CREATE DATABASE ecommerce_restaurada;"
+mysql -u root -p ecommerce_restaurada &lt; ecommerce_dump.sql</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="postgres-backup">Backup con pg_dump</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Shell</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-shell"># Volcado del base 'ecommerce' a un archivo
+pg_dump -U postgres -d ecommerce -f ecommerce_pg.sql
+
+# Restaurar
+createdb -U postgres ecommerce_restaurada
+psql -U postgres -d ecommerce_restaurada -f ecommerce_pg.sql</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="estrategia">Diseñar la estrategia</h2>
+          <ul>
+            <li><strong>Frecuencia:</strong> elige según el daño aceptable: diaria, horaria o continua.</li>
+            <li><strong>Retención:</strong> guarda varios días/semanas para revertir errores «que aparecen tarde».</li>
+            <li><strong>Offsite:</strong> copia el backup fuera del mismo disco/servidor (nube, otro host).</li>
+            <li><strong>Automatización:</strong> usa cron o el planificador de tareas; los humanos olvidan.</li>
+            <li><strong>Recuperación ante desastres:</strong> define un paso a paso documentado para volver en &lt; X minutos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="wal">PITR y el WAL</h2>
+          <p>Los motores modernos guardan cada confirmación en un <strong>log de escritura anticipada (WAL)</strong>. Combinando un backup base + los WAL posteriores puedes restaurar «al minuto del accidente» (PITR, <em>point-in-time recovery</em>). En producción esto reduce la pérdida de un día a segundos.</p>
+        </section>
+
+        <section>
+          <h2 id="verificar">Verificar el backup</h2>
+          <p>Operación obligatoria cada cierto tiempo: <strong>restaurar en una base de prueba</strong> y comparar conteos de filas o un checksum. Si la restauración falla, el backup no existía.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT (SELECT COUNT(*) FROM pedidos) AS pedidos_original;
+SELECT (SELECT COUNT(*) FROM pedidos) AS pedidos_restaurada;  -- en la base restaurada</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Con tu base de práctica, haz un mysqldump o pg_dump.</li>
+            <li>Borra una tabla por error y «vuelve en el tiempo» restaurando el dump.</li>
+            <li>Escribe la política de backup de tu proyecto: frecuencia, retención y lugar.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>mysqldump y pg_dump generan respaldos lógicos portables.</li>
+            <li>Restaurar es la prueba que valida el procedimiento.</li>
+            <li>Automatiza, retén varias generaciones y guarda en otro sitio.</li>
+            <li>El WAL habilita recuperación al minuto (PITR).</li>
+            <li>Un backup sin test de restauración es una ilusión.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="usuarios-permisos-respaldos.html">Usuarios y permisos</a>
+            <a class="related-lessons__link" href="mysql-vs-postgresql.html">MySQL vs PostgreSQL</a>
+            <a class="related-lessons__link" href="../modulo-05/propiedades-acid.html">Durabilidad y WAL</a>
+            <a class="related-lessons__link" href="../modulo-01/papel-de-la-base-de-datos.html">El papel de la base de datos</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

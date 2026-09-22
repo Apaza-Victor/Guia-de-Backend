@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-quorum-y-recuperacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum y recuperación · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende quórums de lectura y escritura (W/R), read repair, hinted handoff y cómo se recupera un sistema distribuido cuando un nodo vuelve a conectar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-quorum-y-recuperacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Quorum y recuperación</span>
+      </nav>
+      <h1 class="lesson-title">Quorum y recuperación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Replicación y consistencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En un sistema sin líder (leaderless), nadie sabe cuál es la copia «verdadera». Para decidir, el cliente no habla con un solo nodo: habla con <strong>varios</strong> y exige un mínimo de confirmaciones. Ese mínimo es el <strong>quórum</strong>, y con la fórmula adecuada consigues consistencia fuerte sin un liderazgo central.</p>
+      </section>
+
+      <section>
+        <h2 id="w-r">La regla W + R &gt; N</h2>
+        <p>Con <strong>N</strong> réplicas por clave:</p>
+        <ul>
+          <li><strong>W</strong> = número mínimo de nodos que deben confirmar una <em>escritura</em>.</li>
+          <li><strong>R</strong> = número mínimo de nodos que deben confirmar una <em>lectura</em>.</li>
+        </ul>
+        <p>Si <strong>W + R &gt; N</strong>, cualquier lectura quórum lee al menos de un nodo que tenga la última escritura. Es la base para tener lecturas siempre frescas, pero a costa de latencia: cada operación espera a varios nodos.</p>
+        <div class="callout">
+          <p><strong>Ejemplo:</strong> con N=3, si usas W=2 y R=2 (2+2&gt;3), toleras la caída de un nodo y sigues leyendo datos consistentes. Si optimizas velocidad con W=1 y R=1 (1+1 no &gt;3), ganas rendimiento pero puedes leer datos viejos.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="modelo-quorum">Modelo de quórum en código</h2>
+        <p>Representemos el flujo de una lectura quórum. El cliente pide la clave a varias réplicas y elige la versión más nueva entre las que llegan a tiempo:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import asyncio
+
+def leer_quorum(replicas, clave, r, timeout_ms=500):
+    pendientes = [pedir(replica, clave) for replica in replicas]
+    respuestas = esperar_esas_pendientes(pendientes, timeout_ms)
+
+    if len(respuestas) &lt; r:
+        raise Error("no se alcanzó el quórum de lectura")
+
+    # Elegir la versión con el número mayor (asumiendo versiones)
+    return max(respuestas, key=lambda v: v.version)
+</code></pre>
+        <p>Cuando el quórum no se alcanza —por ejemplo, tras una partición—, el sistema decide entre fallar la operación (política CP) o servir igualmente (política AP).</p>
+      </section>
+
+      <section>
+        <h2 id="recuperacion">Recuperación: read repair</h2>
+        <p>¿Qué pasa cuando una réplica se quedó desactualizada pero el cliente sí tenía el valor correcto? La técnica del <strong>read repair</strong> aprovecha la lectura con quórum para sanear: al detectar versiones divergentes, el nodo que tiene el valor más nuevo se lo envía a los atrasados.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "operacion": "lectura_quorum",
+  "replicas_consultadas": ["nodo-a", "nodo-b", "nodo-c"],
+  "versiones_recibidas": {
+    "nodo-a": { "version": 9, "valor": "Activo" },
+    "nodo-b": { "version": 7, "valor": "Pendiente" },
+    "nodo-c": { "version": 9, "valor": "Activo" }
+  },
+  "decision": "devolver version 9",
+  "read_repair": { "nodo-b": "reenviar version 9 para sanear" }
+}
+</code></pre>
+        <p>Así, sin un proceso central, el propio tráfico de lectura va curando a las réplicas rezagadas.</p>
+      </section>
+
+      <section>
+        <h2 id="hinted-handoff">Hinted handoff</h2>
+        <p>Cuando un nodo está <strong>caído</strong> durante una escritura, otro nodo sano acepta el dato «en préstamo» y lo deja anotado (<em>hint</em>). Cuando el nodo caído vuelve, el que guardó el hint se lo entrega. Así la escritura «no se pierde» aunque el destino estuviera apagado.</p>
+        <ul>
+          <li>Aumenta disponibilidad de escritura (no necesitas los N acuses, solo W de nodos sanos).</li>
+          <li>Requiere que el nodo que hizo de «casillero» sobreviva hasta la devolución.</li>
+        </ul>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># Configuración de Cassandra (Docker) que fija N, W y R por defecto:
+# - keyspace con factor de replicación N=3 (clase SimpleStrategy)
+# - consistency por operación: WRITE=LOCAL_QUORUM, READ=LOCAL_QUORUM
+
+storage:
+  cluster_name: 'AppCluster'
+  num_tokens: 256
+  hints_directory: /var/lib/cassandra/hints
+  hinted_handoff_enabled: true
+  max_hint_window: 3h
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="lwts">Sistemas grandes sin líder ni quórum</h2>
+        <p>Algunas bases (epílogo) mezclan líder y quórum. Las <em>lightweight transactions</em> de Cassandra usan Paxos internamente para operaciones «comparar-y-marcar» (por ejemplo, crear una clave única). Para eso ya entramos en el territorio del <strong>consenso</strong>, que verás en una lección próxima.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Con N=5, calcula combinaciones de W y R que mantengan consistencia fuerte y otras que no. ¿Cuál tolera más nodos caídos?</li>
+          <li>Simula un read repair por escrito: 3 réplicas, una con versión vieja; describe qué devuelves al cliente y qué se reenvía.</li>
+          <li>Responde: si dos nodos guardan un hint para el mismo nodo caído, ¿qué puede salir mal y cómo lo evitas?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El quórum define cuántos nodos deben confirmar una operación (W escritura, R lectura).</li>
+          <li>W + R &gt; N garantiza lecturas con la última escritura, tolerando algunos nodos caídos.</li>
+          <li>Read repair sanea réplicas atrasadas aprovechando las lecturas quórum.</li>
+          <li>Hinted handoff guarda la escritura temporalmente y la entrega cuando el nodo vuelve.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/consistencia-eventual.html">Consistencia eventual</a>
+          <a class="related-lessons__link" href="replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="relojes-vectoriales.html">Relojes vectoriales y versiones</a>
+          <a class="related-lessons__link" href="../modulo-03/casos-kafka-cassandra.html">Casos: Kafka, Cassandra, Redis cluster</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

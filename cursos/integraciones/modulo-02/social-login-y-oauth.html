@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-social-login-y-oauth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social login y OAuth · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a integrar el login con cuentas sociales: flujo de OAuth 2.0 y OIDC, canje de code por tokens, refresh de acceso y gestión de sesiones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-social-login-y-oauth"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Social login y OAuth</span>
+      </nav>
+      <h1 class="lesson-title">Social login y OAuth</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Integraciones prácticas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>«Inicia sesión con Google» no es magia: tu backend le da la bienvenida al usuario sin ver jamás su contraseña. Eso funciona porque el usuario autoriza a tu aplicación a saber quién es a través de <strong>OAuth 2.0</strong> (delegación de acceso) y, si el proveedor soporta <strong>OIDC</strong> (OpenID Connect), tu app recibe además su <strong>identidad</strong> verificada. Tu papel es implementar el flujo correctamente y no guardar el token en un lugar frágil.</p>
+      </section>
+
+      <section>
+        <h2 id="flujo">El flujo de authorization code</h2>
+        <ol>
+          <li>Tu backend redirige al usuario al proveedor con su <code>client_id</code> y los <code>scopes</code> pedidos.</li>
+          <li>El usuario se autentica en el proveedor y aprueba los permisos.</li>
+          <li>El proveedor redirige de vuelta a tu <code>redirect_uri</code> con un <code>code</code> de un solo uso.</li>
+          <li>Tu backend presenta el <code>code</code> al token endpoint junto con su <code>client_secret</code> y recibe los tokens.</li>
+        </ol>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">const params = new URLSearchParams({
+  client_id: process.env.GOOGLE_CLIENT_ID,
+  redirect_uri: 'https://mi-app.com/auth/callback',
+  response_type: 'code',
+  scope: 'openid email profile',
+  state: nonceAleatorio()
+});
+res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);</code></pre>
+        <p>El parametro <code>state</code> es una protección anti-CSRF: comprueba que sea el mismo que generaste antes de aceptar el <code>code</code>. Nunca lo omitas.</p>
+      </section>
+
+      <section>
+        <h2 id="canje">Canjear el code por tokens</h2>
+        <p>El <code>code</code> es corto y de un solo uso. El canje ocurre servidor a servidor, nunca en el navegador, porque requiere el <code>client_secret</code>:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import httpx
+
+def canjear_code(code: str) -> dict:
+    resp = httpx.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": CALLBACK_URL,
+            "grant_type": "authorization_code",
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()
+    # -> {"access_token": ..., "refresh_token": ..., "id_token": ..., "expires_in": 3600}
+</code></pre>
+        <p>Con el <code>id_token</code> (un JWT firmado que verifica la identidad) creas o encuentras al usuario en tu base; con el <code>access_token</code> accedes a sus datos autorizados (su foto, su correo verificado).</p>
+      </section>
+
+      <section>
+        <h2 id="oidc">OIDC: identidad verificada</h2>
+        <p>OIDC añade el <code>id_token</code>: un JWT con los <code>claims</code> del usuario (<code>sub</code>, <code>email</code>, <code>email_verified</code>, <code>name</code>). Debes <strong>validarlo</strong> antes de confiar:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "iss": "https://accounts.google.com",
+  "sub": "1182347835209876",
+  "email": "ana@correo.com",
+  "email_verified": true,
+  "aud": "mi-client-id.apps.googleusercontent.com",
+  "exp": 1699992000
+}</code></pre>
+        <ul>
+          <li>Verifica la <strong>firma</strong> con las claves públicas del proveedor (JWKS) al descargar de su discovery endpoint.</li>
+          <li>Comprueba <code>iss</code>, <code>aud</code> y <code>exp</code>. Un JWT firmado para otro aud o caducado no vale.</li>
+          <li>Usa el <code>sub</code> como identificador estable del usuario, no su correo (que puede cambiar).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="refresh">Refresh y sesión propia</h2>
+        <p>Los <code>access_token</code> expiran (una hora típicamente). El <code>refresh_token</code> de larga duración los renueva silenciosamente cuando el acceso sigue siendo necesario:</p>
+<pre class="code-block"><code class="language-bash" data-language="bash">curl -X POST https://oauth2.googleapis.com/token \
+  -d grant_type=refresh_token \
+  -d client_id=$GOOGLE_CLIENT_ID \
+  -d client_secret=$GOOGLE_CLIENT_SECRET \
+  -d refresh_token=$REFRESH_TOKEN</code></pre>
+        <p>El refresh_token se guarda cifrado y ligado a tu usuario. No lo envíes al navegador: tu backend mantiene su propia sesión (cookie HttpOnly), y los tokens del proveedor quedan a salvo en tus datos.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> el navegador solo ve la sesión de tu app. Los tokens de OAuth viven en tu backend, cifrados, nunca en localStorage del cliente.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="errors">Errores que verás seguido</h2>
+        <ul>
+          <li><code>invalid_grant</code> — el <code>code</code> ya se usó o caducó; vuelve a empezar el flujo.</li>
+          <li><code>redirect_uri_mismatch</code> — la URI configurada en el proveedor no coincide con la llamada.</li>
+          <li><code>invalid_client</code> — secret mal configurado o expuesto.</li>
+          <li><code>unauthorized_client</code> — el <code>client_id</code> no tiene permitido el scope pedido.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Registra una app en un proveedor (puedes usar uno de test) y configura <code>redirect_uri</code> y <code>state</code>.</li>
+          <li>Implementa el endpoint callback que valida el <code>state</code>, canjea el <code>code</code> y verifica el <code>id_token</code>.</li>
+          <li>Dibuja en un diagrama quién ve qué: proveedor, navegador, tu backend, y cuál guarda cada token.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>OAuth 2.0 delega acceso; OIDC añade identidad verificada con <code>id_token</code>.</li>
+          <li>El <code>code</code> se canjea servidor a servidor con el <code>client_secret</code>.</li>
+          <li>Siempre valida <code>state</code>, firma, <code>iss</code>, <code>aud</code> y <code>exp</code>.</li>
+          <li>El refresh_token se guarda en el backend; el navegador solo conoce tu sesión.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-01/sdk-y-clientes.html">SDKs y clientes HTTP</a>
+          <a class="related-lessons__link" href="../modulo-03/env-vars-y-secrets.html">Configuración y secretos</a>
+          <a class="related-lessons__link" href="../modulo-03/monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-que-es-inteligencia-artificial">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es la IA en el backend? · Backend para IA · Backend Academy</title>
+<meta name="description" content="Aprende qué significa integrar IA desde el servidor: la diferencia entre machine learning, deep learning y LLMs, y por qué el backend es el lugar donde se consume y protege la IA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-que-es-inteligencia-artificial"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es la IA en el backend?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es la IA en el backend?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando un usuario habla con un bot y este «entiende» o cuando un correo se clasifica automáticamente como spam, detrás hay un <strong>modelo</strong>: un programa que aprendió a reconocer patrones a partir de datos. Tu aplicación no «ejecuta magia»; tu servidor hace algo muy concreto: envía un texto a un modelo y recibe una predicción.</p>
+        <p>En este curso, <strong>la IA es un servicio consumible</strong>: un API que tu backend llama, igual que llamaría a una base de datos o a un proveedor de pagos. Entender eso desde el inicio te ahorrará meses de tratar el tema como algo «científico» cuando, en realidad, es un problema de ingeniería de integración.</p>
+      </section>
+
+      <section>
+        <h2 id="rol-del-backend">El rol del backend frente a la IA</h2>
+        <p>Prácticamente ningún producto de IA se consume desde el navegador llamando directamente al modelo. Ese trabajo vive en el servidor, y son tareas clásicas de backend:</p>
+        <ul>
+          <li><strong>Proteger las API keys:</strong> el secreto nunca debe viajar al cliente; se queda en variables de entorno del servidor.</li>
+          <li><strong>Orquestar llamadas:</strong> componer el prompt con contexto de tu base de datos, llamar al modelo y guardar el resultado.</li>
+          <li><strong>Cachear y controlar costes:</strong> respuestas repetidas no deberían pagar tokens dos veces.</li>
+          <li><strong>Limitar y autenticar:</strong> decidir quién puede consumir cuánto de tu integración de IA.</li>
+          <li><strong>Transmitir respuestas:</strong> enviar los tokens al cliente a medida que llegan (streaming).</li>
+        </ul>
+        <p>Todo lo demás —elegir el modelo, medir latencia, guardar historial, hacer fallback cuando el modelo falla— también es backend.</p>
+      </section>
+
+      <section>
+        <h2 id="ml-dl-llm">ML, deep learning y LLMs</h2>
+        <p>Conviene ordenar la terminología, porque se usa de forma intercambiable y no lo es:</p>
+        <ul>
+          <li><strong>Machine learning (ML):</strong> algoritmos que aprenden patrones de datos para predecir. Incluye regresión, árboles de decisión, clasificadores, etc.</li>
+          <li><strong>Deep learning (DL):</strong> una rama del ML basada en redes neuronales con muchas capas, capaces de aprender características complejas.</li>
+          <li><strong>LLM (Large Language Model):</strong> un modelo de deep learning entrenado con enormes cantidades de texto para predecir y generar lenguaje. GPT, Claude y Gemini son ejemplos.</li>
+        </ul>
+        <p>En la práctica, tu backend rara vez entrena modelos: los <strong>consume</strong> entrenados por otros. Eso cambia completamente el enfoque: tu trabajo es integrar bien, no ajustar pesos.</p>
+      </section>
+
+      <section>
+        <h2 id="primera-llamada">Tu primera llamada a un modelo</h2>
+        <p>La forma más común de consumir un LLM desde un servidor Node.js es la API de <em>chat completions</em>: envías un arreglo de mensajes y recibes la continuación de la conversación.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+
+async function responder(pregunta) {
+  const res = await fetch(OPENAI_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Eres un asistente de soporte técnico.' },
+        { role: 'user', content: pregunta }
+      ],
+      temperature: 0.3
+    })
+  });
+
+  if (!res.ok) throw new Error(`La API respondió ${res.status}`);
+
+  const data = await res.json();
+  return data.choices[0].message.content;
+}</code></pre>
+        <p>Observa los tres elementos de toda llamada: el <strong>modelo</strong>, los <strong>mensajes</strong> (con su rol) y los <strong>parámetros</strong> como la temperatura. En las próximas lecciones profundizaremos en cada uno.</p>
+      </section>
+
+      <section>
+        <h2 id="sdk-python">Lo mismo con el SDK de Python</h2>
+        <p>Python es el lenguaje natural del ecosistema de IA, y los proveedores publican SDKs oficiales que te ahorran escribir <code>fetch</code> a mano.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from openai import OpenAI
+
+client = OpenAI()  # lee OPENAI_API_KEY del entorno
+
+respuesta = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": "Traduce del español al inglés."},
+        {"role": "user", "content": "El pedido llegó con una pieza rota."}
+    ],
+    temperature=0.2,
+)
+
+print(respuesta.choices[0].message.content)
+# "The order arrived with a broken piece."</code></pre>
+        <p>Elige Python si tu equipo ya vive en él (análisis de datos, ML) y Node.js si tu backend es JavaScript. El protocolo es el mismo y, como verás, ambas formas llegan al mismo endpoint.</p>
+      </section>
+
+      <section>
+        <h2 id="respuesta">La respuesta que devuelve el modelo</h2>
+        <p>La API no devuelve solo el texto: devuelve metadatos que tu backend debe saber leer para medir costes y diagnosticar.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "id": "chatcmpl-ABC123",
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Claro, te explico el problema..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 34,
+    "completion_tokens": 12,
+    "total_tokens": 46
+  }
+}</code></pre>
+        <p>Los campos <code>usage</code> son tu medidor de coste y <code>finish_reason</code> te dice si el modelo terminó (<code>stop</code>), se cortó por el límite (<code>length</code>) o quería llamar a una herramienta (<code>tool_calls</code>). Esos detalles gobiernan la robustez de todo lo que construirás después.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un pequeño script Node.js (o Python) que llame a un modelo de chat con el mensaje: <em>«Explica en una frase qué hace el backend frente a la IA»</em>.</li>
+          <li>Guarda la API key en una variable de entorno y nunca la escribas en el código ni la envíes al navegador.</li>
+          <li>Imprime por consola los campos <code>model</code>, <code>content</code> y <code>usage.total_tokens</code> de la respuesta.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La IA se consume como un servicio: tu backend envía texto a un modelo y recibe una predicción.</li>
+          <li>Proteger keys, orquestar prompts, cachear y medir costes son tareas de backend.</li>
+          <li>ML es el término general; el deep learning es su subconjunto neuronal; los LLMs son modelos de lenguaje profundos.</li>
+          <li>Una llamada típica envía modelo + mensajes con roles + parámetros como la temperatura.</li>
+          <li>La respuesta trae el texto y también metadatos útiles: tokens usados y motivo de finalización.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="lenguaje-natural-y-llms.html">Lenguaje natural y LLMs</a>
+          <a class="related-lessons__link" href="apis-de-ia.html">APIs de IA</a>
+          <a class="related-lessons__link" href="../modulo-02/llm-integration-en-servicio.html">Integrar LLMs en un servicio</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 1</span>
+        <span class="title">Fundamentos de IA</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="lenguaje-natural-y-llms.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Lenguaje natural y LLMs</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

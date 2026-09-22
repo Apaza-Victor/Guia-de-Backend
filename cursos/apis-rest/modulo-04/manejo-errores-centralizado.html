@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="manejo-errores-centralizado">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manejo de errores centralizado · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a manejar errores de forma centralizada en APIs REST: middleware de error, trazas, logging y formatos de respuesta uniformes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="manejo-errores-centralizado"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4 · Implementación</a><span class="sep">/</span>
+          <span class="current">Manejo de errores centralizado</span>
+        </nav>
+        <h1 class="lesson-title">Manejo de errores centralizado</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Implementación</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="problema">El infierno de los try/catch por esquina</h2>
+          <p>Cada controlador repitiendo <code>try/catch</code>, cada uno con un JSON distinto… Eso es un <em>smell</em> de diseño. Lo correcto: <strong>un solo lugar</strong> captura, traduce y da formato a todas las excepciones.</p>
+        </section>
+
+        <section>
+          <h2 id="middleware">Middleware de error en Express</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">js (Express)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">class ApiError extends Error {
+  constructor(status, code, message, campos = null) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.campos = campos;
+  }
+}
+
+// El middleware LAST, después de las rutas
+app.use((err, req, res, next) =&gt; {
+  // excepciones inesperadas → 500 con traza, sin stack al exterior
+  if (!(err instanceof ApiError)) {
+    console.error(`[500] ${req.id}`, err);
+    err = new ApiError(500, "ERROR_INTERNO", "Algo salió mal.");
+  }
+  res.status(err.status).json({
+    error: {
+      code: err.code,
+      message: err.message,
+      status: err.status,
+      errors: err.campos,
+      trace_id: req.id
+    }
+  });
+});</code></pre>
+            </div>
+          </figure>
+          <p>Los controladores se voltean: lanzan <code>throw new ApiError(...)</code> y el middleware se encarga. Cero JSON manual repetido.</p>
+        </section>
+
+        <section>
+          <h2 id="flujo">Flujo del error</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Concepto</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-plaintext">route → repo lanza (duplicado) 
+→ middleware captura 
+→ traduce: 409 PRODUCTO_DUPLICADO 
+→ log con trace_id 
+→ responde JSON uniforme</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Logging:</strong> guardas <code>trace_id</code>, ruta, método, código y mensaje (ya sin stack si es esperado).</li>
+            <li><strong>Sin fuga:</strong> nunca mandes stack traces, SQL o mensajes de driver al cliente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="async">El dolor de las promesas rechazadas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">js</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// Sin envoltorio: la promesa rechazada cae al vacío
+app.get('/api/v1/peña', async (req, res) =&gt; {
+  const r = await repo.queFalla(); // ¡err!
+  res.json(r);
+});
+
+// Con envoltorio (o wrapper de framework): llega al middleware
+const asyncH = (fn) =&gt; (req, res, next) =&gt;
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+app.get('/api/v1/peña', asyncH(async (req, res) =&gt; {
+  const r = await repo.queFalla();
+  res.json(r);
+}));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="tips">Errores que preparan el terreno</h2>
+          <ul>
+            <li>Centraliza también la generación de <code>trace_id</code> (middleware de entrada + helper de logs).</li>
+            <li>Mapea los errores de BD a ApiError (<em>duplicate key</em> → 409, <em>not found</em> → 404) en el repo, no en el controlador.</li>
+            <li>En tu OpenAPI documenta las respuestas de error una sola vez y reutilízalas.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Implementa tu <code>ApiError</code> y tu middleware de error.</li>
+            <li>Lanza tres errores distintos desde tus rutas y verifica el JSON.</li>
+            <li>Añade el envoltorio asyncH y provoca un fallo real para ver el 500 limpio.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Un solo middleware traduce errores → JSON uniforme.</li>
+            <li>ApiError con status + code (+ campos para 422) en el núcleo.</li>
+            <li>Promesas: envueltas para no perder excepciones.</li>
+            <li>Log con trace_id, sin stack al cliente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="validacion-entrada-reglas.html">Validación de entrada</a>
+            <a class="related-lessons__link" href="../modulo-03/estructura-errores-consistente.html">Estructura de errores consistente</a>
+            <a class="related-lessons__link" href="../modulo-02/codigos-estado.html">Códigos de estado</a>
+            <a class="related-lessons__link" href="../modulo-06/monitoreo-metricas-basicas.html">Monitoreo y métricas</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

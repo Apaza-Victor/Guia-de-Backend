@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="firmas-digitales-y-hmac">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firmas digitales y HMAC · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Integridad y autenticidad: HMAC con llave compartida, firmas RSA con llaves asimétricas y el caso de JWT (HS256 vs RS256).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="firmas-digitales-y-hmac"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Firmas digitales y HMAC</span>
+        </nav>
+        <h1 class="lesson-title">Firmas digitales y HMAC</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Criptografía</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="garantias">Qué prueban una firma</h2>
+          <p>Un hash solo verifica <strong>integridad</strong> (no cambió el dato). Las firmas van más lejos y además prueban quién lo emitió (<strong>autenticidad</strong>) y que nadie lo repudia (<strong>no repudio</strong>). Dos familias: <strong>HMAC</strong> (llave compartida) y <strong>firma digital RSA/ECC</strong> (par público/privado).</p>
+        </section>
+
+        <section>
+          <h2 id="hmac">HMAC: llave compartida</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$secreto = getenv("HMAC_SECRETO"); // compartido entre los servicios
+
+$mensaje = '{"usuario":"123","accion":"transferir"}';
+
+// sello MAC: mismo mensaje + misma llave == mismo sello
+$sello = hash_hmac("sha256", $mensaje, $secreto);
+
+// el receptor recalcula y compara en tiempo constante
+$esperado = hash_hmac("sha256", $mensaje, $secreto);
+$vale = hash_equals($esperado, $sello);
+
+echo $vale ? "autentico" : "manipulado";
+// si el sello no cuadra, el dato no lo escribio tu dueno de la llave.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="firma">Firma digital: asimétrica</h2>
+          <p>Aquí <strong>cualquiera con la llave pública</strong> puede verificar, pero solo el dueño de la privada firma. Es lo que pasa con certificados, updates de software y JWTs de tipo RS256.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$priv = openssl_pkey_get_private(file_get_contents("/ruta/priv.pem"));
+$pub  = openssl_pkey_get_public (file_get_contents("/ruta/pub.pem"));
+
+$doc  = file_get_contents("contrato.json");
+
+// firmar
+openssl_sign($doc, $firma, $priv, OPENSSL_ALGO_SHA384);
+
+// verificar con la publica: cualquiera puede
+$ok = openssl_verify($doc, $firma, $pub, OPENSSL_ALGO_SHA384);
+var_dump($ok === 1); // 1 == autentico</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="cuando">Cuál usar</h2>
+          <table class="table">
+            <thead><tr><th>Escenario</th><th>Mecanismo</th></tr></thead>
+            <tbody>
+              <tr><td>Mensajes entre tus servicios (misma llave en ambos)</td><td>HMAC</td></tr>
+              <tr><td>Tokens JWT internos</td><td>HS256 (HMAC)</td></tr>
+              <tr><td>Verificación pública de quien firmó</td><td>RSA/ECDSA</td></tr>
+              <tr><td>Certificados y software</td><td>Firma asimétrica</td></tr>
+            </tbody>
+          </table>
+          <p>Regla simple: si el verificador confía en tu servidor y comparte la llave → HMAC; si terceros deben verificar sin conocer secretos → asimétrico.</p>
+        </section>
+
+        <section>
+          <h2 id="jwt">El caso de los JWT</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">// HS256: verifica con el mismo secreto que firmo -> simetrico/hmac.
+firebase\JWT\JWT::encode($payload, $secreto, "HS256");
+
+// RS256: firma con privada, valida cualquiera con la publica.
+firebase\JWT\JWT::encode($payload, $privPem, "RS256");
+
+// Al recibir, verifica SIEMPRE con la funcion decode() de la libreria:
+$decoded = firebase\JWT\JWT::decode($token, $claveVerificacion, ["HS256"]);
+// nunca verifiques con openssl_verify por tu cuenta (riesgo de 'alg' mix).</code></pre>
+            </div>
+          </figure>
+          <p>La seguridad del JWT depende de jamás bajar la guardia en la verificación de la firma, exactamente como en este módulo.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Firma un webhook saliente con HMAC y valídalo en el receptor.</li>
+            <li>Crea un par RSA y firma un archivo de configuración.</li>
+            <li>Compara HS256 y RS256 en tu JWT y anota cuándo elegirías cada uno.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>HMAC: integridad + autenticación con llave compartida.</li>
+            <li>Firma asimétrica: verifica pública, firma privada.</li>
+            <li><code class="inline">hash_equals</code> contra comparaciones normales.</li>
+            <li>JWT: HS256 = HMAC, RS256 = firma RSA.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="funciones-hash-bcrypt-argon2.html">Funciones hash: bcrypt y argon2</a>
+            <a class="related-lessons__link" href="cifrado-simetrico-y-asimetrico.html">Cifrado simétrico y asimétrico</a>
+            <a class="related-lessons__link" href="../modulo-03/tokens-csrf-y-cookies-samesite.html">Tokens CSRF y cookies SameSite</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

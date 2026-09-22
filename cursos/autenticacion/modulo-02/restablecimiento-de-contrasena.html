@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="restablecimiento-de-contrasena">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restablecimiento de contraseña · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Flujo seguro de restablecimiento de contraseña en PHP: token aleatorio de un solo uso, expiración, verificación por email y rotación tras el cambio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="restablecimiento-de-contrasena"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Restablecimiento de contraseña</span>
+        </nav>
+        <h1 class="lesson-title">Restablecimiento de contraseña</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Registro y Login</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">La recuperación también se defiende</h2>
+          <p>El flujo «olvidé mi contraseña» es una puerta trasera si se implementa mal. Dos errores clásicos: responder siempre «si el email existe te enviamos un enlace» pero con distintos tiempos, o usar el <strong>hash de la contraseña como token</strong>. La regla de oro: el token de reset es un <strong>secreto aleatorio de un solo uso</strong>, con expiración, independiente del hash.</p>
+        </section>
+
+        <section>
+          <h2 id="generacion">Generar y guardar el token</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+// POST /api/olvide-password  body: {email}
+
+$email = mb_strtolower(trim($_POST["email"] ?? ""));
+
+// Respuesta generica SIEMPRE (aunque el email no exista)
+$stmt = $db-&gt;prepare("SELECT id FROM usuarios WHERE email = ? AND activo = 1");
+$stmt-&gt;execute([$email]);
+$usuario = $stmt-&gt;fetch();
+
+if ($usuario) {
+    // Token criptograficamente seguro
+    $token  = bin2hex(random_bytes(32));
+    $tokenHash = hash("sha256", $token);
+    $expira = date("Y-m-d H:i:s", time() + 60 * 60); // 1 hora
+
+    $ins = $db-&gt;prepare(
+        "INSERT INTO reset_tokens (usuario_id, token_hash, expira_en)
+         VALUES (?, ?, ?)"
+    );
+    $ins-&gt;execute([$usuario["id"], $tokenHash, $expira]);
+
+    // Enviar SOLO el token en claro por correo (el texto, no la URL cruda)
+    // mail($email, "Restablece tu contrasena", "Tu enlace: /reset?t=$token");
+}
+
+// Responder lo mismo siempre
+http_response_code(200);
+echo json_encode(["mensaje" =&gt; "Si el email existe, revisa tu bandeja"]);</code></pre>
+            </div>
+          </figure>
+          <p>En base de datos solo se guarda el <strong>hash</strong> del token (lo mismo que con contraseñas): una filtración de una tabla no convierte los tokens en reseteos útiles.</p>
+        </section>
+
+        <section>
+          <h2 id="consumo">Consumir el token</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+// POST /api/reset-password  body: {token, nueva_password}
+
+$tokenHash = hash("sha256", (string) ($body["token"] ?? ""));
+$stmt = $db-&gt;prepare(
+    "SELECT * FROM reset_tokens
+     WHERE token_hash = ? AND expira_en &gt; NOW() AND usado = 0"
+);
+$stmt-&gt;execute([$tokenHash]);
+$fila = $stmt-&gt;fetch();
+
+if (!$fila) {
+    http_response_code(400);
+    exit(json_encode(["error" =&gt; "Enlace invalido o expirado"]));
+}
+
+$nueva = (string) ($body["nueva_password"] ?? "");
+if (strlen($nueva) &lt; 12) {
+    http_response_code(422);
+    exit(json_encode(["error" =&gt; "La contrasena debe tener minimo 12 caracteres"]));
+}
+
+// Actualizar hash y marcar el token como usado (un solo uso)
+$hash = password_hash($nueva, PASSWORD_BCRYPT, ["cost" =&gt; 12]);
+$db-&gt;prepare("UPDATE usuarios SET password_hash = ? WHERE id = ?")
+   -&gt;execute([$hash, $fila["usuario_id"]]);
+$db-&gt;prepare("UPDATE reset_tokens SET usado = 1 WHERE id = ?")
+   -&gt;execute([$fila["id"]]);
+
+echo json_encode(["mensaje" =&gt; "Contrasena actualizada"]);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="buenas">Buenas prácticas extra</h2>
+          <ul>
+            <li>Limita intentos de reset por email e IP (rate limiting).</li>
+            <li>Pide confirmación de la nueva contraseña en el frontend, no en el backend.</li>
+            <li>Tras un reset exitoso, revoca las sesiones activas del usuario.</li>
+            <li>El enlace debe ser <code class="inline">GET /reset?t=TOKEN</code> en la UI; el cambio de contraseña, un POST con el token.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Implementa la tabla <code class="inline">reset_tokens</code> con las columnas: id, usuario_id, token_hash, expira_en, usado, creado_en.</li>
+            <li>Prueba el flujo completo y consumiendo el token dos veces (la segunda debe fallar).</li>
+            <li>Explica por qué guardamos <code class="inline">token_hash</code> y no el token en claro.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Token aleatorio criptográfico, expiración y un solo uso.</li>
+            <li>En BD solo se guarda el hash del token.</li>
+            <li>Respuestas idénticas evitan enumerar usuarios.</li>
+            <li>Tras el cambio, revoca las sesiones anteriores.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="login-y-verificacion.html">Login y verificación de credenciales</a>
+            <a class="related-lessons__link" href="hashing-con-bcrypt.html">Hashing con bcrypt y password_hash</a>
+            <a class="related-lessons__link" href="../modulo-03/cierre-de-sesion-y-revocacion.html">Cierre de sesión y revocación</a>
+            <a class="related-lessons__link" href="../modulo-01/modelo-de-amenazas-login.html">El modelo de amenazas del login</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

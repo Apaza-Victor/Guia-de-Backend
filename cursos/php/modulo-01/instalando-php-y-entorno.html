@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="instalando-php-y-entorno">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instalando PHP y configurando el entorno · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende a instalar PHP en Windows, macOS y Linux, verificar la versión con la terminal y configurar un entorno con el servidor de desarrollo integrado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="instalando-php-y-entorno"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Instalando PHP y configurando el entorno</span>
+        </nav>
+        <h1 class="lesson-title">Instalando PHP y configurando el entorno</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a PHP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-necesitas">Qué necesitas</h2>
+          <p>Para seguir este curso solo necesitas tres piezas: un <strong>intérprete de PHP</strong> versión 8 o superior, un <strong>editor de textos</strong> y una <strong>terminal</strong>. No hace falta instalar una base de datos todavía: los primeros módulos funcionan perfectamente con PHP puro.</p>
+          <p>Puedes usar cualquier editor moderno. <strong>Visual Studio Code</strong> con la extensión «PHP Intelephense» es una opción gratuita y popular porque te ofrece resaltado de sintaxis, autocompletado y detección de errores mientras escribes.</p>
+          <ul>
+            <li><strong>PHP 8.x:</strong> el intérprete del lenguaje (incluye el servidor web integrado).</li>
+            <li><strong>Editor:</strong> VS Code, PHPStorm, Sublime Text u otro de tu preferencia.</li>
+            <li><strong>Terminal:</strong> PowerShell en Windows, Terminal en macOS o la consola de Linux.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="instalacion">Instalación por sistema operativo</h2>
+          <p>La forma más rápida de instalar solo el intérprete es usando el gestor de paquetes de tu sistema. En <strong>Windows</strong> puedes usar <strong>Chocolatey</strong>; en <strong>macOS</strong>, <strong>Homebrew</strong>, y en las distribuciones de <strong>Linux</strong> basadas en Debian, <code class="inline">apt</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># Windows (PowerShell, con Chocolatey instalado)
+choco install php
+
+# macOS (con Homebrew instalado)
+brew install php
+
+# Linux (Debian / Ubuntu)
+sudo apt update
+sudo apt install php-cli</code></pre>
+            </div>
+          </figure>
+          <p>Si prefieres un entorno «todo en uno» con Apache y MySQL para más adelante, <strong>XAMPP</strong> (Windows, macOS y Linux) o <strong>Laragon</strong> (Windows) son alternativas muy usadas en el mundo profesional porque incluyen PHP, un servidor web y MySQL en un solo paquete.</p>
+        </section>
+
+        <section>
+          <h2 id="verificar">Verificar la instalación</h2>
+          <p>Abre tu terminal y ejecuta el siguiente comando. Deberías ver la versión instalada y la fecha de compilación:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">php -v</code></pre>
+            </div>
+          </figure>
+          <p>Si quieres conocer la configuración completa del intérprete —extensiones cargadas, rutas, valores de <code class="inline">php.ini</code>— usa:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">php --ini
+php -m</code></pre>
+            </div>
+          </figure>
+          <p><code class="inline">php -m</code> muestra los módulos disponibles. Entre ellos deberías ver <code class="inline">json</code>, <code class="inline">pdo</code> y <code class="inline">mysqli</code>, que usaremos en los módulos de bases de datos.</p>
+        </section>
+
+        <section>
+          <h2 id="servidor">El servidor de desarrollo integrado</h2>
+          <p>PHP trae un servidor web ligero ideal para practicar. Navega con tu terminal a la carpeta de tu proyecto y ejecuta:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">php -S localhost:8000</code></pre>
+            </div>
+          </figure>
+          <p>Ahora abre <code class="inline">http://localhost:8000</code> en tu navegador. Si hay un archivo <code class="inline">index.php</code> en la carpeta, será ejecutado automáticamente. Este servidor es perfecto para desarrollo; en producción se usan servidores como Apache o Nginx junto a PHP-FPM.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Instala PHP 8 en tu sistema siguiendo el método que prefieras.</li>
+            <li>Ejecuta <code class="inline">php -v</code> y anota la versión exacta que tienes.</li>
+            <li>Ejecuta <code class="inline">php -m</code> y busca si aparece el módulo <code class="inline">pdo</code>.</li>
+            <li>Crea una carpeta <code class="inline">mis-proyectos</code>, inicia el servidor con <code class="inline">php -S localhost:8000</code> y confirma que responde en el navegador.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>PHP 8 se instala con el gestor de paquetes de tu sistema o con paquetes como XAMPP.</li>
+            <li><code class="inline">php -v</code> verifica la instalación y <code class="inline">php -m</code> lista los módulos.</li>
+            <li>El servidor de desarrollo se levanta con <code class="inline">php -S localhost:8000</code>.</li>
+            <li>El archivo <code class="inline">index.php</code> dentro de la carpeta se ejecuta al entrar a la URL raíz.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

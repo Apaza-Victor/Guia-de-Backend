@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="tercera-forma-normal-desnormalizacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tercera forma normal y desnormalización · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende la tercera forma normal, cómo detectar dependencias transitivas y cuándo desnormalizar de forma consciente para mejorar el rendimiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="tercera-forma-normal-desnormalizacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2 · Modelado y diseño</a><span class="sep">/</span>
+          <span class="current">Tercera forma normal y desnormalización</span>
+        </nav>
+        <h1 class="lesson-title">Tercera forma normal y desnormalización</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Modelado y diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Terminamos el viaje de la normalización con la <strong>tercera forma normal (3FN)</strong>, la meta de casi todos los esquemas reales. Su enemiga es la <strong>dependencia transitiva</strong>: cuando un atributo depende de la clave, pero a través de otro atributo de la misma tabla. Y al cerrar, hablaremos de la <strong>desnormalización</strong>: la decisión consciente de romper las reglas cuando el rendimiento lo exige.</p>
+        </section>
+
+        <section>
+          <h2 id="dependencia-transitiva">La dependencia transitiva</h2>
+          <p>Una tabla cumple 3FN si cumple 2FN y <strong>ningún atributo no clave depende de otro atributo no clave</strong>. En lenguaje simple: «la tabla guarda hechos del tema que describe».</p>
+          <p>Imagina esta tabla de pedidos con datos de la ciudad del cliente incluidos:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE pedidos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente VARCHAR(100),
+    ciudad VARCHAR(80),
+    pais VARCHAR(80)   -- depende de ciudad, no de id
+);</code></pre>
+            </div>
+          </figure>
+          <p>La cadena <code class="inline">id → ciudad → pais</code> es transitiva: el país depende de la ciudad, y la ciudad depende del pedido. Si una ciudad «sube» de país, habría que actualizar cada pedido histórico. La solución es separar la <strong>Ciudad</strong> (que ya sabe su país) en su propia tabla y referenciarla:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE ciudades (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(80) NOT NULL,
+    pais VARCHAR(80) NOT NULL
+);
+
+CREATE TABLE pedidos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente VARCHAR(100),
+    ciudad_id INT,
+    FOREIGN KEY (ciudad_id) REFERENCES ciudades(id)
+);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="anomalias">Las anomalías que evita la 3FN</h2>
+          <ul>
+            <li><strong>Inserción:</strong> no puedes crear un pedido sin conocer la ciudad (y por tanto el país).</li>
+            <li><strong>Actualización:</strong> si un país cambia de nombre, hay que tocar todas las filas del país.</li>
+            <li><strong>Borrado:</strong> al borrar el último pedido de una ciudad pierdes la información del país.</li>
+          </ul>
+          <p>Con la tabla <code class="inline">ciudades</code> separada, cada dato vive en un solo lugar y las anomalías desaparecen.</p>
+        </section>
+
+        <section>
+          <h2 id="desnormalizacion">Desnormalización: romper reglas con intención</h2>
+          <p>Normalizar cuesta <em>JOINs</em>: para mostrar el país necesitas unir dos tablas. En sistemas de <strong>lectura intensiva</strong> (reportes, dashboards, feeds), el costo de unir 5 tablas puede ser mayor que el beneficio de la limpieza. Ahí nace la desnormalización: <strong>duplicar datos deliberadamente</strong> para acelerar lecturas, aceptando el riesgo de inconsistencias.</p>
+          <p>Reglas para desnormalizar bien:</p>
+          <ul>
+            <li>Hazlo solo con <strong>datos históricos o de baja frecuencia de cambio</strong> (totales, contadores).</li>
+            <li>Aplica la técnica de mayor rendimiento por esfuerzo: columnas calculadas, sumas prefijadas o copias de solo lectura.</li>
+            <li>Asegura que el escritor guarde siempre el duplicado <strong>en la misma transacción</strong>.</li>
+            <li>Deja comentado y documentado el porqué; que la siguiente persona no lo «repare» por accidente.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Desnormalización útil: contar reseñas dentro del producto
+ALTER TABLE productos ADD COLUMN total_resenas INT NOT NULL DEFAULT 0;
+
+-- El código del backend lo incrementa en la misma operación que crea la reseña
+BEGIN;
+INSERT INTO resenas (producto_id, texto) VALUES (42, 'Excelente');
+UPDATE productos SET total_resenas = total_resenas + 1 WHERE id = 42;
+COMMIT;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="resumen-niveles">Normalizar hasta dónde</h2>
+          <p>La mayoría de esquemas profesionales se quedan en <strong>3FN</strong>. Las formas 4FN y 5FN existen y rara vez se aplican en el mundo real. La secuencia práctica: modelar el negocio, llegar a 3FN, y solo después preguntarse si un caso concreto de rendimiento justifica desnormalizar.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Detecta la dependencia transitiva en una tabla <code class="inline">productos(id, categoria, supervisor_categoria)</code> y normalízala a 3FN.</li>
+            <li>Propón un caso real de desnormalización y explica qué se gana y qué se arriesga.</li>
+            <li>Escribe el SQL (con transacción) que mantiene sincronizado el contador de un duplicado.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>3FN elimina las dependencias transitivas entre atributos no clave.</li>
+            <li>Cada atributo debe contar algo de la entidad de la tabla, no de otra.</li>
+            <li>La desnormalización duplica datos conscientemente a cambio de velocidad de lectura.</li>
+            <li>Se desnormaliza sobre datos históricos o poco cambiantes, y siempre documentado.</li>
+            <li>3FN es el objetivo práctico habitual; las formas superiores son raras.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="primera-segunda-forma-normal.html">Primera y segunda forma normal</a>
+            <a class="related-lessons__link" href="modelo-entidad-relacion.html">Modelo entidad-relación</a>
+            <a class="related-lessons__link" href="cardinalidad.html">Cardinalidad de las relaciones</a>
+            <a class="related-lessons__link" href="../modulo-04/indices-rendimiento.html">Índices y rendimiento</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

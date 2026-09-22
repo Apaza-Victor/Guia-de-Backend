@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-comunicacion-en-el-equipo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comunicación en el equipo · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a comunicar dentro de un equipo backend: síncrono vs asíncrono, el registro escrito y los ADRs para que las decisiones técnicas no mueran con quien las tomó.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-comunicacion-en-el-equipo"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Comunicación en el equipo</span>
+      </nav>
+      <h1 class="lesson-title">Comunicación en el equipo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Comunicación y entrega</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="sync-async">Síncrono vs asíncrono</h2>
+        <p>Un equipo backend pasa 80% de su tiempo <em>desconectado</em>: programando, revisando, desplegando. La comunicación debe ajustarse a esa realidad. La regla general es simple:</p>
+        <ul>
+          <li><strong>Síncrono</strong> (reunión, videollamada): lo que se beneficia del ida y vuelta inmediato — brainstorming, desacuerdo técnico, decisiones donde el contexto importa.</li>
+          <li><strong>Asíncrono</strong> (issue, PR, doc, chat): todo lo que se puede resolver sin reunión — informes, decisiones, avisos, revisiones.</li>
+        </ul>
+        <p>La pregunta que separa ambos mundos: <em>¿esto requiere que yo esté presente, o puedo decidirlo/cuadrarlo leyendo?</em>. Si responde «leyendo», es asíncrono — y meterlo en una reunión es robarte tiempo de código.</p>
+      </section>
+
+      <section>
+        <h2 id="registro-escrito">El registro escrito como memoria del equipo</h2>
+        <p>Las reuniones desaparecen; los tickets, los PRs y los documentos se quedan. Por eso el equipo backend escribe: cada decisión importante, cada cambio de contrato, cada incidente, donde cualquiera pueda encontrarlo después.</p>
+        <p>Un principio útil: «si no está escrito, no pasó», pero en versión amable: <em>si lo importante se apoya solo en conversaciones, cuando la persona se vaya, el conocimiento se va con ella</em>. Escribir es una inversión con retorno asimétrico bajo.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> una decisión discutida en una reunión no está tomada hasta que alguien la dejó escrita en un ticket, un PR o un ADR y se aclaró quién la ejecutará.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="adr">Documentar decisiones técnicas con ADRs</h2>
+        <p>El patrón más efectivo para capturar decisiones de arquitectura y diseño en backend es el <strong>ADR (Architecture Decision Record)</strong>: un documento corto con contexto, decisión y consecuencias. Su formato mínimo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "adr": 7,
+  "titulo": "Usar PostgreSQL como base principal y Redis para caché",
+  "estado": "aceptado",
+  "fecha": "2026-09-22",
+  "contexto": [
+    "El sistema crece a 50k peticiones/día y necesita lectura rápida de catálogo",
+    "Mantener una sola fuente de verdad transaccional reduce costos de sincronización"
+  ],
+  "decision": "PostgreSQL para persistencia transaccional; Redis para caché de lectura",
+  "consecuencias": [
+    "Positivas: transaccionalidad robusta, caché de perfil muy rápido",
+    "Negativas: hay que mantener coherencia de caché (invalidación) y dos bases operando",
+    "Alternativas descartadas: MongoDB (sin caso que la justifique), DynamoDB (vencimiento y costo)"
+  ]
+}</code></pre>
+        <p>Un ADR no es un ensayo: 5 a 15 líneas bastan. Su superpoder es la sección de <strong>consecuencias</strong>, incluyendo lo negativo — ahí vive lo que se olvida primero y lo que evita rehacer decisiones equivocadas.</p>
+      </section>
+
+      <section>
+        <h2 id="canales">Canales y reglas básicas de higiene</h2>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Convención de canales de un equipo backend distribuido
+#
+# canal "incidentes"        -> solo alertas y cadenas de coordinación de crisis
+# canal "backend"           -> dudas cotidianas asíncronas, enlaces a tickets
+# canal "releases"          -> avisos de despliegues y flag flips (no discusión)
+# PR/issue                  -> la discusión técnica vive EN el PR, no en el chat
+
+# Regla: todo hallazgo de review o duda técnica se abre como hilo/issue
+# y no se "resuelve por chat", porque el chat no tiene historia útil.
+echo "El chat recuerda las últimas 48h. El issue recuerda para siempre."</code></pre>
+        <p>Otras normas que elevan la calidad de comunicación en equipos serios:</p>
+        <ul>
+          <li>Reuniones con orden del día escrito y una línea de decisión al cierre («qué quedó claro y quien lo ejecuta»).</li>
+          <li>Documentación viva en el repositorio, no en la nube de la gente.</li>
+          <li>Una dolaridad: las preguntas que se repiten merecen respuesta escrita una vez, enlazada desde la FAQ.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="feedback">Feedback sin dramas</h2>
+        <p>La comunicación también engloba dar y recibir crítica técnica. Las revisiones de código, las retrospectivas y los postmortems comparten una misma base: <strong>secriticar la solución, no a la persona</strong>. Frases que neutralizan el conflicto:</p>
+        <ul>
+          <li>«No entiendo cómo este caso se cubre — ¿me ayudas con el ejemplo?» en vez de «esto está mal».</li>
+          <li>«Propongo otra alternativa por X; ¿probamos la comparación?» en vez de «lo haría distinto».</li>
+          <li>En postmortem: «¿qué condición permitió que pasara?» en vez de «¿quién lo hizo?».</li>
+        </ul>
+        <p>Un equipo donde se puede decir «no estoy de acuerdo» sin quemarse discute mejor, revisita más rápido y produce código más defendible.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica 5 actividades típicas de tu semana (reunión, chat, ticket, PR, doc) en síncronas o asíncronas y propón cuál podría migrar a asíncrona.</li>
+          <li>Escribe un ADR de una decisión técnica reciente de tu equipo con las 3 secciones del formato (contexto, decisión, consecuencias).</li>
+          <li>Redacta la convención de canales de tu equipo en 4 líneas, con la regla de que la discusión técnica vive en el PR.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Síncrono para lo que necesita ida y vuelta; asíncrono para lo que se resuelve leyendo.</li>
+          <li>El registro escrito es la memoria del equipo; lo que solo vive en conversaciones se va con quien se va.</li>
+          <li>Los ADRs capturan contexto, decisión y consecuencias — incluidas las negativas.</li>
+          <li>La discusión técnica vive en el PR; el feedback critica la solución, no a la persona.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="code-review-y-colaboracion.html">Code review y colaboración</a>
+          <a class="related-lessons__link" href="lanzamiento-y-postmortem.html">Lanzamientos y postmortem</a>
+          <a class="related-lessons__link" href="../modulo-02/seguimiento-y-medicion.html">Seguimiento y medición</a>
+          <a class="related-lessons__link" href="../modulo-01/scrum-para-backend.html">Scrum aplicado a backend</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 3</span>
+        <span class="title">Comunicación y entrega</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="code-review-y-colaboracion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Code review y colaboración</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

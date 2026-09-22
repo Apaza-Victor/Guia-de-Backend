@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="alcance-de-variables">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alcance de variables (scope) · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Entiende el alcance de las variables en PHP: scope local, global, superglobals y la palabra clave global, con ejemplos claros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="alcance-de-variables"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Alcance de variables (scope)</span>
+        </nav>
+        <h1 class="lesson-title">Alcance de variables (scope)</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de flujo y funciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es-scope">¿Qué es el alcance?</h2>
+          <p>El <strong>alcance</strong> (scope) decide desde qué puntos del código puedes «ver» una variable. Si declaras una variable fuera de las funciones, esa variable es <strong>global</strong>. Si la declaras dentro de una función, es <strong>local</strong> a esa función.</p>
+          <p>Regla fundamental de PHP: <strong>una variable global no es visible dentro de una función</strong> y viceversa. Esta design es intencionada: mantiene cada función aislada y predecible.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$entorno = "producción";   // variable global
+
+function leerEntorno() {
+    // $entorno NO existe aquí: esta línea genera un aviso
+    echo $entorno . PHP_EOL;
+}
+
+leerEntorno();
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="scope-local">El scope local de las funciones</h2>
+          <p>Cada llamada a una función crea su propio <em>mundo</em> de variables. Los parámetros y las variables creadas dentro se destruyen al terminar la llamada... a menos que uses <code class="inline">static</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function contador() {
+    static $visitas = 0;   // conserva el valor entre llamadas
+    $visitas++;
+    return $visitas;
+}
+
+echo contador() . PHP_EOL;  // 1
+echo contador() . PHP_EOL;  // 2
+echo contador() . PHP_EOL;  // 3
+
+function sinStatic() {
+    $local = 0;            // se reinicia en cada llamada
+    $local++;
+    return $local;
+}
+
+echo sinStatic() . PHP_EOL;  // 1
+echo sinStatic() . PHP_EOL;  // 1
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="global">La palabra global</h2>
+          <p>Si necesitas usar una variable global dentro de una función, debes declararla con <code class="inline">global $nombre;</code>. A pesar de existir, en el backend moderno se evita: crea dependencias ocultas entre funciones.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$configVersion = "3.2";
+
+function versionActual() {
+    global $configVersion;
+    return $configVersion;
+}
+
+echo versionActual() . PHP_EOL;   // 3.2
+
+// Mejor aún: pasarla como parámetro
+function versionActual2(string $version): string {
+    return $version;
+}
+echo versionActual2($configVersion) . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="superglobals">Las superglobals</h2>
+          <p>PHP pone a tu disposición <strong>superglobals</strong>: variables predefinidas disponibles en todo el código, incluso dentro de las funciones. Son el puente entre el mundo HTTP y tu programa.</p>
+          <ul>
+            <li><code class="inline">$_GET</code>: parámetros enviados por la URL.</li>
+            <li><code class="inline">$_POST</code>: datos enviados por un formulario en POST.</li>
+            <li><code class="inline">$_SERVER</code>: cabeceras y datos del servidor y de la petición.</li>
+            <li><code class="inline">$_SESSION</code> y <code class="inline">$_COOKIE</code>: estado del usuario.</li>
+            <li><code class="inline">$_FILES</code>: archivos subidos.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function metodoDePeticion(): string {
+    // Disponible dentro de una función sin declarar global
+    return $_SERVER['REQUEST_METHOD'] ?? "UNKNOWN";
+}
+
+echo metodoDePeticion() . PHP_EOL;
+
+if ($_GET['promo'] ?? false) {
+    echo "Promoción aplicada" . PHP_EOL;
+}
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea una variable global <code class="inline">$IVA = 0.21</code> e intenta usarla dentro de una función; anota el aviso que recibes.</li>
+            <li>Resuelve el problema de dos formas: con <code class="inline">global</code> y pasándola como parámetro.</li>
+            <li>Escribe una función con <code class="inline">static $llamadas</code> que cuente cuántas veces fue invocada.</li>
+            <li>Dentro de una función, imprime el método HTTP actual usando <code class="inline">$_SERVER</code>.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Las variables tienen ámbito local y global; los bloques if/for no crean scope propio.</li>
+            <li>Dentro de una función no se ven las variables globales automáticamente.</li>
+            <li><code class="inline">static</code> conserva el valor local entre llamadas.</li>
+            <li><code class="inline">global</code> importa una variable global, pero conviene evitarla.</li>
+            <li>Las superglobals como <code class="inline">$_GET</code>, <code class="inline">$_POST</code> o <code class="inline">$_SERVER</code> están siempre disponibles.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-que-es-graphql">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es GraphQL? · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende qué es GraphQL, el lenguaje de consultas para APIs que nace para resolver los problemas de REST, y compara ambos modelos con ejemplos reales de consulta y respuesta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-que-es-graphql"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es GraphQL?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es GraphQL?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de GraphQL</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>GraphQL es un <strong>lenguaje de consulta para APIs</strong> desarrollado por Facebook en 2012 y liberado en 2015. En lugar de exponer un conjunto de URLs por recurso, la API expone <em>un solo endpoint</em> al que el cliente envía una consulta estructurada que describe exactamente qué datos quiere y en qué forma.</p>
+        <p>Esas consultas son texto plano con una sintaxis llamada <strong>SDL</strong> (Schema Definition Language), el mismo lenguaje que usan los desarrolladores, las aplicaciones móviles y los navegadores. Esto convierte a la API en un <em>contrato tipado</em>: el servidor sabe qué campos existen, qué argumentos aceptan y qué tipo devuelven.</p>
+        <p>Al ser un lenguaje de consulta, GraphQL no es una librería ni un framework específico: es una <strong>especificación abierta</strong> (graphql.org) con implementaciones en casi todos los lenguajes, desde JavaScript y Python hasta Go, Ruby y .NET.</p>
+      </section>
+
+      <section>
+        <h2 id="problema-rest">El problema con REST</h2>
+        <p>REST es el estándar que dominó la década pasada: cada recurso tiene una URL y unos verbos HTTP, y el servidor devuelve una representación fija. Funciona muy bien, pero a medida que las apps son más complejas aparecen dos problemas constantes:</p>
+        <ul>
+          <li><strong>Over-fetching:</strong> el servidor envía campos que el cliente no va a usar. Cargar la pantalla de perfil trae también los posts, los seguidores y los datos sensibles "por si acaso".</li>
+          <li><strong>Under-fetching:</strong> la respuesta se queda corta y el cliente debe hacer varias peticiones encadenadas. Una vista que mezcla perfil + últimas compras + reviews requiere 3 (o 5) llamadas a 3 (o 5) endpoints distintos.</li>
+        </ul>
+        <p>El peor escenario combina ambos: la app móvil pide el doble de datos que necesita y aun así tiene que encadenar llamadas para terminar de pintar una sola pantalla.</p>
+      </section>
+
+      <section>
+        <h2 id="como-funciona">Cómo funciona GraphQL</h2>
+        <p>En GraphQL no hay docenas de endpoints: hay <strong>una sola URL</strong> (normalmente <code>/graphql</code>) a la que llegan todas las operaciones. El cliente envía un documento de operación y el servidor, guiado por el schema, lo ejecuta campo por campo con sus propios resolvers.</p>
+        <p>El flujo es siempre el mismo:</p>
+        <ul>
+          <li>El cliente envía una <strong>consulta</strong> describiendo la forma de la respuesta.</li>
+          <li>El servidor <strong>valida</strong> la consulta contra el schema (campos correctos, tipos correctos).</li>
+          <li>Cada campo tiene un <strong>resolver</strong> que devuelve su valor, enlazando la base de datos, otras APIs o el código de negocio.</li>
+          <li>GraphQL <strong>ensambla</strong> la respuesta respetando la forma pedida y la entrega en JSON.</li>
+        </ul>
+        <p>El cliente no decide "qué devolver el servidor", pero sí <em>qué parte quiere ver</em> y cómo quiere anidarla. Esa libertad, controlada por el schema, es la clave de todo lo demás.</p>
+      </section>
+
+      <section>
+        <h2 id="primera-query">Tu primera consulta</h2>
+        <p>Observa cómo el cliente pide un usuario y, bajo cada campo, puede anidar sus posts eligiendo los campos que le interesan:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">{
+  usuario(id: "u1") {
+    nombre
+    email
+    posts {
+      titulo
+    }
+  }
+}</code></pre>
+        <p>El servidor responde con exactamente esa forma, sin campos extras:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "data": {
+    "usuario": {
+      "nombre": "Ana Torres",
+      "email": "ana@example.com",
+      "posts": [
+        { "titulo": "Hola GraphQL" },
+        { "titulo": "Resolvers en acción" }
+      ]
+    }
+  }
+}</code></pre>
+        <p>La misma consulta que en REST exigiría dos o tres peticiones (<code>GET /usuarios/1</code>, <code>GET /usuarios/1/posts</code>) aquí se resuelve en una sola operación. Se puede probar fácilmente con un cliente HTTP:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ usuario(id: \"u1\") { nombre email } }"}'</code></pre>
+      </section>
+
+      <section>
+        <h2 id="vs-rest">GraphQL vs REST</h2>
+        <p>No es "uno reemplaza al otro", sino modelos con prioridades distintas. La comparación rápida:</p>
+        <ul>
+          <li><strong>Endpoints:</strong> REST expone muchos recursos (uno por entidad); GraphQL expone un único endpoint con todas las operaciones.</li>
+          <li><strong>Forma de la respuesta:</strong> en REST el servidor decide; en GraphQL la decide el cliente dentro de los límites del schema.</li>
+          <li><strong>Tipado:</strong> REST suele documentarse aparte (OpenAPI); GraphQL es tipado y auto-documentado por introspección.</li>
+          <li><strong>Versionado:</strong> REST versiona la URL (<code>/v1/</code>, <code>/v2/</code>); GraphQL agrega campos de forma evolutiva sin romper a los clientes.</li>
+          <li><strong>Errores:</strong> REST usa códigos HTTP; GraphQL siempre responde 200 con un cuerpo <code>errors</code> estructurado.</li>
+        </ul>
+        <p>REST sigue siendo excelente para APIs públicas, simples y orientadas a recursos. GraphQL brilla cuando hay clientes diversos (web, móvil, TV), relaciones de datos complejas y equipos que quieren evolucionar la API sin coordinar versionado manual.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando-usar">¿Cuándo usar GraphQL?</h2>
+        <p>GraphQL aporta más valor cuando existen varias de estas condiciones:</p>
+        <ul>
+          <li><strong>Clientes heterogéneos:</strong> web de escritorio, móvil y aplicaciones internas con necesidades de datos distintas.</li>
+          <li><strong>Relaciones profundas:</strong> datos entrecruzados (usuario → posts → comentarios → autor) que en REST obligarían a encadenar llamadas.</li>
+          <li><strong>Productos con UI densa:</strong> feeds, dashboards y paneles donde una pantalla consume muchísimos datos.</li>
+          <li><strong>Equipos que evolucionan la API seguido:</strong> añadir campos sin versionar la URL.</li>
+        </ul>
+        <p>En cambio, para una API pública sencilla, un contrato REST estable o cuando el cliente solo necesita datos planos, GraphQL añade complejidad sin beneficio claro. Decidir con criterio —como harás en el módulo 3— es parte del trabajo del backend.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma una API REST que conozcas y elige una pantalla de tu app que la consuma.</li>
+          <li>Anota cuántas peticiones hace esa pantalla y qué campos recibe que no usa. Clasifícalos en <em>over-fetching</em> o <em>under-fetching</em>.</li>
+          <li>Escribe esa misma pantalla como una consulta GraphQL: un campo raíz, campos anidados y solo las propiedades que realmente pintas.</li>
+          <li>Responde por escrito: en tu caso, ¿merece la pena cambiar a GraphQL? ¿Por qué?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>GraphQL es un lenguaje de consulta tipado para APIs con un único endpoint.</li>
+          <li>Resuelve el over-fetching y el under-fetching típicos de REST.</li>
+          <li>El cliente describe la forma de la respuesta y el servidor la valida contra el schema.</li>
+          <li>GraphQL y REST coexisten: cada uno tiene escenarios donde brilla.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="types-y-schema.html">Tipos y Schema</a>
+          <a class="related-lessons__link" href="queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="resolvers.html">Resolvers</a>
+          <a class="related-lessons__link" href="../modulo-02/apollo-server-basico.html">Apollo Server básico</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 1</span>
+        <span class="title">Fundamentos de GraphQL</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="types-y-schema.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Tipos y Schema</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="iam-y-seguridad">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IAM y seguridad · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Usuarios, roles y políticas de IAM en AWS: el modelo de permisos mínimo que protege tu Backend y tu cuenta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="iam-y-seguridad"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">IAM y seguridad</span>
+      </nav>
+      <h1 class="lesson-title">IAM y seguridad</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · AWS</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Quién puede hacer qué</h2>
+        <p><strong>IAM (Identity and Access Management)</strong> es el sistema de permisos de AWS: quién (identidad) puede hacer qué (acción) sobre cuál recurso. La mayoría de los hackeos de cuentas AWS vienen de credenciales con demasiado poder. IAM te permite dormir tranquilo con el <strong>menor privilegio</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="piezas">Las tres piezas: usuarios, grupos, políticas</h2>
+        <ul>
+          <li><strong>Usuarios IAM:</strong> identidades para personas o máquinas, con una Access Key (ID + secret) para la CLI.</li>
+          <li><strong>Grupos:</strong> agrupan usuarios (ej. <code class="inline">devs</code>, <code class="inline">ops</code>) y sus permisos se heredan.</li>
+          <li><strong>Políticas:</strong> JSON que define acciones y recursos permitidos/denegados.</li>
+        </ul>
+        <p>Regla inquebrantable: <strong>jamás operes con la cuenta raíz</strong>. Se crea un usuario con sus permisos y con MFA obligatorio.</p>
+      </section>
+
+      <section>
+        <h2 id="politica">Una política de menor privilegio</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::mi-api-media/*",
+      "Condition": {
+        "IpAddress": { "aws:SourceIp": "203.0.113.10/32" }
+      }
+    }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+        <p>Solo lee/escribe en el bucket de la API y solo desde una IP. Esa es la mentalidad: acciones específicas, recursos específicos, condiciones.</p>
+      </section>
+
+      <section>
+        <h2 id="roles">Roles: permisos para servicios, no para personas</h2>
+        <p>Los <strong>roles IAM</strong> otorgan permisos a un servicio (EC2, Lambda) de forma temporal y segura. Tu Lambda puede leer S3 sin que guardes ninguna Access Key en el código (pésima práctica): el rol lo hace.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># crear el rol para la Lambda
+aws iam create-role --role-name mi-api-role \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Principal": {"Service": "lambda.amazonaws.com"},
+      "Action": "sts:AssumeRole"
+    }]
+  }'
+
+# adjuntar política de S3 y de logs
+aws iam attach-role-policy \
+  --role-name mi-api-role \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+# al crear la Lambda, se asigna el rol (ya visto en la lección Lambda)</code></pre>
+          </div>
+        </figure>
+        <p>Las credenciales temporales se renuevan solas: es más seguro que andar guardando secretos.</p>
+      </section>
+
+      <section>
+        <h2 id="checklist">Checklist de seguridad mínimo</h2>
+        <ul>
+          <li>MFA activado en la cuenta raíz y en los usuarios con permisos altos.</li>
+          <li>Cero Access Keys en código o archivos de configuración del repo.</li>
+          <li>Políticas con el menor alcance posible (acciones + recursos + condiciones).</li>
+          <li>SSH y puertos de bases cerrados a internet con security groups.</li>
+          <li>Revisión periódica de qué permisos tienen los usuarios inactivos (delétalos).</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un usuario IAM con acceso solo a S3 de un bucket (y nada más).</li>
+          <li>Genera sus Access Keys y comprueba en la CLI que <code class="inline">ec2 describe-instances</code> falla.</li>
+          <li>Crea un rol para Lambda y pásalo a una de tus funciones que lee S3 sin usarse ninguna Key.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>IAM define quién puede hacer qué: usuarios, grupos, roles y políticas.</li>
+          <li>El menor privilegio es la norma: acciones y recursos mínimos.</li>
+          <li>Los roles dan permisos temporales a servicios sin exponer secretos.</li>
+          <li>MFA + cero roots en operación + claves fuera del código = cuenta sana.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-relojes-vectoriales">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relojes vectoriales y versiones · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende a ordenar eventos en sistemas distribuidos: relojes de Lamport, relojes vectoriales, versionamiento de valores y cómo resolver conflictos entre réplicas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-relojes-vectoriales"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Relojes vectoriales y versiones</span>
+      </nav>
+      <h1 class="lesson-title">Relojes vectoriales y versiones</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Replicación y consistencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Los relojes físicos no sirven para ordenar eventos en un sistema distribuido: cada nodo lee su propio reloj, que se desvía. Para saber «¿este evento ocurrió antes que aquel?» sin depender del tiempo, usamos <strong>relojes lógicos</strong>: contadores que se intercambian entre nodos.</p>
+      </section>
+
+      <section>
+        <h2 id="lamport">Reloj de Lamport</h2>
+        <p>El reloj de Lamport es un contador entero con dos reglas:</p>
+        <ol>
+          <li>Cada nodo incrementa su contador en 1 antes de cada evento.</li>
+          <li>Al enviar un mensaje, se incluye el contador; al recibirlo, el receptor toma <code>máx(contador_local, contador_recibido) + 1</code>.</li>
+        </ol>
+        <pre class="code-block"><code class="language-python" data-language="python">class RelojLamport:
+    def __init__(self, nodo):
+        self.nodo = nodo
+        self.valor = 0
+
+    def evento(self):
+        self.valor += 1
+
+    def enviar(self):
+        self.valor += 1
+        return self.valor  # se adjunta al mensaje
+
+    def recibir(self, valor_recibido):
+        self.valor = max(self.valor, valor_recibido) + 1
+
+# Orden causal viaja en los mensajes: lo que "pasó antes" queda registrado
+</code></pre>
+        <p>Los relojes de Lamport dan un <strong>orden parcial</strong>: si un mensaje viajó, sabemos quién fue primero; eventos de nodos distintos sin comunicación quedan «concurrentes» (no comparables).</p>
+      </section>
+
+      <section>
+        <h2 id="vectoriales">Relojes vectoriales</h2>
+        <p>Para detectar exactamente <em>qué pares de eventos son concurrentes</em>, usamos un reloj por nodo: el <strong>vectorial</strong>. Cada nodo mantiene un vector con un contador por nodo del sistema.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Reloj vectorial: Map(nodo -> contador) por proceso
+function incrementar(clk, nodo) {
+  const nuevo = new Map(clk);
+  nuevo.set(nodo, (nuevo.get(nodo) || 0) + 1);
+  return nuevo;
+}
+
+function comparar(a, b) {
+  // Devuelve "igual", "despues" (a domina a b), "antes" o "concurrente"
+  let dominaA = false, dominaB = false;
+  const nodos = new Set([...a.keys(), ...b.keys()]);
+  for (const nodo of nodos) {
+    const ca = a.get(nodo) || 0;
+    const cb = b.get(nodo) || 0;
+    if (ca > cb) dominaA = true;
+    if (ca < cb) dominaB = true;
+  }
+  if (dominaA && dominaB) return "concurrente";
+  if (dominaA) return "despues";
+  if (dominaB) return "antes";
+  return "igual";
+}
+</code></pre>
+        <p>Al recibir una actualización, el nodo fusiona el reloj del remitente tomando el máximo por entrada. Así, cualquier versión «sabe» qué otras versiones ya conoce.</p>
+        <div class="callout">
+          <p><strong>Importante:</strong> los relojes vectoriales no te dicen <em>cuál</em> valor es el correcto; te dicen <em>si</em> hay conflicto. La resolución de conflictos es otra decisión: last-writer-wins, fusión o unificación de valores.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="versioning">Versionado de objetos</h2>
+        <p>En bases sin líder, cada valor replicado se guarda junto con un <strong>contexto de versiones</strong>. Si al leer obtienes dos versiones concurrentes, el sistema devuelve ambas y la aplicación (o el usuario) las resuelve. Así lo modela DynamoDB/Cassandra internamente:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "clave": "carrito:usuario-42",
+  "versiones": [
+    { "valor": "añadir:camiseta-M",   "reloj": { "nodo-a": 3, "nodo-b": 0 } },
+    { "valor": "añadir:gorra-negra",  "reloj": { "nodo-a": 0, "nodo-b": 2 } }
+  ],
+  "estado": "conflicto",
+  "siguiente_paso": "el cliente fusiona ambas listas"
+}
+</code></pre>
+        <p>Las dos versiones son concurrentes (ninguna domina a la otra) y por eso el sistema conserva ambas en vez de descartar una. Tras la fusión, se escribe con un reloj que las domina a las dos.</p>
+      </section>
+
+      <section>
+        <h2 id="resolucion">Resolver conflictos</h2>
+        <ul>
+          <li><strong>Last-writer-wins (LWW):</strong> el reloj con el timestamp mayor gana. Simple y pierde datos: una edición antigua puede pisotear una nueva.</li>
+          <li><strong>Merge de valores:</strong> combinar estructuras de datos convergentes (CRDT, contadores, conjuntos). Correcto para casos específicos.</li>
+          <li><strong>Conflicto visible:</strong> devolver ambas versiones y pedir decisión al usuario o a la aplicación. Lo más seguro para datos importantes.</li>
+        </ul>
+        <p>En el mundo real, Cassandra usa LWW por defecto y permite «resolver en la aplicación» con operaciones CAS. La elección depende de cuánto duele perder una actualización.</p>
+      </section>
+
+      <section>
+        <h2 id="dfs">La regla clave</h2>
+        <p>El orden causal vale solo si seguimos el «tiempo de los mensajes»: si <code>a pasa a b</code> (a sucede-before b) y ambos modifican la misma clave, siempre podremos decir cuál deriva de cuál. Cuando dos nodos modifican sin cruzarse mensajes, hay un conflicto genuino. Esa distinción —<em>derivado vs conflicto</em>— es exactamente lo que resuelven los relojes vectoriales.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Simula con lápiz y papel un reloj de Lamport: nodo A envía a B, luego B envía a C. Escribe los contadores de cada evento.</li>
+          <li>Con el código <code>comparar()</code> de esta lección, di qué relación tienen: (a-b:3 , b:1) vs (a-b:2, b:2).</li>
+          <li>Para un carrito de la compra, diseña la fusión de dos versiones concurrentes y qué reloj asocias a la versión resultante.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los relojes lógicos ordenan eventos sin depender de relojes físicos.</li>
+          <li>Lamport da un orden parcial; los relojes vectoriales detectan concurrencia exacta.</li>
+          <li>Las versiones concurrentes se guardan juntas, nunca se descartan a ciegas.</li>
+          <li>La resolución es decisión de negocio: LWW, merge o conflicto visible.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="../modulo-01/consistencia-eventual.html">Consistencia eventual</a>
+          <a class="related-lessons__link" href="consenso-distribuido.html">Consenso distribuido</a>
+          <a class="related-lessons__link" href="../modulo-03/casos-kafka-cassandra.html">Casos: Kafka, Cassandra, Redis cluster</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m4-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón State: comportamiento que cambia con el estado de una entidad, con ejemplos PHP de pedidos y flujos de aprobación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m4-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">State</span>
+      </nav>
+      <h1 class="lesson-title">State</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Comportamiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>State</strong> hace que el comportamiento de un objeto <strong>dependa de su estado</strong>, moviendo cada conjunto de reglas a una clase de estado propia. Un pedido <code>pendiente</code> no se comporta igual que uno <code>enviado</code>: con el patrón, esa diferencia se modela, no se programa con ifs.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El infierno de los if de estado</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (acoplado)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class Pedido
+{
+    public function cambiarEstado(string $nuevo): void
+    {
+        if ($this-&gt;estado === 'cancelado') {
+            throw new \DomainException('Pedido cancelado');
+        }
+        if ($this-&gt;estado === 'enviado' &amp;&amp; $nuevo === 'pendiente') {
+            throw new \DomainException('No se puede regresar');
+        }
+        if ($nuevo === 'cancelado' &amp;&amp; $this-&gt;estado === 'entregado') {
+            throw new \DomainException('Entregado no se cancela');
+        }
+        // 30 líneas más de transiciones...
+        $this-&gt;estado = $nuevo;
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Cada transición nueva = un if más en la entidad (y en la otra entidad que haga lo mismo).</p>
+      </section>
+
+      <section>
+        <h2 id="solucion">La solución: estados con identidad propia</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">interface EstadoPedido
+{
+    public function nombre(): string;
+    public function confirmar(Pedido $p): EstadoPedido;
+    public function cancelar(Pedido $p): EstadoPedido;
+    public function enviar(Pedido $p): EstadoPedido;
+}
+
+final class Pendiente implements EstadoPedido
+{
+    public function nombre(): string { return 'pendiente'; }
+
+    public function confirmar(Pedido $p): EstadoPedido { return new Confirmado(); }
+    public function cancelar(Pedido $p): EstadoPedido  { return new Cancelado(); }
+    public function enviar(Pedido $p): EstadoPedido
+    {
+        throw new \DomainException('Un pedido pendiente no se envía');
+    }
+}
+
+final class Cancelado implements EstadoPedido
+{
+    public function nombre(): string { return 'cancelado'; }
+
+    public function confirmar(Pedido $p): EstadoPedido
+    {
+        throw new \DomainException('Pedido cancelado no se confirma');
+    }
+    public function cancelar(Pedido $p): EstadoPedido { return $this; }
+    public function enviar(Pedido $p): EstadoPedido
+    {
+        throw new \DomainException('Pedido cancelado no se envía');
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="entidad">La entidad delega, ya no decide</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class Pedido
+{
+    public function __construct(
+        public string $id,
+        private EstadoPedido $estado = new Pendiente(),
+    ) {}
+
+    public function estado(): string { return $this-&gt;estado-&gt;nombre(); }
+
+    public function confirmar(): void { $this-&gt;estado = $this-&gt;estado-&gt;confirmar($this); }
+    public function cancelar(): void  { $this-&gt;estado = $this-&gt;estado-&gt;cancelar($this); }
+    public function enviar(): void    { $this-&gt;estado = $this-&gt;estado-&gt;enviar($this); }
+}</code></pre>
+          </div>
+        </figure>
+        <p>La entidad solo cambia su estado actual. La <strong>matriz de transiciones</strong> vive distribuida en cada clase de estado: añadir un estado nuevo no toca a los demás.</p>
+      </section>
+
+      <section>
+        <h2 id="persistencia">Persistir el estado</h2>
+        <ul>
+          <li>Guarda el <code>nombre()</code> del estado (string) en la base de datos.</li>
+          <li>Al cargar, reconstruye con un mapa: <code>$estados['pendiente'] ?? throw ...</code>.</li>
+          <li>Si el flujo crece mucho, existen máquinas de estado (State Machine) que aportan diagramas, listeners y auditas; el patrón State es su base.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una entidad con estados y transiciones (pedido, ticket, solicitud).</li>
+          <li>Define la interfaz Estado con una acción por transición.</li>
+          <li>Modela 3 estados y haz que la entidad delegue.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>State modela el comportamiento según el estado del objeto.</li>
+          <li>Cada estado es una clase con sus propias reglas de transición.</li>
+          <li>La entidad delega; las transiciones ilegales fallan en el estado.</li>
+          <li>Añadir un estado nuevo nunca toca a los demás.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="strategy.html">Strategy</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-04/solid-principios.html">Principios SOLID</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-06/aggregados-y-value-objects.html">Agregados y Value Objects</a>
+          <a class="related-lessons__link" href="command.html">Command</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

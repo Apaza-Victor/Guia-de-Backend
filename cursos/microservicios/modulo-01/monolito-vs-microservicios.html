@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-monolito-vs-microservicios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monolito vs microservicios · Microservicios · Backend Academy</title>
+<meta name="description" content="Compara monolito y microservicios con criterios reales: ventajas, desventajas, costos operativos y cuándo es el momento de migrar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-monolito-vs-microservicios"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Monolito vs microservicios</span>
+      </nav>
+      <h1 class="lesson-title">Monolito vs microservicios</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de microservicios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El debate <em>monolito vs microservicios</em> suele plantearse como si fuera una guerra de estilos. En la práctica es una decisión de ingeniería con <strong>costos y beneficios medibles</strong>. No existe el «mejor paradigma» en abstracto: existe la mejor opción para tu equipo, tu dominio y tu momento.</p>
+        <p>La mayoría de las grandes empresas que hoy usan microservicios (Amazon, Netflix, Uber) empezaron con un monolito. No migraron porque fuera bonito; migraron cuando el crecimiento hizo que el monolito se volviera un obstáculo.</p>
+      </section>
+
+      <section>
+        <h2 id="monolito">Ventajas del monolito</h2>
+        <ul>
+          <li><strong>Simple de empezar:</strong> una sola aplicación, un solo repositorio, un solo despliegue.</li>
+          <li><strong>Llamadas en proceso:</strong> las funciones se invocan directamente, sin red, sin serialización, sin fallos de latencia.</li>
+          <li><strong>Transacciones ACID:</strong> puedes atomizar cambios en varias tablas con un único commit de base de datos.</li>
+          <li><strong>Detección de errores inmediata:</strong> un stack trace del monoapp es mucho más fácil de seguir.</li>
+          <li><strong>Menos infraestructura:</strong> no necesitas Kubernetes, service discovery ni colas para empezar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="microservicios">Ventajas de los microservicios</h2>
+        <ul>
+          <li><strong>Despliegue independiente:</strong> cada equipo publica su servicio sin coordinarse con el resto.</li>
+          <li><strong>Escalado selectivo:</strong> solo se replican los servicios que lo necesitan en cada momento.</li>
+          <li><strong>Límites técnicos claros:</strong> cada servicio puede usar el lenguaje y la base de datos que mejor resuelven su problema.</li>
+          <li><strong>Aislamiento de fallos:</strong> el fallo de pagos no tumba el catálogo si está bien diseñado.</li>
+          <li><strong>Onboarding escalable:</strong> equipos nuevos entienden un servicio pequeño más rápido que un código enorme.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="comparativa">Comparativa honesta</h2>
+        <p>La diferencia real no es de código sino de <strong>dónde se paga cada costo</strong>. Esta tabla resume el trade-off:</p>
+        <ul>
+          <li><strong>Consistencia de datos:</strong> monolito = transacciones ACID; microservicios = consistencia eventual y sagas.</li>
+          <li><strong>Latencia:</strong> monolito = µs entre módulos; microservicios = ms por llamada de red, a veces varias en cadena.</li>
+          <li><strong>Operación:</strong> monolito = 1 deploy, 1 monitoreo; microservicios = CI/CD por servicio, trazabilidad distribuida.</li>
+          <li><strong>Fallos:</strong> monolito = un fallo lo derriba todo; microservicios = fallos parciales que hay que aislar.</li>
+          <li><strong>Colaboración:</strong> monolito = un solo equipo responsable; microservicios = ownership distribuido entre equipos.</li>
+        </ul>
+        <p>En las primeras etapas de un producto, el monolito casi siempre es la decisión correcta: es más rápido de desarrollar, más fácil de operar y más barato. El microservicio se justifica cuando el <strong>crecimiento</strong> —de tráfico, de equipos o de dominio— hace que esas ventajas pesen más que sus costos.</p>
+      </section>
+
+      <section>
+        <h2 id="escala">Cómo se ve la escala en cada arquitectura</h2>
+        <p>En un monolito, escalar significa reproducir la aplicación entera, aunque solo un módulo lo necesite. En microservicios se escala por servicio. Esta es la diferencia concreta en un archivo de orquestación simplificado:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml"># Monolito: todo se replica igual
+servicio-monolito:
+  replicas: 10
+  imagen: mi-app-1.0
+
+# Microservicios: cada uno escala lo suyo
+servicio-catalogo:
+  replicas: 3
+  imagen: catalogo
+
+servicio-pedidos:
+  replicas: 2
+  imagen: pedidos
+
+servicio-pagos:
+  replicas: 10
+  imagen: pagos</code></pre>
+          </div>
+        </figure>
+        <p>Cuando los pagos reciben 10× más tráfico que el catálogo, solo se replican pagos. El costo de la infraestructura se ajusta al uso real.</p>
+      </section>
+
+      <section>
+        <h2 id="migrar">Señales para migrar</h2>
+        <p>Estos síntomas no significan que debas migrar ya, pero indican que el monolito está empezando a limitarte:</p>
+        <ul>
+          <li>Los despliegues se han vuelto arriesgados: cualquier cambio puede romper una parte no relacionada.</li>
+          <li>El equipo de desarrollo crece y todos tocan el mismo código (conflictos de merge constantes).</li>
+          <li>Un módulo tiene requisitos de escalado muy distintos al resto.</li>
+          <li>Necesitas políticas de seguridad o de datos diferentes por área (por ejemplo, PII de pagos).</li>
+          <li>La tecnología elegida para un módulo está frenando a los demás.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Estrategia recomendada:</strong> «start with monolith, split later». Crea un monolito modular bien delimitado y extrae servicios gradualmente (patrón strangler fig) solo cuando las señales sean claras.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="decision">Guía rápida de decisión</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash (pseudocódigo)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="bash"><code class="language-bash" data-language="bash"># Fat: decide() evalua las señales de tu proyecto
+decide() {
+  if [ "$EQUIPO" -gt 5 ] && [ "$DOMINIO" = "claro" ] && [ "$ESCALADO_DESPAREJO" = "si" ]; then
+    echo "Evaluar microservicios"
+  elif [ "$FASE" = "early" ] || [ "$INCERTIDUMBRE" = "alta" ]; then
+    echo "Monolito modular ahora, dividir después"
+  else
+    echo "Mantener monolito si el costo de migrar &gt; beneficio"
+  fi
+}</code></pre>
+          </div>
+        </figure>
+        <p>Lo importante no es el «sí» o el «no», sino la <strong>secuencia</strong>: no decidas en abstracto, decide cuando tengas datos de tráfico, equipo y crecimiento real.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe 5 preguntas que harías a un equipo antes de recomendarles microservicios.</li>
+          <li>Identifica en un producto conocido cuál sería el primer servicio que extraerías del monolito y por qué.</li>
+          <li>Calcula en 3 líneas qué se ahorraría en costos de infra si solo se escala el módulo caliente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El monolito gana en simplicidad, transacciones ACID y operación inicial.</li>
+          <li>Los microservicios ganan en despliegue independiente, escalado selectivo y aislamiento de fallos.</li>
+          <li>La decisión depende del equipo, el dominio y el momento del producto.</li>
+          <li>Comienza con un monolito modular y divide por etapas cuando existan señales claras.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-son-microservicios.html">¿Qué son los microservicios?</a>
+          <a class="related-lessons__link" href="como-dividir-servicios.html">Cómo dividir servicios</a>
+          <a class="related-lessons__link" href="antipatrones.html">Antipatrones comunes</a>
+          <a class="related-lessons__link" href="../modulo-03/resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

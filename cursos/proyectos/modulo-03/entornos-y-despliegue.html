@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-entornos-y-despliegue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entornos y despliegue · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a gestionar entornos dev, staging y producción en un backend: estrategias de despliegue y el plan de rollback que convierte una caída en un momento de calma.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-entornos-y-despliegue"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Entornos y despliegue</span>
+      </nav>
+      <h1 class="lesson-title">Entornos y despliegue</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Comunicación y entrega</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="entornos">El mapa de entornos</h2>
+        <p>Cada línea de código viaja por entornos de menor a mayor confianza. El backend exige que este mapa esté claro porque aquí cada salto tiene acceso a datos reales:</p>
+        <ul>
+          <li><strong>Local:</strong> tu máquina, datos de prueba, sin estrés. Razo de iteración máxima.</li>
+          <li><strong>Desarrollo (dev):</strong> integración del equipo, datos sintéticos, se rompe sin drama.</li>
+          <li><strong>Staging:</strong> gemelo de producción —misma base, mismas dosis, mismas secrets de prueba—. Sirve para verificar lo que la CI no puede: la integración verdadera.</li>
+          <li><strong>Producción:</strong> usuarios reales. Lo que falla aquí paga factura.</li>
+        </ul>
+        <p>La ley no escrita: <strong>lo que no se probó en staging no se despliega en producción</strong>. Si saltas el escalón, el error se vuelve «descubierto por el usuario», que es la peor forma de hacer QA.</p>
+      </section>
+
+      <section>
+        <h2 id="configuracion">Configuración por entorno: los secretos no van en git</h2>
+        <p>La misma aplicación cambia de comportamiento según el entorno mediante la configuración, no mediante el código. Todo lo que distingue dev de producción —conexiones, claves, flags— es variable de entorno:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># .env.staging (ejemplo de configuración de staging)
+DATABASE_URL=postgres://app:app@db-staging:5432/tienda
+REDIS_URL=redis://redis-staging:6379/0
+IDEMPOTENCIA_TTL_SECS=86400
+
+# .env de producción vive en el secret manager, NO en el repo
+# gcloud secrets versions access latest --secret=DATABASE_URL
+
+# Verificación: ¿hay secretos en el repo?
+git ls-files | xargs grep -l "password\s*=" 2>/dev/null || echo "limpio: sin secretos"</code></pre>
+        <p>Dos motivos por los que esto lo decide la cultura del equipo: la higiene de secretos (un `.env` commiteado es una backdoor pública) y la paridad de entornos (si staging usa otra base, el desplegué a producción lleva sorpresas).</p>
+      </section>
+
+      <section>
+        <h2 id="deploy">Estrategias de despliegue</h2>
+        <p>El despliegue no es «subir a producción»: es un conjunto de estrategias con distinto tiempo de exposición al fallo:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">[
+  {
+    "estrategia": "redeploy (cutover)",
+    "descripcion": "Se detiene lo viejo y se sube lo nuevo. Simple y barato.",
+    "riesgo": "Ventana de caída total si el despliegue falla",
+    "cuando": "MVP, servicios internos, infra con slot de mantenimiento"
+  },
+  {
+    "estrategia": "rolling",
+    "descripcion": "Se actualiza de a un nodo; mientras tanto quedan los viejos sirviendo.",
+    "riesgo": "Dos versiones conviven unos minutos (compatibilidad de contrato obligatoria)",
+    "cuando": "API con pods/replicas detrás del balanceador"
+  },
+  {
+    "estrategia": "blue-green (canary)",
+    "descripcion": "Se monta el entorno nuevo completo (verde) y el tráfico se mueve por porcentaje.",
+    "riesgo": "Costo de tener dos entornos vivos",
+    "cuando": "Releases grandes con necesidad de observabilidad previa"
+  }
+]</code></pre>
+        <p>La regla común a todas: <strong>decide antes del despliegue cuál es el criterio para volver atrás</strong> (síntoma: error rate > X%, latencia > Y). Si el rollback se decide durante la crisis, será tarde.</p>
+      </section>
+
+      <section>
+        <h2 id="rollback">El plan de rollback que da tranquilidad</h2>
+        <p>Rollback es tan importante como deploy. Un buen plan de reversa tiene tres piezas:</p>
+        <ol>
+          <li><strong>App:</strong> el binario/versión anterior lista para volver (imagen viejita en el registry, tag anterior en git).</li>
+          <li><strong>Base:</strong> las migraciones reversibles — si una columna se eliminó, el down debe poder recrearla. Nunca migrar sin script de reversa.</li>
+          <li><strong>Paridad:</strong> datos probablemente ya tocados por la versión nueva (tipos, campos, enriquecimiento). Si la versión nueva modificó datos, el rollback de app no es suficiente: se necesita un plan de data.</li>
+        </ol>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Plan de rollback de un release (cheatlist)
+git tag list — release-2026-09-22   # version desplegada
+git checkout v2026-09-01            # última versión estable
+docker compose build —tag api:rollback
+docker compose up -d --no-deps api:rollback
+
+# Base de datos: ejecutar el down de la migración 48
+npx prisma migrate resolve --applied 47
+npx prisma migrate deploy            # baja a la estructura anterior</code></pre>
+        <p>La señal de madurez es el <strong>juego de guerra</strong>: probar el rollback en staging antes del release. Si nunca lo ensayaste, el día que lo necesites será tu primer ensayo.</p>
+      </section>
+
+      <section>
+        <h2 id="deploy-automatizado">Deploy automatizado y repetible</h2>
+        <p>El despliegue manual —comandos tecleados por una persona con memoria— es el peor riesgo que gestiona un backend. Todo desplegué debe ser la misma receta ejecutada por la máquina:</p>
+        <ul>
+          <li>Despliegue = hacer build, correr migraciones (con chocheo), mover el tráfico, verificar health.</li>
+          <li>El paso a staging se dispara automáticamente con cada merge.</li>
+          <li>El paso a producción se dispara con un botón/approved del release, siempre el mismo playbook.</li>
+          <li>Healthcheck real (endpoint /healthz que compruebe DB y dependencias), no solo «el proceso está vivo».</li>
+        </ul>
+        <p>Con esto, desplegar deja de ser «hazaña del mes» y se vuelve rutina semanal — la frecuencia es la prueba de madurez del pipeline.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el mapa de entornos de tu proyecto y verifica si staging usa la misma base, tus mismas versiones y configuraciones que producción.</li>
+          <li>Elige una estrategia de despliegue para tu API principal y escribe el criterio numérico de rollback (error rate, latencia).</li>
+          <li>Redacta tu plan de reversa en 3 pasos: app, migración (down) y plan de datos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El mapa dev → staging → producción da un lugar para cada tipo de error, y staging es el gemelo que debe parecerse a producción.</li>
+          <li>La configuración diferencia entornos; los secretos viven en el secret manager, nunca en git.</li>
+          <li>Redeploy, rolling y blue-green son estrategias con distinta exposición al fallo.</li>
+          <li>El rollback se decide antes del despliegue y se practica en staging — app, migración y plan de datos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="calidad-y-verificacion.html">Calidad y verificación</a>
+          <a class="related-lessons__link" href="lanzamiento-y-postmortem.html">Lanzamientos y postmortem</a>
+          <a class="related-lessons__link" href="../modulo-02/gestion-de-riesgos.html">Gestión de riesgos</a>
+          <a class="related-lessons__link" href="../modulo-02/deuda-tecnica.html">Deuda técnica</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="calidad-y-verificacion.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Calidad y verificación</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="lanzamiento-y-postmortem.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Lanzamientos y postmortem</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

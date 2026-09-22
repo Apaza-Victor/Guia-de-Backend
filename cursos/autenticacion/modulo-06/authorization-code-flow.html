@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="authorization-code-flow">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authorization code flow · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="El flujo de código de autorización con PKCE paso a paso en PHP: redirigir, intercambiar el código por tokens y proteger contra la intercepción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="authorization-code-flow"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Authorization code flow</span>
+        </nav>
+        <h1 class="lesson-title">Authorization code flow</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · OAuth 2.0 y OIDC</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="idea">La idea del código</h2>
+          <p>El <strong>authorization code flow</strong> evita exponer el token en el navegador: el cliente redirige al usuario, el proveedor autentica y consiente, y devuelve un <strong>código</strong> de un solo uso. Ese código se intercambia del lado del servidor (canal de confianza) por el access token. <strong>PKCE</strong> añade una prueba criptográfica que impide que un código robado sirva en otra app.</p>
+        </section>
+
+        <section>
+          <h2 id="paso1">Paso 1 · Redirigir al proveedor</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// PKCE: generar verifier + challenge
+$verifier  = bin2hex(random_bytes(32));
+$challenge = rtrim(strtr(base64_encode(hash("sha256", $verifier, true)), "+/", "-_"), "=");
+
+// Guardar para validadlo al volver
+$_SESSION["pkce_verifier"] = $verifier;
+$_SESSION["oauth_state"]   = bin2hex(random_bytes(16));  // anti-CSRF
+
+$params = [
+    "client_id"             =&gt; $_ENV["CLIENT_ID"],
+    "redirect_uri"          =&gt; "https://miapp.dev/callback",
+    "response_type"         =&gt; "code",
+    "scope"                 =&gt; "openid profile email",
+    "state"                 =&gt; $_SESSION["oauth_state"],
+    "code_challenge"        =&gt; $challenge,
+    "code_challenge_method" =&gt; "S256",
+];
+
+header("Location: https://acme.auth/login/oauth/authorize?" . http_build_query($params));
+exit;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="paso2">Paso 2 · Recibir el código</h2>
+          <p>El proveedor devuelve al <code class="inline">redirect_uri</code> con <code class="inline">?code=...&amp;state=...</code>. La rutina al validar:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+if (($_GET["state"] ?? "") !== ($_SESSION["oauth_state"] ?? "")) {
+    http_response_code(400);
+    echo json_encode(["error" =&gt; "state_invalido"]);
+    exit;
+}
+
+// Paso 3 · Intercambiar code por tokens (canal servidor-a-servidor)
+$token = file_get_contents(
+    "https://acme.auth/login/oauth/access_token",
+    false,
+    stream_context_create([
+        "http" =&gt; [
+            "method"  =&gt; "POST",
+            "header"  =&gt; "Content-Type: application/x-www-form-urlencoded",
+            "content" =&gt; http_build_query([
+                "grant_type"    =&gt; "authorization_code",
+                "code"          =&gt; $_GET["code"],
+                "redirect_uri"  =&gt; "https://miapp.dev/callback",
+                "code_verifier" =&gt; $_SESSION["pkce_verifier"],
+                "client_id"     =&gt; $_ENV["CLIENT_ID"],
+            ]),
+        ],
+    ])
+);
+
+$tokens = json_decode($token, true);
+// $tokens["access_token"], $tokens["refresh_token"] ...</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="verificaciones">Verificaciones imprescindibles</h2>
+          <ul>
+            <li><code class="inline">state</code>: coincide con el guardado (anti-CSRF en el flujo).</li>
+            <li><code class="inline">code_verifier</code>: debe refirmar el challenge esperado.</li>
+            <li>Códigos de un solo uso: guardar los usados y rechazar repetición.</li>
+            <li><code class="inline">redirect_uri</code> registrada exacta en el proveedor.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Implementa el flujo contra un proveedor de pruebas local.</li>
+            <li>Roba el código por tu cuenta: intercambialo y observa que PKCE lo bloquea sin verifier.</li>
+            <li>Cambia <code class="inline">state</code> y confirma que se rechaza.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El código viaja por el navegador; el token solo en HTTPS servidor-a-servidor.</li>
+            <li>PKCE (S256) prueba que quien canjea es quien inició el flujo.</li>
+            <li><code class="inline">state</code> previene el CRLF y la reinyección de flujo.</li>
+            <li>Código de un solo uso + redirect_uri exacta.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="oauth-actores-y-flujos.html">OAuth: actores y flujos</a>
+            <a class="related-lessons__link" href="scopes-y-consentimiento.html">Scopes y consentimiento</a>
+            <a class="related-lessons__link" href="integrando-un-proveedor-externo.html">Integrando un proveedor externo</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

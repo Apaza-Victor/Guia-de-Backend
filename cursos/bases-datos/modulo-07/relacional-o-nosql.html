@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="relacional-o-nosql">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Relacional o NoSQL? · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Criterios reales para decidir entre una base relacional y una NoSQL: transacciones, integridad, escala, sprint, modelado y equipos. Directo y accionable.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="relacional-o-nosql"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7 · NoSQL</a><span class="sep">/</span>
+          <span class="current">¿Relacional o NoSQL?</span>
+        </nav>
+        <h1 class="lesson-title">¿Relacional o NoSQL?</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · NoSQL</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Después de conocer ambos mundos, la pregunta no es «cuál es mejor» sino <strong>«cuál encaja con mi problema»</strong>. Esta lección condensa los criterios que usan los equipos reales, sin fanatismos.</p>
+        </section>
+
+        <section>
+          <h2 id="relacional">Elige relacional cuando...</h2>
+          <ul>
+            <li>Los datos son la fuente de la verdad y exigen <strong>integridad</strong> (dinero, stock, cuentas).</li>
+            <li>Necesitas consultas complejas que atraviesan muchas tablas (JOINs, reportes).</li>
+            <li>Hay relaciones que cambian a menudo entre entidades.</li>
+            <li>El equipo ya domina SQL y sus herramientas de modelado.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="nosql">Elige NoSQL cuando...</h2>
+          <ul>
+            <li>El documento <em>se lee y se escribe entero</em> (perfiles, catálogos, eventos).</li>
+            <li>El esquema es variable o está en evolución rápida.</li>
+            <li>Necesitas escalar <strong>horizontalmente</strong> millones de lecturas.</li>
+            <li>La consistencia eventual es aceptable (logs, feeds, métricas).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="eventos">La decisión en la práctica</h2>
+          <p>Lo habitual no es elegir «una base», sino un <strong>conjunto</strong>: PostgreSQL para transacciones + Redis como caché + MongoDB para catálogos. Cada pieza hace lo que mejor sabe y el sistema completo gana.</p>
+          <ul>
+            <li><strong>Golden rule:</strong> si no puedes explicar por qué necesitas NoSQL, empieza con SQL. Es difícil equivocarse.</li>
+            <li><strong>Red flag:</strong> elegir NoSQL «porque sí» solo complica el modelado.</li>
+            <li><strong>Pragmatismo:</strong> si el tamaño del proyecto lo justifica, un relacional («acertar siempre») es la apuesta segura.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="test">Autotest rápido</h2>
+          <ol>
+            <li>¿Mi dato cambia en varios sitios a la vez y debe estar sincronizado? → Relacional.</li>
+            <li>¿Mi dato se lee de un tirón y viaja como JSON? → Documental.</li>
+            <li>¿Necesito una caché ultrarrápida? → Clave-valor.</li>
+            <li>¿Todo lo anterior? → Tipo mezcla (la realidad).</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Proyecto: e-commerce con carrito, pagos y recomendaciones. Decide la base para cada módulo y justifica.</li>
+            <li>Convierte el documento «usuario con pedidos» a esquema relacional y viceversa (diseña ambos).</li>
+            <li>Escribe una única frase que resuma tu regla de decisión personal.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Relacional gana cuando importa integridad y consultas cruzadas.</li>
+            <li>NoSQL gana con esquema variable, escala y lectura documental.</li>
+            <li>La mayoría de sistemas reales combinan varios motores.</li>
+            <li>Si dudas, empieza relacional; es la apuesta más segura.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="que-es-nosql.html">¿Qué es NoSQL?</a>
+            <a class="related-lessons__link" href="mongodb-documentos-colecciones.html">MongoDB: documentos y colecciones</a>
+            <a class="related-lessons__link" href="../modulo-06/mysql-vs-postgresql.html">MySQL vs PostgreSQL</a>
+            <a class="related-lessons__link" href="../../sql/modulo-01/que-es-sql-dialectos.html">Curso SQL: Fundamentos</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

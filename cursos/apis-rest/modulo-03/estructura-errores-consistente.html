@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="estructura-errores-consistente">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estructura de errores consistente · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a estructurar errores consistentes en APIs REST: formato JSON de error, códigos de error, campos y documentación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="estructura-errores-consistente"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3 · Diseño REST</a><span class="sep">/</span>
+          <span class="current">Estructura de errores consistente</span>
+        </nav>
+        <h1 class="lesson-title">Estructura de errores consistente</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que">El error también es contrato</h2>
+          <p>Un buen error JSON permite a tus clientes <strong>programar</strong> contra él: mostrar el mensaje, rellenar campos, lanzar reintentos. Errores «cada uno por su lado» condenan tu API a míticos <em>if/else</em>.</p>
+        </section>
+
+        <section>
+          <h2 id="esquema">Un esquema mínimo y a prueba de balas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "error": {
+    "code": "PRODUCTO_NO_ENCONTRADO",
+    "message": "El producto 42 no existe.",
+    "status": 404,
+    "trace_id": "9f2c1a-77e1-4a9b"
+  }
+}</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>code:</strong> código interno legible (constante para la lógica del cliente).</li>
+            <li><strong>message:</strong> frase humana en el idioma negociado.</li>
+            <li><strong>status:</strong> el HTTP status code, duplicado en el cuerpo (facilita depurar).</li>
+            <li><strong>trace_id:</strong> correlación con tus logs. Sin él, "¿me ayudas?" se vuelve una búsqueda con lupa.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="campos">Errores por campo: tu aliado en validaciones</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "error": {
+    "code": "VALIDACION_FALLIDA",
+    "message": "Revisa los campos marcados.",
+    "status": 422,
+    "errors": {
+      "precio": ["Debe ser numérico."],
+      "stock": ["Solo 'true' o 'false'."]
+    },
+    "trace_id": "9f2c1a-77e1-4a9b"
+  }
+}</code></pre>
+            </div>
+          </figure>
+          <p>El mismo contorno para todos los 422 del mundo: campos ↔ lista de mensajes.</p>
+        </section>
+
+        <section>
+          <h2 id="standard">Estándares útiles del ecosistema</h2>
+          <ul>
+            <li><strong>RFC 7807 (Problem Details):</strong> <code>type</code>, <code>title</code>, <code>detail</code>, <code>instance</code>. Background de Spring y otras. Considéralo como esquema de adopción internacional.</li>
+            <li><strong>OpenAPI error definitions:</strong> definidas tus respuestas de error una vez en tus schemas.</li>
+            <li>Si tu equipo ya habla con un formato (Stripe, GitHub lo hacen parecido), hérelo.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="reglas">Reglas de oro</h2>
+          <ol>
+            <li>El <strong>status code</strong> correcto es obligación, no alquimia.</li>
+            <li><code>code</code> estable y documentado; <code>message</code> humano.</li>
+            <li>Nunca filtres stack traces ni SQL brutos al exterior.</li>
+            <li>Siempre el mismo contorno: éxito en <code>data</code>(+meta); fracaso en <code>error</code>.</li>
+            <li>Acompaña el error con un <code>trace_id</code> <em>y</em> regístralo.</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Diseña un esquema de error único para tu tienda.</li>
+            <li>Crea respuestas de ejemplo para 400, 401, 404, 422 y 503.</li>
+            <li>Explica qué haría un cliente con tu <code>errors</code> por campo.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El error es contrato: code + message + status + trace_id.</li>
+            <li>422 con <code>errors { campo: [mensajes] }</code> para validaciones.</li>
+            <li>Nunca vayas por campo libre: consistencia o ruido.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="../modulo-02/codigos-estado.html">Códigos de estado</a>
+            <a class="related-lessons__link" href="../modulo-04/manejo-errores-centralizado.html">Manejo de errores centralizado</a>
+            <a class="related-lessons__link" href="../modulo-04/validacion-entrada-reglas.html">Validación de entrada</a>
+            <a class="related-lessons__link" href="../modulo-05/definiendo-contrato-api.html">Definiendo el contrato</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

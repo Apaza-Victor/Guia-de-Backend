@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integrando-un-proveedor-externo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrando un proveedor externo · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Login con Google en tu backend PHP: registrar credenciales, redirigir, canjear el código, validar el id_token y crear la sesión local del usuario.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="integrando-un-proveedor-externo"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Integrando un proveedor externo</span>
+        </nav>
+        <h1 class="lesson-title">Integrando un proveedor externo</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · OAuth 2.0 y OIDC</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="previo">Antes de codear</h2>
+          <p>En la consola de Google (o de tu proveedor) crea el proyecto OAuth: tendrás <code class="inline">client_id</code>, <code class="inline">client_secret</code> y la <code class="inline">redirect_uri</code> exacta que registrarás. El discovery document live en <code class="inline">https://accounts.google.com/.well-known/openid-configuration</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="flujo">Flujo resumido</h2>
+          <ol>
+            <li>Boton «Login con Google» → redirigir al authorize endpoint con PKCE + state.</li>
+            <li>Google autentica y consiente → vuelve a tu <code class="inline">/callback</code> con code y state.</li>
+            <li>Tu backend canjea el código por tokens.</li>
+            <li>Validas id_token (firma, iss, aud, exp, nonce).</li>
+            <li>Localizas o creas el usuario por <code class="inline">sub</code> de Google y abres tu sesión.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 id="callback">El callback en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+session_start();
+if (($_GET["state"] ?? "") !== ($_SESSION["oauth_state"] ?? "")) { /* 400 */ }
+
+// canje del codigo (igual que en la leccion del authorization code flow)
+// $tokens = ...;  $id = $tokens["id_token"];
+
+$claims = validarIdToken($id);   // leccion openid-connect-id-tokens
+
+// usuario local por el sub del proveedor
+$q = $db-&gt;prepare("SELECT * FROM usuarios WHERE google_sub = ?");
+$q-&gt;execute([$claims["sub"]]);
+$usuario = $q-&gt;fetch();
+
+if (!$usuario) {   // primer login: registrar automaticamente
+    $q = $db-&gt;prepare("INSERT INTO usuarios (email, nombre, google_sub, rol_id)
+                       VALUES (?, ?, ?, (SELECT id FROM roles WHERE nombre = 'lector'))");
+    $q-&gt;execute([$claims["email"], $claims["name"], $claims["sub"]]);
+    $usuarioId = (int) $db-&gt;lastInsertId();
+} else {
+    $usuarioId = (int) $usuario["id"];
+}
+
+// regenerar session id y abrir sesion local (modulo 2)
+session_regenerate_id(true);
+$_SESSION["usuario_id"] = $usuarioId;
+header("Location: /panel");
+exit;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="cuidado">Cuidados de integración</h2>
+          <ul>
+            <li>No confíes en que el email llega verificado: el proveedor lo indica con el claim <code class="inline">email_verified</code>.</li>
+            <li>Guarda el <code class="inline">sub</code> como identificador, no el email (el email puede cambiar).</li>
+            <li>Verifica aud exacto: un token pensado para otra app se rechaza.</li>
+            <li>No almacenes tokens de Google salvo que los necesites.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Registra una app de prueba y completa el flujo end-to-end.</li>
+            <li>Prueba el primer login (crea usuario) y el segundo (lo reconoce).</li>
+            <li>Comprueba los claims de verificación del correo en tu consola.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Credenciales OAuth + redirect_uri registrada exacta.</li>
+            <li>Canje servidor-a-servidor, jamás en el navegador.</li>
+            <li>Idéntica validación: firma, iss, aud, exp, nonce.</li>
+            <li>Usuario local por <code class="inline">sub</code>, no por email.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="openid-connect-id-tokens.html">OpenID Connect e id tokens</a>
+            <a class="related-lessons__link" href="authorization-code-flow.html">Authorization code flow</a>
+            <a class="related-lessons__link" href="../modulo-03/cierre-de-sesion-y-revocacion.html">Cierre de sesión y revocación</a>
+            <a class="related-lessons__link" href="../modulo-02/restablecimiento-de-contrasena.html">Restablecimiento de contraseña</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

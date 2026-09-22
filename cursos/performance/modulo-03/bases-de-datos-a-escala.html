@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bases de datos a escala · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a escalar bases de datos: réplicas de lectura, sharding y particionado, y cómo repartir escrituras y datos sin derrumbar la latencia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Bases de datos a escala</span>
+      </nav>
+      <h1 class="lesson-title">Bases de datos a escala</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y despliegue</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Escalaste la API a 20 nodos detrás de tu balanceador… y ahora toda la carga cae sobre una única base de datos. Las bases de datos se escalan distinto que los servidores de aplicación: son difíciles de replicar sin romper consistencia. Esta lección va en orden de menor a mayor dolor: <strong>replicas de lectura</strong> (primero), <strong>particionado</strong> (tablas grandes) y <strong>sharding</strong> (la última bala).</p>
+      </section>
+
+      <section>
+        <h2 id="lectura">Réplicas de lectura</h2>
+        <p>En la mayoría de los sistemas, las lecturas superan ampliamente a las escrituras (10:1 o más). Las <strong>réplicas de lectura</strong> son copias de la base que responden a los SELECT mientras el primario (leader) atiende las escrituras y se las replica. Así, la carga de lectura se reparte entre N servidores y el primario respira.</p>
+        <p>El costo: <strong>consistencia eventual</strong> — una réplica puede estar unos milisegundos por detrás (replicación asíncrona). Para datos de sesión, catálogo y lecturas generales es perfecto; para el saldo bancario, no.</p>
+        <p>Configuración mínima en PostgreSQL:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># En el primario (postgresql.conf): marcar como replicación y abrir slot
+#   wal_level = replica
+#   max_wal_senders = 10
+#   hot_standby = on
+
+# En la réplica (postgresql.conf):
+#   hot_standby = on          # servirá lecturas mientras replica
+
+# Clonar datos del primario a la réplica (pg_basebackup)
+pg_basebackup -h primario -D /var/lib/postgresql/data -R -X stream -U replicador
+# El flag -R deja lista la configuración de streaming en standby.signal</code></pre>
+        <p>Y la aplicación reparte las lecturas hacia un pool de réplicas:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import random
+import threading
+import psycopg2
+
+# Pooles separados: escrituras al primario, lecturas a las réplicas
+with threading.Lock():
+    def obtener_lectura():
+        replica = random.choice(["replica-1", "replica-2", "replica-3"])
+        return psycopg2.connect(host=replica, dbname="tienda", user="app", password="secreto")
+
+    def obtener_escritura():
+        return psycopg2.connect(host="primario", dbname="tienda", user="app", password="secreto")
+
+# Rutas de solo lectura -> replica (catálogo, perfiles, reportes)
+def listar_productos(categoria: str):
+    con = obtener_lectura()
+    with con.cursor() as cur:
+        cur.execute("SELECT * FROM productos WHERE categoria = %s", (categoria,))
+        return cur.fetchall()
+
+# Rutas de escritura -> primario (compras, actualizaciones)
+def registrar_compra(datos: dict):
+    con = obtener_escritura()
+    with con.cursor() as cur:
+        cur.execute("INSERT INTO compras (...) VALUES (...)", datos)
+    con.commit()</code></pre>
+        <p>La transición es suave: primero mueves los reportes y catálogos; solo después te atreves con las rutas calientes.</p>
+      </section>
+
+      <section>
+        <h2 id="particionado">Particionado (tablas gigantes)</h2>
+        <p>Cuando una tabla tiene cientos de millones de filas, incluso con índice el rendimiento se degrada: el índice es enorme, la caché no cabe y los análisis tardan. El <strong>particionado</strong> divide la tabla lógicamente en otras más pequeñas —típicamente por fecha («orders_2026», «orders_2027»)— manteniendo una sola vista lógica. Las consultas con el criterio de partición van directas al trozo correcto.</p>
+        <p>PostgreSQL 12+ lo hace con <code>PARTITION BY</code> heredado, sin cambiar las consultas de la aplicación:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">psql -d tienda <<'SQL'
+CREATE TABLE compras (
+  id bigint,
+  fecha timestamp NOT NULL,
+  usuario_id int,
+  total numeric
+) PARTITION BY RANGE (fecha);
+
+-- Particiones por año
+CREATE TABLE compras_2026 PARTITION OF compras
+  FOR VALUES FROM ('2026-01-01') TO ('2027-01-01');
+CREATE TABLE compras_2027 PARTITION OF compras
+  FOR VALUES FROM ('2027-01-01') TO ('2028-01-01');
+
+-- Las consultas de un año usan solo su partición (la app no cambia nada):
+EXPLAIN SELECT * FROM compras WHERE fecha BETWEEN '2026-06-01' AND '2026-06-30';
+--  ->  Seq Scan on compras_2026 ...     <- solo el trozo de 2026
+SQL</code></pre>
+        <p>Para análisis o <code>ANALYZE</code>/relativos: hacer <code>VACUUM ANALYZE</code> y borrar particiones viejas (<code>DROP TABLE compras_2019</code>) se vuelve trivial: no tocas a los datos vivos.</p>
+      </section>
+
+      <section>
+        <h2 id="sharding">Sharding: repartir los datos en varios servidores</h2>
+        <p>El <strong>sharding</strong> es lo último: en vez de una BD gigante, varias BDs (shards) cada una con una parte de los datos, donde una clave de reparto (<code>usuario_id</code>, <code>pais</code>) decide a qué shard va cada fila. Gana espacio y throughput total; pierde operaciones cruzadas: consultas «a todos los shards» y transacciones entre shards son caras o imposibles.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "estrategia": "hash_mod",
+  "num_shards": 4,
+  "shard_id": "usuario_id % 4",
+  "conexiones": {
+    "shard_0": { "host": "db-0", "puerto": 5432 },
+    "shard_1": { "host": "db-1", "puerto": 5432 },
+    "shard_2": { "host": "db-2", "puerto": 5432 },
+    "shard_3": { "host": "db-3", "puerto": 5432 }
+  },
+  "reglas": {
+    "mismo_usuario_siempre_mismo_shard": true,
+    "transacciones_cruzadas": false,
+    "migracion_de_shards": "duplicar_datos_y_redirigir"
+  }
+}</code></pre>
+        <p>El detalle que más duele es la <strong>migración</strong>: cambiar <code>mod 4</code> por <code>mod 8</code> rebalancea el 50% de los datos. Por eso se recomienda consistir en una clave estable y suficiente de sobra desde el día uno.</p>
+      </section>
+
+      <section>
+        <h2 id="orden">Cuándo tocar cada palanca</h2>
+        <p>El desescalonamiento evita sufrir: primero optimiza (índices, N+1), luego caché, después réplicas de lectura, después particionado de las tablas gordas y por último sharding. Cada paso tiene un coste operativo creciente; la mayoría de sistemas nunca necesitan pasar del tercero.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si una lectura se sirve desde caché de verdad, las réplicas apenas sufren; y si una tabla anual se particiona bien, el sharding queda para escenarios realmente exóticos.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Inventa una tabla candidata del caso de la tienda (compras) y escribe el DDL con partición por rango de un año. Verifica con EXPLAIN que una consulta del semestre toca solo su partición.</li>
+          <li>Repite tu prueba de carga sirviendo las lecturas de catálogo desde una réplica y comprueba la reducción de carga en el primario.</li>
+          <li>Discute (y escribe): ¿qué operaciones de tu sistema romperían si los datos se repartieran en 4 shards? Ese análisis es la respuesta a «¿me toca sharding?».</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Orden de escala: optimización/caché → réplicas de lectura → particionado → sharding.</li>
+          <li>Réplicas de lectura reparten SELECT; el primario escribe. Paga con consistencia eventual.</li>
+          <li>La app separa los pooles de conexión: escrituras al líder, lecturas al azar entre réplicas.</li>
+          <li>El particionado parte tablas por rango (fechas) manteniendo una sola vista lógica.</li>
+          <li>El sharding reparte los datos en varias BDs por clave; rompe transacciones y consultas cruzadas, y migrar es costoso.</li>
+          <li>Si la mayoría de tus lecturas salen de caché, casi nunca llega la hora del sharding.</li>
+          <li>La CDN elimina otro montón de tráfico antes de llegar siquiera a tu backend: siguiente lección.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="load-balancing.html">Load balancing</a>
+          <a class="related-lessons__link" href="../modulo-02/optimizacion-de-bases-de-datos.html">Optimizar bases de datos</a>
+          <a class="related-lessons__link" href="../modulo-02/caching-estrategias.html">Caching y estrategias</a>
+          <a class="related-lessons__link" href="cdny-edge-caching.html">CDN y edge caching</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

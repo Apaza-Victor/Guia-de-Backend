@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="primer-script-y-consola-interactiva">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu primer script y la consola interactiva · Python para Backend · Backend Academy</title>
+<meta name="description" content="Escribe un archivo .py, ejecútalo desde la terminal y conoce el REPL, la consola interactiva que responde a cada línea que escribes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="python" data-current="primer-script-y-consola-interactiva"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Tu primer script y la consola interactiva</span>
+        </nav>
+        <h1 class="lesson-title">Tu primer script y la consola interactiva</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Python</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="crear-archivo">Crea tu primer archivo</h2>
+          <p>En una carpeta de trabajo, crea un archivo llamado <code class="inline">hola.py</code>. El editor de texto plano que uses da igual (VS Code, Notepad++, Vim…); la clave es que guardes con codificación <strong>UTF-8</strong>, porque por defecto Python 3 la usa para leer el código fuente.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">print("Hola, Backend")</code></pre>
+            </div>
+          </figure>
+          <p><code class="inline">print()</code> es de las primeras funciones que usarás siempre: manda texto a la salida estándar (la terminal). Los paréntesis son obligatorios en Python 3, a diferencia de Python 2, donde podían (erróneamente) omitirse.</p>
+        </section>
+
+        <section>
+          <h2 id="ejecutar">Ejecútalo desde la terminal</h2>
+          <p>Navega hasta la carpeta del archivo y ejecuta:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">python hola.py
+# o en Windows:
+py hola.py
+
+# Salida esperada:
+# Hola, Backend</code></pre>
+            </div>
+          </figure>
+          <p>El intérprete lee el archivo completo, lo compila a bytecode en memoria y lo ejecuta. Si hay un error de sintaxis, te lo dirá con un <em>traceback</em> sin ejecutar nada de lo que viene después de la línea conflictiva.</p>
+        </section>
+
+        <section>
+          <h2 id="repl">La consola interactiva (REPL)</h2>
+          <p>Escribe <code class="inline">python</code> (o <code class="inline">py</code>) <strong>sin argumentos</strong> y entrarás al REPL: Read, Eval, Print, Loop. Cada línea que escribes se evalúa al instante y te muestra el resultado, perfecto para hacer experimentos rápidos.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-pycon">Python 3.12.4 (tags/v3.12.4:8e8a4ba, Jun  6 2024) [MSC v.1940 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+&gt;&gt;&gt; 2 + 2
+4
+&gt;&gt;&gt; print("hola")
+hola
+&gt;&gt;&gt; "backend".upper()
+'BACKEND'
+&gt;&gt;&gt; exit()</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>El prompt <code class="inline">&gt;&gt;&gt;</code> espera una instrucción nueva.</li>
+            <li>El prompt <code class="inline">...</code> aparece cuando una instrucción quedó a medias (p. ej. un paréntesis abierto o un bloque con dos puntos).</li>
+            <li>Para salir escribe <code class="inline">exit()</code> o pulsa <code class="inline">Ctrl+Z</code> + <code class="inline">Enter</code> en Windows.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="repl-vs-script">¿REPL o script?</h2>
+          <p>Usa el REPL cuando quieras probar una expresión suelta, explorar una librería o hacer cuentas rápidas. Usa un archivo <code class="inline">.py</code> cuando el código vaya a repetirse, a crecer o a ejecutarse muchas veces: los scripts se guardan, se revisan y se comparten.</p>
+          <p>En backend casi todo vive en archivos: <em>handlers</em>, modelos, tests. El REPL queda para inspección rápida y debugging puntual.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea <code class="inline">saludo.py</code> que imprima tu nombre y la fecha actual (pista: <code class="inline">import datetime</code>).</li>
+            <li>Ejecútalo por terminal y anota el traceback si cometes un error a propósito.</li>
+            <li>Entra al REPL, multiplica <code class="inline">7 * 6</code> y calcula <code class="inline">2 ** 10</code>; sal con exit().</li>
+            <li>Explica con tus palabras la diferencia entre REPL y script.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Un script es un archivo <code class="inline">.py</code> que Python ejecuta de punta a punta.</li>
+            <li><code class="inline">print()</code> escribe en la salida estándar.</li>
+            <li>El REPL evalúa línea a línea al instante.</li>
+            <li><code class="inline">&gt;&gt;&gt;</code> pide instrucciones; <code class="inline">...</code> indica que estás a mitad de una.</li>
+            <li>Script para proyecto, REPL para experimentar.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos y módulos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

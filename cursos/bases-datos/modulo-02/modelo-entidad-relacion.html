@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="modelo-entidad-relacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo entidad-relación · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende a construir el modelo entidad-relación: entidades, atributos, relaciones y claves, la base del diseño de cualquier base de datos relacional.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="modelo-entidad-relacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2 · Modelado y diseño</a><span class="sep">/</span>
+          <span class="current">Modelo entidad-relación</span>
+        </nav>
+        <h1 class="lesson-title">Modelo entidad-relación</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Modelado y diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Antes de escribir una sola línea de <code class="inline">CREATE TABLE</code>, los buenos equipos piensan en el <strong>modelo de datos</strong>: qué «cosas» existen en el negocio y cómo se relacionan. Ese plano se llama <strong>modelo entidad-relación</strong> (ER) y es la forma estándar de representar la información de un sistema de forma independiente de la tecnología.</p>
+          <p>Cuando alguien pregunta «¿cómo guardarás los pedidos?», no quiere escuchar nombres de tablas: quiere entender las <em>entidades</em> y sus <em>relaciones</em>.</p>
+        </section>
+
+        <section>
+          <h2 id="componentes">Los tres componentes</h2>
+          <ul>
+            <li><strong>Entidad:</strong> un «objeto» del mundo real que interesa al negocio (Cliente, Producto, Pedido). Se convertirá en una tabla.</li>
+            <li><strong>Atributo:</strong> una propiedad de la entidad (nombre, email, precio). Se convertirá en columna. El atributo que identifica de forma única es la <strong>clave primaria</strong>.</li>
+            <li><strong>Relación:</strong> un vínculo entre dos o más entidades («un cliente <em>hace</em> pedidos», «un pedido <em>contiene</em> productos»).</li>
+          </ul>
+          <p>La clave del arte de modelar es <strong>encontrar las entidades correctas</strong>. «Datos del envío» no es una entidad: es un atributo compuesto del pedido. «Dirección de casa» es un atributo. Pero «Dirección» puede ser entidad si un usuario guarda varias.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo">Ejemplo: tienda online</h2>
+          <p>Modelar la tienda significa responder preguntas sobre las entidades y sus atributos:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Modelo ER (definición)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-text">CLIENTE (id, nombre, email, fecha_registro)
+PEDIDO  (id, fecha, total, cliente_id)
+PRODUCTO(id, nombre, precio, stock)
+PEDIDO_PRODUCTO (pedido_id, producto_id, cantidad)
+
+Relaciones:
+  CLIENTE hace PEDIDO        → 1 a N
+  PEDIDO contiene PRODUCTO   → N a M (usa PEDIDO_PRODUCTO)</code></pre>
+            </div>
+          </figure>
+          <p>Fíjate en dos decisiones: <code class="inline">cliente_id</code> en PEDIDO representa la relación «hace», y la tabla intermedia <code class="inline">PEDIDO_PRODUCTO</code> resuelve la relación muchos a muchos.<br>
+          Con este modelo, el motor ya sabe qué tablas crear. El paso del modelo ER al SQL es casi mecánico:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE pedidos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fecha DATETIME NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    cliente_id INT NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="reglas">Reglas que te ahorrarán errores</h2>
+          <ul>
+            <li>Nombra las entidades en singular en el modelo («Cliente»), el SQL luego las usa en plural o singular según la convención del equipo.</li>
+            <li>Cada entidad necesita una <strong>clave primaria</strong>; si no la tiene, sospecha.</li>
+            <li>Los atributos deben ser <strong>atómicos</strong> (un dato por campo), lo que cubrirá la primera forma normal.</li>
+            <li>Una relación N:M <strong>siempre</strong> requiere una tabla intermedia en el modelo relacional.</li>
+            <li>Modela primero, haz SQL después. Escribir SQL sin modelo es construir sin plano.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Piensa en un sistema de biblioteca y lista las entidades mínimas (autor, libro, préstamo, socio…).</li>
+            <li>Escribe los atributos de cada entidad y resalta con qué clave se identificará cada una.</li>
+            <li>Describe con una frase las relaciones entre entidades (por ejemplo: «un socio realiza muchos préstamos»).</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El modelo ER es el plano lógico del sistema.</li>
+            <li>Se compone de entidades, atributos y relaciones.</li>
+            <li>Una entidad se convierte en tabla y sus atributos en columnas.</li>
+            <li>La clave primaria identifica cada registro.</li>
+            <li>Modelar antes de escribir SQL evita rediseños costosos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="diagramas-entidad-relacion.html">Dibujando diagramas entidad-relación</a>
+            <a class="related-lessons__link" href="cardinalidad.html">Cardinalidad de las relaciones</a>
+            <a class="related-lessons__link" href="primera-segunda-forma-normal.html">Primera y segunda forma normal</a>
+            <a class="related-lessons__link" href="../modulo-04/relaciones-uno-muchos.html">Relaciones uno a muchos y muchos a muchos</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

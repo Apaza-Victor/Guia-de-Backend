@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="variables-constantes-y-tipos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables, constantes y tipos de datos · Python para Backend · Backend Academy</title>
+<meta name="description" content="Guarda valores en variables, conoce los tipos básicos de Python y usa type() para verificar qué tipo contiene cada nombre.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="python" data-current="variables-constantes-y-tipos"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Variables, constantes y tipos de datos</span>
+        </nav>
+        <h1 class="lesson-title">Variables, constantes y tipos de datos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Python</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es-variable">Qué es una variable</h2>
+          <p>Una variable es un <strong>nombre que apunta a un valor</strong> que vive en memoria. En Python no declaras el tipo: el intérprete lo determina solo cuando asignas. Por eso se dice que Python tiene <strong>tipado dinámico</strong>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">nombre = "Ana"        # str
+edad = 32             # int
+altura = 1.72         # float
+es_admin = True       # bool
+
+print(nombre, edad, altura, es_admin)</code></pre>
+            </div>
+          </figure>
+          <p>La asignación con <code class="inline">=</code> lee el valor de la derecha, lo guarda en memoria de trabajo y enlaza el nombre de la izquierda a ese objeto.</p>
+        </section>
+
+        <section>
+          <h2 id="tipos-basicos">Los tipos básicos</h2>
+          <ul>
+            <li><strong>int</strong>: enteros sin límite práctico (<code class="inline">255</code>, <code class="inline">-10</code>, <code class="inline">10**100</code>).</li>
+            <li><strong>float</strong>: números decimales de coma flotante (<code class="inline">3.14</code>, <code class="inline">1e9</code>).</li>
+            <li><strong>complex</strong>: números complejos (<code class="inline">2+3j</code>).</li>
+            <li><strong>str</strong>: cadenas de texto con comillas simples o dobles.</li>
+            <li><strong>bool</strong>: solo <code class="inline">True</code> o <code class="inline">False</code>.</li>
+            <li><strong>NoneType</strong>: el valor <code class="inline">None</code>, usado para "sin valor".</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">print(type(10))        # &lt;class 'int'&gt;
+print(type("texto"))   # &lt;class 'str'&gt;
+print(type(3.14))      # &lt;class 'float'&gt;
+print(type(True))      # &lt;class 'bool'&gt;
+print(type(None))      # &lt;class 'NoneType'&gt;</code></pre>
+            </div>
+          </figure>
+          <p><code class="inline">type()</code> es tu herramienta de diagnóstico: si algo no se comporta como esperas, lo primero es preguntar qué tipo tiene.</p>
+        </section>
+
+        <section>
+          <h2 id="constantes">¿Y las constantes?</h2>
+          <p>Python <strong>no tiene constantes verdaderas</strong>. La convención es nombrarlas <strong>todo en mayúsculas</strong>: cualquiera que lea el código entenderá "esto no debe cambiarse", aunque técnicamente el lenguaje no lo prohíbe.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">MAX_CONEXXIONES = 100
+DURACION_TOKEN = 3600
+TIEMPO_ESPERA_TIMEOUT = 5.0
+
+# Configuración de toda la app agrupada arriba del archivo</code></pre>
+            </div>
+          </figure>
+          <p>Poner los valores de configuración como constantes al inicio del módulo facilita encontrarlas y cambiarlas sin tocar la lógica.</p>
+        </section>
+
+        <section>
+          <h2 id="nombres">Buenas prácticas al nombrar</h2>
+          <ul>
+            <li>Usa <code class="inline">snake_case</code>: palabras en minúscula separadas por guion bajo: <code class="inline">max_intentos</code>.</li>
+            <li>Elige nombres descriptivos: <code class="inline">tiempo_maximo_ms</code> mejor que <code class="inline">t</code>.</li>
+            <li>No uses palabras reservadas (<code class="inline">class</code>, <code class="inline">for</code>, <code class="inline">print</code> mejor evítala como nombre).</li>
+            <li>En español es válido y común en equipos hispanos, pero sé consistente.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Declara variables para: nombre de usuario, id de usuario, saldo y si la cuenta está activa.</li>
+            <li>Imprime el tipo de cada una con <code class="inline">type()</code>.</li>
+            <li>Crea tres constantes de configuración simulando tiempos de espera.</li>
+            <li>Responde: ¿qué pasa si asignas un texto a una variable que antes tenía un número?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Las variables unen un nombre con un valor; no tienen tipo fijo.</li>
+            <li>Los tipos base: int, float, str, bool y NoneType.</li>
+            <li><code class="inline">type()</code> revela el tipo de cualquier valor.</li>
+            <li>Las "constantes" son convención: nombres en MAYÚSCULAS.</li>
+            <li>Nombres descriptivos en snake_case hacen tu código legible.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos y módulos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

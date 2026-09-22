@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Los tres pilares de la observabilidad · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende los tres pilares de la observabilidad: logs, métricas y trazas distribuidas, qué aporta cada uno y cómo se complementan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m1-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Los tres pilares</span>
+      </nav>
+      <h1 class="lesson-title">Los tres pilares</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="los-tres">Los tres pilares</h2>
+        <p>La observabilidad se apoya en tres tipos de señales. Cada una responde <strong>una parte distinta de la pregunta</strong>, y ninguna basta por sí sola:</p>
+        <dl class="definition-list">
+          <dt>Logs</dt><dd>eventos discretos con detalle: qué pasó exactamente. Son los más expresivos y los más caros de almacenar a gran volumen.</dd>
+          <dt>Métricas</dt><dd>números agregados en el tiempo: cuánto, cuán rápido, cuántos. Son baratas y permiten detectar tendencias y levantar alertas.</dd>
+          <dt>Trazas distribuidas</dt><dd>el camino de una petición a través de los componentes: dónde se gastó el tiempo y dónde falló.</dd>
+        </dl>
+        <p>Usemos una analogía: un viaje en avión. Las <strong>métricas</strong> te dicen que el vuelo lleva retraso (números). Los <strong>logs</strong> te dicen que la puerta de embarque cambió y el pasajero se perdió (eventos con detalle). La <strong>traza</strong> te muestra el recorrido completo: facturación, seguridad, salón, embarque, y en qué punto se quedó atascado.</p>
+      </section>
+
+      <section>
+        <h2 id="logs">El pilar de los logs</h2>
+        <p>Un log es un registro de un evento con su contexto. En backend moderno los logs son estructurados (JSON), con nivel, timestamp, mensaje y campos de correlación. Son insustituibles para responder «¿qué pasó exactamente?» con detalle de usuario, valores y stack trace.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "level": "warn",
+  "ts": "2026-02-18T10:04:11.521Z",
+  "msg": "intento de compra fallido: stock insuficiente",
+  "service": "checkout-api",
+  "trace_id": "7b9c8d1e2f3a4b5c6d7e8f9a0b1c2d3e",
+  "checkout.id": "co_93812",
+  "product.sku": "TSHIRT-M-L",
+  "stock.disponible": 0
+}</code></pre>
+          </div>
+        </figure>
+        <p>Los logs cuentan la historia de negocio completa, pero a alto volumen, buscar entre ellos sin indexar es lento. Por eso no alertas sobre logs sueltos: los usas para <em>profundizar</em> cuando ya sospechas el área.</p>
+      </section>
+
+      <section>
+        <h2 id="metricas">El pilar de las métricas</h2>
+        <p>Las métricas son series de números con etiquetas: <code class="inline">http_requests_total{method="GET", status="200"}</code>. Se agregan en intervalos (cada 15 segundos), se almacenan baratas y se consultan rápido. Son la base de los dashboards y de las alertas.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">prometheus</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># HELP http_request_duration_seconds Duración de las peticiones HTTP
+# TYPE http_request_duration_seconds histogram
+http_request_duration_seconds_bucket{le="0.1", route="/v1/checkout"} 900
+http_request_duration_seconds_bucket{le="0.5", route="/v1/checkout"} 1200
+http_request_duration_seconds_bucket{le="+Inf", route="/v1/checkout"} 1234
+http_request_duration_seconds_sum{route="/v1/checkout"} 301.5
+http_request_duration_seconds_count{route="/v1/checkout"} 1234
+
+# Tipos de métrica:
+#   counter   - solo sube (peticiones, errores)
+#   gauge     - sube y baja (memoria, cola pendiente)
+#   histogram - latencias en buckets (para percentiles)</code></pre>
+          </div>
+        </figure>
+        <p>Su punto ciego: te dicen <em>que</em> el p99 pasó de 200 ms a 3 segundos, pero no quién es el culpable. Para eso pasamos a la traza.</p>
+      </section>
+
+      <section>
+        <h2 id="trazas">El pilar de las trazas distribuidas</h2>
+        <p>Una traza es un árbol de <strong>spans</strong>: cada span es una unidad de trabajo (una llamada HTTP, una consulta a BD, un paso en la cola) con su duración y su padre. El <code class="inline">trace_id</code> identifica la petición completa; el <code class="inline">span_id</code> identifica cada tramo.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "spans": [
+    {
+      "name": "POST /v1/checkout",
+      "spanId": "00f067aa0ba902b7",
+      "parentSpanId": "0000000000000000",
+      "startTime": "2026-02-18T10:04:11.500Z",
+      "durationMs": 850,
+      "attributes": { "http.route": "/v1/checkout", "http.status_code": "504" }
+    },
+    {
+      "name": "consultar stock",
+      "spanId": "0b3f9d4c8e1a7062",
+      "parentSpanId": "00f067aa0ba902b7",
+      "startTime": "2026-02-18T10:04:11.540Z",
+      "durationMs": 640,
+      "attributes": { "db.system": "postgresql", "db.operation": "SELECT" }
+    }
+  ]
+}</code></pre>
+          </div>
+        </figure>
+        <p>Aquí vemos el golpe de realidad: la petición tardó 850 ms, y 640 los consumió una consulta a la base de datos. Sin la traza no sabríamos dónde se queman los milisegundos en un sistema con veinte servicios.</p>
+      </section>
+
+      <section>
+        <h2 id="correlacion">La correlación: el pegamento</h2>
+        <p>Los tres pilares se conectan con el <code class="inline">trace_id</code>. El mismo ID viaja en el header de la petición, se escribe en cada log, se asocia a cada span y se usa como etiqueta en métricas (cuando son muestreadas). Investigar un incidente es entonces un movimiento entre pestañas:</p>
+        <ol>
+          <li>Una <strong>métrica</strong> te avisa: tasa de errores alta en <code class="inline">/v1/checkout</code>.</li>
+          <li>Buscas las <strong>trazas</strong> de esa ruta y eliges una fallida.</li>
+          <li>Copias su <code class="inline">trace_id</code> y filtras los <strong>logs</strong> de toda la petición: el motivo está ahí.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Método:</strong> métricas para <em>detectar</em>, trazas para <em>localizar</em>, logs para <em>explicar</em>. Y el trace_id es lo que te permite saltar de una a otra.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para un endpoint de login, escribe el log de un fallo de autenticación en JSON (con 4 campos de contexto).</li>
+          <li>Define las 3 métricas que alertarías primero (una counter, una gauge, un histogram).</li>
+          <li>Escribe los spans que tendría una petición que pasa por API → BD → cola de correos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los logs explican el «qué pasó» con detalle; las métricas cuantifican el «cuánto»; las trazas reconstruyen el «dónde».</li>
+          <li>Las métricas son baratas y alertables; los logs son expresivos pero caros.</li>
+          <li>Las trazas son el único pilar que sigue una petición a través de servicios.</li>
+          <li>El trace_id correlaciona los tres pilares y es la base de la investigación.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-observabilidad.html">¿Qué es la observabilidad?</a>
+          <a class="related-lessons__link" href="logs-estructurados.html">Logs estructurados</a>
+          <a class="related-lessons__link" href="metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="trazas-distribuidas.html">Trazas distribuidas</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

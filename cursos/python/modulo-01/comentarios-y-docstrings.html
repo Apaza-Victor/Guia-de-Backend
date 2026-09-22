@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="comentarios-y-docstrings">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comentarios y docstrings · Python para Backend · Backend Academy</title>
+<meta name="description" content="Aprende a documentar tu código Python con comentarios con #, docstrings con tres comillas y a explicar el "porqué" sin repetir el "qué".">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="python" data-current="comentarios-y-docstrings"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Comentarios y docstrings</span>
+        </nav>
+        <h1 class="lesson-title">Comentarios y docstrings</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Python</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="comentarios">Comentarios con #</h2>
+          <p>Todo lo que esté después de un <code class="inline">#</code> en una línea es ignorado por el intérprete. El objetivo no es parafrasear el código, sino explicar el <strong>porqué</strong>: decisiones que parecerían extrañas sin contexto.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python"># Retry con backoff exponencial porque el proveedor
+# de pagos devuelve 429 cuando saturamos su API.
+intentos = 0
+while intentos &lt; 3:
+    intentos += 1
+    # intentar_pago() vendrá en el módulo 2
+    break</code></pre>
+            </div>
+          </figure>
+          <p>Un comentario útil responde a <em>¿por qué así?</em> o <em>¿qué restricción estoy sorteando?</em>. Comentar <code class="inline"># suma a y b</code> encima de <code class="inline">a + b</code> no aporta nada.</p>
+        </section>
+
+        <section>
+          <h2 id="docstrings">Docstrings: documentación que vive</h2>
+          <p>Un <strong>docstring</strong> es una cadena literal como <strong>primera instrucción</strong> de un módulo, una función o una clase. No se ignora: queda asociada al objeto y la consulta <code class="inline">help()</code> o <code class="inline">__doc__</code> la muestra en cualquier momento.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">def calcular_backoff(intentos: int) -&gt; int:
+    """Devuelve los segundos de espera antes del siguiente intento.
+
+    Usa la fórmula base 2 ** intentos, con un tope de 60 segundos
+    para no castigar más de la cuenta al sistema.
+    """
+    return min(2 ** intentos, 60)
+
+print(calcular_backoff.__doc__)</code></pre>
+            </div>
+          </figure>
+          <p>Reglas de estilo (PEP 257): se delimitan con tres comillas dobles <code class="inline">"""..."""</code>, empiezan con mayúscula, terminan en punto y siguen la convención: primera línea = resumen en una frase; luego una línea en blanco; después los detalles.</p>
+        </section>
+
+        <section>
+          <h2 id="dunder">__doc__ y help()</h2>
+          <p>El docstring se convierte en el atributo <code class="inline">__doc__</code> del objeto. Por eso la documentación "vive" con el código y nunca se desincroniza del comportamiento real (si haces las ediciones bien).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">&gt;&gt;&gt; help(calcular_backoff)
+Help on function calcular_backoff in module __main__:
+
+calcular_backoff(intentos: int) -&gt; int
+    Devuelve los segundos de espera antes del siguiente intento.
+    ...</code></pre>
+            </div>
+          </figure>
+          <p>En backend esto es oro: <code class="inline">help()</code> también documenta las librerías del sistema. Escribe <code class="inline">help(str)</code> y tendrás la guía de cadenas sin abrir el navegador.</p>
+        </section>
+
+        <section>
+          <h2 id="buenas-practicas">Buenas prácticas</h2>
+          <ul>
+            <li>Documenta <strong>interfaces</strong>: qué recibe, qué devuelve y qué errores puede lanzar.</li>
+            <li>Deja comentarios para el "porqué"; usa docstrings para el contrato.</li>
+            <li>No conviertas manías en comentarios: <code class="inline"># no toques esto</code> sin razón es ruido.</li>
+            <li>Actualiza el docstring cuando cambies la firma; el código muerto y la doc contradictoria confunden por igual.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe una función <code class="inline">tiempo_espera()</code> con docstring que incluya resumen y ejemplo en la sección de detalles.</li>
+            <li>Consulta <code class="inline">help(tiempo_espera)</code> y verifica que el texto aparece tal cual lo escribiste.</li>
+            <li>Añade tres comentarios "porqué" a un script anterior del módulo.</li>
+            <li>Localiza un docstring de la biblioteca estándar (por ejemplo <code class="inline">str.strip</code>) y cópialo con sus propias palabras.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Los comentarios con <code class="inline">#</code> explican el porqué y son ignorados por el intérprete.</li>
+            <li>Los docstrings con <code class="inline">"""</code> documentan módulos, clases y funciones.</li>
+            <li><code class="inline">__doc__</code> y <code class="inline">help()</code> consultan esa documentación en caliente.</li>
+            <li>Primera línea = resumen; después los detalles.</li>
+            <li>Documentar contratos es parte del trabajo en backend: tus futuras/os compañeras lo agradecerán.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos y módulos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

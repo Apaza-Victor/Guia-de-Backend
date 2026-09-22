@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m2-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ELK y OpenSearch · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende el stack ELK para centralizar logs: Filebeat, Logstash, Elasticsearch y Kibana, con pipelines de transformación y búsqueda.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m2-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">ELK y OpenSearch</span>
+      </nav>
+      <h1 class="lesson-title">ELK y OpenSearch</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Herramientas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">El stack de logs</h2>
+        <p>Cuando tienes docenas de instancias, cada una con sus archivos, buscar en todos los logs a mano es imposible. El stack <strong>ELK</strong> centraliza cada línea, la indexa y te deja buscar con la velocidad de un motores de búsqueda:</p>
+        <dl class="definition-list">
+          <dt>Filebeat / Beats</dt><dd>agentes ligeros que leen archivos (o logs de contenedores) en cada máquina y los envían.</dd>
+          <dt>Logstash</dt><dd>tubería de transformación: recibe, filtra, parsea y reenvía.</dd>
+          <dt>Elasticsearch</dt><dd>almacén y buscador distribuido. Indexa cada log para consultarlo en milisegundos.</dd>
+          <dt>Kibana</dt><dd>UI: explorar logs (Discover), crear dashboards y visualizaciones.</dd>
+        </dl>
+        <p><strong>OpenSearch</strong> es el fork abierto de Elasticsearch + Kibana: misma API y mismas ideas. Si tu stack usa OpenSearch, todo lo de esta lección aplica igual.</p>
+      </section>
+
+      <section>
+        <h2 id="filebeat">Filebeat: el recolector</h2>
+        <p>Se despliega como sidecar o DaemonSet en cada nodo. Lee el log de los contenedores y lo manda a Logstash:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">filebeat.inputs:
+  - type: container
+    paths:
+      - "/var/lib/docker/containers/*/*.log"
+    processors:
+      - add_kubernetes_metadata: {}
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          
+output.logstash:
+  hosts: ["logstash:5044"]
+
+setup.kibana:
+  host: "http://kibana:5601"</code></pre>
+          </div>
+        </figure>
+        <p>Fíjate en el procesador <code class="inline">decode_json_fields</code>: si tus logs ya son JSON estructurados (como pedimos en el módulo 1), Filebeat los deserializa y cada campo llega indexado por separado. Ahí es donde tu disciplina de logs estructurados se convierte en búsquedas veloces.</p>
+      </section>
+
+      <section>
+        <h2 id="logstash">Logstash: transformar</h2>
+        <p>Logstash recibe del Beat, aplica un pipeline (reviso de estructura, parseo de fecha, adición de campos) y entrega a Elasticsearch:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">ruby</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-ruby" data-language="ruby">input {
+  beats { port =&gt; 5044 }
+}
+
+filter {
+  json {
+    source       =&gt; "message"
+    target       =&gt; "parsed"
+    remove_field =&gt; ["message"]
+  }
+
+  date {
+    match       =&gt; ["parsed.ts", "ISO8601"]
+    target      =&gt; "@timestamp"
+  }
+
+  if [parsed][tenant] {
+    mutate { copy =&gt; { "[parsed][tenant]" =&gt; "[tenant]" } }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts =&gt; ["http://elasticsearch:9200"]
+    index =&gt; "logs-api-%{+YYYY.MM.dd}"
+  }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Cada día crea un índice <code class="inline">logs-api-YYYY.MM.DD</code>; así puedes borrar índices viejos con un lifecycle policy y mantener el coste bajo control.</p>
+      </section>
+
+      <section>
+        <h2 id="elasticsearch">Búsqueda en Elasticsearch</h2>
+        <p>La API de búsqueda es JSON sobre HTTP. Un ejemplo típico de incidencia: errores del servicio de checkout en el último día filtrados por tenant:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">POST /logs-api-*/_search
+{
+  "size": 20,
+  "sort": [{ "@timestamp": { "order": "desc" } }],
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "level": "error" } },
+        { "match": { "service": "checkout-api" } }
+      ],
+      "filter": [
+        { "term": { "tenant": "acme" } },
+        { "range": { "@timestamp": { "gte": "now-24h" } } }
+      ]
+    }
+  }
+}</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li><code class="inline">must</code>: cláusulas que aportan relevancia (texto buscado).</li>
+          <li><code class="inline">filter</code>: cláusulas de filtrado exacto, cacheadas y rápidas.</li>
+          <li><code class="inline">range</code>: el rango temporal; siempre añádelo para no barrer todo el índice.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="kibana">Kibana: explorar y visualizar</h2>
+        <p>En <strong>Discover</strong> escribes consultas KQL (Kibana Query Language) y filtras en vivo, por ejemplo <code class="inline">level: error and service: "checkout-api"</code>. Desde ahí saltas a paneles: histogramas de errores por hora, top de rutas lentas, mapas de tenants afectados. Kibana también tiene su parte de observabilidad: si correlacionas con trace_id, puedes ver el log de todos los servicios de una misma petición.</p>
+        <div class="callout">
+          <p><strong>Flujo real:</strong> alerta de Prometheus → trace_id en Jaeger → buscas ese mismo trace_id en Kibana → ves los logs exactos de esa petición en todos los servicios.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta el stack con docker-compose (elasticsearch, logstash, kibana) o usa un cluster gestionado.</li>
+          <li>Configura Filebeat para mandar los logs del contenedor de tu API a Logstash.</li>
+          <li>En Kibana Discover, muéstrame 3 consultas: errores por servicio, un término de usuario, y un rango temporal.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Filebeat recoge, Logstash transforma, Elasticsearch indexa y Kibana explora.</li>
+          <li>Los logs estructurados en JSON se indexan campo a campo y se buscan en milisegundos.</li>
+          <li>Use Índices por día y lifecycle policy para controlar el tamaño y el coste.</li>
+          <li>El trace_id es la llave que une ELK con Prometheus y Jaeger en una incidencia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/logs-estructurados.html">Logs estructurados</a>
+          <a class="related-lessons__link" href="opentelemetry.html">OpenTelemetry</a>
+          <a class="related-lessons__link" href="grafana.html">Grafana</a>
+          <a class="related-lessons__link" href="../modulo-03/dashboards-efectivos.html">Dashboards efectivos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

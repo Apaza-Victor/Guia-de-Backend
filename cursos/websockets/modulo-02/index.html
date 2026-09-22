@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 2 · WebSockets en Node.js · WebSockets y Tiempo Real</title>
+<meta name="description" content="Módulo 2 del curso WebSockets y Tiempo Real: servidores WebSocket con Node.js, el paquete ws, broadcast, salas, autenticación con JWT, Socket.IO y el cliente del navegador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="container-narrow">
+
+    <nav class="breadcrumb" aria-label="Miga de pan">
+      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item"><a href="../index.html">WebSockets y Tiempo Real</a></span>
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span class="breadcrumb__item" aria-current="page">Módulo 2 · WebSockets en Node.js</span>
+    </nav>
+
+    <header class="lesson-hero">
+      <p class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></p>
+      <h1 class="lesson-title">Módulo 2 · WebSockets en Node.js</h1>
+      <p class="section-subtitle">Construye servidores WebSocket reales con Node.js: el paquete ws, broadcast a grupos, salas, autenticación con tokens JWT y la alternativa madura de Socket.IO.</p>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Node.js</span>
+      </div>
+    </header>
+
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Levantar un servidor WebSocket con Node.js y el paquete ws.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Enviar mensajes a uno, a varios o a salas completas de clientes.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Autenticar conexiones validando un token JWT en el handshake.</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Comparar ws con Socket.IO y construir un cliente robusto en el navegador.</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Tu progreso</h2>
+        <div class="progress" data-progress="websockets">
+          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+          <span class="progress__label">0%</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Lecciones</h2>
+        <div class="grid-2">
+          <article class="card card--lesson card--link">
+            <h3><a href="servidor-websocket-node.html">1 · Servidor WebSocket con Node</a></h3>
+            <p>El paquete ws y uWebSockets, servidor básico y eventos del servidor.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">servidor</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="broadcast-de-mensajes.html">2 · Broadcast y salas</a></h3>
+            <p>Envío a uno, a todos y a grupos concretos de clientes conectados.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">mensajería</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="autenticacion-por-token.html">3 · Autenticación por token</a></h3>
+            <p>Validar un JWT en el handshake y aplicar un middleware de autenticación.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">seguridad</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="socket-io.html">4 · Socket.IO</a></h3>
+            <p>Eventos, salas y reconexión con Socket.IO frente al paquete ws puro.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">framework</span></div>
+          </article>
+          <article class="card card--lesson card--link">
+            <h3><a href="cliente-websocket-web.html">5 · Cliente WebSocket en el navegador</a></h3>
+            <p>La API WebSocket del navegador, enviar mensajes JSON y reconexión manual.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">cliente</span></div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../modulo-01/index.html">
+        <span class="label">← Módulo anterior</span>
+        <span class="title">Fundamentos de WebSocket</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Escalar y asegurar WebSockets</span>
+      </a>
+    </nav>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

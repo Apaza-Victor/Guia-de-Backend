@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-fragmentos-y-uniones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fragmentos, uniones e interfaces · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende fragmentos para reutilizar selecciones y cómo modelar polimorfismo en GraphQL con interfaces, uniones y el resolver __resolveType.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-fragmentos-y-uniones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Fragmentos, uniones e interfaces</span>
+      </nav>
+      <h1 class="lesson-title">Fragmentos, uniones e interfaces</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Avanzado y producción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Dos herramientas que la especificación ofrece para no repetirte cuando los datos se parecen o cuando un campo puede ser de varios tipos: los <strong>fragmentos</strong> (reutilizar selecciones) y las <strong>interfaces y uniones</strong> (polimorfismo). Ambas son muy usadas en clientes de verdad y en schemas de dominios ricos.</p>
+      </section>
+
+      <section>
+        <h2 id="fragmentos">Fragmentos: reutiliza selecciones</h2>
+        <p>Un <strong>fragmento</strong> es un paquete de campos reutilizable que se incluye con <code>...</code>. Definido una vez, se extiende (<em>spread</em>) en varias partes de la consulta:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">fragment DatosBasicosUsuario on Usuario {
+  nombre
+  avatar
+  email
+}
+
+query {
+  autor: usuario(id: "u1") {
+    ...DatosBasicosUsuario
+    posts { titulo }
+  }
+  editor: usuario(id: "u2") {
+    ...DatosBasicosUsuario
+  }
+}</code></pre>
+        <p>Ventajas que van más allá de la estética:</p>
+        <ul>
+          <li><strong>Coherencia:</strong> el avatar se pide igual en todas las pantallas — un solo lugar que editar.</li>
+          <li><strong>Cache:</strong> los clientes Apollo/Relay normalizan por <code>__typename + id</code>; los campos coincidentes se reutilizan.</li>
+          <li><strong>Legibilidad:</strong> el selection set describe intención, no verbosidad.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="interfaces">Interfaces</h2>
+        <p>Una <strong>interfaz</strong> define campos comunes que varios tipos deben cumplir (<code>implements</code>). Sirve para agrupar cosas que comparten comportamiento, como medios de pago:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">interface MedioPago {
+  id: ID!
+  marca: String!
+}
+
+type Tarjeta implements MedioPago {
+  id: ID!
+  marca: String!
+  ultimosCuatro: String!
+}
+
+type PayPal implements MedioPago {
+  id: ID!
+  marca: String!
+  email: String!
+}
+
+type Query {
+  metodosDePago: [MedioPago!]!
+}</code></pre>
+        <p>El cliente puede pedir los campos comunes sin conocer el tipo concreto, y para los específicos usa los fragmentos inline con <code>... on</code>:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query {
+  metodosDePago {
+    id
+    marca
+    ... on Tarjeta { ultimosCuatro }
+    ... on PayPal { email }
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="uniones">Uniones</h2>
+        <p>La <strong>unión</strong> es más libre: agrupa tipos <em>sin</em> campos comunes. El ejemplo clásico es un buscador que devuelve resultados heterogéneos:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">union ResultadoBusqueda = Post | Usuario | Comentario
+
+type Query {
+  buscar(termino: String!): [ResultadoBusqueda!]!
+}</code></pre>
+        <p>Al no haber denominador común, la consulta debe discriminar por tipo. El campo meta <code>__typename</code> siempre está disponible y los fragmentos inline seleccionan campos por tipo:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query {
+  buscar(termino: "graphql") {
+    __typename
+    ... on Post { titulo autor { nombre } }
+    ... on Usuario { nombre email }
+    ... on Comentario { texto }
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="resolvetype">Resolver el tipo concreto: __resolveType</h2>
+        <p>Cuando GraphQL devuelve un valor de una interfaz o unión, necesita saber <em>qué tipo concreto</em> es. Lo deduce con el campo <code>__typename</code> que ya trae el objeto, y si no, con <code>__resolveType</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  ResultadoBusqueda: {
+    __resolveType: (objeto) => {
+      if (objeto.titulo !== undefined) return "Post";
+      if (objeto.nombre !== undefined) return "Usuario";
+      return "Comentario";
+    },
+  },
+  MedioPago: {
+    __resolveType: (objeto) => (objeto.ultimosCuatro ? "Tarjeta" : "PayPal"),
+  },
+};</code></pre>
+        <p>Cuanto más limpia sea la discriminación (<code>__typename</code> presente, o un campo discriminador), menos costoso. Si varios tipos comparten todas las claves, es recomendable añadir un campo <code>tipo</code> explícito al modelo para no adivinar.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuál elegir?</h2>
+        <ul>
+          <li><strong>Interfaz</strong> si los tipos comparten una identidad y campos (medios de pago, eventos, nodos).</li>
+          <li><strong>Unión</strong> si son resultados inconexos que coinciden en un endpoint (búsqueda, notificaciones, feed mixto).</li>
+          <li><strong>Fragments</strong> siempre que repitas un selection set: son la herramienta de composición del cliente.</li>
+        </ul>
+        <p>En el schema también existen las <em>interfaces clave</em>: la interfaz <code>Node</code> con un campo <code>id</code> es un patrón clásico para campos "buscables por id global". Elegir entre ellas es una decisión de diseño de dominio, no puramente técnica.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Define un fragmento <code>CamposAutor</code> y úsalo en tres puntos de una query.</li>
+          <li>Crea una interfaz <code>Evento</code> con <code>id</code> y <code>ocurridoen</code>, e implements en <code>Compra</code> y <code>Login</code>.</li>
+          <li>Cambia la query raíz para que <code>historial(usuarioId)</code> devuelva <code>[Evento!]!</code>.</li>
+          <li>Escribe <code>__resolveType</code> para esa interfaz discriminando por un campo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los fragmentos reutilizan selection sets y mejoran cache y coherencia.</li>
+          <li>Las interfaces declaran campos comunes que varios tipos implementan.</li>
+          <li>Las uniones agrupan tipos sin denominador común.</li>
+          <li><code>__typename</code> y los fragmentos inline <code>... on Tipo</code> discriminan en la consulta.</li>
+          <li><code>__resolveType</code> le dice al servidor qué tipo concreto devolver.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/types-y-schema.html">Tipos y Schema</a>
+          <a class="related-lessons__link" href="subscriptions.html">Subscriptions</a>
+          <a class="related-lessons__link" href="federation-y-gateway.html">Federation y gateway</a>
+          <a class="related-lessons__link" href="seguridad-y-limitacion.html">Seguridad y limitación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="subscriptions.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Subscriptions</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="dataloader-y-n-1.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">DataLoader y N+1</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

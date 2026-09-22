@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="vps-vs-serverless">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VPS vs Serverless · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Compara VPS y serverless para tu Backend: control vs ahorro, escalado, costos, cold starts y cuándo elegir cada paradigma.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="vps-vs-serverless"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">VPS vs Serverless</span>
+      </nav>
+      <h1 class="lesson-title">VPS vs Serverless</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Dos mentalidades para servir código</h2>
+        <p>Hay dos formas extremas de ejecutar tu Backend. El <strong>VPS</strong> (o VM): una máquina virtual siempre encendida que pagas por mes. El <strong>serverless</strong>: funciones que el proveedor ejecuta a demanda, cobrándote por milisegundos reales de uso. La elección cambia tu arquitectura entera.</p>
+      </section>
+
+      <section>
+        <h2 id="vps">El caso del VPS</h2>
+        <ul>
+          <li><strong>Control total:</strong> SO, runtime, daemons, memoria, hilos: todo tuyo.</li>
+          <li><strong>Coste predecible:</strong> pagas algo fijo, suba o baje el tráfico.</li>
+          <li><strong>Conexiones persistentes:</strong> ideal para WebSockets, tareas largas, colas.</li>
+          <li><strong>Trabajo:</strong> configurar, patchear, escalar y monitorizar es tuyo.</li>
+        </ul>
+        <p>Cuando el tráfico es estable o la carga es continua, el VPS suele salir más barato y es más simple de razonar.</p>
+      </section>
+
+      <section>
+        <h2 id="serverless">El caso serverless</h2>
+        <ul>
+          <li><strong>Escalado automático:</strong> de 0 a miles de ejecuciones sin tocar nada.</li>
+          <li><strong>Pago por uso real:</strong> nada de pagar una VM ociosa a las 3 AM.</li>
+          <li><strong>Cero servidores que mantener:</strong> el proveedor patchea y dimensiona por ti.</li>
+          <li><strong>Cold starts:</strong> la primera petición tras un periodo de inactividad puede tardar 100 ms-2 s (las funciones "arrancan" al ser llamadas).</li>
+        </ul>
+        <p>Pago ejemplo: 1M invocaciones × 200 ms de Lambda ≈ pocas decenas de USD al mes, mientras una VM costaría algo fijo aunque no la uses.</p>
+      </section>
+
+      <section>
+        <h2 id="matriz">Matriz de decisión</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Pregunta                          VPS          Serverless
+Tráfico predecible constante       ✔ mejor        ok
+Tráfico en picos / intermitente    caro ocioso    ✔ ideal
+Conexiones persistentes (socket)   ✔              límites
+Tareas largas (&gt; 15 min)           ✔              difícil
+Control fino del hardware/runtime ✔              poco
+Operación (parches, escalado)      tú gestionas  proveedor
+Coste en uso real                  fijo          por invocación</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="mezcla">La realidad: se mezclan</h2>
+        <p>Las arquitecturas modernas no eligen una sola: el <strong>APY crítico en VPS o contenedores</strong>, las <strong>funciones de evento en serverless</strong> (thumbnails, webhooks, limpieza). Incluso serverless puede correr contenedores (Cloud Run, App Runner) cuando una función no alcanza.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># serverless típico en AWS: función + API Gateway
+serverless.yml:
+  service: api-logs
+  functions:
+    procesar:
+      handler: handler.procesar
+      events:
+        - http:
+            path: logs/procesar
+            method: post</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica estas cargas: API de chat con WebSockets, redimensionado de imágenes por evento, e-commerce con picos de campaña, job nocturno de 40 min.</li>
+          <li>Calcula cuál pagarías ocioso la mitad del tiempo: una VM de $12 o funciones por uso.</li>
+          <li>Describe un sistema que use ambos a la vez y por qué.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>VPS: control total y coste fijo; serverless: cero operación y pago por uso.</li>
+          <li>El cold start es el precio de la escala a 0.</li>
+          <li>Tráfico continuo → VM/contenedor; picos o eventos → serverless.</li>
+          <li>Las arquitecturas reales mezclan ambos según cada pieza.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-queries-y-mutations">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queries y Mutations · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a escribir queries y mutations en GraphQL: selección de campos, argumentos, aliases, variables y la forma de la respuesta, con ejemplos verificables.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-queries-y-mutations"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Queries y Mutations</span>
+      </nav>
+      <h1 class="lesson-title">Queries y Mutations</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de GraphQL</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En GraphQL hay tres tipos de operación. La <strong>query</strong> es una lectura: pide datos sin efectos secundarios. La <strong>mutation</strong> es una escritura: crea, actualiza o borra, como un <code>POST</code>/<code>PUT</code>/<code>DELETE</code> de REST. Ambas comparten sintaxis; la diferencia es de intención y de garantías de ejecución.</p>
+        <p>Vamos a desmontar la sintaxis de <code>query</code> paso a paso: operación, selección, argumentos y aliases, y después veremos cómo se escribe una mutation.</p>
+      </section>
+
+      <section>
+        <h2 id="query">La operación query</h2>
+        <p>Una query nombrada empieza con la palabra clave <code>query</code>, un nombre opcional (buena práctica para logs y depuración) y su campo raíz:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query ObtenerUsuario {
+  usuario(id: "u1") {
+    nombre
+    email
+    avatar
+  }
+}</code></pre>
+        <p>El <strong>selection set</strong> es el bloque entre llaves: la lista de campos que se devuelven. El servidor ignora lo que no se pide. Si el cliente más adelante necesita <code>telefono</code>, basta con añadirlo a la consulta — no hace falta una nueva versión de la API ni un endpoint nuevo.</p>
+        <p>GraphQL también permite la forma abreviada sin la palabra <code>query</code> (útil en consolas), pero en producción es recomendable nombrar las operaciones para identificarlas en logs y métricas.</p>
+      </section>
+
+      <section>
+        <h2 id="argumentos">Argumentos</h2>
+        <p>Los campos llevan <strong>argumentos</strong>: parámetros con tipo que el resolver recibe. Un campo puede combinarse con argumentos de filtrado, paginación u orden, y los argumentos pueden anidarse campo a campo:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query BuscarPost {
+  post(id: "p42") {
+    titulo
+    autor {
+      nombre
+      email
+    }
+  }
+}</code></pre>
+        <p>Aquí <code>post</code> recibe <code>id</code>, y <code>autor</code> se resuelve como una relación anidada. El resultado viaja en una sola respuesta, aunque en el servidor haya habido dos consultas a la base de datos (o tres, si el autor mira sus propios posts). Los argumentos también pueden ser obligatorios o no — el schema decide.</p>
+      </section>
+
+      <section>
+        <h2 id="aliases">Aliases</h2>
+        <p>¿Qué pasa si quieres pedir el mismo campo con argumentos distintos dos veces en la misma consulta? Sin más, fallaría porque los campos con el mismo nombre colisionan. La solución son los <strong>aliases</strong>: un nombre propio para cada instancia:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query {
+  perfil: usuario(id: "u1") {
+    nombre
+  }
+  contacto: usuario(id: "u2") {
+    nombre
+  }
+}</code></pre>
+        <p>La respuesta llega con los nombres de los alias como claves, lo que permite comparar dos usuarios o pedir el mismo dataset con parámetros distintos en una sola petición:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "data": {
+    "perfil": { "nombre": "Ana Torres" },
+    "contacto": { "nombre": "Luis Mora" }
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="mutaciones">Mutaciones</h2>
+        <p>Las <strong>mutations</strong> modifican el estado y, como en REST, pueden devolver los datos creados. Es buena práctica que devuelvan el objeto completo o una proyección útil, para que el cliente actualice su UI sin hacer una query extra:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">mutation CrearPost {
+  crearPost(titulo: "Hola GraphQL", contenido: "Primer post del curso") {
+    id
+    titulo
+    creadoEn
+  }
+}</code></pre>
+        <p>Una diferencia clave con REST: las mutations se ejecutan <strong>en serie</strong>. Si una mutation tiene varios campos raíz, GraphQL los ejecuta uno tras otro en orden, mientras que las queries se ejecutan en paralelo. Esto permite que una mutation dependa del resultado de la anterior dentro del mismo documento.</p>
+      </section>
+
+      <section>
+        <h2 id="respuesta">La forma de la respuesta</h2>
+        <p>Toda operación responde con la misma estructura: una clave <code>data</code> con la forma exacta de la consulta, y opcionalmente <code>errors</code>:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "data": {
+    "crearPost": {
+      "id": "p47",
+      "titulo": "Hola GraphQL",
+      "creadoEn": "2026-09-22T09:15:00Z"
+    }
+  }
+}</code></pre>
+        <p>Si un campo falla, aparece <code>errors</code> con la descripción y la ruta del campo fallido — el resto de la respuesta se entrega igualmente. Ese modelo de errores estructurados lo estudiarás a fondo en la lección de errores y validación.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe una query nombrada que traiga un usuario y sus últimos 3 posts (anida el selection set de posts).</li>
+          <li>Usa un alias para pedir el mismo usuario dos veces con IDs distintos en una sola request.</li>
+          <li>Escribe una mutation <code>actualizarPerfil</code> que reciba un nuevo nombre y devuelva el usuario actualizado.</li>
+          <li>Responde por escrito: ¿por qué las mutations se ejecutan en serie mientras las queries pueden hacerlo en paralelo?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Una query lee datos; una mutation los escribe. La sintaxis es idéntica.</li>
+          <li>El selection set define exactamente qué campos se devuelven.</li>
+          <li>Los campos reciben argumentos tipados y pueden anidarse.</li>
+          <li>Los aliases permiten pedir el mismo campo varias veces sin colisión.</li>
+          <li>Las mutations se ejecutan en serie y suelen devolver el objeto modificado.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="types-y-schema.html">Tipos y Schema</a>
+          <a class="related-lessons__link" href="resolvers.html">Resolvers</a>
+          <a class="related-lessons__link" href="../modulo-02/argumentos-y-variables.html">Argumentos y variables</a>
+          <a class="related-lessons__link" href="../modulo-02/mutations-validaciones.html">Mutations y validación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="types-y-schema.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Tipos y Schema</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="resolvers.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Resolvers</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

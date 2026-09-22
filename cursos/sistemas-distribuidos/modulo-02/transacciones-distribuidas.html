@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-transacciones-distribuidas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transacciones distribuidas · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende transacciones distribuidas: protocolo 2PC, sagas con orquestación y coreografía, compensación de pasos y cuándo es mejor evitarlas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-transacciones-distribuidas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Transacciones distribuidas</span>
+      </nav>
+      <h1 class="lesson-title">Transacciones distribuidas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Replicación y consistencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando una operación de negocio toca varios servicios o varias bases, un <code>COMMIT</code> local ya no es suficiente: no puedes «hacer commit» en dos bases a la vez con la garantía ACID clásica. Aparecen las <strong>transacciones distribuidas</strong>. Hay dos grandes familias: el protocolo <strong>2PC</strong> (fuerte, bloqueante) y las <strong>sagas</strong> (débiles, sin bloqueos).</p>
+      </section>
+
+      <section>
+        <h2 id="2pc">Two-phase commit (2PC)</h2>
+        <p>Un coordinador dirige a varios participantes:</p>
+        <ol>
+          <li><strong>Fase de preparación (votar):</strong> el coordinador pregunta a cada participante «¿puedes preparar?». Cada uno responde <em>sí</em> o <em>abort</em>, sin hacer commit todavía.</li>
+          <li><strong>Fase de commit (decidir):</strong> si todos dijeron que sí, el coordinador ordena commit a todos; si alguien aborta, ordena rollback a todos.</li>
+        </ol>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "coordinador": "servicio-pagos",
+  "participantes": ["bd-pagos", "bd-inventario", "bd-envios"],
+  "fase_1": {
+    "estado": "prepare",
+    "votos": { "bd-pagos": "si", "bd-inventario": "si", "bd-envios": "si" }
+  },
+  "fase_2": { "decision": "commit", "estado": "todos_confirman" }
+}
+</code></pre>
+        <p>Su talón de Aquiles: si el coordinador muere después de la fase 1, los participantes quedan <strong>bloqueados en preparado</strong> sin saber si deben commitear o abortar, hasta que llegue un reemplazo. Por eso 2PC escalar mal en arquitecturas de microservicios modernas.</p>
+      </section>
+
+      <section>
+        <h2 id="sagas">Sagas: transacciones sin bloqueo</h2>
+        <p>Una <strong>saga</strong> divide la operación en pasos locales, cada uno con su propia transacción ACID, y prevé un <strong>paso compensatorio</strong> para deshacer cada uno:</p>
+        <ul>
+          <li><strong>Orquestación:</strong> un coordinador «coreógrafo» guía el flujo llamando a cada servicio y sus compensaciones. Es fácil de seguir, pero el coordinador se vuelve un punto central.</li>
+          <li><strong>Coreografía:</strong> cada servicio publica eventos y reacciona a eventos de otros. Sin coordinador; el flujo se ve en los eventos, pero se dispersa y es más difícil de trazar.</li>
+        </ul>
+        <p>El truco está en el patrón de compensación: cada paso debe saber cómo deshacerse (la reserva con su cancelación, la transferencia con su reversa, etc.).</p>
+      </section>
+
+      <section>
+        <h2 id="orquestacion">Saga orquestada en código</h2>
+        <pre class="code-block"><code class="language-python" data-language="python">class OrquestadorPedido:
+    PASOS = [
+        (crear_pedido, cancelar_pedido),
+        (cobrar_pago,  reembolsar_pago),
+        (reservar_inventario, liberar_inventario),
+        (programar_envio, cancelar_envio),
+    ]
+
+    def ejecutar(self, datos):
+        hechos = []
+        for paso, compensacion in self.PASOS:
+            try:
+                paso(datos)
+                hechos.append(compensacion)
+            except Exception as exc:
+                # rollback en orden inverso: compensamos lo ya hecho
+                for comp in reversed(hechos):
+                    comp(datos)
+                raise SagaRota(exc)
+
+        return {"estado": "pedido_completado"}
+</code></pre>
+        <p>Observa el detalle clave: los <em>pasos compensatorios</em> se ejecutan en <strong>orden inverso</strong> al de producción.</p>
+      </section>
+
+      <section>
+        <h2 id="coreografia">Saga coreografiada con eventos</h2>
+        <p>En la variante coreografiada, cada servicio reacciona a eventos. Aquí, un servicio escucha el evento de pago y actúa en consecuencia:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Consumidor del servicio de inventario (coreografía)
+colas.consume("eventos.pedido", (evento) => {
+  switch (evento.tipo) {
+    case "pedido.creado":
+      reservar(evento.producto, evento.cantidad);   // paso
+      emitir("inventario.reservado", evento);        // sigue el flujo
+      break;
+    case "pago.fallido":
+      liberar(evento.producto, evento.cantidad);     // compensación
+      emitir("inventario.liberado", evento);
+      break;
+  }
+});
+</code></pre>
+        <p>La cadena de eventos es el «ADN» del flujo: si un paso falla, el evento de fallo dispara compensaciones escalonadas en cada servicio.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando-cual">¿2PC o saga?</h2>
+        <table>
+          <thead>
+            <tr><th>Criterio</th><th>2PC</th><th>Saga</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Consistencia</td><td>Fuerte (todas o ninguna)</td><td>Eventual (compensable)</td></tr>
+            <tr><td>Bloqueos</td><td>Sí, al quedarse en preparado</td><td>No; cada paso es local</td></tr>
+            <tr><td>Latencia</td><td>Alta con pocos nodos</td><td>Baja, pasos paralelos posibles</td></tr>
+            <tr><td>Casos ideales</td><td>Pocos sistemas homogéneos</td><td>Microservicios heterogéneos y colas</td></tr>
+          </tbody>
+        </table>
+        <p>La industria moderna tiende a las sagas: no se bloquea, se compensa. Pagos incluidos — «el dinero se reversa». Antes de elegir, pregunta: <em>¿el negocio tolera ver el pedido «en proceso» un rato?</em></p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma «comprar en una tienda online» y lista sus pasos con su compensación (pedido, pago, inventario, envío).</li>
+          <li>Describe el mismo flujo primero como orquestación y luego como coreografía; ¿en qué cambia la trazabilidad?</li>
+          <li>Explica por qué 2PC puede «bloquear» recursos indefinidamente y por qué una saga solo los libera con compensación.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>2PC ofrece atomicidad total con dos fases, pero bloquea nodos y escala mal.</li>
+          <li>Las sagas dividen la operación en pasos locales con compensaciones.</li>
+          <li>La compensación se ejecuta en orden inverso a los pasos realizados.</li>
+          <li>La orquestación centraliza el flujo; la coreografía lo dispersa en eventos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/bases-de-la-comunicacion.html">Comunicación entre nodos</a>
+          <a class="related-lessons__link" href="consenso-distribuido.html">Consenso distribuido</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-fallos-graceful.html">Manejo de fallos graceful</a>
+          <a class="related-lessons__link" href="../modulo-03/diseñar-un-sistema-distribuido.html">Diseñar un sistema distribuido</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

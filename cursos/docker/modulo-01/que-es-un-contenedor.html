@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m1-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es un contenedor? · Docker para Backend · Backend Academy</title>
+<meta name="description" content="Empaqueta tu backend con todo lo que necesita para correr: el problema que resuelven los contenedores y la diferencia entre imagen y contenedor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m1-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es un contenedor?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es un contenedor?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="problema">El problema del empaquetado</h2>
+        <p>Tu API funciona en tu laptop y revienta en el servidor. Versiones de Node distintas, librerías sistemas que faltan, variables de entorno que nadie documentó. Un <strong>contenedor</strong> es la respuesta: tu código <em>más</em> su runtime <em>más</em> las librerías del sistema empacados juntos, corriendo aislados del resto del host.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion">Definición simple</h2>
+        <div class="info-box">
+          <p><strong>Contenedor</strong> = un proceso (o grupo de procesos) con su propio filesystem, red y limitaciones de recursos, ejecutando normalmente el kernel del host. Es reproducible: si corre en tu máquina, corre igual en producción.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="imagen-vs-contenedor">Imagen vs contenedor</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">IMAGEN = el plano / plantilla inmutable (como un .exe o un .deb)
+CONTENEDOR = la imagen EN EJECUCIÓN (un "proceso" que vive)
+
+        imagen --docker run--> contenedores (miles, iguales)
+            docker build  ↑            | escribir/borrar
+                  Dockerfile           v
+                            las capas de escritura son SOLO del contenedor</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="analogia">Analogía: la caja de mudanza</h2>
+        <ul>
+          <li><strong>Imagen:</strong> una caja sellada con la app, el Node, las llaves y las instrucciones. Idéntica para todos.</li>
+          <li><strong>Contenedor:</strong> la caja abierta en el nuevo piso, funcionando con sus cosas y guardando cambios que afectan SOLO a esa caja.</li>
+          <li><strong>Registry:</strong> el almacén (Docker Hub) donde guardas y tomas cajas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="que-resuelve">Qué resuelve en backend</h2>
+        <ol>
+          <li><strong>Paridad dev/prod:</strong> mismo runtime, mismo entorno.</li>
+          <li><strong>Aislamiento:</strong> dos apps con dependencias incompatibles coexisten.</li>
+          <li><strong>Empaquetado de servicios:</strong> BD, caché, colas y API se levantan con un comando.</li>
+          <li><strong>Escalado:</strong> aumentas instancias copiando el contenedor, no el servidor.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe en una línea qué guardaría tu imagen si containerizaras tu último proyecto.</li>
+          <li>Explica con tus palabras la diferencia entre imagen y contenedor.</li>
+          <li>Di <code>docker --version</code> y verifica la instalación antes de la siguiente lección.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El contenedor empaqueta código + runtime + librerías.</li>
+          <li>Corre aislado compartiendo el kernel del host.</li>
+          <li>La imagen es el plano inmutable; el contenedor, su ejecución.</li>
+          <li>Resuelve paridad, aislamiento y empacado de servicios.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="contenedor-vs-maquina-virtual.html">Contenedor vs máquina virtual</a>
+          <a class="related-lessons__link" href="el-ciclo-de-vida.html">El ciclo de vida</a>
+          <a class="related-lessons__link" href="primeros-comandos.html">Primeros comandos</a>
+          <a class="related-lessons__link" href="index.html">Módulo 1 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

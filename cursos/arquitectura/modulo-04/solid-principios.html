@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m4-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Principios SOLID · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Los cinco principios SOLID explicados con ejemplos reales de backend: SRP, OCP, LSP, ISP, DIP y cómo usarlos entre sí.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m4-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">Principios SOLID</span>
+      </nav>
+      <h1 class="lesson-title">Principios SOLID</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Principios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p><strong>SOLID</strong> es un acrónimo de cinco principios de diseño orientado a objetos acuñados por Robert Martin. No son reglas de estética: responden a un problema de negocio — el <strong>costo de cambio</strong>. Un código SOLID se modifica en puntos aislados y no rompe todo a su paso.</p>
+      </section>
+
+      <section>
+        <h2 id="srp">S — Single Responsibility</h2>
+        <p>«Una clase debe tener una única razón para cambiar». La razón de cambio es una <em>persona o actor</em> que pide el cambio, no una sección del código. Si dos actores (facturación y devoluciones) piden tocar la misma clase, están sufriendo el mismo cambio — el globo está mezclado.</p>
+      </section>
+
+      <section>
+        <h2 id="ocp">O — Open/Closed</h2>
+        <p>«Abierta para extensión, cerrada para modificación». Para añadir un formato, no toco el exportador: agrego una clase e interfaz. Eso reduce el efecto dominó.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+// CERRADA: cada formato nuevo cambia el if
+final class Exportador
+{
+    public function exportar($formato, ...$datos)
+    {
+        if ($formato === 'pdf') { return $this-&gt;pdf($datos); }
+        if ($formato === 'csv') { return $this-&gt;csv($datos); }
+        // remoto: no tocar aquí para agregar 'xls'
+    }
+}
+
+// ABIERTA: extensión por interfaz
+interface FormatoExportador { public function exportar(array $datos): string; }
+
+class Pdf        implements FormatoExportador { public function exportar(array $d): string { /* */ } }
+class Csv        implements FormatoExportador { public function exportar(array $d): string { /* */ } }
+class Xls        implements FormatoExportador { public function exportar(array $d): string { /* */ } }</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="lsp">L — Liskov Substitution</h2>
+        <p>«Si B es subtipo de A, cualquier uso de A debe funcionar con B sin cambios». En la práctica: los subtipos <strong>no deben romper el contrato</strong> — ni lanzar excepciones inesperadas, ni devolver más restricciones, ni comportarse distinto en casos base. Un «Cuadrado : Rectángulo» que rompe el setter de altura es el ejemplo clásico de violación.</p>
+      </section>
+
+      <section>
+        <h2 id="isp">I — Interface Segregation</h2>
+        <p>«Mejor muchas interfaces pequeñas que una todoterreno». Si una clase debe implementar métodos que no usa (o que lanza excepción «no soportado»), la interfaz está mal cortada.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// MAL: una interfaz todoterreno
+interface Repositorio {
+    public function find(int $id): array;
+    public function save(array $d): void;
+    public function search(string $q): array;
+}
+
+class ReadOnlyRepo implements Repositorio {
+    public function find(int $id): array { /* ok */ }
+    public function save(array $d): void { throw new Exception('no soportado'); }
+    public function search(string $q): array { /* ok */ }
+}
+
+// BIEN: segregadas
+interface RepositorioLectura { public function find(int $id): array; public function search(string $q): array; }
+interface RepositorioEscritura { public function save(array $d): void; }</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="dip">D — Dependency Inversion</h2>
+        <p>«Los módulos de alto nivel no deben depender de los de bajo nivel; ambos deben depender de abstracciones». Es la joya que ya aplicamos en DI: el service depende de la interfaz del repositorio, no de Eloquent. Las abstracciones pertenecen al dominio; los detalles implementan.</p>
+      </section>
+
+      <section>
+        <h2 id="juntos">Cómo funcionan juntos</h2>
+        <p>SRP dice cuántas cosas debe tener una clase; OCP dice hacia dónde extendemos; LSP protege a los subtipos para que OCP sea seguro; ISP corta interfaces para no obligar a implementar lo innecesario; DIP asegura que las clases de alto nivel hablen con abstracciones. Juntos mantienen el cambio localizado.</p>
+        <p><strong>No son dogma:</strong> un CRUD trivial que nunca cambia puede permitirse no seguir SOLID al pie de la letra. Los principios pagán cuando hay demanda real de cambio.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Identifica en tu proyecto la clase más grande y evalúa cuántas «razones de cambio» tiene (SRP).</li>
+          <li>Busca un if que seleccione implementaciones y sustituyelo por una interfaz + polimorfismo (OCP).</li>
+          <li>Revisa tus interfaces: ¿alguna obliga a métodos que una implementación no usa? (ISP).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>SOLID = cinco principios para mantener el coste de cambio bajo.</li>
+          <li>SRP (una razón de cambio), OCP (extender sin modificar), LSP (subtipo seguro).</li>
+          <li>ISP (interfaces pequeñas) y DIP (depender de abstracciones).</li>
+          <li>Usa los principios con juicio; no son obligatorios en todo CRUD.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="acoplamiento-y-cohesion.html">Acoplamiento y cohesión</a>
+          <a class="related-lessons__link" href="srp-en-el-mundo-real.html">SRP en el mundo real</a>
+          <a class="related-lessons__link" href="../modulo-03/inyeccion-de-dependencias.html">Inyección de dependencias</a>
+          <a class="related-lessons__link" href="../modulo-05/regla-de-dependencia.html">La regla de dependencia</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

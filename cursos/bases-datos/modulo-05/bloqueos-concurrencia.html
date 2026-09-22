@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="bloqueos-concurrencia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloqueos y concurrencia · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende cómo funcionan los bloqueos en bases de datos: compartidos y exclusivos, deadlocks y problemas de concurrencia como la carrera crítica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="bloqueos-concurrencia"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5 · Transacciones y concurrencia</a><span class="sep">/</span>
+          <span class="current">Bloqueos y concurrencia</span>
+        </nav>
+        <h1 class="lesson-title">Bloqueos y concurrencia</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Transacciones y concurrencia</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Cuando miles de usuarios hacen peticiones a la vez, decenas de transacciones corren en paralelo. Sin control, leen y escriben los mismos datos y se pisan. Los <strong>bloqueos (locks)</strong> son el mecanismo que ordena esa pelea por los datos.</p>
+        </section>
+
+        <section>
+          <h2 id="tipos">Tipos de bloqueo</h2>
+          <ul>
+            <li><strong>Compartido (S-lock):</strong> para leer. Varias transacciones pueden leer la misma fila a la vez.</li>
+            <li><strong>Exclusivo (X-lock):</strong> para escribir. Solo una transacción puede tocar la fila; las demás esperan.</li>
+          </ul>
+          <p>Un <code class="inline">SELECT ... FOR UPDATE</code> toma un bloqueo exclusivo «proactivo»: reservas la fila antes de modificarla, evitando que otra la cambie entre tu lectura y tu escritura.</p>
+        </section>
+
+        <section>
+          <h2 id="carrera">La carrera crítica</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Ambos leen stock=1 a la vez
+BEGIN;
+SELECT stock FROM productos WHERE id = 7;   -- 1
+-- ambos venden el último: venta doble
+
+-- Solución: reservar antes de actualizar
+BEGIN;
+SELECT stock FROM productos WHERE id = 7 FOR UPDATE;  -- bloqueo exclusivo
+UPDATE productos SET stock = stock - 1 WHERE id = 7;
+COMMIT;</code></pre>
+            </div>
+          </figure>
+          <p>El <code class="inline">FOR UPDATE</code> hace que la segunda transacción <strong>espere</strong> hasta que la primera confirme o deshaga. Problema resuelto: sin overbooking.</p>
+        </section>
+
+        <section>
+          <h2 id="deadlock">El deadlock (abrazo mortal)</h2>
+          <p>Dos transacciones se bloquean mutuamente: A espera algo que bloqueó B, y B espera algo que bloqueó A. Ninguna puede avanzar → el motor detecta el ciclo, deshace una de ellas y la otra continúa:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- T1: bloquea fila 1, pide fila 2
+BEGIN; UPDATE cuentas SET saldo=saldo-10 WHERE id=1; -- esperar fila 2...
+-- T2: bloquea fila 2, pide fila 1
+BEGIN; UPDATE cuentas SET saldo=saldo-10 WHERE id=2; -- esperar fila 1...
+-- DEADLOCK: el motor aborta a una de ellas (ERROR 1213)</code></pre>
+            </div>
+          </figure>
+          <p>Regla práctica para reducirlos: <strong>acceder a los recursos siempre en el mismo orden</strong> (primero la fila menor, luego la mayor).</p>
+        </section>
+
+        <section>
+          <h2 id="consejos">Consejos para el backend</h2>
+          <ul>
+            <li>Mantén transacciones cortas: menos bloqueo, más concurrencia.</li>
+            <li>No hagas peticiones HTTP ni esperas dentro de una transacción.</li>
+            <li>Controla errores 1213 (deadlock): reintenta la operación.</li>
+            <li>Usa <code class="inline">FOR UPDATE</code> solo donde de verdad hay carrera (stock, saldos).</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Simula con dos sesiones el problema del stock compartido y su solución con FOR UPDATE.</li>
+            <li>Provoca un deadlock con dos sesiones y observa el error y el rollback del motor.</li>
+            <li>Investiga qué es el bloqueo a nivel de tabla vs a nivel de fila en tu motor de BD.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Locks compartidos para lecturas; exclusivos para escrituras.</li>
+            <li>SELECT ... FOR UPDATE reserva una fila ante carreras críticas.</li>
+            <li>Los deadlocks se resuelven deshaciendo una transacción.</li>
+            <li>Ordenar el acceso a recursos evita el abrazo mortal.</li>
+            <li>Transacciones cortas = mayor concurrencia.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="transacciones.html">Transacciones: BEGIN, COMMIT y ROLLBACK</a>
+            <a class="related-lessons__link" href="niveles-aislamiento.html">Niveles de aislamiento</a>
+            <a class="related-lessons__link" href="propiedades-acid.html">Propiedades ACID</a>
+            <a class="related-lessons__link" href="../modulo-04/indices-rendimiento.html">Índices y rendimiento</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

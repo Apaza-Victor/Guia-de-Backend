@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="promesas-y-encadenamiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promesas y encadenamiento · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Crea y encadena promesas en Node.js con then, catch y finally, y deja atrás el callback hell de forma elegante.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="promesas-y-encadenamiento"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Promesas y encadenamiento</span>
+        </nav>
+        <h1 class="lesson-title">Promesas y encadenamiento</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Asincronía avanzada</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es-una-promesa">Qué es una promesa</h2>
+          <p>Una <strong>promesa</strong> es un objeto que representa un valor futuro: o se cumple (<code class="inline">resolve</code>) con un resultado, o se rechaza (<code class="inline">reject</code>) con un error. Tiene tres estados: <em>pending</em>, <em>fulfilled</em> y <em>rejected</em>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const esperar = (ms, valor) =&gt;
+  new Promise((resolve, reject) =&gt; {
+    if (ms &lt; 0) {
+      reject(new Error("El tiempo no puede ser negativo"));
+      return;
+    }
+    setTimeout(() =&gt; resolve(valor), ms);
+  });
+
+esperar(200, "listo")
+  .then((resultado) =&gt; console.log(resultado))
+  .catch((err) =&gt; console.error(err.message));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="encadenar">Encadenar operaciones</h2>
+          <p>El superpoder de las promesas es el <strong>encadenamiento</strong>: cada <code class="inline">.then</code> recibe el resultado del anterior y puede devolver otro valor o otra promesa, aplanando la pirámide del callback hell.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const fs = require("node:fs/promises");
+
+fs.readFile("a.txt", "utf8")
+  .then((contenidoA) =&gt; {
+    console.log("Leído a.txt");
+    return fs.readFile("b.txt", "utf8"); // devuelve otra promesa
+  })
+  .then((contenidoB) =&gt; {
+    console.log("Leído b.txt:", contenidoB.trim());
+  })
+  .catch((err) =&gt; {
+    console.error("Algo falló en la cadena:", err.message);
+  });</code></pre>
+            </div>
+          </figure>
+          <p>Compáralo con la versión de callbacks de la lección anterior: mismo trabajo, una línea de profundidad en lugar de tres.</p>
+        </section>
+
+        <section>
+          <h2 id="catch-finally">catch y finally</h2>
+          <p>Un único <code class="inline">.catch</code> al final captura cualquier rechazo de la cadena, venga de donde venga. Y <code class="inline">finally</code> se ejecuta siempre, cumpla o falle: ideal para limpiar recursos o cerrar conexiones.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const consultarUsuario = (id) =&gt;
+  new Promise((resolve, reject) =&gt; {
+    setTimeout(() =&gt; {
+      if (id === 0) {
+        reject(new Error("Usuario no encontrado"));
+        return;
+      }
+      resolve({ id, nombre: "Ana" });
+    }, 100);
+  });
+
+consultarUsuario(0)
+  .then((user) =&gt; console.log("Hola", user.nombre))
+  .catch((err) =&gt; console.error("ERROR:", err.message))
+  .finally(() =&gt; console.log("Consulta terminada"));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="promisify">Un callback a promesa</h2>
+          <p>No todas las APIs han migrado a promesas. Node ofrece <code class="inline">util.promisify</code> para envolver funciones de callback en promesas, y varios módulos core ya traen variantes en <code class="inline">fs/promises</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const { promisify } = require("node:util");
+const fs = require("node:fs");
+
+const leer = promisify(fs.readFile);
+
+leer("a.txt", "utf8")
+  .then((texto) =&gt; console.log(texto.trim()))
+  .catch((err) =&gt; console.error(err.message));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea una función que devuelva una promesa con retardo configurable.</li>
+            <li>Encadena tres lecturas de archivo con fs/promises y un solo catch.</li>
+            <li>Usa <code class="inline">promisify</code> en una API de callbacks propia de la lección anterior.</li>
+            <li>Explica los tres estados de una promesa con un ejemplo real.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Una promesa representa un valor futuro: fulfilled o rejected.</li>
+            <li>Los <code class="inline">.then</code> se encadenan y aplanan la asincronía.</li>
+            <li>Un solo <code class="inline">.catch</code> captura todos los errores de la cadena.</li>
+            <li><code class="inline">finally</code> siempre se ejecuta, para limpieza.</li>
+            <li><code class="inline">util.promisify</code> y <code class="inline">fs/promises</code> convierten callbacks en promesas.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

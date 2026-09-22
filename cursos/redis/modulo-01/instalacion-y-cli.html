@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="instalacion-y-cli">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instalación y CLI de Redis · Redis para Backend · Backend Academy</title>
+<meta name="description" content="Instala Redis local y domina la CLI redis-cli: ping, SET, GET, INCR y gestión de claves con comandos esenciales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="instalacion-y-cli"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Redis para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Instalación y CLI</span>
+      </nav>
+      <h1 class="lesson-title">Instalación y CLI</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="instalar">Instalar Redis</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Linux (Debian/Ubuntu)
+sudo apt update
+sudo apt install redis-server -y
+
+# macOS (Homebrew)
+brew install redis
+
+# Windows: usa WSL2 (recomendado) o Memurai / la versión de tporadowski:
+#   docker
+docker run -d --name redis -p 6379:6379 redis:7</code></pre>
+          </div>
+        </figure>
+        <p>Verifica la versión y el estado del servidor:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">redis-server --version
+sudo systemctl enable --now redis-server   # Linux
+redis-cli ping                      # → PONG (el servidor está vivo)</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cli">Primeros comandos en redis-cli</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># entras a la consola interactiva
+redis-cli
+
+127.0.0.1:6379> SET saludo "hola mundo"
+OK
+127.0.0.1:6379> GET saludo
+"hola mundo"
+
+# contadores atómicos
+127.0.0.1:6379> SET visitas 0
+OK
+127.0.0.1:6379> INCR visitas
+(integer) 1
+127.0.0.1:6379> INCRBY visitas 100
+(integer) 101
+
+# ver y limpiar claves
+127.0.0.1:6379> KEYS *
+1) "visitas"
+2) "saludo"
+127.0.0.1:6379> DEL saludo
+(integer) 1
+127.0.0.1:6379> FLUSHALL   # ⚠ borra TODO, solo en desarrollo</code></pre>
+          </div>
+        </figure>
+        <div class="callout">
+          <p><strong>Ojo:</strong> <code class="inline">KEYS *</code> recorre todas las claves y bloquea el servidor. En producción nunca lo uses; usa <code class="inline">SCAN</code> para iterar de a lotes.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="operaciones">Operaciones con parámetros extra</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># SET con expiración automática (segundos o ms)
+SET token:abc "x9f2" EX 300
+SET cupon:ENTRADA "B10" PX 90000
+
+# SETNX: solo si NO existe (clave de desbloqueo / dedupe)
+SETNX cupon:ENTRADA "B10"
+(integer) 0      # ya existía: nadie toca
+
+# múltiples claves a la vez
+MSET a 1 b 2 c 3
+MGET a b c
+
+# comprobar existencia y tiempo de vida
+EXISTS token:abc     # 1 o 0
+TTL token:abc        # segundos restantes (o -1 sin expiración)
+PERSIST token:abc    # quitar la expiración</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="config">Configuración rápida</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># ver configuración activa
+redis-cli CONFIG GET maxmemory
+redis-cli CONFIG GET save          # política de persistencia RDB
+
+# límite de memoria (protección ante bombas de caché)
+redis-cli CONFIG SET maxmemory 256mb
+redis-cli CONFIG SET maxmemory-policy allkeys-lru</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Instala Redis y responde <code class="inline">PING</code> desde la CLI.</li>
+          <li>Guarda un perfil con <code class="inline">MSET</code>, incrémentalo y dale TTL de 60 s.</li>
+          <li>Comprueba <code class="inline">TTL</code> dos veces separadas y observa cómo baja.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Redis se levanta con una línea y responde con <code class="inline">PONG</code>.</li>
+          <li><code class="inline">SET/GET/INCR/DEL</code> son el vocabulario básico.</li>
+          <li>Los <code class="inline">EX/PX</code> y <code class="inline">SETNX</code> preparan la caché y controles de concurrencia.</li>
+          <li>Nunca <code class="inline">KEYS *</code> en producción: se bloquea.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

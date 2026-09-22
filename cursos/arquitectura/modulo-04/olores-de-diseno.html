@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m4-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olores de diseño y deuda técnica · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a detectar los olores de diseño más comunes en backend y qué es la deuda técnica: tipos, cómo medirla y cuándo pagarla.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m4-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">Olores de diseño y deuda técnica</span>
+      </nav>
+      <h1 class="lesson-title">Olores de diseño y deuda técnica</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Principios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Los <strong>olores de diseño</strong> son señales léxicas y estructurales que delatan un problema más profundo. No causan el error de inmediato, pero avisan: «aquí el cambio va a doler». Detectarlos a tiempo es la diferencia entre un refactor de 1 día y una reescritura de 3 meses.</p>
+      </section>
+
+      <section>
+        <h2 id="clasicos">Olores clásicos (backend edition)</h2>
+        <ul>
+          <li><strong>God Class:</strong> una clase que lo es todo (controlador de 2.000 líneas, servicio que valida, persiste y envía correos).</li>
+          <li><strong>Feature Envy:</strong> un método usa insistentemente datos de otra clase; el método debería vivir allá.</li>
+          <li><strong>Long Parameter List:</strong> 5+ parámetros; pide un objeto de valor o un comando.</li>
+          <li><strong>Message Chains:</strong> <code class="inline">$a-&gt;b()-&gt;c()-&gt;d()</code> en el controlador: acopla a la estructura interna de los colaboradores.</li>
+          <li><strong>Duplicate Code:</strong> la misma lógica copiada en dos endpoints; la regla de negocio ya no tiene dique.</li>
+          <li><strong>Inapropiado Intimidad:</strong> clases que se tocan propiedades privadas de la otra (acoplamiento por contenido).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="deuda">¿Qué es la deuda técnica?</h2>
+        <p>Metáfora de Ward Cunningham: cada decisión «rápida y sucia» pedida por el negocio es un <strong>préstamo</strong> que se paga con interés — cada feature nueva tarda más porque el suelo está enredado. Clasificación útil:</p>
+        <ol>
+          <li><strong>Deliberada y documentada:</strong> «lo hacemos rápido y lo marcamos con TODO». Controlable y honesta.</li>
+          <li><strong>Deliberada y no documentada:</strong> nadie anotó la deuda; en 3 meses será un misterio.</li>
+          <li><strong>Fortalita (involuntaria):</strong> el sistema cambió y el diseño quedó obsoleto sin querer.</li>
+          <li><strong>Deuda accidental por malas prácticas:</strong> código sin mirar, DRY al revés, sin tests. Esta es la cara y la que más intereses cobra.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 id="medir">Cómo medir el dolor (y no morir)</h2>
+        <ul>
+          <li><strong>Tiempo de implementación de un cambio:</strong> idea, tocar código, pasar tests, desplegar. Si «idea» dominó 20% y «toque + test» 80%, hay deuda.</li>
+          <li><strong>Complejidad ciclomática y acoplamiento:</strong> métricas de la herramienta de análisis estático (phpdcd, SonarQube, Decomar).</li>
+          <li><strong>Índice de mantenibilidad:</strong> se calcula de líneas, complejidad y doc; bajar de 60% significa que duela más cambiarlo que reescribirlo.</li>
+          <li><strong>Duración de los tests:</strong> si el 30% del CI son tests que se caen por acoplamiento, el mensaje es claro.</li>
+        </ul>
+        <p>El negocio no paga «refactor del módulo 4»: se paga «el módulo 4 es el cuello de botella». Traduce siempre deuda a <em>tiempo y riesgo</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo pagar la deuda</h2>
+        <ol>
+          <li><strong>Antes de ampliar:</strong> refactorizar antes de meter la feature 5 del mismo módulo.</li>
+          <li><strong>Después de un incidente:</strong> un fallo por mala arquitectura es la señal de que el interés se acumuló.</li>
+          <li><strong>Cuando el código dije «aquí no»:</strong> ante un cambio trivial se necesita tocar 8 archivos de «francotirador».</li>
+        </ol>
+        <p>La deuda nunca se elimina del todo: se <strong>administra</strong>. El objetivo no es código perfecto, es un backlog consciente.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Haz una auditoría de olores en tu módulo más grande: god class, chains, duplicación.</li>
+          <li>Clasifica la deuda de tu proyecto en las 4 categorías.</li>
+          <li>Escribe 2 «intereses» que pagaste por la deuda (un bug por copia, un cambio lento).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los olores avisan de problemas estructurales antes del fallo.</li>
+          <li>La deuda técnica es un préstamo que se paga con interés de cambio lento.</li>
+          <li>Se mide en tiempo y riesgo para hablarle al negocio.</li>
+          <li>La deuda se administra: clasifícala, prioriza y págala antes de ampliar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="acoplamiento-y-cohesion.html">Acoplamiento y cohesión</a>
+          <a class="related-lessons__link" href="../modulo-07/refactoring-de-arquitectura.html">Refactoring de arquitectura</a>
+          <a class="related-lessons__link" href="../modulo-04/dry-kiss-yagni.html">DRY, KISS y YAGNI</a>
+          <a class="related-lessons__link" href="srp-en-el-mundo-real.html">SRP en el mundo real</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

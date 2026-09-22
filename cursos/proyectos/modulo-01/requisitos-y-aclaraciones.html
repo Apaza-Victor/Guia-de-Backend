@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-requisitos-y-aclaraciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requerimientos y aclaraciones · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a escribir user stories útiles para backend: formato estándar, criterios de aceptación y las preguntas de aclaración que evitan semanas de reproceso.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-requisitos-y-aclaraciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Requerimientos y aclaraciones</span>
+      </nav>
+      <h1 class="lesson-title">Requerimientos y aclaraciones</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de gestión</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="las-suposiciones">El costo oculto de las suposiciones</h2>
+        <p>El backend traduce intenciones de negocio a reglas rigurosas: validaciones, transacciones, estados, concurrencia. Si una intención llega vaga («que el usuario pueda cancelar su compra»), el equipo llena los huecos <em>por su cuenta</em> y cada suposición es una potencial catástrofe:</p>
+        <ul>
+          <li>¿Qué pasa si el pago ya fue cobrado por el banco?</li>
+          <li>¿La cancelación debe funcionar para compras en proceso de envío?</li>
+          <li>¿Reembolso automático o manual con aprobación?</li>
+          <li>¿Qué hace el endpoint si la tienda ya cerró el pedido del día?</li>
+        </ul>
+        <p>Cuanto más tarde descubras que respondiste mal una de estas, más caro es arreglarlo. Por eso, el <strong>refinamiento de requerimientos es una conversación</strong>: el PO trae lo que quiere, el equipo devuelve preguntas, y la respuesta se vuelve regla escrita.</p>
+      </section>
+
+      <section>
+        <h2 id="user-stories">User stories: el formato mínimo</h2>
+        <p>Una <strong>user story</strong> es una descripción corta de una funcionalidad contada desde el valor que produce, no desde su implementación. La plantilla clásica es «Como <em>persona</em>, quiero <em>algo</em>, para <em>beneficio</em>»:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "id": "PYM-220",
+  "como": "responsable de tienda",
+  "quiero": "cancelar una compra pagada por tarjeta",
+  "para": "devolver el dinero sin intervención manual",
+  "estado": "listo para desarrollo",
+  "criterios_de_aceptacion": [
+    "Si la compra está pagada, cancelarla dispara un reembolso automático",
+    "Si el reembolso falla, la compra queda en estado 'reembolso_pendiente'",
+    "Un comprobante de cancelación se emite y se envía por email",
+    "Cancelar una compra ya cancelada devuelve el mismo comprobante sin reembolsar dos veces"
+  ]
+}</code></pre>
+        <p>Tres trampas frecuentes con las stories: escribirlas como <em>soluciones</em> («montar una tabla de cancelaciones» — el equipo debe decidir eso), hacerlas gigantes (deben caber en un sprint) y saltarse los <strong>criterios de aceptación</strong> (las reglas que convierten la intención en algo verificable).</p>
+      </section>
+
+      <section>
+        <h2 id="criterios">Criterios de aceptación: lo exclusivamente comprobable</h2>
+        <p>Un criterio de aceptación es una declaración verificable: se cumple o no se cumple. El formato más usado es <strong>Dado/Cuando/Entonces</strong> (Given/When/Then), que describe precondición, acción y resultado. Su belleza es que se traduce <em>directamente a tests</em>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const request = require('supertest');
+const app = require('../src/app');
+
+describe('Cancelar compra', () => {
+  it('reembolsa automáticamente cuando la compra está pagada', async () => {
+    const api = request(app);
+
+    // Dado: existe una compra pagada por tarjeta
+    const compra = await api.post('/api/compras').send({ id: 'C-401', medio: 'tarjeta' });
+    expect(compra.body.estado).toBe('pagada');
+
+    // Cuando: el responsable la cancela
+    const resp = await api.post('/api/compras/C-401/cancelar').send({ motivo: 'devolución' });
+
+    // Entonces: se emite reembolso y la compra cambia de estado
+    expect(resp.status).toBe(200);
+    expect(resp.body.estado).toBe('reembolso_solicitado');
+    expect(resp.body.comprobante).toMatch(/^RMB-/);
+  });
+
+  it('no reembolsa dos veces una compra ya cancelada', async () => {
+    await request(app).post('/api/compras/C-402/cancelar');
+    const segunda = await request(app).post('/api/compras/C-402/cancelar');
+    expect(segunda.status).toBe(409);
+  });
+});
+</code></pre>
+        <p>Cuando el criterio está escrito así, el test deja de ser una tarea post-desarrollo y se vuelve el <strong>contrato</strong> que define cuándo la historia está terminada.</p>
+      </section>
+
+      <section>
+        <h2 id="preguntas">Las preguntas de aclaración que salvan semanas</h2>
+        <p>Hay preguntas que todo backend debe hacer antes de aceptar una historia. Un buen listado de partida:</p>
+        <ol>
+          <li><strong>Volumen y latencia:</strong> ¿cuántas operaciones por segundo esperamos? ¿Qué latencia es aceptable?</li>
+          <li><strong>Consistencia:</strong> ¿este dato puede leerse eventualmente consistente o debe ser estricto?</li>
+          <li><strong>Puntos de integración:</strong> ¿qué servicios externos participan y quién los prueba?</li>
+          <li><strong>Casos de fallo:</strong> ¿qué hacemos si el proveedor de pagos cae a mitad de proceso?</li>
+          <li><strong>Observabilidad:</strong> ¿qué queremos medir al desplegar esta feature?</li>
+          <li><strong>Seguridad y acceso:</strong> ¿quién puede ejecutar esto y qué datos expone?</li>
+        </ol>
+        <p>No todas aplican a todas las historias, pero responderlas juntas es el refinamiento que el backend aporta al negocio. Es la diferencia entre «implementar» y <em>entender</em> lo que se implementa.</p>
+      </section>
+
+      <section>
+        <h2 id="definition-of-ready">Definition of Ready y el ticket que siempre rebota</h2>
+        <p>Para que el desarrollo no arranque con vicio, muchos equipos usan una <strong>Definition of Ready (DoR)</strong>: el checklist que una historia debe cumplir antes de entrar a un sprint. Si falla la DoR, la historia vuelve al refinamiento:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Definition of Ready: la historia solo entra al sprint si
+git check-ignore .  # trivial, solo para que puedas bater el flujo
+
+# [ ] Tiene valor claro y un dueño que responde preguntas
+# [ ] Tiene criterios de aceptación verificables (no "se ve bien")
+# [ ] Los casos de fallo del proveedor/integración están definidos
+# [ ] Las reglas de consistencia y volumen están acordadas
+# [ ] Su estimación es viable en un sprint (≤ 13 puntos)
+# [ ] El contrato o payload esperado está esbozado
+
+echo "Si no se cumple todo lo anterior, no se planifica: se refina."</code></pre>
+        <p>Cuidado: la DoR no es burocracia para frenar trabajo. Es un filtro para que el previsible endurecimiento no pase a través del costo que produce: flujo detenido, contexto perdido y PQRS.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Convierte «el usuario quiere recuperar su contraseña» en una user story con 4 criterios de aceptación verificables.</li>
+          <li>Aplica el formato Dado/Cuando/Entonces a uno de esos criterios y transfórmalo en un test de ejemplo (puedes sketchearlo en JS).</li>
+          <li>Escribe 5 de las 6 preguntas de aclaración que le harías a tu PO sobre esa historia, enfocadas en seguridad y fallos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un requerimiento vago se convierte en suposiciones peligrosas; refinarlos es una conversación, no un trámite.</li>
+          <li>Las user stories describen valor con criterios de aceptación verificables.</li>
+          <li>Dado/Cuando/Entonces permite traducir cada criterio a un test automatizado.</li>
+          <li>La DoR filtra las historias no listas: volumen, consistencia, fallos y seguridad se acuerdan antes del sprint.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="scrum-para-backend.html">Scrum aplicado a backend</a>
+          <a class="related-lessons__link" href="estimacion-y-priorizacion.html">Estimación y priorización</a>
+          <a class="related-lessons__link" href="../modulo-02/gestion-de-riesgos.html">Gestión de riesgos</a>
+          <a class="related-lessons__link" href="../modulo-03/calidad-y-verificacion.html">Calidad y verificación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="scrum-para-backend.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Scrum aplicado a backend</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="estimacion-y-priorizacion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Estimación y priorización</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

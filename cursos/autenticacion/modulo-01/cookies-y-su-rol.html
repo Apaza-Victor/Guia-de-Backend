@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="cookies-y-su-rol">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cookies y su rol en la web · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Qué son las cookies HTTP, sus atributos de seguridad (Secure, HttpOnly, SameSite), su papel en las sesiones y cómo configurarlas en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="cookies-y-su-rol"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Cookies y su rol en la web</span>
+        </nav>
+        <h1 class="lesson-title">Cookies y su rol en la web</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es">¿Qué es una cookie?</h2>
+          <p>Una <strong>cookie HTTP</strong> es un pequeño fragmento de texto que el servidor envía en la respuesta mediante la cabecera <code class="inline">Set-Cookie</code>. El navegador lo guarda y lo devuelve automáticamente en la cabecera <code class="inline">Cookie</code> en cada petición al mismo dominio. Es el mecanismo más habitual para transportar el identificador de sesión.</p>
+          <p>Las cookies no son un almacén para datos sensibles: van al servidor en cada request y pueden ser leídas por cualquier script del mismo sitio si no se protegen.</p>
+        </section>
+
+        <section>
+          <h2 id="atributos">Atributos de seguridad</h2>
+          <ul>
+            <li><strong>Secure:</strong> la cookie solo viaja por HTTPS. Impide que se envíe por una conexión en claro.</li>
+            <li><strong>HttpOnly:</strong> JavaScript no puede leerla (<code class="inline">document.cookie</code> la ignora). Bloquea el robo vía XSS.</li>
+            <li><strong>SameSite=Lax/Strict:</strong> controla el envío en peticiones cross-site. Mitiga CSRF.</li>
+            <li><strong>Domain y Path:</strong> restringen a qué hosts y rutas se envía.</li>
+            <li><strong>Max-Age/Expires:</strong> tiempo de vida de la cookie.</li>
+          </ul>
+          <p>Para una cookie de sesión la combinación mínima aceptable es <code class="inline">Secure; HttpOnly; SameSite=Lax</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="php">Configurándolas en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$opciones = [
+    "expires"  =&gt; time() + 60 * 60 * 24 * 7, // 7 dias
+    "path"     =&gt; "/",
+    "domain"   =&gt; "api.ejemplo.com",
+    "secure"   =&gt; true,     // solo HTTPS
+    "httponly" =&gt; true,     // inaccesible desde JS
+    "samesite" =&gt; "Lax",    // mitiga CSRF
+];
+
+// Guarda SOLO el identificador opaco, nunca datos sensibles
+setcookie("session_id", $idSesion, $opciones);</code></pre>
+            </div>
+          </figure>
+          <p>Para sesiones PHP nativas (<code class="inline">session_start()</code>) los mismos atributos se configuran antes de iniciar, por ejemplo <code class="inline">session_set_cookie_params()</code> o en <code class="inline">php.ini</code> con las directivas <code class="inline">session.cookie_httponly</code>, <code class="inline">session.cookie_secure</code> y <code class="inline">session.cookie_samesite</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="que-guardar">Qué guardar (y qué no)</h2>
+          <ul>
+            <li><strong>Sí:</strong> un identificador de sesión aleatorio e impredecible.</li>
+            <li><strong>No:</strong> la contraseña, el email, el rol o datos personales.</li>
+            <li><strong>No:</strong> el rol en claro: el cliente podría manipularlo si lo interpreta el servidor.</li>
+          </ul>
+          <p>Regla general: la cookie debe ser inútil sin el almacén del servidor. Si roban la cookie pero el servidor no reconoce el id, el ataque falla.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Abre las DevTools de tu navegador (pestaña Application → Cookies) e identifica los atributos de cada cookie de un sitio real.</li>
+            <li>Crea una cookie en PHP con los cinco atributos de seguridad mostrados y verifícala con <code class="inline">var_dump($_COOKIE)</code>.</li>
+            <li>Responde: ¿por qué merece la pena el atributo <code class="inline">HttpOnly</code> incluso sin XSS conocido?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>La cookie transporta el identificador de sesión entre cliente y servidor.</li>
+            <li>Secure, HttpOnly y SameSite son los tres pilares básicos de una cookie de sesión.</li>
+            <li>Solo debe guardar un id opaco e impredecible.</li>
+            <li>Los atributos se fijan en el backend, nunca desde el cliente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="identidad-y-estados-de-sesion.html">Identidad y estados de sesión</a>
+            <a class="related-lessons__link" href="hashing-vs-encriptacion.html">Hashing vs encriptación</a>
+            <a class="related-lessons__link" href="../modulo-03/proteccion-de-la-cookie-de-sesion.html">Protección de la cookie de sesión</a>
+            <a class="related-lessons__link" href="../modulo-03/sesiones-y-almacenamiento.html">Sesiones y almacenamiento</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

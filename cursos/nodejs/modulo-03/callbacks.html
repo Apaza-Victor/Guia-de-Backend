@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="callbacks">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Callbacks · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Domina los callbacks en Node.js: funciones que se ejecutan después, el patrón err-first y por qué nace el callback hell.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="callbacks"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Callbacks</span>
+        </nav>
+        <h1 class="lesson-title">Callbacks</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Asincronía avanzada</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="concepto">Qué es un callback</h2>
+          <p>Un callback es una función que <strong>pasas a otra función</strong> para que se ejecute cuando termine. Es el mecanismo original de Node para la asincronía: "haz X y cuando termines, ejecuta esto".</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const fs = require("node:fs");
+
+fs.readFile("dato.txt", "utf8", (err, contenido) =&gt; {
+  if (err) {
+    console.error("Error:", err.message);
+    return;
+  }
+  console.log(contenido);
+});</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="err-first">El patrón error-first</h2>
+          <p>Node estandarizó la firma de los callbacks: primer argumento, el error (si lo hay, o <code class="inline">null</code>); segundo, el resultado.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">function leerConfig(ruta, callback) {
+  const fs = require("node:fs");
+
+  fs.readFile(ruta, "utf8", (err, contenido) =&gt; {
+    if (err) return callback(err, null); // primero el error
+    try {
+      const config = JSON.parse(contenido);
+      callback(null, config);            // segundo el resultado
+    } catch (errParse) {
+      callback(errParse, null);
+    }
+  });
+}
+
+leerConfig("config.json", (err, config) =&gt; {
+  if (err) {
+    console.error("No pude cargar la config", err.message);
+    return;
+  }
+  console.log("Config lista:", config);
+});</code></pre>
+            </div>
+          </figure>
+          <p>Este orden es un contrato: quien consuma tu API de callbacks sabe siempre qué espera. Ignorar el error es la fuente número uno de fallos silenciosos.</p>
+        </section>
+
+        <section>
+          <h2 id="callback-hell">El callback hell</h2>
+          <p>Cuando una operación depende de otra, los callbacks se anidan y el código avanza hacia la derecha formando la temida "pirámide de la perdición".</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">fs.readFile("a.txt", "utf8", (err, a) =&gt; {
+  if (err) throw err;
+  fs.readFile("b.txt", "utf8", (err, b) =&gt; {
+    if (err) throw err;
+    fs.readFile("c.txt", "utf8", (err, c) =&gt; {
+      if (err) throw err;
+      console.log(a, b, c); // tres niveles de profundidad
+    });
+  });
+});</code></pre>
+            </div>
+          </figure>
+          <p>Identifica los tres males: legibilidad nula, errores repetidos a mano y casi imposible de probar. La comunidad respondió con promesas, primero con <code class="inline">fs.promises</code> y luego async/await.</p>
+        </section>
+
+        <section>
+          <h2 id="mejores-practicas">Callbacks sin dolor</h2>
+          <ul>
+            <li><strong>Nombra tus funciones:</strong> los callbacks anónimos esconden el stack en errores.</li>
+            <li><strong>Chequea el error primero:</strong> sal siempre con <code class="inline">return</code> si hay error.</li>
+            <li><strong>Achata:</strong> si necesitas tres niveles de anidamiento, es señal de que toca refactorizar a promesas.</li>
+            <li><strong>Nunca ignores el argumento err:</strong> un <code class="inline">(err)</code> sin usar es un bug disfrazado.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">function loguearDato(archivo) {
+  const fs = require("node:fs");
+
+  function cuandoLea(err, contenido) {
+    if (err) {
+      console.error("No se pudo leer", archivo, err.message);
+      return;
+    }
+    console.log(`[${archivo}]`, contenido.trim());
+  }
+
+  fs.readFile(archivo, "utf8", cuandoLea);
+}
+
+loguearDato("a.txt");</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea tu propia función de callback error-first que simule una consulta (usa <code class="inline">setTimeout</code>).</li>
+            <li>Úsala consumiendo el resultado y gestionando el error con return.</li>
+            <li>Copia el ejemplo del callback hell y anota sus tres problemas.</li>
+            <li>Justifica con tus palabras por qué el error siempre va primero.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Un callback es una función que se ejecuta cuando la operación termina.</li>
+            <li>El patrón error-first ordena err, result como argumentos.</li>
+            <li>El anidamiento excesivo genera callback hell: ilegible y frágil.</li>
+            <li>Nombra tus callbacks y gestiona siempre el error.</li>
+            <li>Las promesas (próxima lección) nacen para resolver esto.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

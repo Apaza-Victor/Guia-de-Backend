@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-comunicacion-sincrona">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comunicación síncrona · Microservicios · Backend Academy</title>
+<meta name="description" content="Comunicación síncrona entre microservicios: REST, gRPC, HTTP, timeouts, retries y cuándo elegir cada protocolo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-comunicacion-sincrona"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Comunicación síncrona</span>
+      </nav>
+      <h1 class="lesson-title">Comunicación síncrona</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Comunicación</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En la comunicación síncrona, el servicio cliente <strong>espera la respuesta</strong> del servicio proveedor: envía una petición HTTP o gRPC y bloquea hasta recibir el resultado. Es el modelo más simple de entender y el más natural para operaciones que necesitan confirmación inmediata (¿creó la orden?, ¿aceptó el pago?).</p>
+        <p>Esta lección cubre REST, gRPC, HTTP y la pieza que casi siempre se olvida: los <strong>timeouts</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="rest">REST por HTTP/JSON</h2>
+        <p>REST sigue siendo el estándar dominante entre microservicios: recursos, métodos HTTP y un contrato JSON sencillo de inspeccionar. Buena elección para APIs públicas y cuando la facilidad de depuración pesa más que el rendimiento puro.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript (cliente)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">const respuesta = await fetch("http://servicio-usuarios:8080/usuarios/42", {
+  method: "GET",
+  headers: { "Accept": "application/json" },
+  signal: AbortSignal.timeout(2000) // timeout de 2 s
+});
+
+if (!respuesta.ok) {
+  throw new Error("El servicio de usuarios falló: " + respuesta.status);
+}
+
+const usuario = await respuesta.json();
+console.log(usuario.nombre);</code></pre>
+          </div>
+        </figure>
+        <p>Fíjate en el <code>AbortSignal.timeout(2000)</code>: sin timeout, una llamada colgada puede bloquearte para siempre. El timeout es obligatorio en cualquier comunicación entre servicios.</p>
+      </section>
+
+      <section>
+        <h2 id="grpc">gRPC</h2>
+        <p>gRPC es RPC moderno sobre HTTP/2: los contratos se definen en <strong>protobuf</strong>, los mensajes son binarios y compactos, soporta streaming y generación de clientes en muchos idiomas. Es ideal para comunicación <em>service-to-service</em> de alto volumen con contratos versionados.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (cliente gRPC)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">import grpc
+import usuarios_pb2
+import usuarios_pb2_grpc
+
+channel = grpc.insecure_channel("servicio-usuarios:50051")
+cliente = usuarios_pb2_grpc.UsuariosStub(channel)
+
+try:
+    respuesta = cliente.ObtenerUsuario(
+        usuarios_pb2.SolicitudUsuario(id="42"),
+        timeout=2.5,  # timeout de 2.5 s
+    )
+    print(f"Usuario: {respuesta.nombre}, saldo: {respuesta.saldo}")
+except grpc.RpcError as err:
+    print(f"gRPC falló con código {err.code()}: {err.details()}")</code></pre>
+          </div>
+        </figure>
+        <p>Las ventajas frente a REST: menor latencia (binario + HTTP/2), contratos fuertes compilados y <strong>timeouts nativos</strong> por llamada.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿REST o gRPC?</h2>
+        <p>La decisión equilibra humanos y máquinas:</p>
+        <ul>
+          <li><strong>API hacia el exterior</strong> (navegadores, socios): REST/HTTP+JSON casi siempre, por interoperabilidad.</li>
+          <li><strong>Backend interno de alto volumen</strong>: gRPC, cuando el rendimiento y los contratos importan más que la inspección manual.</li>
+          <li><strong>Ecosistema heterogéneo</strong> (frontend, scripters, integradores): REST es más accesible.</li>
+          <li><strong>Streaming y payloads binarios</strong>: gRPC destaca claramente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="timeouts">Timeouts: la regla de oro</h2>
+        <p>En un sistema distribuido, toda llamada síncrona debe tener timeout. Sin él:</p>
+        <ul>
+          <li>Un servicio lento hace que todos sus dependientes acumulen hilos bloqueados.</li>
+          <li>El problema escala: la latencia se propaga en cadenas de espera.</li>
+          <li>La base de datos se llena de conexiones ociosas y el sistema se cae por sobrecarga, no por fallo real.</li>
+        </ul>
+        <p>Configura timeouts <strong>decrecientes</strong> hacia afuera: 3000 ms en la puerta, 2000 ms internos, 1000 ms hacia bases de datos. Así un fallo profundo no agota el tiempo del cliente.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON (configuración de clientes)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "clients": {
+    "servicio-usuarios": { "protocol": "grpc", "timeout_ms": 2000 },
+    "servicio-inventario": { "protocol": "rest", "timeout_ms": 2500 },
+    "base-de-datos": { "protocol": "sql", "timeout_ms": 1000 }
+  },
+  "gateway": {
+    "timeout_ms": 3000,
+    "retries": { "max": 2, "backoff_ms": 150 }
+  }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="idempotencia">Idempotencia</h2>
+        <p>Cuando un timeout se dispara, no sabes si el proveedor procesó o no la operación. Reintentar puede duplicar un cobro o una orden. La solución es la <strong>idempotencia</strong>: el proveedor debe devolver el mismo resultado si recibe la misma operación dos veces.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (endpoint idempotente)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">CARGOS = {}  # en producción: tabla con clave de idempotencia
+
+def crear_cargo(cargo_id: str, monto: float):
+    # Si ya procesamos este cargo_id, devolvemos el resultado original
+    if cargo_id in CARGOS:
+        return CARGOS[cargo_id]
+    resultado = procesar_en_pasarela(cargo_id, monto)
+    CARGOS[cargo_id] = resultado
+    return resultado</code></pre>
+          </div>
+        </figure>
+        <p>El cliente envía un <code>Idempotency-Key</code> (o <code>cargo_id</code>) que el proveedor recuerda. Así el retry es seguro.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un cliente REST con timeout de 1 segundo a un endpoint de prueba y observa qué sucede al agotarse.</li>
+          <li>Diseña la clave de idempotencia para una operación de cobro y explica cómo evita duplicados.</li>
+          <li>Define los timeouts decrecientes para una cadena de 3 servicios y justifica los valores.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La comunicación síncrona espera respuesta: petición → proceso → respuesta.</li>
+          <li>REST/HTTP+JSON es ideal para APIs externas y de depuración fácil.</li>
+          <li>gRPC aporta contratos fuertes, binario y streaming para el backend interno.</li>
+          <li>Los timeouts son obligatorios y deben ser decrecientes hacia afuera.</li>
+          <li>La idempotencia convierte los reintentos en operaciones seguras.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="comunicacion-asincrona.html">Comunicación asíncrona</a>
+          <a class="related-lessons__link" href="api-gateway.html">API Gateway</a>
+          <a class="related-lessons__link" href="contratos-y-versionado.html">Contratos y versionado</a>
+          <a class="related-lessons__link" href="../modulo-03/resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m2-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimizar I/O · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a optimizar operaciones de entrada/salida: I/O síncrono contra asíncrono, buffering, y streaming de archivos y respuestas grandes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m2-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Optimizar I/O</span>
+      </nav>
+      <h1 class="lesson-title">Optimizar I/O</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Optimización</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Toda la trasferencia de datos que no es memoria es I/O: leer un archivo del disco, escribir un log, subir un CSV, servir una descarga. El I/O es órdenes de magnitud más lento que el cálculo —una lectura de disco es ~100 000 veces más lenta que un acceso a RAM—. Cuando el I/O se hace mal, ni el CPU ni la RAM sirven de nada: el proceso pasa horas esperando a que lleguen los datos.</p>
+        <p>Tres herramientas ordenadas: <strong>asíncrono</strong> (no bloquear), <strong>buffering</strong> (leer/escribir en bloques) y <strong>streaming</strong> (no cargar todo en memoria).</p>
+      </section>
+
+      <section>
+        <h2 id="sync-vs-async">I/O síncrono frente a asíncrono</h2>
+        <p>La lectura síncrona bloquea el hilo: nada más corre hasta que el archivo termine de leerse. En un solo script de consola, da igual; dentro de un servidor con 1 000 peticiones vivas, cada lectura síncrona congela todas las demás (vista en la lección de concurrencia). La versión asíncrona delega y deja el hilo libre.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const fs = require('node:fs');
+const { readFile } = require('node:fs/promises');
+
+// MAL dentro de un servidor: bloquea el event loop para TODO el mundo
+app.get('/backup/datos', (req, res) => {
+  const contenido = fs.readFileSync('/app/datos/export.json', 'utf8');
+  res.send(contenido); // ~50 ms aquí = ~50 ms de parón global bajo carga
+});
+
+// BIEN: asíncrono, el event loop sigue atendiendo a los demás
+app.get('/backup/datos', async (req, res) => {
+  const contenido = await readFile('/app/datos/export.json', 'utf8');
+  res.send(contenido);
+});</code></pre>
+        <p>La regla: <strong>jamás I/O síncrono en el camino crítico de una petición</strong> (a menos que el archivo sea diminuto y arranques así el servidor). En Python pasa exactamente igual: <code>open().read()</code> en un handler FastAPI bloquea ese hilo, mientras <code>aiofiles</code> o <code>asyncio.to_thread</code> lo evita.</p>
+      </section>
+
+      <section>
+        <h2 id="buffering">Buffering: leer y escribir en bloques</h2>
+        <p>Leer de uno en uno pero en 1 byte es la forma más lenta de tocar un disco. Cada lectura tiene un coste de sistema (syscall) y de posicionamiento del cabezal en disco. La solución se llama <strong>buffering</strong>: leer/escribir en bloques grandes y dejar que el sistema acumule datos.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Lento: 1 byte -> 1 syscall. Un archivo de 10 MB = 10 millones de syscalls
+with open("export.csv", "r") as f:
+    datos = ""
+    while True:
+        byte = f.read(1)
+        if not byte:
+            break
+        datos += byte
+
+# Rápido: buffer de 64 KB desde el principio
+with open("export.csv", "r", buffering=65536) as f:
+    lineas = []           # lee en bloques de 64 KB, mucho menos I/O al sistema
+    for linea in f:       # la iteración por líneas ya usa el buffer
+        lineas.append(linea)
+
+# El modo binario + lectura por trozos es igual de efectivo para archivos pesados:
+with open("export.csv", "rb") as f:
+    while chunk := f.read(65536):   # 64 KB por llamada
+        procesar(chunk)</code></pre>
+        <p>En la terminal, la misma idea la ajustas con <code>dd</code>: el tamaño de bloque (<code>bs</code>) decide cuántos syscalls tardas en copiar un archivo. Un <code>bs=64K</code> copia cientos de veces más rápido que un <code>bs=1</code>.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Compara los tiempos (time) con bs=1 vs bs=64K:
+#   dd if=export.csv of=/tmp/copia bs=1 count=100000
+#   dd if=export.csv of=/tmp/copia bs=64K count=10
+
+# El bloqueo de E/S de red también se tunea:
+#   sysctl -w net.core.rmem_max=134217728   # ~128 MB para buffers de red</code></pre>
+      </section>
+
+      <section>
+        <h2 id="streaming">Streaming: sin cargar todo en memoria</h2>
+        <p>Cargar un archivo de 2 GB en memoria para luego enviarlo por HTTP es el camino a un OOM-kill. El <strong>streaming</strong> lee un trozo, lo envía, lee el siguiente: la memoria se queda plana aunque el archivo sea enorme. Node lo expresa elegantemente encadenando streams.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const fs = require('node:fs');
+const { pipeline } = require('node:stream/promises');
+
+// MAL: readFile entero + string en memoria. Un 2 GB -> 2 GB en RAM.
+app.get('/descargar/video', async (req, res) => {
+  const b = await readFile('/media/video.mp4');
+  res.send(b);
+});
+
+// BIEN: stream pipe, memoria constante (~64 KB por vuelta)
+app.get('/descargar/video', (req, res) => {
+  const fuente = fs.createReadStream('/media/video.mp4');   // no lee todo
+  pipeline(fuente, res);                                    // disco -> red, en trozos
+});</code></pre>
+        <p>El equivalente en Python/FastAPI se resuelve con <code>FileResponse</code>, que internamente hace streaming del archivo sin colgarlo en RAM:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from fastapi import FastAPI
+from starlette.responses import FileResponse
+
+app = FastAPI()
+
+@app.get("/descargar/video")
+def descargar():
+    # Servido en trozos; la memoria del proceso no depende del tamaño del archivo
+    return FileResponse("/media/video.mp4", filename="video.mp4")</code></pre>
+        <p>El streaming también vale para procesos: un CSV de 10 millones de filas puede ir filtrándose línea a línea sin que <code>dataframes</code> ni listas exploten la memoria. Y del lado del protocolo, las respuestas HTTP con <code>Transfer-Encoding: chunked</code> envían los trozos a medida que se producen — la base de los SSE que ve en el curso de IA.</p>
+      </section>
+
+      <section>
+        <h2 id="loggeo">El I/O escondido: el logging</h2>
+        <p>El error de I/O más común que no parece I/O es el <strong>logging síncrono de alto volumen</strong>: cada línea de log es una escritura al disco (o peor, un round-trip a stdout). En producción con <code>console.log</code> en un bucle, ese log se convierte en el cuello de botella número uno.</p>
+        <p>Receta mínima:</p>
+        <ul>
+          <li>Loguear en <strong>nivel INFO como máximo</strong> en producción; DEBUG fuera de los caminos calientes.</li>
+          <li>Si necesitas volumen, envía los logs a <strong>stderr/colas</strong> y que un proceso externo (o la infraestructura) los recoja; nunca bloquees la petición esperando el write.</li>
+          <li>Redúcelo a resumen: «en vez de duplicar 50 eventos, loguea un agregado».</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Necesario (el log tiene un coste real)
+if (evento.importante) log.info({ usuario: evento.clienteId }, "compra confirmada");
+
+// Innecesario bajo carga masiva: 1 syscall por línea, en producción, multiplicado por 1000
+// log.debug({ cada_entrada: listaCompleta }); // deja DEBUG aislado de prod</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Busca en tu código cualquier <code>readFileSync</code>, <code>read()</code> bloqueante o <code>open().read()</code> en el camino de peticiones y conviérte a la versión asíncrona o a <code>FileResponse</code>/stream.</li>
+          <li>Encuentra la carga o descarga de archivos más pesada de tu sistema y reescríbela con streaming; vigila la memoria del proceso antes y después (no debe subir con el tamaño del archivo).</li>
+          <li>Mide tus <code>console.log</code> en la prueba de carga: coméntalos temporalmente y compara el throughput. Si sube, tienes tu siguiente optimización.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El I/O es el recurso más lento del sistema: nunca lo bloquees en el hilo de una petición.</li>
+          <li>I/O asíncrono (fs/promises, aiofiles, asyncio.to_thread) mantiene el hilo libre.</li>
+          <li>El buffering (bloques de 64 KB) reduce las syscalls y acelera cualquier traslado de datos.</li>
+          <li>El streaming (createReadStream, FileResponse) mantiene la memoria plana con archivos enormes.</li>
+          <li>El logging síncrono es I/O escondido: nivela y delega; nunca escribas por petición.</li>
+          <li>Todo esto se demuestra con la prueba de carga y la observación del disco (iostat) de antes y después.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="concurrencia-y-asincronia.html">Concurrencia y asincronía</a>
+          <a class="related-lessons__link" href="optimizacion-de-apis.html">Optimizar APIs</a>
+          <a class="related-lessons__link" href="../modulo-01/cuellos-de-botalla.html">Identificar cuellos de botella</a>
+          <a class="related-lessons__link" href="../modulo-03/cdny-edge-caching.html">CDN y edge caching</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 5 · TDD y Buenas Prácticas · Testing Backend · Backend Academy</title>
+<meta name="description" content="TDD en backend con PHPUnit: Red-Green-Refactor, TDD aplicado a una API REST, casos borde y errores, y usar TDD para corregir bugs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="route">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <a class="breadcrumb__item" href="../../../index.html">Inicio</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../../../cursos/index.html">Cursos</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../index.html">Testing Backend</a>
+    <span class="breadcrumb__sep">/</span>
+    <span class="breadcrumb__item breadcrumb__item--current">Módulo 5</span>
+  </nav>
+
+  <div class="route-hero">
+    <div class="route-hero__meta"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span><span class="route-hero__lessons">5 lecciones</span><span class="route-hero__time">~70 min</span></div>
+    <h1 class="route-hero__title">Módulo 5 · TDD y Buenas Prácticas</h1>
+    <p class="route-hero__lead">Escribir primero el test, verlo fallar, hacer la implementación mínima y refactorizar. El ritmo que vuelve al testing un diseño.</p>
+  </div>
+
+  <div class="progress" data-progress="testing">
+    <div class="progress__bar"><div class="progress__fill"></div></div>
+    <span class="progress__label">Progreso del curso</span>
+  </div>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
+    <ul class="route-goals">
+      <li>Justificar el ciclo Red-Green-Refactor.</li>
+      <li>Aplicar TDD a una regla de negocio y a una API REST.</li>
+      <li>Cuidar los casos borde y los caminos de error.</li>
+      <li>Usar TDD para corregir bugs sin romper lo demás.</li>
+    </ul>
+  </section>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Lecciones</h2>
+    <div class="grid grid--2">
+      <a class="card-route" href="que-es-tdd.html">
+        <h3 class="card-route__title">¿Qué es TDD?</h3>
+        <p class="card-route__meta">El ciclo que diseñó a partir de los tests</p>
+      </a>
+      <a class="card-route" href="red-green-refactor.html">
+        <h3 class="card-route__title">Red, Green, Refactor</h3>
+        <p class="card-route__meta">El ritmo paso a paso con PHPUnit</p>
+      </a>
+      <a class="card-route" href="tdd-en-api-rest.html">
+        <h3 class="card-route__title">TDD aplicado a una API REST</h3>
+        <p class="card-route__meta">De la ruta al contrato, todo en verde</p>
+      </a>
+      <a class="card-route" href="casos-borde-y-errores.html">
+        <h3 class="card-route__title">Casos borde y errores</h3>
+        <p class="card-route__meta">Donde se esconden los bugs de verdad</p>
+      </a>
+      <a class="card-route" href="tdd-para-corregir-bugs.html">
+        <h3 class="card-route__title">TDD para corregir bugs</h3>
+        <p class="card-route__meta">El test de regresión como primera noticia</p>
+      </a>
+    </div>
+  </section>
+
+  <div class="lesson-prevnext">
+    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../modulo-04/index.html">
+      <span class="lesson-prevnext__tag">Anterior</span><strong>Módulo 4 · E2E</strong>
+    </a>
+    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-06/index.html">
+      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 6 · Métricas y CI/CD</strong>
+    </a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

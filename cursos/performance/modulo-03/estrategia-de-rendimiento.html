@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estrategia integral · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a armar una estrategia de rendimiento integral: ciclo medir-optimizar-escalar, presupuestos automatizados en CI y revisión periódica del sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Estrategia integral</span>
+      </nav>
+      <h1 class="lesson-title">Estrategia integral</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y despliegue</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Ya sabes medir, optimizar y escalar. La última pieza es <strong>no olvidarlo</strong>: el rendimiento no es una tarea que se hace una vez, es un proceso. Si el equipo no lo sostiene, en dos trimestres la deuda técnica devuelve la latencia a como estaba antes de empezar.</p>
+        <p>Esta lección cierra el curso con la disciplina: el ciclo <strong>medir → optimizar → escalar</strong> convertido en rutina, presupuestos automatizados que se ejecutan en cada release y una revisión periódica del sistema completo.</p>
+      </section>
+
+      <section>
+        <h2 id="ciclo">El ciclo completo: medir → optimizar → escalar</h2>
+        <p>El orden no es aleatorio y nunca se salta un paso:</p>
+        <ol>
+          <li><strong>Medir (módulo 1):</strong> SLOs, pruebas de carga, perfiles y diagnóstico de cuellos de botella. Lo que no se mide vuelve a romperse.</li>
+          <li><strong>Optimizar (módulo 2):</strong> caché, bases de datos, concurrencia, APIs e I/O. Aplicar con la prueba como testigo: la respuesta debe mejorar <em>cuantificablemente</em>.</li>
+          <li><strong>Escalar (módulo 3):</strong> nodos, balanceo, bases de datos a escala, CDN. La última palanca, que solo entra cuando medir muestra que el rendimiento local ya no alcanza.</li>
+        </ol>
+        <p>La trampa clásica es saltarse la medición: optimizar una función que no importa, o escalar mientras hay un índice que falta. El ciclo existe para impedir exactamente eso.</p>
+      </section>
+
+      <section>
+        <h2 id="presupuesto">El presupuesto como contrato en CI</h2>
+        <p>El SLO y el presupuesto definidos en el módulo 1 se convierten en <strong>pruebas automatizadas</strong>: cada release corre una prueba de carga ligera con thresholds que fallan la entrega si el p95 supera el umbral. Así el rendimiento entra en el flujo diario y ninguna feature nueva puede empeorarlo sin que el equipo lo confirme.</p>
+        <p>Un presupuesto tiene sentido si queda documentado y versionado junto al código:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "version": 1,
+  "presupuesto_peticion": {
+    "max_p95_ms": 300,
+    "max_errores_pct": 0.5
+  },
+  "por_endpoint": {
+    "GET /catalogo/precios": { "p95_max_ms": 100, "cacheable": true },
+    "POST /carrito/comprar":  { "p95_max_ms": 400 },
+    "GET /perfil":            { "p95_max_ms": 200, "privado": true }
+  },
+  "capacidad": {
+    "rps_objetivo": 1500,
+    "nodos_minimos": 3,
+    "check_escalado_cada": "semana"
+  },
+  "proceso": {
+    "pruebas_en_ci": true,
+    "revision_periodica_dias": 30,
+    "responsable": "equipo-performance"
+  }
+}</code></pre>
+        <p>Con k6, ese presupuesto se ejecuta automáticamente como etapa de CI, tal como viste en «pruebas de carga»:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// budget.ci.js: versión corta para CI (1-2 min)
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  vus: 40,                                // carga ligera, solo regresiones
+  duration: '60s',
+  thresholds: {
+    'http_req_duration{expected_response:true}': ['p(95)<300'],
+    'http_req_failed': ['rate<0.005']
+  }
+};
+
+export default function () {
+  const res = http.get('https://ci.mi-servicio.com/catalogo/precios');
+  check(res, { 'status 200': (r) => r.status === 200 });
+  sleep(0.5);
+}
+// Paso en el pipeline:  k6 run budget.ci.js
+// Si los thresholds fallan -> el release se detiene, no se despliega.</code></pre>
+        <p>En un pipeline real, la orden de la prueba se ve así (una etapa más del CI, con sus umbrales que ya vienen del presupuesto JSON):</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Etapa del pipeline: verificación de rendimiento antes de desplegar
+k6 run budget.ci.js --quiet --summary-export=resumen.json
+
+# k6 responde con código de salida no-cero si los thresholds fallan;
+# el pipeline se detiene ahí (exit != 0) y el release no avanza.
+if [ $? -ne 0 ]; then
+  echo "Presupuesto superado: p95 o errores fuera de rango. Revisar."
+  exit 1
+fi
+
+# Y por si algo se pierde en el log: el manager de CI muestra el resumen
+cat resumen.json | jq '.metrics.http_req_duration.values["p(95)"]'</code></pre>
+      </section>
+
+      <section>
+        <h2 id="metricas">Métricas siempre encendidas</h2>
+        <p>El presupuesto en CI detecta regresiones de laboratorio. Para que el sistema viva sano en producción, el monitoreo debe medir siempre (aquí conecta tu curso de Observabilidad):</p>
+        <ul>
+          <li><strong>Latencia por endpoint</strong> en percentiles (p50/p95/p99) y tasa de errores, con alerta cuando el error budget se agota.</li>
+          <li><strong>Throughput</strong> y uso de los recursos (CPU, memoria, I/O) por nodo: verás la cola formándose antes del pico.</li>
+          <li><strong>Rendimiento de la BD:</strong> tiempo de consulta, conexiones activas, índice faltante (pg_stat_user_indexes que se está sin usar).</li>
+          <li><strong>Latencia de dependencias:</strong> tus servicios externos deben tener su propio SLO; si uno no lo cumple, piensa caché, variar o cambiar de proveedor.</li>
+        </ul>
+        <p>Revisa estos paneles en una cadencia fija (una hora al día, el ritual del café) y una revisión profunda mensual con tu carga de producción real.</p>
+      </section>
+
+      <section>
+        <h2 id="revision">Revisión periódica y cultura</h2>
+        <p>La frecuencia y la salida del proceso, para que no muera por desinterés:</p>
+        <ol>
+          <li><strong>Semanal:</strong> miramos p95/p99, throughput y alertas de error budget. Si algo se dispara, abrimos ticket.</li>
+          <li><strong>Mensual:</strong> correr una prueba de carga con el escenario nuevo (volumen estimado del próximo mes) y el capacity planning correspondiente. La prueba de tensión de la «estrategia» se hace en un entorno de staging.</li>
+          <li><strong>Trimestral:</strong> revisión de arquitectura: ¿el índice sigue justificado? ¿la caché sigue caliente? ¿este endpoint que ya nadie usa de verdad necesitaba esa complejidad?</li>
+        </ol>
+        <p>El peor enemigo es la burocracia vacía, así que la regla es: <strong>cada revisión termina con una acción concreta</strong> (un índice, un timeout, un nodo más, un SLO actualizado). Si la acción no aterriza en un ticket, la reunión no sirvió.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> el rendimiento se paga como deuda cuando se ignora: cada release sin su prueba es una apuesta. Con el presupuesto de CI y la revisión mensual, la apuesta desaparece.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe el presupuesto JSON de tu sistema siguiendo la plantilla: por endpoint, con umbrales y responsables.</li>
+          <li>Convierte los dos umbrales clave en un script de CI (k6 u otra herramienta) y añádelo a tu pipeline: la próxima feature ya no podrá empeorar el p95 sin que el pipeline proteste.</li>
+          <li>Programa tu revisión periódica real (en tu calendario, con fecha): la primera dentro de 4 semanas. Anota qué 3 métricas mirarás siempre.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El ciclo es medir → optimizar → escalar, sin atajos: medir decide, optimizar arregla, escalar da aire.</li>
+          <li>El presupuesto de rendimiento vive versionado como código y se ejecuta en CI con thresholds.</li>
+          <li>El monitoreo de producción (percentiles, recursos, BD, dependencias) está siempre encendido.</li>
+          <li>Revisión semanal (paneles), mensual (carga + capacity) y trimestral (arquitectura).</li>
+          <li>Toda revisión termina en una acción concreta con ticket; si no hay acción, cuestiónate la reunión.</li>
+          <li>Con esta rutina, el rendimiento deja de ser un proyecto: es un proceso que no se olvida.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/que-es-performance-backend.html">¿Qué es performance?</a>
+          <a class="related-lessons__link" href="../modulo-01/test-de-carga.html">Pruebas de carga</a>
+          <a class="related-lessons__link" href="cdny-edge-caching.html">CDN y edge caching</a>
+          <a class="related-lessons__link" href="../modulo-02/caching-estrategias.html">Caching y estrategias</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

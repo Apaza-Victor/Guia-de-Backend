@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conjuntos y colecciones · Programación para Backend · Backend Academy</title>
+<meta name="description" content="Elementos únicos y operaciones de conjunto para eliminar duplicados y comparar datos.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css"></head>
+<body class="app-shell">
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html" aria-label="Backend Academy - Inicio">
+      <span class="brand__logo" aria-hidden="true"><i class="fa-solid fa-code"></i></span>
+      <span>Backend Academy<small>aprende a programar</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../cursos/proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle btn btn--icon" type="button" aria-label="Cambiar a modo oscuro">
+        <i class="fa-solid fa-moon" data-mode="light" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="lesson-layout lesson-layout--with-toc container">
+<aside class="sidebar" aria-label="Contenido del curso Programación para Backend">
+  <div class="sidebar__section">
+    <a class="sidebar__title" href="../../../cursos/programacion/index.html">Programación para Backend</a>
+    <div class="progress" data-progress="programacion" aria-label="Progreso del curso">
+      <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
+      <span class="progress__label">0%</span>
+    </div>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Fundamentos de programación</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="variables-y-constantes" href="../../../cursos/programacion/modulo-01/variables-y-constantes.html">Variables y constantes<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="tipos-de-datos" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="operadores" href="../../../cursos/programacion/modulo-01/operadores.html">Operadores y expresiones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="conversion-de-tipos" href="../../../cursos/programacion/modulo-01/conversion-de-tipos.html">Conversión de tipos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="entrada-salida" href="../../../cursos/programacion/modulo-01/entrada-salida.html">Entrada, salida y comentarios<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Control de flujo</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="condicionales" href="../../../cursos/programacion/modulo-02/condicionales.html">Condicionales: if, else y elseif<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="condicional-switch" href="../../../cursos/programacion/modulo-02/condicional-switch.html">La estructura switch<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-while" href="../../../cursos/programacion/modulo-02/bucles-while.html">Bucles while y do-while<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="bucles-for-foreach" href="../../../cursos/programacion/modulo-02/bucles-for-foreach.html">Bucles for y foreach<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="break-continue" href="../../../cursos/programacion/modulo-02/break-continue.html">break y continue: control fino de bucles<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Funciones</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="funciones" href="../../../cursos/programacion/modulo-03/funciones.html">Funciones: definir y retornar<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="parametros-y-argumentos" href="../../../cursos/programacion/modulo-03/parametros-y-argumentos.html">Parámetros y argumentos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="ambito-de-variables" href="../../../cursos/programacion/modulo-03/ambito-de-variables.html">Ámbito (scope) de las variables<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="funciones-anonimas-callbacks" href="../../../cursos/programacion/modulo-03/funciones-anonimas-callbacks.html">Funciones anónimas y callbacks<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="recursividad" href="../../../cursos/programacion/modulo-03/recursividad.html">Recursividad<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group is-open">
+    <h3 class="sidebar__group-title"><span>Estructuras de datos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="arrays" href="../../../cursos/programacion/modulo-04/arrays.html">Arrays: la base de los datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="arrays-asociativos" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">Arrays asociativos (mapas)<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link is-active" data-lesson-id="conjuntos" href="../../../cursos/programacion/modulo-04/conjuntos.html" aria-current="page">Conjuntos y colecciones<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="objetos" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="estructuras-anidadas" href="../../../cursos/programacion/modulo-04/estructuras-anidadas.html">Estructuras anidadas<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Programación Orientada a Objetos</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="clases-y-objetos" href="../../../cursos/programacion/modulo-05/clases-y-objetos.html">Clases y objetos<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="atributos-metodos-constructores" href="../../../cursos/programacion/modulo-05/atributos-metodos-constructores.html">Atributos, métodos y constructores<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="encapsulamiento" href="../../../cursos/programacion/modulo-05/encapsulamiento.html">Encapsulamiento: public, private y protected<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="herencia" href="../../../cursos/programacion/modulo-05/herencia.html">Herencia<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="polimorfismo-abstraccion-interfaces" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>
+  <div class="sidebar__group">
+    <h3 class="sidebar__group-title"><span>Código profesional</span></h3>
+    <ul class="sidebar__links">      <li><a class="sidebar__link" data-lesson-id="modularizacion" href="../../../cursos/programacion/modulo-06/modularizacion.html">Modularización<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="clean-code" href="../../../cursos/programacion/modulo-06/clean-code.html">Clean Code<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="principios-solid" href="../../../cursos/programacion/modulo-06/principios-solid.html">Principios SOLID<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="dry-kiss" href="../../../cursos/programacion/modulo-06/dry-kiss.html">DRY y KISS<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="debugging" href="../../../cursos/programacion/modulo-06/debugging.html">Debugging y herramientas<span class="check" aria-hidden="true"></span></a></li>      <li><a class="sidebar__link" data-lesson-id="manejo-de-errores" href="../../../cursos/programacion/modulo-06/manejo-de-errores.html">Manejo de errores y excepciones<span class="check" aria-hidden="true"></span></a></li>    </ul>
+  </div>  <div class="sidebar-footer">
+    <span><i class="fa-solid fa-code" aria-hidden="true"></i> Ejemplos en PHP 8.</span>
+    <a href="../../../cursos/programacion/index.html">Ver índice del curso</a>
+  </div>
+</aside>
+  <main class="lesson-main" id="main">
+<nav class="lesson-crumbs" aria-label="Ruta de navegación">
+  <a href="../../../index.html">Inicio</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../aprender/index.html">Cursos</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/index.html">Programación para Backend</a><span class="sep" aria-hidden="true">/</span>
+  <a href="../../../cursos/programacion/modulo-04/index.html">módulo 04</a><span class="sep" aria-hidden="true">/</span>
+  <span class="current" aria-current="page">Conjuntos y colecciones</span>
+</nav>
+    <article class="lesson-article" data-lesson-id="conjuntos">
+      <header class="lesson-hero">
+        <h1 class="lesson-title">Conjuntos y colecciones</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Intermedio</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-code" aria-hidden="true"></i> PHP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Estructuras de datos</span>
+          <label class="complete-toggle"><input type="checkbox"><span class="complete-toggle__box" aria-hidden="true">✓</span> Marcar como completada</label>
+        </div>
+      </header>
+      <div class="lesson-content">
+<section id="introduccion" aria-labelledby="introduccion-t">
+  <h2 id="introduccion-t">Introducción</h2>
+  <p>En ocasiones lo único que importa es <em>si un elemento está</em>, no cuántas veces aparece ni en qué orden. Los <strong>conjuntos</strong> (sets) modelan colecciones de elementos únicos y sus operaciones de comparación.</p>
+</section><section id="definicion" aria-labelledby="definicion-t">
+  <h2 id="definicion-t">Definición</h2>
+  <p>PHP no tiene un tipo <code class="inline">set</code> nativo, pero se implementa con arrays asociativos cuyas <em>claves</em> son los elementos: las claves son únicas por diseño. A partir de ahí, <code class="inline">array_keys()</code> recupera los elementos, <code class="inline">isset()</code> comprueba pertenencia en O(1) y operaciones como intersección o diferencia salen de funciones nativas de PHP.</p>
+</section><section id="conceptos-clave" aria-labelledby="conceptos-clave-t">
+  <h2 id="conceptos-clave-t">Conceptos clave</h2>
+  <ul>
+  <li>Set con claves: <code class="inline">$vistos = ["u1" =&gt; true, "u2" =&gt; true];</code>.</li>
+  <li>Pertenencia instantánea: <code class="inline">isset($vistos["u2"])</code>.</li>
+  <li>Intersección: <code class="inline">array_intersect_key($a, $b)</code>.</li>
+  <li>Diferencia: <code class="inline">array_diff_key($a, $b)</code>.</li>
+  <li>Duplicados se evitan solos: añadir la misma clave no crea una segunda.</li>
+</ul>
+</section><section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t">
+  <h2 id="ejemplo-basico-t">Ejemplo básico</h2>
+  <p>Eliminar duplicados de una lista convirtiéndola en conjunto de claves:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">unicos.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$nombres = [&quot;ana&quot;, &quot;luis&quot;, &quot;ana&quot;, &quot;nora&quot;, &quot;luis&quot;];
+
+$unicos = [];
+foreach ($nombres as $nombre) {
+    $unicos[$nombre] = true;   // las claves se pisan solas
+}
+
+print_r(array_keys($unicos));</code></pre></div>
+</div>
+</section><section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t">
+  <h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2>
+  <p>Comprobar pertenencia al vuelo (muy usado en sesiones y en listas de bloqueo):</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">bloqueos.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$bloqueados = [&quot;ip:192.168.1.9&quot; =&gt; true, &quot;ip:10.0.0.5&quot; =&gt; true];
+
+function estaBloqueado(string $direccion, array $lista): bool {
+    return isset($lista[$direccion]);
+}
+
+echo estaBloqueado(&quot;ip:192.168.1.9&quot;, $bloqueados)
+    ? &quot;Acceso denegado&quot;
+    : &quot;Acceso permitido&quot;;</code></pre></div>
+</div>
+</section><section id="ejemplo-real" aria-labelledby="ejemplo-real-t">
+  <h2 id="ejemplo-real-t">Ejemplo real</h2>
+  <p>Intersección y diferencia con <code class="inline">array_intersect_key</code> / <code class="inline">array_diff_key</code>:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">interseccion.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">$pjuegA = [&quot;php&quot; =&gt; true, &quot;sql&quot; =&gt; true, &quot;js&quot; =&gt; true];
+$pjuegB = [&quot;sql&quot; =&gt; true, &quot;python&quot; =&gt; true];
+
+$comunes = array_intersect_key($pjuegA, $pjuegB);
+$soloA   = array_diff_key($pjuegA, $pjuegB);
+
+echo &quot;Comunes: &quot; . implode(&quot;, &quot;, array_keys($comunes));
+echo &quot; Solo en A: &quot; . implode(&quot;, &quot;, array_keys($soloA));</code></pre></div>
+</div>
+</section><section id="codigo" aria-labelledby="codigo-t">
+  <h2 id="codigo-t">Código completo</h2>
+  <p>Código completo: recomendaciones por intereses superpuestos:</p><div class="code-block" data-lang="php">
+  <div class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">recomendador.php</span></div>
+  <div class="code-block__body"><pre data-lang="php"><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+function aSet(array $elementos): array {
+    $set = [];
+    foreach ($elementos as $e) {
+        $set[$e] = true;
+    }
+    return $set;
+}
+
+$miNivel   = aSet([&quot;PHP&quot;, &quot;JS&quot;, &quot;SQL&quot;]);
+$nivelCurso = aSet([&quot;JS&quot;, &quot;SQL&quot;, &quot;Python&quot;, &quot;Go&quot;]);
+
+$aprendere = array_diff_key($nivelCurso, $miNivel);
+echo &quot;Del curso aprender&#225;s: &quot; . implode(&quot;, &quot;, array_keys($aprendere)) . &quot;\n&quot;;
+
+$coinciden = array_intersect_key($miNivel, $nivelCurso);
+echo &quot;Ya sabes: &quot; . implode(&quot;, &quot;, array_keys($coinciden)) . &quot;\n&quot;;</code></pre></div>
+</div>
+</section><section id="explicacion" aria-labelledby="explicacion-t">
+  <h2 id="explicacion-t">Explicación</h2>
+  <p>El truco del set en PHP: usar claves garantiza unicidad (el "ana" repetido pisa la misma clave) y <code class="inline">isset()</code> sobre ellas es la comprobación más rápida que existe. Es la base de listas de bloqueo, sesiones y cachés.</p>
+<p><code class="inline">array_intersect_key</code> devuelve las claves presentes en ambos conjuntos (intersección) y <code class="inline">array_diff_key</code> las que solo están en el primero (diferencia). Con ellos, "qué debería estudiar" se resuelve con una línea y sin bucles. El recomendador combina ambas para saber qué aprenderás y qué ya dominas.</p>
+</section><section id="errores-comunes" aria-labelledby="errores-comunes-t">
+  <h2 id="errores-comunes-t">Errores comunes</h2>
+  <ul>
+  <li>Confundir <code class="inline">array_intersect_key</code> (por claves) con <code class="inline">array_intersect</code> (por valores).</li>
+  <li>Buscar pertenencia con <code class="inline">in_array</code> cuando podrías usar claves e <code class="inline">isset()</code>.</li>
+  <li>Olvidar que los valores true del set no se usan: <code class="inline">array_keys()</code> los recupera.</li>
+</ul>
+</section><section id="buenas-practicas" aria-labelledby="buenas-practicas-t">
+  <h2 id="buenas-practicas-t">Buenas prácticas</h2>
+  <ul>
+  <li>Estandariza los elementos (<code class="inline">strtolower</code>, trim) antes de meterlos en el set.</li>
+  <li>Envuelve la lógica en funciones pequeñas (<code class="inline">aSet()</code>, <code class="inline">estaBloqueado()</code>).</li>
+  <li>Para sets grandes en memoria, considera librerías Ds (Data Structures).</li>
+</ul>
+</section><section id="ejercicio" aria-labelledby="ejercicio-t">
+  <h2 id="ejercicio-t">Ejercicio</h2>
+  <div class="exercise">
+  <div class="exercise__head">
+    <h3>Lista de permitidos</h3>
+    <span class="badge badge--level-intermedio">Dificultad: Media</span>
+  </div>
+  <ol>
+    <li>Crea la lista <code class="inline">$permitidos = aSet(["admin", "editor"])</code>.</li>
+    <li>Implementa <code class="inline">tieneAcceso(string $rol): bool</code> con <code class="inline">isset</code>.</li>
+    <li>Prueba "admin" (true), "invitado" (false) y comprueba que añadir "admin" dos veces no crea duplicados.</li>
+  </ol>
+</div>
+</section><section id="resumen" aria-labelledby="resumen-t">
+  <h2 id="resumen-t">Resumen</h2>
+  <div class="summary">
+  <ul>
+    <li>El set PHP = claves de un asociativo; unicidad y pertenencia rápida.</li>
+    <li><code class="inline">array_intersect_key</code> / <code class="inline">array_diff_key</code> comparan conjuntos.</li>
+    <li>Ideal para bloqueos, sesiones y recomendaciones.</li>
+  </ul>
+</div>
+</section>
+      </div>
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../../../cursos/programacion/modulo-04/index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo</a>
+      </nav><div class="lesson-prevnext">
+  <a class="lesson-prevnext__link" href="../../../cursos/programacion/modulo-04/arrays-asociativos.html">
+    <span class="label" aria-hidden="true">← Anterior</span>
+    <span class="title">Arrays asociativos (mapas)</span>
+  </a>
+  <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../../../cursos/programacion/modulo-04/objetos.html">
+    <span class="label" aria-hidden="true">Siguiente →</span>
+    <span class="title">Objetos y estructuras de datos</span>
+  </a>
+</div>
+      <section class="related-block" aria-labelledby="rel-t">
+        <h2 id="rel-t">También puede interesarte</h2><div class="related-lessons">  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-04/objetos.html">Objetos y estructuras de datos<br><span class="muted">Estructuras de datos</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-05/polimorfismo-abstraccion-interfaces.html">Polimorfismo, abstracción e interfaces<br><span class="muted">Programación Orientada a Objetos</span></a>  <a class="related-lessons__link" href="../../../cursos/programacion/modulo-01/tipos-de-datos.html">Tipos de datos<br><span class="muted">Fundamentos de programación</span></a></div>      </section>
+    </article>
+  </main><aside class="toc-rail" data-toc aria-label="Contenido de la página">
+  <h2>En esta página</h2>
+  <nav aria-label="Secciones de la lección">
+    <a href="#introduccion">Introducción</a>
+    <a href="#definicion">Definición</a>
+    <a href="#conceptos-clave">Conceptos clave</a>
+    <a href="#ejemplo-basico">Ejemplo básico</a>
+    <a href="#ejemplo-intermedio">Ejemplo intermedio</a>
+    <a href="#ejemplo-real">Ejemplo real</a>
+    <a href="#codigo">Código completo</a>
+    <a href="#explicacion">Explicación</a>
+    <a href="#errores-comunes">Errores comunes</a>
+    <a href="#buenas-practicas">Buenas prácticas</a>
+    <a href="#ejercicio">Ejercicio</a>
+    <a href="#resumen">Resumen</a>
+  </nav>
+</aside>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <h4><a href="../../../index.html">Backend Academy</a></h4>
+        <p>Plataforma en español para aprender desarrollo backend: de los fundamentos a la arquitectura de sistemas de alto tráfico.</p>
+      </div>
+      <div>
+        <h4>Cursos</h4>
+        <ul>
+          <li><a href="../../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../../cursos/programacion/index.html">Programación para Backend</a></li>
+          <li><a href="../../../cursos/php/index.html">PHP</a></li>
+          <li><a href="../../../cursos/nodejs/index.html">Node.js</a></li>
+          <li><a href="../../../cursos/python/index.html">Python</a></li>
+          <li><a href="../../../cursos/bases-datos/index.html">Bases de Datos</a></li>
+          <li><a href="../../../cursos/apis-rest/index.html">APIs REST</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap</a></li>
+          <li><a href="../../../retos/index.html">Retos</a></li>
+          <li><a href="../../../ejercicios/index.html">Ejercicios</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../dashboard/index.html">Mi progreso</a></li>
+          <li><a href="../../../favoritos/index.html">Favoritos</a></li>
+          <li><a href="../../../historial/index.html">Historial</a></li>
+          <li><a href="../../../acerca/index.html">Acerca de</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido educativo gratuito, en español.</span>
+      <span class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca</a>
+        <a href="../../../glosario/index.html">Glosario</a>
+        <a href="../../../roadmap/index.html">Roadmap</a>
+      </span>
+    </div>
+  </div>
+</footer><script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  try { if (window.AppTheme) AppTheme.init(); } catch (err) {}
+  try { if (window.AppProgress) AppProgress.init(); } catch (err) {}
+});
+</script></body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-colas-para-tareas-lentas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colas para tareas lentas · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a sacar de la petición síncrona las integraciones lentas: trabajos asíncronos, colas de trabajo, workers, estados de job y reintento con dead letters.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-colas-para-tareas-lentas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Colas para tareas lentas</span>
+      </nav>
+      <h1 class="lesson-title">Colas para tareas lentas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Robustez</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Hay integraciones que duran milisegundos y otras que duran minutos: generar un PDF pesado, sincronizar miles de clientes con un CRM, enviar o reenviar correos, procesar una factura. Si las ejecutas dentro del request HTTP, tu API queda bloqueada, el usuario espera sin límite y un timeout del proveedor puede tirar abajo todo el endpoint. La solución es el <strong>trabajo asíncrono</strong>: el request encola la tarea y responde inmediatamente; un <strong>worker</strong> aparte la procesa en su propio ritmo.</p>
+      </section>
+
+      <section>
+        <h2 id="producer">Productor: encolar y responder ya</h2>
+        <p>La API no llama al proveedor lento directamente: publica un <strong>trabajo</strong> en una cola. El cliente recibe un <code>202 Accepted</code> al instante y puede consultar el estado después:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">import { Queue } from 'bullmq';
+import redis from 'ioredis';
+
+const colaSincronizacion = new Queue('sync-crm', { connection: redis });
+
+export async function encolarSincronizacion(clienteId) {
+  const job = await colaSincronizacion.add('sync', { clienteId }, {
+    attempts: 4,
+    backoff: { type: 'exponential', delay: 2000 },
+    removeOnComplete: { age: 86400 }
+  });
+  return { jobId: job.id };  // el cliente puede consultar {jobId}
+}</code></pre>
+        <p>El worker se ejecuta en un proceso separado y puede escalar horizontalmente: más workers, más tareas en paralelo, sin tocar la API.</p>
+      </section>
+
+      <section>
+        <h2 id="worker">Worker: el procesador de fondo</h2>
+        <p>El worker escucha la cola, ejecuta la integración y marca el resultado. Si la tarea falla, el sistema reintenta automáticamente según la configuración, y al agotarse los intentos la manda a una cola de <strong>dead letters</strong> para revisión humana:</p>
+<pre class="code-block"><code class="language-python" data-language="python"># worker.py — procesa la sincronización con el CRM
+def sincronizar(job):
+    cliente_id = job.payload["clienteId"]
+    try:
+        crm_client.upsert(cliente_id)          # llamada lenta al tercero
+    except ErrorReintentable as err:
+        raise JobRetryableError(err) from None  # se reintenta
+    return {"sincronizado": cliente_id}
+</code></pre>
+        <p>Separa errores que merecen reintento (5xx del proveedor, timeout) de los irreparables (cliente inexistente, 422): los segundos no deben agotar los intentos de nadie.</p>
+      </section>
+
+      <section>
+        <h2 id="estados">Estados de un trabajo</h2>
+        <p>Todo el ciclo queda visible si asignas estados a cada tarea. Así puedes responder al cliente y monitorizar el progreso:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "job_id": "b2d1a9f3",
+  "tipo": "sync.crm",
+  "estado": "procesando",
+  "intentos": 2,
+  "colas_posibles": [
+    "encolado", "procesando", "completado",
+    "fallido", "en_cola_muerta"
+  ],
+  "created_at": "2026-09-22T10:15:00Z"
+}</code></pre>
+        <p>Un endpoint <code>GET /trabajos/:id</code> devuelve ese estado y el frontend puede mostrar «Generando tu factura…» sin bloquear nada.</p>
+      </section>
+
+      <section>
+        <h2 id="cache">Idempotencia entre reintentos del worker</h2>
+        <p>El worker puede morir a mitad de tarea y reintentarse desde cero. Si la tarea ya había cobrado o enviado algo, el reintento duplica la acción. Por eso la lógica del worker debe ser <strong>idempotente</strong>: registra el efecto (guardar el <code>messageId</code>, el <code>pagoId</code>) en la base antes de terminar, y al inicio del trabajo comprueba si el efecto ya existe:</p>
+<pre class="code-block"><code class="language-bash" data-language="bash"># Escala workers sin tocar la API: cuantos más, más paralelo
+worker sync-crm --concurrency 4
+worker sync-crm --concurrency 4   # segundo proceso, misma cola</code></pre>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si la tarea puede provocar un efecto externo (un pago, un correo, un borrado), tu worker es idempotente o tus reintentos tienen fugas.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="dead-letter">La cola muerta</h2>
+        <p>Cuando una tarea agota sus reintentos no puede desaparecer silenciosamente: va a la <strong>dead letter queue</strong> con su historial completo de errores. Esa cola es la lista de espera de operación: alguien la revisa, corrige la causa (una dirección mal escrita) y reencola la tarea con un origen manual que no vuelva a fallar.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Diseña el modelo de estados de tu tarea asíncrona más lenta y escribe el JSON de ejemplo.</li>
+          <li>Configura una cola con 4 intentos y backoff exponencial para una sincronización con un CRM ficticio.</li>
+          <li>Escribe el worker que distingue errores reintentables de irreparables y responde el estado al API.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las tareas lentas se encolan y se procesan en workers, no dentro del request.</li>
+          <li>Los workers escalan horizontalmente y reintentan con backoff automático.</li>
+          <li>El estado del trabajo da visibilidad a API y frontend.</li>
+          <li>La idempotencia del worker protege contra el doble efecto de un reintento.</li>
+          <li>La dead letter queue captura lo que no pudo completarse para revisión manual.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="manejo-de-errores-reintentos.html">Errores y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-01/webhooks.html">Webhooks</a>
+          <a class="related-lessons__link" href="../modulo-02/email-y-notificaciones.html">Email y notificaciones</a>
+          <a class="related-lessons__link" href="monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="monitoreo-metricas-basicas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoreo y métricas básicas · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a monitorear APIs REST: métricas básicas, logging estructurado, alertas y las 4 señales de oro (métricas RED/USE).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="monitoreo-metricas-basicas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 6 · Calidad y seguridad</a><span class="sep">/</span>
+          <span class="current">Monitoreo y métricas básicas</span>
+        </nav>
+        <h1 class="lesson-title">Monitoreo y métricas básicas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Calidad y seguridad</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que">Sin datos, tu API es una opinión</h2>
+          <p>Monitorear = medir, registrar y alertar para saber cómo <em>se siente</em> tu API antes de que lo diga el cliente. Las «4 señales de oro» de Google SRE:</p>
+          <ul>
+            <li><strong>Latencia:</strong> cuánto tarda en responder.</li>
+            <li><strong>Tráfico:</strong> cuántas peticiones llegan.</li>
+            <li><strong>Errores:</strong> cuántas fallan (status 5xx y reglas propias).</li>
+            <li><strong>Saturación:</strong> % de uso de CPU, memoria, conexiones, disco.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="red-use">RED y USE: dos casas para las métricas del servicio</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Concepto</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-plaintext">RED (servicio web):
+  Rate       → peticiones/seg
+  Errors     → % de fallos
+  Duration   → latencia (p50/p95/p99)
+
+USE (recurso): 
+  Utilization → CPU, RAM, disco, red
+  Saturation  → colas, threads
+  Errors      → errores de hardware</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="instrumentar">Instrumentar sin frameworks (express + prom-client)</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">js (Prometheus)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">import client from "prom-client";
+
+const requests = new client.Counter({
+  name: "http_requests_total",
+  help: "Total de peticiones",
+  labelNames: ["method", "route", "status"]
+});
+
+const latency = new client.Histogram({
+  name: "http_request_duration_seconds",
+  help: "Latencia en segundos",
+  labelNames: ["method", "route"],
+  buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2.5, 5]
+});
+
+app.use((req, res, next) =&gt; {
+  const fin = latency.startTimer({ method: req.method, route: req.route?.path || req.path });
+  res.on("finish", () =&gt; {
+    requests.inc({ method: req.method, route: req.route?.path, status: res.statusCode });
+    fin({ method: req.method, route: req.route?.path });
+  });
+  next();
+});
+
+app.get("/metrics", async (req, res) =&gt; {
+  res.type("text/plain");
+  res.send(await client.register.metrics());
+});</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="logs">Logs estructurados: la pareja del dashboard</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">json</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{ "ts": "2026-09-19T10:20:41Z", "level": "warn",
+  "trace_id": "9f2c1a-...", "method": "GET",
+  "route": "/api/v1/productos/42", "status": 404,
+  "dur_ms": 12, "user_agent": "TiendaApp/2.4" }</code></pre>
+            </div>
+          </footer>
+          </ul>
+          <ul>
+            <li>Mismo <code>trace_id</code> que vas en la respuesta de error: de cliente al log en un salto.</li>
+            <li>Logs de error con contexto, no frases danzaronas.</li>
+            <li>No loguees PII ni bodies de autenticación.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="alertas">Alertas: tu guardia de noche</h2>
+          <ul>
+            <li><strong>Ratio de 5xx &gt; 1%</strong> en 5 min.</li>
+            <li><strong>p95 de latencia &gt; 500ms</strong> sostenido.</li>
+            <li><strong>CPU &gt; 85%</strong> sostenido.</li>
+            <li><strong>Uptime:</strong> health check caído.</li>
+            <li>Empieza con 3 alertas buenas, no con 40 ruidosas.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Expón <code>/metrics</code> y lanza petición desde tu terminal.</li>
+            <li>Graba 3 métricas RED a mano en una hoja.</li>
+            <li>Define 3 alertas con umbral que SIEMPRE quieras ver.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Mide latencia, tráfico, errores y saturación.</li>
+            <li>RED para el servicio; USE para el recurso.</li>
+            <li>Métricas Prometheus + logs JSON con trace_id + alertas mínimas.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="testing-endpoints.html">Testing de endpoints</a>
+            <a class="related-lessons__link" href="rate-limiting-abuso-api.html">Rate limiting</a>
+            <a class="related-lessons__link" href="../modulo-04/manejo-errores-centralizado.html">Manejo de errores centralizado</a>
+            <a class="related-lessons__link" href="../modulo-03/cache-etag-cache-control.html">Caché con ETag y Cache-Control</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

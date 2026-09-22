@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="identidad-y-estados-de-sesion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identidad y estados de sesión · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Cómo pasa el backend de recibir una petición anónima a conocer al usuario: identidad, estados de sesión, expiración y ciclo de vida de la sesión.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="identidad-y-estados-de-sesion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Identidad y estados de sesión</span>
+        </nav>
+        <h1 class="lesson-title">Identidad y estados de sesión</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">El problema del estado</h2>
+          <p>El protocolo HTTP no recuerda nada: cada petición llega sin contexto, como si el servidor conociera al visitante por primera vez. Si un usuario inicia sesión y en la siguiente petición el servidor ya no lo reconoce, el login no sirve de nada. Por eso la autenticación construye <strong>estado</strong> sobre un protocolo sin estado.</p>
+          <p>La <strong>identidad</strong> es el conjunto de atributos que distingue a un usuario (id, email, nombre, rol). La <strong>sesión</strong> es el período durante el cual el servidor recuerda «esta petición pertenece a este usuario» después de que ya se autenticó.</p>
+        </section>
+
+        <section>
+          <h2 id="tipos">Dos familias de estado</h2>
+          <ul>
+            <li><strong>Sesiones del lado servidor:</strong> el estado vive en el servidor (memoria, base de datos o Redis). El cliente solo guarda un identificador opaco de sesión en una cookie.</li>
+            <li><strong>Tokens stateless:</strong> el estado viaja dentro de un token firmado (JWT) que el propio servidor puede verificar sin mirar una base de datos.</li>
+          </ul>
+          <p>Ambas familias son válidas; se eligen según la arquitectura. Este módulo y los siguientes las estudian por separado para que puedas compararlas con criterio.</p>
+        </section>
+
+        <section>
+          <h2 id="ciclo-de-vida">Ciclo de vida de una sesión</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// 1. Inicio: el servidor crea una sesion nueva (cookie + archivo/almacen)
+session_start();
+
+// 2. Durante el login se fija la identidad del usuario en la sesion
+$_SESSION["user_id"]  = $usuario["id"];
+$_SESSION["rol"]      = $usuario["rol"];
+$_SESSION["login_at"] = time();
+
+// 3. En cada peticion posterior recuperamos la identidad
+if (!isset($_SESSION["user_id"])) {
+    http_response_code(401);
+    exit;
+}
+
+// 4. Renovacion de actividad: la sesion "vive" si el usuario sigue activo
+$_SESSION["last_seen"] = time();
+
+// 5. Cierre: destruir la sesion marca el fin del estado
+session_unset();
+session_destroy();</code></pre>
+            </div>
+          </figure>
+          <p>El ciclo completo es: <strong>inicio → login → uso → expiración/cierre</strong>. Controlar cada transición es el trabajo de un buen backend.</p>
+        </section>
+
+        <section>
+          <h2 id="estados">Los estados de una sesión</h2>
+          <ul>
+            <li><strong>Anónima:</strong> existe una sesión técnica pero sin identidad asociada.</li>
+            <li><strong>Autenticada:</strong> la sesión contiene la identidad del usuario verificada.</li>
+            <li><strong>Expirada:</strong> pasó el tiempo de inactividad o la vigencia máxima; el servidor la invalida.</li>
+            <li><strong>Revocada:</strong> el usuario cerró sesión o un administrador la invalidó, incluso antes de expirar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="reglas">Reglas mínimas</h2>
+          <ul>
+            <li>Nunca guardes la contraseña en la sesión; guarda el <code class="inline">user_id</code> y datos estables.</li>
+            <li>Establece tiempos de expiración y de inactividad separados.</li>
+            <li>Regenera el identificador de sesión tras el login para evitar session fixation.</li>
+            <li>Si cambia la contraseña, invalida las sesiones anteriores.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Dibuja el diagrama del ciclo de vida de una sesión con sus cuatro estados.</li>
+            <li>Modifica el ejemplo para que, si <code class="inline">last_seen</code> supera 30 minutos, la sesión se destruya.</li>
+            <li>Explica por qué guardar el rol en la sesión nadie más que el servidor debe poder cambiarlo.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>HTTP no tiene estado; la sesión lo añade.</li>
+            <li>Hay sesiones de servidor y tokens stateless.</li>
+            <li>La identidad se fija tras el login y se consulta en cada petición.</li>
+            <li>Anónima, autenticada, expirada y revocada son los estados posibles.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="autenticacion-vs-autorizacion.html">Autenticación vs Autorización</a>
+            <a class="related-lessons__link" href="cookies-y-su-rol.html">Cookies y su rol en la web</a>
+            <a class="related-lessons__link" href="../modulo-03/sesiones-y-almacenamiento.html">Sesiones y almacenamiento</a>
+            <a class="related-lessons__link" href="../modulo-03/cierre-de-sesion-y-revocacion.html">Cierre de sesión y revocación</a>
+            <a class="related-lessons__link" href="../modulo-04/que-es-un-jwt.html">JWT</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

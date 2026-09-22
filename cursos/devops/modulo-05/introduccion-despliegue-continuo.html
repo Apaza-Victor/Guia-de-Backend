@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="introduccion-despliegue-continuo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introducción al despliegue continuo · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Qué es el despliegue continuo (CD), su diferencia con la entrega continua y cómo encaja en el pipeline de una API Backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="introduccion-despliegue-continuo"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Introducción al despliegue continuo</span>
+      </nav>
+      <h1 class="lesson-title">Introducción al despliegue continuo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Despliegue Continuo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">¿Qué es el despliegue continuo?</h2>
+        <p>La <strong>integración continua (CI)</strong> verifica que el código funciona; el <strong>despliegue continuo (CD)</strong> lo lleva a los entornos automáticamente. Cada cambio que pasa las pruebas se publica en producción sin intervención humana, y la CD agrega además el <em>cómo</em>: servir las versiones sin interrumpir a los usuarios y poder volver atrás.</p>
+      </section>
+
+      <section>
+        <h2 id="ci-cd">Entrega continua vs despliegue continuo</h2>
+        <p>Suena parecido pero no es lo mismo:</p>
+        <ul>
+          <li><strong>Entrega continua:</strong> cada cambio verificado queda <em>listo para desplegar</em>, pero alguien pulsa el botón en producción.</li>
+          <li><strong>Despliegue continuo:</strong> nadie pulsa el botón; el pipeline publica automáticamente, y luego se valida con monitoreo.</li>
+        </ul>
+        <p>Para una API que escala, el despliegue continuo reduce el <em>tiempo de ciclo</em> (de "idea a producción") y elimina el error humano del despliegue manual.</p>
+      </section>
+
+      <section>
+        <h2 id="pipeline">El pipeline completo de una API</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">1. Desarrollador hace push a main
+2. CI: instala dependencias, corre tests, lint
+3. CD: construye la imagen / empaqueta el código
+4. Sube el artefacto al registro o al servidor
+5. Publica: activa la nueva versión en el entorno
+6. Valida: healthcheck + monitoreo de errores
+7. Si algo falla: alerta y rollback automático</code></pre>
+          </div>
+        </figure>
+        <p>Cada etapa termina antes de que empiece la siguiente: si el test falla, jamás se llega al paso 4. Esta secuencia reproducible es la base de todo lo demás en este módulo.</p>
+      </section>
+
+      <section>
+        <h2 id="entornos">El role de los entornos</h2>
+        <p>En la práctica no vas de <code class="inline">dev</code> directo a <code class="inline">prod</code>. Los entornos habituales:</p>
+        <ul>
+          <li><strong>Development:</strong> auto-deploy en cada push, datos simulados.</li>
+          <li><strong>Staging:</strong> réplica de producción con datos de prueba; aquí se ensaya el deploy.</li>
+          <li><strong>Producción:</strong> público final; se alimenta de la rama <code class="inline">main</code> tras pasar staging.</li>
+        </ul>
+        <p>Cada entorno es un <em>deployment</em> (un target en GitHub) con sus secrets independientes, lo que permite que los permisos de despliegue sean más estrictos en producción.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja el pipeline CI→CD de tu proyecto actual y señala dónde interviene un humano hoy.</li>
+          <li>Identifica qué partes podrían automatizarse y qué riesgo correrías al automatizarlas.</li>
+          <li>Escribe en dos líneas la diferencia entre entrega continua y despliegue continuo con tus palabras.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>CI valida; CD publica. El despliegue continuo automatiza hasta producción.</li>
+          <li>La entrega continua deja el código listo; el despliegue continuo no necesita botón.</li>
+          <li>El pipeline sigue una secuencia reproducible: construir, subir, publicar, validar.</li>
+          <li>Los entornos (dev → staging → prod) separan pruebas de riesgo real.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

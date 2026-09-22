@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="insert-update">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insertando y modificando datos · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende INSERT, UPDATE y las reglas para modificar datos sin errores: sintaxis, valores múltiples, actualizaciones seguras y qué evitar en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="insert-update"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3 · SQL básico</a><span class="sep">/</span>
+          <span class="current">Insertando y modificando datos</span>
+        </nav>
+        <h1 class="lesson-title">Insertando y modificando datos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · SQL básico</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Las operaciones de escritura son las que más riesgo traen: un <code class="inline">UPDATE</code> sin condición puede pisarte toda una tabla. En esta lección dominarás <code class="inline">INSERT</code> y <code class="inline">UPDATE</code> con sus buenas prácticas para que nada se rompa.</p>
+        </section>
+
+        <section>
+          <h2 id="insert">INSERT: dar de alta datos</h2>
+          <p>El <code class="inline">INSERT</code> añade registros. Puedes indicar las columnas o no; lo correcto es <strong>declararlas siempre</strong> para que el código no dependa del orden de las columnas:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">INSERT INTO clientes (email, activo) VALUES ('ana@example.com', TRUE);
+
+-- Varios registros en una sola sentencia
+INSERT INTO clientes (email, activo) VALUES
+    ('lucas@example.com', TRUE),
+    ('mia@example.com', TRUE),
+    ('sol@example.com', FALSE);</code></pre>
+            </div>
+          </figure>
+          <p>Dejamos fuera <code class="inline">id</code> y los campos con <code class="inline">DEFAULT</code>, que el motor completa solo. Recuerda: las claves primarias <code class="inline">AUTO_INCREMENT</code> no se insertan a mano.</p>
+        </section>
+
+        <section>
+          <h2 id="update">UPDATE: modificar registros</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Actualizar una fila concreta (SIEMPRE con WHERE)
+UPDATE clientes
+SET activo = FALSE
+WHERE id = 4;
+
+-- Actualizar varias columnas a la vez
+UPDATE productos
+SET precio = precio * 1.05, stock = stock - 1
+WHERE id = 42;</code></pre>
+            </div>
+          </figure>
+          <p>La regla de oro: <strong>un UPDATE sin WHERE afecta a todas las filas</strong>. Antes de ejecutar, pregunta siempre: «¿este WHERE identifica solo lo que quiero tocar?».</p>
+          <p>Consejo pro: escribe primero el <code class="inline">SELECT</code> con el mismo WHERE para ver cuántas filas devolverá, y recién entonces conviértelo en <code class="inline">UPDATE</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="errores">Errores típicos</h2>
+          <ul>
+            <li><strong>Olvidar el WHERE:</strong> se modifica todo. De nada sirve arrepentirse después.</li>
+            <li><strong>Violar UNIQUE:</strong> insertar un email repetido lanza un error; el motor te protege.</li>
+            <li><strong>Violar FK:</strong> referenciar un cliente que no existe: el motor lo rechaza.</li>
+            <li><strong>Usar tipos incorrectos:</strong> guardar fechas como texto crea problemas de orden y búsqueda.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Confirma qué filas vas a tocar antes de actualizar
+SELECT id, email FROM clientes WHERE activo = FALSE;
+
+-- Recién ahora, con la misma condición:
+UPDATE clientes SET activo = TRUE WHERE activo = FALSE;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="protecciones">Protecciones en producción</h2>
+          <p>Si usas MySQL/PostgreSQL a mano, acompaña tus cambios críticos con:</p>
+          <ul>
+            <li>Transacciones (<code class="inline">BEGIN</code> … <code class="inline">COMMIT</code>/<code class="inline">ROLLBACK</code>) — las verás en el módulo 5.</li>
+            <li>Respaldos puntuales antes de cambios masivos (módulo 6).</li>
+            <li>Un entorno de pruebas donde verificar el SQL primero.</li>
+            <li>Herramientas como <code class="inline">--safe-updates</code> en el cliente MySQL, que exigen WHERE o LIMIT en UPDATE/DELETE.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Inserta 3 clientes nuevos y después actualiza el email de uno solo usando su <code class="inline">id</code>.</li>
+            <li>Escribe un UPDATE que suba un 10% el precio de los productos con stock en 0.</li>
+            <li>Explica por escrito qué le pasa a la tabla si ejecutas <code class="inline">UPDATE productos SET precio = 0;</code> sin WHERE.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li><code class="inline">INSERT</code> da de alta registros; declarar columnas es buena práctica.</li>
+            <li><code class="inline">UPDATE ... SET ... WHERE</code> modifica filas específicas.</li>
+            <li>Un UPDATE sin WHERE toca toda la tabla: siempre verifica con SELECT antes.</li>
+            <li>Las restricciones del esquema protegen de errores de escritura.</li>
+            <li>Transacciones, back-ups y entornos de prueba blindan los cambios en producción.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="create-table.html">Creando tablas con CREATE TABLE</a>
+            <a class="related-lessons__link" href="delete-seguro.html">Borrado seguro con DELETE</a>
+            <a class="related-lessons__link" href="../modulo-05/transacciones.html">Transacciones: BEGIN, COMMIT y ROLLBACK</a>
+            <a class="related-lessons__link" href="../modulo-06/backups-restauracion.html">Backups y restauración</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

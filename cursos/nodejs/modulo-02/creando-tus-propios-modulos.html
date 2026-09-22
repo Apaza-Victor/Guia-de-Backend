@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="creando-tus-propios-modulos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creando tus propios módulos · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Organiza tu aplicación en módulos propios con module.exports, exports y export, y aprende a importarlos tanto en CommonJS como en ES Modules.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="creando-tus-propios-modulos"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Creando tus propios módulos</span>
+        </nav>
+        <h1 class="lesson-title">Creando tus propios módulos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Módulos y npm</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es-un-modulo">Qué es un módulo propio</h2>
+          <p>Un módulo es simplemente un archivo que expone algo: funciones, objetos, clases o constantes. Como cada archivo tiene su propio <strong>ámbito</strong>, todo lo que no exportes permanece privado. Esa es la regla de oro para organizar código: exportar lo mínimo, mantener el resto interno.</p>
+          <p>Esto permite dividir tu aplicación en piezas (utilidades, modelos, servicios) que se prueban y se reutilizan de forma independiente.</p>
+        </section>
+
+        <section>
+          <h2 id="commonjs-exports">module.exports en CommonJS</h2>
+          <p>En CommonJS, <code class="inline">module.exports</code> define qué recibe quien hace <code class="inline">require</code>. Puedes exportar un objeto, una función única o una clase.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// utilidades.js
+const formatearFecha = (fecha) =&gt; fecha.toISOString().slice(0, 10);
+
+function saludar(nombre) {
+  return `Hola, ${nombre}`;
+}
+
+module.exports = {
+  formatearFecha,
+  saludar,
+};</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const util = require("./utilidades");
+console.log(util.formatearFecha(new Date()));
+console.log(util.saludar("Ana"));</code></pre>
+            </div>
+          </figure>
+          <p>Una variante habitual es exportar una única función como <code class="inline">module.exports</code>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// sumar.js
+module.exports = function sumar(a, b) {
+  return a + b;
+};</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const sumar = require("./sumar");
+console.log(sumar(4, 9)); // 13</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="esm-exports">export e import en ES Modules</h2>
+          <p>Con <code class="inline">export</code> expones una pieza por vez (export nombrado) o un conjunto por defecto (export default).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// matematica.mjs
+export const PI = 3.14159;
+
+export function areaCirculo(r) {
+  return PI * r * r;
+}
+
+export default { PI, areaCirculo };</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">import { areaCirculo, PI } from "./matematica.mjs";
+import util from "./matematica.mjs";
+
+console.log(areaCirculo(2)); // 12.56636
+console.log(util.PI);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="var-modulos">Variables y constantes compartidas</h2>
+          <p>Un error típico es creer que "importar" también copia el valor. La realidad: las exportaciones son <strong>referencias</strong>. Si el módulo exporta un objeto y otro módulo lo muta, el cambio se ve en todos.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// config.js
+const config = { puerto: 3000 };
+module.exports = config;</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const config = require("./config");
+config.puerto = 4000; // mutación que afecta a todo el proceso
+console.log(require("./config").puerto); // 4000</code></pre>
+            </div>
+          </figure>
+          <p>En sistemas reales, evita mutar configuraciones compartidas: úsalas como solo lectura o entrega copias.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea un módulo <code class="inline">utilidades.js</code> con dos funciones y una constante, y úsalo desde otro archivo.</li>
+            <li>Exporta una única función (estilo <code class="inline">module.exports = fn</code>) y consúmela.</li>
+            <li>Haz el equivalente en <code class="inline">.mjs</code> con named exports y default export.</li>
+            <li>Comprueba la mutación compartida del ejemplo de config y responde por qué ocurre.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Un módulo es un archivo con ámbito propio que exporta lo necesario.</li>
+            <li>CommonJS: <code class="inline">module.exports</code> + <code class="inline">require</code>.</li>
+            <li>ES Modules: <code class="inline">export</code> (nombrado o default) + <code class="inline">import</code>.</li>
+            <li>Las exportaciones son referencias: mutar un objeto compartido afecta a todo.</li>
+            <li>Exportar poco y mantener lo interno privado facilita el mantenimiento.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

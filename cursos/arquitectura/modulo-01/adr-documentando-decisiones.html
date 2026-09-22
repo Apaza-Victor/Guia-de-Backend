@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m1-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentando decisiones con ADRs · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a escribir Architecture Decision Records (ADRs): contexto, decisión y consecuencias para que las decisiones técnicas queden registradas y sean entendibles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m1-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Documentando decisiones con ADRs</span>
+      </nav>
+      <h1 class="lesson-title">Documentando decisiones con ADRs</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuántas veces has preguntado <em>«¿por qué el código usa MySQL si ya estaba decidido MongoDB?»</em> y nadie supo responderte. Las decisiones técnicas sin registro se olvidan, se repiten mal y generan coste. Un <strong>ADR (Architecture Decision Record)</strong> es un documento ligero que registra una decisión arquitectónica importante junto con su contexto y sus consecuencias.</p>
+      </section>
+
+      <section>
+        <h2 id="estructura">La estructura de un ADR</h2>
+        <p>El formato clásico (inspirado en Michael Nygard) tiene estas partes mínimas:</p>
+        <ul>
+          <li><strong>Estado:</strong> Proposed, Accepted, Deprecated o Superseded.</li>
+          <li><strong>Contexto:</strong> la situación y las restricciones que motivan la decisión.</li>
+          <li><strong>Decisión:</strong> qué se eligió y cómo.</li>
+          <li><strong>Consecuencias:</strong> positivas y negativas del resultado.</li>
+        </ul>
+        <p>Se guardan en el propio repositorio, habitualmente en una carpeta <code class="inline">docs/adr/</code>, uno por cada decisión, con nombre <code class="inline">NNN-titulo-corto.md</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo real de ADR</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Markdown</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-md"># ADR-0004: Usar PostgreSQL como base principal
+
+## Estado
+Aceptado
+
+## Contexto
+Necesitamos almacenar pedidos con transacciones
+financieras. La consistencia y la integridad de los
+datos son críticas y el volumen actual es moderado.
+Evaluamos MongoDB (esquema flexible) y PostgreSQL.
+
+## Decisión
+Usar PostgreSQL como base de datos principal.
+MongoDB queda descartado por ahora porque las
+transacciones multi-documento son más débiles y
+no tenemos necesidad real de esquema dinámico.
+
+## Consecuencias
++ Transacciones ACID, joins y reportes fáciles.
++ Madurez, soporte y talento disponibles.
+- Migración de esquema requiere procesos definidos.
+- Restricciones de consistencia requieren planear bien
+  la evolución del modelo.
+- Si el volumen explota, habrá que escalar o añadir
+  capas de cache/lectura.</code></pre>
+          </div>
+        </figure>
+        <p>Nota cómo el ADR <strong>no busca ser perfecto</strong>, sino capturar el razonamiento para que la próxima persona entienda el porqué en 5 minutos.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuándo escribir un ADR?</h2>
+        <p>No toda decisión merece un ADR. Usa este filtro:</p>
+        <ul>
+          <li>Escribe un ADR cuando la decisión sea <strong>difícil de revertir</strong> o afecte a todo el sistema.</li>
+          <li>Escríbelo cuando haya <strong>más de una opción razonable</strong>.</li>
+          <li>Escríbelo cuando puedas <strong>ahorrar a alguien horas de investigación</strong> en el futuro.</li>
+          <li>No escribas ADRs para decisiones triviales (nombre de una variable, formateo).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="flujo">Flujo de trabajo</h2>
+        <ol>
+          <li>Problema + contexto, redacta el ADR como propuesta.</li>
+          <li>Compártelo con el equipo (en una PR, por ejemplo).</li>
+          <li>Discútelo con argumentos, no con jerarquía.</li>
+          <li>Márcalo como Aceptado cuando se decida.</li>
+          <li>Si la decisión cambia, escribe un ADR nuevo que <em>superceda</em> al anterior; no borres la historia.</li>
+        </ol>
+        <p>El historial de ADRs se convierte en la memoria técnica del proyecto: quién decidió, qué se descartó y por qué.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un ADR sobre la decisión de usar Redis como caché en tu API. Inventa el contexto si no lo tienes.</li>
+          <li>Lee el ADR y añade una consecuencia negativa que no hayas considerado (por ejemplo, consistencia de datos en caché).</li>
+          <li>Decide si escribirías un ADR para elegir el nombre de una tabla. Justifica.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un ADR registra una decisión de arquitectura con contexto y consecuencias.</li>
+          <li>Se guarda en el repositorio, es ligero y se escribe en Markdown.</li>
+          <li>No toda decisión merece un ADR: solo las importantes y difíciles de revertir.</li>
+          <li>Las decisiones pueden ser serialadas por un ADR nuevo; la historia se conserva.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="decisiones-y-trade-offs.html">Decisiones y trade-offs</a>
+          <a class="related-lessons__link" href="rol-del-arquitecto.html">El rol del arquitecto en el equipo</a>
+          <a class="related-lessons__link" href="../modulo-07/comunicando-decisiones-al-equipo.html">Comunicando decisiones al equipo</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

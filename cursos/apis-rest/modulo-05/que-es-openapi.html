@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="que-es-openapi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es OpenAPI? · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende qué es OpenAPI: la especificación de contrato de APIs REST, su historia, tu primer documento y herramientas del ecosistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="que-es-openapi"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 5 · Documentación</a><span class="sep">/</span>
+          <span class="current">¿Qué es OpenAPI?</span>
+        </nav>
+        <h1 class="lesson-title">¿Qué es OpenAPI?</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Documentación</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="def">Una especificación, no una herramienta</h2>
+          <p><strong>OpenAPI</strong> (antes Swagger Spec) es el estándar de facto para describir APIs REST: un documento <strong>YAML o JSON</strong> que declara endpoints, métodos, parámetros, respuestas, schemas y seguridad. Nace de Swagger (2010) y hoy lo mantiene la OpenAPI Initiative.</p>
+          <ul>
+            <li><strong>Autodescriptiva:</strong> el documento <em>es</em> la API, leíble por humanos y por máquinas.</li>
+            <li><strong>Contrato ejecutable:</strong> de él se generan clientes, mocks, validaciones y docs.</li>
+            <li>Define TodoMenos el negocio: forma y comportamiento del protocolo.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="vidas">Del spec a tu día a día</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Concepto</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-plaintext">openapi.yaml
+   │
+   ├─→ Swagger UI      → documentación navegable
+   ├─→ Redoc           → documentación bonita
+   ├─→ openapi-generator → SDKs en 40 idiomas
+   ├─→ Prism (Stoplight)→ mocks realistas
+   └─→ contratos+tests → validación de tu API real vs spec</code></pre>
+            </div>
+          </figure>
+          <p>Todo un ecosistema gira en torno al mismo documento: un solo cambio de spec se replica a clientes, mocks y docs.</p>
+        </section>
+
+        <section>
+          <h2 id="minimo">Un documento mínimo</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-yaml">openapi: 3.0.3
+info:
+  title: Tienda API
+  version: 1.0.0
+paths:
+  /productos:
+    get:
+      summary: Lista productos
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Producto" }
+components:
+  schemas:
+    Producto:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string }</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="familia">La familia que debes conocer</h2>
+          <ul>
+            <li><strong>OpenAPI Spec (v3.x):</strong> el contrato.</li>
+            <li><strong>Swagger:</strong> marca histórica y toolkit (UI, Editor, Codegen).</li>
+            <li><strong>Json Schema:</strong> base de los schemas de OpenAPI (v3).</li>
+            <li><strong>Plantearse:</strong> generar de la spec o código → spec (annotations en Node/Python/Java).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="por-que">¿Por qué merece la pena?</h2>
+          <ul>
+            <li>Onboarding 10x: alguien nuevo «lee» tu API en minutos.</li>
+            <li>Contrato para equipos paralelos: el frontend escribe contra el spec, no contra el servidor.</li>
+            <li>Testing y compliance: valida tu respuesta contra el spec en CI.</li>
+            <li>SDKs y mocks sin escribir una línea.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Abre el spec de una API pública (p. ej. petstore.swagger.io) en tu editor.</li>
+            <li>Identifica info, paths y components.</li>
+            <li>Escribe en papel un spec mínimo de tu recurso favorito.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>OpenAPI = estándar para describir APIs REST en YAML/JSON.</li>
+            <li>Contrato ejecutable: clientes, mocks, docs y tests del mismo archivo.</li>
+            <li>info + paths + components: las tres columnas del spec.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="definiendo-contrato-api.html">Definiendo el contrato de la API</a>
+            <a class="related-lessons__link" href="swagger-ui-exploracion.html">Swagger UI: exploración</a>
+            <a class="related-lessons__link" href="ejemplos-errores-sdks-generados.html">Ejemplos, errores y SDKs</a>
+            <a class="related-lessons__link" href="../modulo-06/testing-endpoints.html">Testing de endpoints</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

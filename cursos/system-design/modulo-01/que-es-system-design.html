@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-que-es-system-design">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es system design? · System Design · Backend Academy</title>
+<meta name="description" content="Aprende qué es el system design, qué atributos debe garantizar un buen diseño a escala y cómo se diferencia de la arquitectura de software.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-que-es-system-design"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es system design?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es system design?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un sistema pequeño funciona de una manera casi intuitiva: una API, una base de datos y listo. El problema aparece cuando hay <strong>millones de usuarios</strong>: la API se satura, la base de datos se convierte en el cuello de botella, una falla en un componente tumba todo y cada nuevo cambio requiere tocar piezas que ya no se pueden tocar a la ligera.</p>
+        <p><strong>System design</strong> es la disciplina de diseñar la arquitectura de un sistema a escala: decidir qué componentes lo forman, cómo se conectan, dónde vive cada dato, cómo se garantiza la disponibilidad y cómo se escala ante el crecimiento. No se trata de escribir el código de cada función, sino de elegir las <em>piezas grandes</em> y las <em>reglas</em> que las unen.</p>
+      </section>
+
+      <section>
+        <h2 id="atributos">Los atributos de un buen diseño</h2>
+        <p>Cuando diseñamos, lo hacemos para cumplir una lista de atributos de calidad. Todos compiten entre sí: mejorar uno suele empeorar otro.</p>
+        <ul>
+          <li><strong>Escalabilidad:</strong> capacidad de soportar más usuarios o más datos añadiendo recursos.</li>
+          <li><strong>Disponibilidad:</strong> el porcentaje del tiempo en que el sistema responde correctamente (los famosos «nueves»: 99.9%, 99.99%).</li>
+          <li><strong>Rendimiento:</strong> latencia y throughput. Cuánto tarda una petición y cuántas peticiones se atienden por segundo.</li>
+          <li><strong>Fiabilidad:</strong> el sistema sigue funcionando aunque algunos componentes fallen. Sin puntos únicos de fallo.</li>
+          <li><strong>Consistencia:</strong> los usuarios ven los mismos datos sin importar desde dónde o cuándo consulten.</li>
+          <li><strong>Mantenibilidad:</strong> el costo de agregar features o corregir bugs sigue siendo razonable a lo largo del tiempo.</li>
+        </ul>
+        <p>Los dos primeros, escalabilidad y disponibilidad, son los que más aparecen en el diseño de sistemas. Pero nunca se deciden solos: detrás siempre hay un balance de costos.</p>
+      </section>
+
+      <section>
+        <h2 id="process">El proceso de diseño</h2>
+        <p>Un diseño serio no empieza dibujando cajas. Sigue un proceso que se repite en cada problema y que será tu esqueleto en este curso:</p>
+        <ol>
+          <li><strong>Requisitos:</strong> qué debe hacer el sistema (funcional) y con qué garantías (no funcional).</li>
+          <li><strong>Estimaciones:</strong> cuántos usuarios, cuántas peticiones por segundo, cuánta data se guarda.</li>
+          <li><strong>Componentes:</strong> elegir los bloques de construcción: load balancers, cachés, colas, bases de datos.</li>
+          <li><strong>Datos:</strong> modelar entidades, relaciones y particionamiento.</li>
+          <li><strong>Trade-offs:</strong> explicar qué ganamos y qué pagamos con cada decisión.</li>
+        </ol>
+        <p>Lo común en system design es <strong>explicar el proceso y sus decisiones</strong>, más que llegar a un dibujo «perfecto». Un diagrama sin justificación vale poco.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: la anatomía de un sistema</h2>
+        <p>Imagina una aplicación de productos mínima a escala. Los componentes clásicos se pueden describir con un archivo de infraestructura. Este es el tipo de «receta» que un diseñador razona antes de comprar máquinas:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml">version: "3.9"
+services:
+  lb:
+    image: nginx:1.25
+    ports: ["80:80"]
+    volumes: ["./nginx.conf:/etc/nginx/nginx.conf:ro"]
+  api:
+    # 3 réplicas detrás del balanceador para escalar y quitar puntos únicos
+    image: mi-api:1.4.0
+    deploy:
+      replicas: 3
+      resources:
+        limits: { cpus: "1", memory: 1G }
+  cache:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1000"]
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: productos
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+volumes:
+  pgdata:</code></pre>
+        <p>Fíjate en el patrón: un <strong>load balancer</strong> al frente, réplicas de la API, una <strong>caché</strong> para descomprimir la base de datos y una <strong>base de datos</strong> con su almacenamiento persistente. Esa misma estructura se redibuja casi igual en los millones de usuarios, solo que cada pieza se multiplica por muchos nodos.</p>
+      </section>
+
+      <section>
+        <h2 id="arquitectura">System design vs arquitectura de software</h2>
+        <p>Ambos términos se solapan, pero tienen énfasis distintos:</p>
+        <ul>
+          <li><strong>Arquitectura de software:</strong> se centra en la estructura interna y las decisiones de diseño de bajo/alto nivel: módulos, capas, principios SOLID, deuda técnica.</li>
+          <li><strong>System design:</strong> se centra en el <em>sistema completo a escala</em>: componentes desplegados, red, distribución, replicación, fallas de máquinas y operación.</li>
+        </ul>
+        <p>En la práctica, un arquitecto de sistemas decide <em>qué piezas</em> existen y <em>dónde se ejecutan</em>; el diseño a nivel de código llena el interior de cada pieza. En las entrevistas técnicas de empresas grandes, el «system design round» evalúa exactamente la visión de conjunto que verás en este curso.</p>
+      </section>
+
+      <section>
+        <h2 id="por-que-importa">Por qué importa el system design</h2>
+        <p>Los sistemas bien diseñados escalan <strong>cambiando configuración</strong> o agregando nodos; los mal diseñados se rompen en formas costosas: podrían perder datos, quedarse sin memoria en el pico de tráfico o exigir reescribir la parte central para crecer. Un buen diseño anticipa el crecimiento y la falla como parte normal de la operación.</p>
+        <p>Además, es una habilidad de comunicación: el diseñador debe traducir números («10.000 peticiones por segundo») en decisiones concretas («tres nodos de API, caché Redis y réplica de lectura») y explicar los trade-offs con claridad.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una aplicación que uses a diario (un delivery, una red social, una app de mensajería). Lista al menos cinco componentes que crees que la forman: frontend, API, base de datos, caché, cola, CDN.</li>
+          <li>Para cada componente, escribe un atributo de calidad que deba garantizar. Por ejemplo: «el historial de mensajes debe ser duradero» (fiabilidad).</li>
+          <li>Dibuja el flujo de una acción simple (un usuario publica algo) pasando por los componentes que listaste.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>System design es diseñar la arquitectura de un sistema a escala: componentes, conexiones y garantías.</li>
+          <li>Los atributos de calidad (escalabilidad, disponibilidad, rendimiento, fiabilidad, consistencia, mantenibilidad) compiten entre sí.</li>
+          <li>El proceso es: requisitos → estimaciones → componentes → datos → trade-offs.</li>
+          <li>Los bloques típicos son load balancer, réplicas de servicios, caché y base de datos con persistencia.</li>
+          <li>Se diferencia de la arquitectura de software en el énfasis sobre la escala, la red y la operación.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="requisitos-y-restricciones.html">Requisitos y restricciones</a>
+          <a class="related-lessons__link" href="estimaciones-de-capacidad.html">Estimaciones de capacidad</a>
+          <a class="related-lessons__link" href="bloques-de-construccion.html">Bloques de construcción</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 1</span>
+        <span class="title">Fundamentos</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="requisitos-y-restricciones.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Requisitos y restricciones</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

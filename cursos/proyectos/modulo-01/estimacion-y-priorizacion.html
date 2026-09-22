@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-estimacion-y-priorizacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estimación y priorización · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a estimar con story points y planning poker y a priorizar el backlog con MoSCoW y WSJF, priorizando el valor de negocio frente al costo técnico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-estimacion-y-priorizacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Estimación y priorización</span>
+      </nav>
+      <h1 class="lesson-title">Estimación y priorización</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de gestión</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="por-que-estimar">Estimar para decidir, no para cumplir plazos</h2>
+        <p>La estimación en proyectos técnicos cumple una función real: <strong>decidir qué cabe y qué no</strong>. El costado ilusorio es usarla como fecha prometida en un calendario; el costado honesto es usarla para comparar opciones y dimensionar un sprint.</p>
+        <p>Por eso los equipos modernos estiman en <strong>story points</strong>: unidades relativas de esfuerzo e incertidumbre, no horas. Decir «este endpoint vale 5 y aquel migración vale 8» te da una escala propia del equipo que es estable con el tiempo — incluso aunque cada miembro tarde distinto en llevarla a cabo.</p>
+      </section>
+
+      <section>
+        <h2 id="story-points">Story points: la escala Fibonacci</h2>
+        <p>La escala más común es la secuencia de Fibonacci: <strong>0, 1, 2, 3, 5, 8, 13, 21</strong>. Los números crecen de forma desproporcionada porque las tareas grandes son exponencialmente más inciertas; la escala refleja esa incertidumbre en lugar de esconderla.</p>
+        <ul>
+          <li><strong>1-2:</strong> trivial y conocida. Agregar un campo a un endpoint interno.</li>
+          <li><strong>3-5:</strong> normal, con algo de ambigüedad. Un CRUD simple con su test.</li>
+          <li><strong>8:</strong> grande y con bordes difusos. Integración con un proveedor externo.</li>
+          <li><strong>13+:</strong> necesita dividirse o es un programa entero. Si estimas 13, rompe la historia.</li>
+        </ul>
+        <p>La regla de oro: si la historia es > 13, <strong>no se estima: se divide</strong>. Y si quieres convertir puntos a tiempo para comunicación con negocio, usa la velocidad real del equipo (puntos por sprint), nunca una tabla arbitraria de horas por punto.</p>
+      </section>
+
+      <section>
+        <h2 id="planning-poker">Planning poker: estimación en equipo</h2>
+        <p>El <strong>planning poker</strong> es una técnica de estimación grupal que evita el sesgo del miembro más ruidoso:</p>
+        <ol>
+          <li>El PO lee una historia y responde dudas técnicas básicas.</li>
+          <li>El equipo discute brevemente enfoques e implícitos.</li>
+          <li>Cada integrante juega una carta con su número en secreto.</li>
+          <li>Se revelan las cartas a la vez.</li>
+          <li>Si hay coincidencia, listo. Si no, los extremos (el más bajo y el más alto) explican <em>por qué</em>, y se re-juega.</li>
+        </ol>
+        <p>El mecanismo fuerza a escuchar el porqué de las discrepancias — que suele ser exactamente el conocimiento técnico que faltaba. Una simulación del consenso sería:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">manos = {"ana": 3, "bruno": 8, "carla": 5, "diego": 8}
+
+def consenso(manos, ronda=1):
+    valores = list(manos.values())
+    casi_todos = max(valores) - min(valores) <= 2
+    if casi_todos:
+        return "acuerdo en ronda %d: %d puntos" % (ronda, round(sum(valores) / len(valores)))
+    extremos = [(k, v) for k, v in manos.items() if v == min(valores) or v == max(valores)]
+    return "discusión necesaria entre: " + ", ".join(k for k, _ in extremos)
+
+print(consenso(manos))</code></pre>
+      </section>
+
+      <section>
+        <h2 id="mosCow">MoSCoW: el idioma del "qué entra"</h2>
+        <p>Una vez estimado, hay que <strong>priorizar</strong>. MoSCoW es la técnica más simple y efectiva para clasificar el backlog en cuatro categorías:</p>
+        <table>
+          <thead>
+            <tr><th>Categoría</th><th>Significado</th><th>Ejemplo backend</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Must</strong></td><td>Imprescindible; sin esto no hay release</td><td>Validación de pagos y reembolsos</td></tr>
+            <tr><td><strong>Should</strong></td><td>Importantísimo, pero puede esperar al siguiente ciclo</td><td>Panel de conciliación</td></tr>
+            <tr><td><strong>Could</strong></td><td>Deseable si el sprint da de sí</td><td>Exportar reportes a CSV</td></tr>
+            <tr><td><strong>Won't</strong></td><td>Explícitamente fuera de este alcance</td><td>Soporte multi-idioma</td></tr>
+          </tbody>
+        </table>
+        <p>La fuerza de MoSCoW está en el <em>Won't</em>: escribir explícitamente lo que <strong>no</strong> se hará evita el alcance silencioso — cuando «podríamos» termina entrando en el sprint por debajo de la mesa.</p>
+      </section>
+
+      <section>
+        <h2 id="wsjf">WSJF: priorizar con datos, no a empujones</h2>
+        <p>Cuando casi todo es «urgente», MoSCoW no basta. Ahí entra el <strong>WSJF</strong> (Weighted Shortest Job First), usado en SAFe: prioridad = <em>(valor de negocio + valor de tiempo + reducción de riesgo) / costo</em>. Divide el beneficio entre el esfuerzo para elegir primero lo que da más valor por punto:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">items = [
+    {"nombre": "webhook de reembolso", "valor": 9, "tiempo": 7, "riesgo": 8, "puntos": 8},
+    {"nombre": "panel de conciliación",  "valor": 6, "tiempo": 4, "riesgo": 2, "puntos": 13},
+    {"nombre": "exportar CSV",           "valor": 3, "tiempo": 2, "riesgo": 1, "puntos": 3},
+]
+
+def wsjf(item):
+    beneficio = item["valor"] + item["tiempo"] + item["riesgo"]
+    return beneficio / item["puntos"]
+
+orden = sorted(items, key=wsjf, reverse=True)
+for i, item in enumerate(orden, start=1):
+    print(f"{i}. {item['nombre']}: WSJF = {wsjf(item):.2f}")</code></pre>
+        <p>El resultado es un ordenamiento transparente: el webhook (mucho valor, poco costo) gana al CSV (poco valor por punto) aunque sea «fácil». Se puede discutir el puntaje, pero ya no se discute <em>gritando</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="sesgo">Tres prejuicios que alteran tus estimaciones</h2>
+        <ul>
+          <li><strong>Vista de túnel:</strong> estimar la parte conocida e ignorar la integración, el despliegue y los tests. Estima el viaje completo.</li>
+          <li><strong>Optimismo de la historia reciente:</strong> si la última tarea fue fácil, la próxima «también lo será». No: la incertidumbre no se acumula hacia abajo.</li>
+          <li><strong>Presión de fecha:</strong> si el PO anunció un lanzamiento, el equipo subestimará para parecer alineado. Separa la estimación de la promesa: primero el dato, luego la negociación.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma 5 historias de tu backlog y asígnales puntos usando la escala Fibonacci, explicando por qué una es 8 y no 3.</li>
+          <li>Clasifica las mismas historias con MoSCoW y escribe explícitamente a qué le dirías «Won't» este trimestre.</li>
+          <li>Aplica WSJF a 3 de ellas (asigna valor/tiempo/riesgo 1-10 y puntos) y dibuja el orden resultante.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los story points miden esfuerzo relativo e incertidumbre, no horas; la escala Fibonacci refleja cómo crece la incertidumbre.</li>
+          <li>Planning poker estima en equipo y expone la información que faltaba a través de los extremos.</li>
+          <li>MoSCoW entrega un «qué entra» claro; el Won't explícito mata el alcance silencioso.</li>
+          <li>WSJF divide valor entre costo para priorizar con datos y no a empujones.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="requisitos-y-aclaraciones.html">Requerimientos y aclaraciones</a>
+          <a class="related-lessons__link" href="../modulo-02/planificacion-de-sprints.html">Planificación de sprints</a>
+          <a class="related-lessons__link" href="../modulo-02/gestion-de-tareas.html">Gestión de tareas</a>
+          <a class="related-lessons__link" href="../modulo-02/deuda-tecnica.html">Deuda técnica</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="requisitos-y-aclaraciones.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Requerimientos y aclaraciones</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Planificación y seguimiento</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

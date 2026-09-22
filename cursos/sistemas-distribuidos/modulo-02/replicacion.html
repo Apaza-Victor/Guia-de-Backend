@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-replicacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replicación de datos · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende los modelos de replicación de datos: leader-follower, multi-leader y leaderless, con replicación síncrona y asíncrona, y el costo del replication lag.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-replicacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Replicación de datos</span>
+      </nav>
+      <h1 class="lesson-title">Replicación de datos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Replicación y consistencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>replicación</strong> consiste en mantener varias copias de los mismos datos en distintas máquinas. Por qué: disponibilidad (si un nodo cae, queda otro), tolerancia a fallos (no hay punto único de fallo) y rendimiento (las lecturas se reparten entre réplicas).</p>
+        <p>La pregunta central es <strong>cómo se propagan los cambios</strong> entre copias. Hay tres grandes familias de modelos y cada una responde distinto a esa pregunta.</p>
+      </section>
+
+      <section>
+        <h2 id="leader-follower">Leader-follower (un solo líder)</h2>
+        <p>El modelo más extendido (PostgreSQL, MySQL, MongoDB, Kafka). Reglas:</p>
+        <ul>
+          <li>Solo el <strong>líder</strong> acepta escrituras.</li>
+          <li>Los <strong>seguidores</strong> replican el log del líder y sirven lecturas.</li>
+          <li>Si el líder muere, un seguidor se promueve (failover) mediante elección o configuración.</li>
+        </ul>
+        <p>Ventajas: es simple y evita conflictos de escritura. Desventaja: si el líder cae y el failover es manual, hay tiempo de inactividad; y si la promoción es automática pero torpe, se corre el riesgo de «líder y ex-líder» escribiendo a la vez.</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># docker-compose: PostgreSQL con réplica de lectura (leader-follower)
+services:
+  pg-leader:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_REPLICATION: "true"
+    ports: ["5432:5432"]
+
+  pg-replica:
+    image: postgres:16
+    command: |
+      bash -c "pg_basebackup -h pg-leader -D /var/lib/postgresql/data -R
+               && docker-entrypoint.sh postgres"
+    depends_on: [pg-leader]
+    ports: ["5433:5432"]
+</code></pre>
+        <p>Las aplicaciones suelen escribir al líder y leer de las réplicas para no saturarlo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// En la práctica cada pool apunta a un host distinto
+const poolEscritura = new Pool({ host: "pg-leader" });   // solo escrituras
+const poolLectura  = new Pool({ host: "pg-replica" });   // solo lecturas
+
+async function crearUsuario(usuario) {
+  // Escritura al líder
+  const { rows } = await poolEscritura.query(
+    "INSERT INTO usuarios (nombre) VALUES ($1) RETURNING id",
+    [usuario.nombre]
+  );
+  return rows[0].id;
+}
+
+async function listarUsuarios() {
+  // Lectura a la réplica: puede verse un usuario que aún no ha llegado
+  const { rows } = await poolLectura.query("SELECT nombre FROM usuarios");
+  return rows;
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="multi-leader">Multi-leader</h2>
+        <p>Varios nodos aceptan escrituras (por ejemplo, uno por zona geográfica) y se replican entre sí. Útil cuando hay usuarios por región (escritura local, baja latencia) o estructuras tipo CRDT con edición offline.</p>
+        <ul>
+          <li>Ventaja: alta disponibilidad de escritura y baja latencia local.</li>
+          <li>Desventaja: <strong>conflictos de escritura</strong> entre líderes (ej.: dos líderes modifican el mismo registro a la vez). Hay que decidir cómo resolverlos: <em>last-writer-wins</em>, fusión de valores, o guardar versiones.</li>
+        </ul>
+        <p>Suele aparecer en Git (cada repo es un «líder»), en editores colaborativos y en despliegues multiregionales de ciertas bases.</p>
+      </section>
+
+      <section>
+        <h2 id="leaderless">Leaderless</h2>
+        <p>Aquí no hay líder ni seguidores: <strong>cualquier nodo acepta lecturas y escrituras</strong>, y el cliente habla con varios a la vez (quórum). Modelo popularizado por DynamoDB y adoptado por Cassandra, Riak y Voldemort.</p>
+        <p>Elimina el punto único de fallo de escritura, pero sin un líder pasa a ser responsabilidad del cliente leer de varios nodos y del sistema reconciliar versiones divergentes — el tema de la próxima lección y de <em>relojes vectoriales</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="sync-async">Síncrona vs asíncrona</h2>
+        <ul>
+          <li><strong>Replicación síncrona:</strong> el líder espera confirmación del seguidor antes de responder al cliente. Consistencia fuerte, pero si el seguidor cae, la escritura se bloquea.</li>
+          <li><strong>Replicación asíncrona:</strong> el líder responde y replica después. Rápida, pero hay un retraso y riesgo de perder escrituras si el líder cae antes de propagar.</li>
+        </ul>
+        <p>Los sistemas suelen combinar ambas: un seguidor síncrono (para no perder datos) y el resto asíncronos (para no frenar). El retraso de las réplicas asíncronas se llama <strong>replication lag</strong> y produce lecturas desactualizadas.</p>
+      </section>
+
+      <section>
+        <h2 id="lag">El costo del replication lag</h2>
+        <p>Cuando una réplica va lenta, un usuario puede hacer una escritura y «no verla» en la siguiente lectura. Es el famoso patrón <em>read-your-own-writes</em>: si distribuyes lecturas entre réplicas sin más control, tu propio guardado puede «desaparecer».<p>
+        <p>Mitigaciones habituales: enrutar las lecturas del usuario recién escrito al líder, usar sesiones pegajosas, o aceptar el lag para datos no críticos. La lección siguiente (quórums) ofrece el control fino de consistencia.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Mitigación read-your-own-writes: el creador lee del líder siempre
+def leer_perfil(usuario_id, es_autor):
+    if es_autor:
+        # las lecturas del propio usuario van al líder
+        return bd_lectura_leader.obtener(usuario_id)
+    # el resto reparte entre réplicas
+    return bd_lectura_replica.obtener(usuario_id)
+</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para tu base de datos actual identifica el modelo de replicación (leader-follower, multi-leader o leaderless) y si usa replicación síncrona o asíncrona.</li>
+          <li>Diseña un flujo «escríbo mi perfil y lo leo al instante» utilizando la estrategia read-your-own-writes y explícalo con un diagrama de flechas.</li>
+          <li>Responde: ¿por qué la replicación asíncrona puede perder escrituras si el líder cae a la vez?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La replicación da disponibilidad y reparte lecturas, pero introduce el problema de propagar los cambios.</li>
+          <li>Leader-follower: un líder escribe y los seguidores replican; es el modelo más común.</li>
+          <li>Multi-leader escala escrituras por región a costa de conflictos que hay que resolver.</li>
+          <li>Leaderless: cualquier nodo escribe; el cliente gestiona el quórum de lecturas/escrituras.</li>
+          <li>La replicación asíncrona produce lag y lecturas desactualizadas que hay que saber mitigar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/consistencia-eventual.html">Consistencia eventual</a>
+          <a class="related-lessons__link" href="quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="consenso-distribuido.html">Consenso distribuido</a>
+          <a class="related-lessons__link" href="../modulo-03/casos-kafka-cassandra.html">Casos: Kafka, Cassandra, Redis cluster</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

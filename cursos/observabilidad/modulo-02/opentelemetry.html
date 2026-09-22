@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenTelemetry · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende OpenTelemetry: API, SDK, exporters y Collector, instrumentación automática y manual, y el contexto W3C para trazas distribuidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">OpenTelemetry</span>
+      </nav>
+      <h1 class="lesson-title">OpenTelemetry</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Herramientas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">Qué es OpenTelemetry</h2>
+        <p><strong>OpenTelemetry</strong> (OTel) es el estándar abierto para instrumentar aplicaciones y generar telemetría (trazas, métricas y logs) sin atarte a un proveedor. Instrumentas una vez con la API de OTel y decides después hacia dónde exportar: Jaeger, Prometheus, Grafana Cloud, Datadog, New Relic...</p>
+        <p>Sus piezas:</p>
+        <dl class="definition-list">
+          <dt>API</dt><dd>interfaces estables para crear spans, métricas y contextos. El código de negocio solo conoce la API.</dd>
+          <dt>SDK</dt><dd>implementación concreta: configura el procesador de spans, el muestreo y los exporters.</dd>
+          <dt>Exporter</dt><dd>envía la telemetría a un destino (OTLP, Jaeger, Zipkin, Prometheus).</dd>
+          <dt>Collector</dt><dd>proceso intermedio que recibe de múltiples servicios, transforma, filtra, bufferiza y reenvía.</dd>
+          <dt>Semconv</dt><dd>convenciones de nombres de atributos para que todos los equipos hablen igual.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2 id="arranque-node">Arranque en Node.js</h2>
+        <p>Con el SDK y la auto-instrumentación, ~10 líneas te dan trazas de HTTP, BD, mensajería y RPC:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
+const sdk = new NodeSDK({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'checkout-api',
+  traceExporter: new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT + '/v1/traces',
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+sdk.start();
+
+process.on('SIGTERM', () =>
+  sdk.shutdown().finally(() => process.exit(0))
+);</code></pre>
+          </div>
+        </figure>
+        <p>Al arrancar, cada petición HTTP genera su span raíz, y las llamadas internas (HTTP client, cliente de BD) crean spans hijos heredando el contexto. Es el 60 % de valor con 5 % de esfuerzo.</p>
+      </section>
+
+      <section>
+        <h2 id="manual-python">Spans manuales en Python</h2>
+        <p>Cuando quieres trazar una operación interna (un flujo de negocio, un bucle de reintentos), creas el span manual:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python" data-language="python">from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+provider = TracerProvider()
+provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="http://collector:4317"))
+)
+trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer("checkout")
+
+def cobrar(total):
+    with tracer.start_as_current_span("pago.procesar") as span:
+        span.set_attribute("payment.provider", "stripe")
+        span.set_attribute("payment.amount", total)
+        resultado = pasarela.cobrar(total)
+        span.set_attribute("payment.status", resultado.status)
+        if not resultado.ok:
+            span.record_exception(resultado.error)
+        return resultado</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="colector">El Collector</h2>
+        <p>El Collector evita que cada servicio serialice y haga retries por su cuenta: todos envían por OTLP al Collector, y este hace el trabajo sucio (memoria, batch, filtrado, redacción de secretos, failover entre backends):</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+  batch:
+    send_batch_size: 1000
+  filter:
+    metrics:
+      metric:
+        - name: process.*  # no exportar métricas del colector
+
+exporters:
+  otlp:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp]</code></pre>
+          </div>
+        </figure>
+        <p>Los servicios solo configuran <code class="inline">OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317</code>. Cambiar de backend deja de ser un cambio de instrumentación: el Collector reexporta a donde quieras.</p>
+      </section>
+
+      <section>
+        <h2 id="contexto-w3c">Contexto W3C y propagación</h2>
+        <p>OTel usa el estándar W3C Trace Context. El header <code class="inline">traceparent</code> viaja entre servicios y el propagador lo lee para continuar el árbol en el servicio siguiente:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">http</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-http" data-language="http">GET /v1/inventory HTTP/1.1
+Host: inventory-api
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+
+Versión  | trace-id (32 hex)             | span-id (16 hex)   | flags</code></pre>
+          </div>
+        </figure>
+        <p>Cuando la instrumentación automática intercepta la llamada HTTP de checkout a inventario, inyecta este header y, en inventario, el SDK crea el span hijo con <code class="inline">parentSpanId</code> = <code class="inline">00f067aa0ba902b7</code>. La misma mecánica aplica a colas (headers de mensaje) y a gRPC (metadata).</p>
+      </section>
+
+      <section>
+        <h2 id="practica">Buenas prácticas</h2>
+        <ul>
+          <li>Configura <code class="inline">OTEL_SERVICE_NAME</code> en cada servicio: es el campo que agrupa todo.</li>
+          <li>Muestreo en el SDK (por la petición raíz), no en cada lobby de process: samplea la entrada y los hijos siguen.</li>
+          <li>Usa semconv para atributos (<code class="inline">http.request.method</code>, <code class="inline">db.system</code>): no inventes nombres propios del equipo.</li>
+          <li>Exporta también métricas por OTLP al Collector; así Prometheus scrapea una sola puerta.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Arranca el SDK de OTel en tu API con auto-instrumentación y guarda un span por request.</li>
+          <li>Añade un span manual alrededor de una operación de negocio (envío de email, cobro, importación).</li>
+          <li>Despliega el Collector en local con docker-compose y exporta OTLP hacia Jaeger.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>OTel separa API (estable) del SDK y los exporters (configurables).</li>
+          <li>La auto-instrumentación cubre la mayoría: HTTP, BD, colas, gRPC.</li>
+          <li>El Collector redirige la telemetría a cualquier backend sin tocar el código.</li>
+          <li>El contexto W3C (traceparent) conecta trazas entre servicios.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="jaeger-y-zipkin.html">Jaeger y Zipkin</a>
+          <a class="related-lessons__link" href="../modulo-01/trazas-distribuidas.html">Trazas distribuidas</a>
+          <a class="related-lessons__link" href="prometheus.html">Prometheus</a>
+          <a class="related-lessons__link" href="../modulo-03/profiling-de-produccion.html">Profiling y correlación</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

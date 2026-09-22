@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-seguridad-en-websockets">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguridad · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Endurece tus WebSockets: transporte wss://, validación de origen, rate limiting y sanitización de mensajes para cerrar las puertas abiertas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-seguridad-en-websockets"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Seguridad</span>
+      </nav>
+      <h1 class="lesson-title">Seguridad</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalar y asegurar WebSockets</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="wss">Transporte cifrado: wss:// siempre</h2>
+        <p>En producción, la regla número uno es <strong>exigir <code>wss://</code></strong> (TLS por detrás). Un socket sin cifrar deja que cualquiera entre la red lea y reenvíe los mensajes: se puede robar tokens, suplantar mensajes o inyectar frames. El coste de TLS moderno es mínimo y lo absorbe un proxy o el balanceador.</p>
+        <ul>
+          <li>Nunca termines el TLS dentro del código de tu aplicación si puedes evitarlo: nginx/<code>caddy</code> o el balanceador lo gestionan.</li>
+          <li>El navegador ya fuerza el bloqueo: una página HTTPS no puede abrir un socket <code>ws://</code> (contenido mixto).</li>
+          <li>Redirige cualquier intento <code>ws://</code> hacia <code>wss://</code> o recházalo con un error claro.</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># nginx: forzar wss y no aceptar ws plano
+server {
+    listen 80;
+    return 301 https://$host$request_uri;   # hasta el upgrade se va por 443
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate     /etc/letsencrypt/live/.../fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/.../privkey.pem;
+
+    location /ws {
+        proxy_pass http://chat_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="origen">Validar el origen del cliente</h2>
+        <p>La cabecera <code>Origin</code> del handshake dice de qué página viene el navegador. Sin validarla, cualquier web maliciosa puede abrir sockets contra tu servidor y usar tu API desde el lado del usuario (un CSWSH: <em>Cross-Site WebSocket Hijacking</em>). La defensa es comprobar el origen contra una lista blanca de dominios propios.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { WebSocketServer } = require('ws');
+const wss = new WebSocketServer({ port: 8080, verifyClient });
+
+const ORIGENES_PERMITIDOS = new Set([
+  'https://app.miservidor.com',
+  'https://admin.miservidor.com',
+]);
+
+function verifyClient({ origin }, callback) {
+  if (!origin || ORIGENES_PERMITIDOS.has(origin)) {
+    callback(true);
+    return;
+  }
+  console.warn('Origen rechazado:', origin);
+  callback(false, 403, 'Origen no permitido');
+}</code></pre>
+        <p>Añade una segunda capa con la autenticación por token de la lección anterior: el origin valida al «navegador» y el token valida al «usuario».</p>
+      </section>
+
+      <section>
+        <h2 id="rate-limit">Rate limiting por conexión</h2>
+        <p>Los sockets pueden convertirse en un canal de abuso: un nodo que emite miles de mensajes por segundo satura la CPU, el bus de Redis y la base de datos. El rate limiting por conexión cuenta los mensajes en una ventana de tiempo y corta al que exceda el límite.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Rate limiting simple por socket: ventana de 10 s, máximo 30 mensajes.
+const VENTANA_MS = 10_000;
+const MAX_MENSAJES = 30;
+
+wss.on('connection', (ws) =&gt; {
+  ws.contador = 0;
+  ws.ventanaInicio = Date.now();
+
+  ws.on('message', (datos) =&gt; {
+    const ahora = Date.now();
+    if (ahora - ws.ventanaInicio &gt; VENTANA_MS) {
+      ws.contador = 0;
+      ws.ventanaInicio = ahora;
+    }
+
+    ws.contador += 1;
+    if (ws.contador &gt; MAX_MENSAJES) {
+      ws.close(1008, 'Demasiados mensajes en la ventana');
+      return;
+    }
+
+    procesarMensaje(ws, datos);
+  });
+});</code></pre>
+        <p>Para sistemas en clúster, mueve el contador a Redis (INCR con EXPIRE) para que el límite sea global y no por nodo: con <code>ws</code> es todo tuyo; con Socket.IO añade un middleware <code>use()</code> que cuente eventos.</p>
+      </section>
+
+      <section>
+        <h2 id="sanitizar">Sanitizar y validar los mensajes</h2>
+        <p>Todo lo que entra por un socket es <strong>no confiable</strong>. Valida el JSON con un esquema, comprueba tamaños y tipos, y nunca interpoles datos de usuario en HTML o en comandos. Un chat que devuelve el texto sin limpiar permite XSS: el navegador de la víctima ejecuta el fragmento HTML que otro usuario envió.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function sanitizarEntrada(mensaje) {
+  // 1) Límites de tamaño antes de procesar.
+  if (mensaje.length &gt; 4096) throw new Error('mensaje demasiado largo');
+
+  // 2) Validar estructura mínima.
+  const datos = JSON.parse(mensaje);
+  if (typeof datos.tipo !== 'string') throw new Error('tipo inválido');
+  if (datos.datos &amp;&amp; typeof datos.datos.texto === 'string') {
+    // 3) Escapar antes de guardar/emitir para neutralizar HTML.
+    datos.datos.texto = datos.datos.texto
+      .replace(/&amp;/g, '&amp;amp;')
+      .replace(/&lt;/g, '&amp;lt;')
+      .replace(/&gt;/g, '&amp;gt;')
+      .replace(/\//g, '&amp;#x2F;');
+  }
+  return datos;
+}
+
+ws.on('message', (datos) =&gt; {
+  try {
+    const limpio = sanitizarEntrada(String(datos));
+    broadcast('chat', limpio.datos);
+  } catch (err) {
+    ws.send(JSON.stringify({ tipo: 'error', razon: err.message }));
+  }
+});</code></pre>
+        <p>En el cliente, además de confiar en el escape, pinta mensajes con <code>textContent</code> en vez de <code>innerHTML</code> para que el navegador nunca los trate como HTML.</p>
+      </section>
+
+      <section>
+        <h2 id="autorizacion">Autorización por evento</h2>
+        <p>Autenticar no es lo mismo que autorizar. Aunque el usuario esté identificado, debe comprobarse si tiene derecho a ejecutar cada acción: ¿está en esa sala? ¿puede ver el canal privado de otro usuario? Pide siempre el rol o la pertenencia antes de responder.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function puedeEscucharCanal(ws, canal) {
+  // Ejemplo real: un canal privado exigirá autoría o rol de admin.
+  if (canal.startsWith('privado:')) {
+    return ws.usuario?.rol === 'admin' || canal === 'privado:' + ws.usuario?.id;
+  }
+  return true; // canales públicos
+}
+
+ws.on('message', (datos) =&gt; {
+  const m = JSON.parse(String(datos));
+  if (!puedeEscucharCanal(ws, m.sala)) {
+    ws.close(1008, 'No tienes acceso a ese canal');
+    return;
+  }
+  unirseASala(ws, m.sala);
+});</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Añade a tu servidor la validación de origen con una lista blanca de un dominio de prueba.</li>
+          <li>Implementa el rate limiting de la lección: conéctale dos clientes, inunda con 50 mensajes y observa cómo se corta el abusador con 1008.</li>
+          <li>Envía el payload <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> y comprueba que llega escapado a los clientes y, pintándolo con textContent, no se ejecuta.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Obliga a wss:// (TLS) y deja la terminación SSL al proxy.</li>
+          <li>Valida el <code>Origin</code> del handshake contra una lista blanca de dominios.</li>
+          <li>Aplica rate limiting por conexión (y global con Redis si escalas).</li>
+          <li>Valida y escapa todo mensaje; usa <code>textContent</code> en el cliente.</li>
+          <li>Autoriza por evento además de autenticar en el handshake.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="autenticacion-por-token.html">Autenticación por token</a>
+          <a class="related-lessons__link" href="heartbeat-y-timeout.html">Heartbeat y timeouts</a>
+          <a class="related-lessons__link" href="despliegue-tras-proxy.html">Despliegue tras proxy</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="sticky-sessions-y-adaptadores.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Sticky sessions y adaptadores</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="heartbeat-y-timeout.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Heartbeat y timeouts</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

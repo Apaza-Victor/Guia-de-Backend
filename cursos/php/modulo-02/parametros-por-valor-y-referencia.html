@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="parametros-por-valor-y-referencia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parámetros por valor y por referencia · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende la diferencia entre pasar argumentos por valor y por referencia en PHP, cuándo conviene usar el símbolo &amp; y los errores comunes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="parametros-por-valor-y-referencia"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Parámetros por valor y por referencia</span>
+        </nav>
+        <h1 class="lesson-title">Parámetros por valor y por referencia</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de flujo y funciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-valor">Parámetros por valor</h2>
+          <p>Por defecto, PHP pasa los argumentos <strong>por valor</strong>: la función recibe una <em>copia</em> del valor. Cambiar el parámetro dentro de la función no afecta a la variable original de fuera.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function intentarEncender($motor) {
+    $motor = "encendido";   // cambia la copia local
+    echo "Dentro: $motor" . PHP_EOL;
+}
+
+$coche = "apagado";
+intentarEncender($coche);
+
+// La variable original NO cambió
+echo "Fuera: $coche" . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Por valor es la opción segura y la que debes usar por defecto: las funciones no provocan efectos colaterales inesperados en las variables de quien las llama.</p>
+        </section>
+
+        <section>
+          <h2 id="por-referencia">Parámetros por referencia</h2>
+          <p>Con el símbolo <code class="inline">&amp;</code> delante del parámetro, la función trabaja con la <strong>misma variable</strong> del llamador: cualquier cambio se refleja fuera. Es útil en funciones que deben modificar una sola estructura, como un array que se va llenando.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function agregarAlCarrito(&amp;$carrito, string $producto, int $cantidad = 1) {
+    if (!isset($carrito[$producto])) {
+        $carrito[$producto] = 0;
+    }
+    $carrito[$producto] += $cantidad;
+}
+
+$miCarrito = [];
+agregarAlCarrito($miCarrito, "portátil");
+agregarAlCarrito($miCarrito, "ratón", 2);
+agregarAlCarrito($miCarrito, "portátil", 1);
+
+var_dump($miCarrito);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Observa que al llamar no escribes el <code class="inline">&amp;</code>: solo aparece en la declaración de la función. Y la variable que pasas debe existir; pasar un literal como <code class="inline">agregarAlCarrito(5, ...)</code> lanzaría un error.</p>
+        </section>
+
+        <section>
+          <h2 id="arrays-objetos">El caso especial de los arrays y objetos</h2>
+          <p>Los temas se enredan un poco aquí, así que conviene tenerlo claro:</p>
+          <ul>
+            <li><strong>Escalares</strong> (int, float, string, bool): siempre por valor, copia real.</li>
+            <li><strong>Arrays</strong>: se comparten con copia-en-escritura (<code class="inline">copy on write</code>). Si la función no modifica el array, no se copia; si lo modifica, se duplica.</li>
+            <li><strong>Objetos</strong>: se pasan por <em>identidad</em> (handle). Si modificas propiedades del objeto dentro de la función, cambias al mismo objeto de fuera, sin necesidad de <code class="inline">&amp;</code>.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function pintarNombre(&amp;$persona) {
+    // El array se modifica y, al ir por referencia, EL CAMBIO QUEDA FUERA
+    $persona['nombre'] = strtoupper($persona['nombre']);
+}
+
+$usuario = ['nombre' =&gt; 'lucía', 'edad' =&gt; 25];
+pintarNombre($usuario);
+echo $usuario['nombre'] . PHP_EOL;   // LUCÍA
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="cuando-usarlas">¿Cuándo usar referencia?</h2>
+          <p>En el backend moderno las referencias se usan con moderación porque dificultan leer el flujo de los datos. Dos casos de uso válidos: modificar en sitio una colección grande o plataformas que lo requieren explícitamente (por ejemplo, ciertas funciones de ordenamiento).</p>
+          <p>Como regla práctica: <strong>si puedes devolver el valor con <code class="inline">return</code>, hazlo</strong>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Preferible: la función devuelve el nuevo estado
+function añadirProducto(array $carrito, string $producto): array {
+    $carrito[$producto] = ($carrito[$producto] ?? 0) + 1;
+    return $carrito;
+}
+
+$carrito = añadirProducto([], "café");
+$carrito = añadirProducto($carrito, "café");
+
+var_dump($carrito);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe una función <code class="inline">doble(&amp;$n)</code> que multiplique por dos, y comprueba que la variable original cambia.</li>
+            <li>Reescribe esa función sin referencia, devolviendo el resultado, y compara el comportamiento.</li>
+            <li>Crea un array de números y usa una función por referencia que ponga en mayúsculas la clave <code class="inline">estado</code> si existe.</li>
+            <li>Responde por escrito: ¿qué pasa si pasas un literal (por ejemplo <code class="inline">f(5)</code>) a una función cuyo parámetro es por referencia?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Por defecto PHP pasa escalares por valor: la función trabaja con una copia.</li>
+            <li>El <code class="inline">&amp;</code> en la declaración convierte el parámetro en referencia.</li>
+            <li>Los objetos se pasan por identidad: sus cambios alcanzan a la variable original.</li>
+            <li>Prefiere devolver valores con <code class="inline">return</code> y reserva la referencia para casos concretos.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

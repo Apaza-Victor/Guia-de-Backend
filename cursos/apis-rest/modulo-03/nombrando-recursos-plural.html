@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="nombrando-recursos-plural">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nombrando recursos en plural · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a nombrar recursos REST: plural vs singular, kebab/snake/camel case, jerarquías y subrecursos anidados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="nombrando-recursos-plural"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3 · Diseño REST</a><span class="sep">/</span>
+          <span class="current">Nombrando recursos en plural</span>
+        </nav>
+        <h1 class="lesson-title">Nombrando recursos en plural</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="plural">Plural por defecto en las colecciones</h2>
+          <p>Los recursos que representan conjuntos (colecciones) se escriben en <strong>plural</strong>. Es lo que hacen GitHub, Stripe, Twilio y casi toda la industria: la ruta habla de la colección; el id, del miembro.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET    /usuarios            la colección
+GET    /usuarios/42         un miembro
+POST   /usuarios            crear miembro
+PUT    /usuarios/42         reemplazar
+DELETE /usuarios/42         quitar</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="case">¿kebab-case, snake_case, camelCase…?</h2>
+          <ul>
+            <li><strong>URLs:</strong> <code>kebab-case</code> (minúsculas separadas por guiones) es la opción amable; los guiones bajos en URLs generan más fricción.</li>
+            <li><strong>Cuerpo JSON:</strong> suele <code>snake_case</code> en REST tradicional (aunque camelCase es legítimo). Consistencia marca la diferencia, no la elección en absoluto.</li>
+            <li>Nunca mezclar dentro de la misma API: elige UN estilo en URLs y OTRO en JSON y decláralo.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/libros-favoritos/7      ← kebab-case en URL
+{"fecha_creacion": "2026-09-19"}     ← snake_case en JSON</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="anidados">Jerarquías y subrecursos</h2>
+          <p>Cuando un recurso solo tiene sentido dentro de otro, anida en la ruta:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/usuarios/42/pedidos
+GET /api/v1/usuarios/42/pedidos/88
+GET /api/v1/pedidos/88/items</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>La jerarquía solo se anida <strong>cuando hay dependencia</strong> (un pedido nunca puede existir sin su comprador).</li>
+            <li>Si el recurso es independiente, un <em>link</em> en la representación basta: <code>"usuario": "/api/v1/usuarios/42"</code>.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="verbos">Sin verbos en las URLs</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">NADA DE ESTO</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">/getProducto
+/ListaUsuarios
+/createOrderOnce
+/deleteUser?id=5</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">ASÍ SÍ</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET    /productos/42
+GET    /usuarios
+POST   /pedidos</code></pre>
+            </div>
+          </figure>
+          <p>Verbos solo viajan como método HTTP y en casos documentados de sub‑recurso de acción (<code>/pedidos/9/enviar</code>).</p>
+        </section>
+
+        <section>
+          <h2 id="nociones">Reglas rápidas del naming</h2>
+          <ol>
+            <li>Sustantivos, nunca verbos.</li>
+            <li>Plural en colecciones.</li>
+            <li>Minúsculas y guiones en URLs.</li>
+            <li>Sin versión ni host en los nombres: <code>https://api.tienda.test/api/v1/productos</code>.</li>
+            <li>Acciones puntuales → sub‑recursos legibles (<code>/mascotas/3/bañar</code> es más claro que <code>/?x=bath</code>).</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Diseña los recursos de su app de tareas (tareas, proyectos, etiquetas).</li>
+            <li>Decide cuáles se anidan y cuáles se referencian por link.</li>
+            <li>Reescribe a estilo REST estas rutas feas: <code>getUserData</code>, <code>DeleteOrderById</code>.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Colecciones en plural; miembros con su id.</li>
+            <li>URLs en kebab-case; JSON en snake_case (elige y declara).</li>
+            <li>Anida solo cuando haya dependencia real.</li>
+            <li>Sin verbos fuera del método HTTP.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="versionado-url-headers.html">Versionado: URL vs headers</a>
+            <a class="related-lessons__link" href="paginacion-filtros-query.html">Paginación y filtros</a>
+            <a class="related-lessons__link" href="../modulo-01/recursos-representaciones-json.html">Recursos y representaciones JSON</a>
+            <a class="related-lessons__link" href="../modulo-04/crud-recurso-completo.html">CRUD de un recurso completo</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

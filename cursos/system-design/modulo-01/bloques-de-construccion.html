@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-bloques-de-construccion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bloques de construcción · System Design · Backend Academy</title>
+<meta name="description" content="Conoce los bloques de construcción del system design: load balancer, caché, colas de mensajes, CDN y bases de datos a escala.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-bloques-de-construccion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Bloques de construcción</span>
+      </nav>
+      <h1 class="lesson-title">Bloques de construcción</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Las piezas que se repiten</h2>
+        <p>Existe un puñado de componentes que aparecen en casi todos los sistemas de alto tráfico con el mismo propósito: <strong>distribuir carga, acelerar lecturas y desacoplar procesos</strong>. Aprenderlos por separado antes de combinarlos es la clave para no inventar arquitecturas de la nada.</p>
+        <p>Los cinco bloques esenciales son el <strong>load balancer</strong>, la <strong>caché</strong>, la <strong>cola de mensajes</strong>, la <strong>CDN</strong> y las <strong>bases de datos a escala</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="load-balancer">Load balancer</h2>
+        <p>Un load balancer reparte las peticiones entrantes entre varias instancias del mismo servicio. Cumple dos fines a la vez: <strong>escalabilidad</strong> (más nodos = más capacidad) y <strong>disponibilidad</strong> (si un nodo cae, el reparto ignora su health check y sigue con los demás).</p>
+        <p>Los algoritmos básicos son round-robin, least connections (al que está menos ocupado) e IP-hash o sticky sessions (mismo cliente, mismo nodo) cuando se necesita afinidad.</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># nginx.conf — upstream con 3 réplicas y health check
+upstream api {
+    least_conn;                     # al nodo con menos conexiones activas
+    server 10.0.0.11:8080 max_fails=3 fail_timeout=30s;
+    server 10.0.0.12:8080 max_fails=3 fail_timeout=30s;
+    server 10.0.0.13:8080 max_fails=3 fail_timeout=30s;
+}
+
+server {
+    listen 443 ssl;
+    location / {
+        proxy_pass http://api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</code></pre>
+        <p>El load balancer debe ser <strong>stateless</strong>: que no recuerde nada entre peticiones (excepto la afinidad elegida). Cuantos más LBs y réplicas añadas «detrás», más fácil es escalar sin reescribir código.</p>
+      </section>
+
+      <section>
+        <h2 id="cache">Caché</h2>
+        <p>Una caché guarda en memoria datos que se leen mucho y cambian poco, aliviando a la base de datos. El patrón típico es <strong>cache-aside</strong>: se consulta primero la caché y solo si hay un fallo (<em>miss</em>) se va a la base y se rellena.</p>
+        <p>Redis, Memcached o las cachés en proceso son las herramientas habituales. El contrato mínimo que hay que dominar es: lectura con miss → relleno → TTL → invalidación al escribir.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import redis
+
+cache = redis.Redis(host="cache", port=6379, decode_responses=True)
+TTL_SEGUNDOS = 300
+
+def get_producto(producto_id: int) -> dict:
+    clave = f"producto:{producto_id}"
+    valor = cache.get(clave)
+    if valor is not None:
+        return {"origen": "cache", "datos": valor}
+
+    # cache miss → leer de la base de datos (simulado)
+    datos = consultar_bd(producto_id)
+    cache.setex(clave, TTL_SEGUNDOS, datos)
+    return {"origen": "bd", "datos": datos}
+
+def invalidar_producto(producto_id: int) -> None:
+    cache.delete(f"producto:{producto_id}")
+
+def consultar_bd(producto_id: int) -> str:
+    return f"{{'id': {producto_id}, 'nombre': 'Producto {producto_id}'}}"</code></pre>
+        <p>La caché mejora la latencia (milisegundos en vez de decenas) y multiplica el QPS efectivo de lecturas. Su precio: datos levemente desactualizados y una pieza más que puede fallar o desincronizarse.</p>
+      </section>
+
+      <section>
+        <h2 id="colas">Colas de mensajes</h2>
+        <p>Una cola desacopla al productor del consumidor: el que recibe un trabajo no espera la respuesta de su procesamiento. Es el bloque preferido para tareas pesadas o lentas: enviar correos, generar imágenes, actualizar índices de búsqueda.</p>
+        <ul>
+          <li><strong>Desacoplamiento:</strong> la API responde al instante y el trabajo continúa en segundo plano.</li>
+          <li><strong>Amortiguación (backpressure):</strong> si el consumidor va lento, los mensajes se acumulan ordenadamente.</li>
+          <li><strong>Garantías:</strong> los mensajes se mantienen hasta ser reconocidos (ACK), tolerando caídas de nodos.</li>
+        </ul>
+        <p>El cuerpo de un mensaje típico es un JSON con el tipo de trabajo y sus datos; la cola añade metadatos de enrutamiento, prioridad y reintentos:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "enviar_email",
+  "payload": {
+    "destinatario": "ana@correo.com",
+    "plantilla": "bienvenida",
+    "variables": { "nombre": "Ana" }
+  },
+  "correlacion": "7f3c2a11",
+  "idempotencia": "evt_20260921_00142",
+  "prioridad": 5,
+  "reintentos": 0
+}</code></pre>
+        <p>Elegir cola cuando el procesamiento tarda más que la paciencia del usuario, o cuando quieres que un pico de tráfico no tumber al servicio que procesa.</p>
+      </section>
+
+      <section>
+        <h2 id="cdn">CDN</h2>
+        <p>Una CDN replica contenido estático (imágenes, CSS, JS, videos) en servidores ubicados cerca del usuario. El cliente que en Bogotá carga la página no viaja al centro de datos de Virginia: descarga desde un nodo de borde cercano.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Ejemplo: mover estáticos a una CDN y liberar el origen
+# Antes: el usuario descarga 300 KB desde el origen cada vez.
+curl -s -o /dev/null -w "origen: %{time_total}s\n" \
+  https://api.miservidor.com/static/app.css
+
+# Después: la CDN sirve el archivo desde el borde con Cache-Control largo.
+curl -s -o /dev/null -w "cdn: %{time_total}s\n" \
+  https://cdn.miservidor.com/static/app.css</code></pre>
+        <p>Como viste en las estimaciones, los estáticos suelen dominar el ancho de banda. La CDN es la forma más económica de absorber ese tráfico: mantiene una copia, define un TTL de cache y el origen solo se llama en el primer acceso o al invalidar.</p>
+      </section>
+
+      <section>
+        <h2 id="bases-de-datos">Bases de datos a escala</h2>
+        <p>La base de datos es el bloque más difícil de escalar porque guarda el estado. Las estrategias básicas, en orden de complejidad creciente:</p>
+        <ul>
+          <li><strong>Optimizar el motor:</strong> índices bien diseñados y consultas que los usan.</li>
+          <li><strong>Caché por delante:</strong> las lecturas repetidas no llegan al disco.</li>
+          <li><strong>Réplicas de lectura:</strong> una primaria recibe escrituras; varias réplicas atienden lecturas.</li>
+          <li><strong>Particionamiento (sharding):</strong> cada shard guarda un subconjunto de los datos; la capacidad total se multiplica por el número de shards.</li>
+        </ul>
+        <p>La elección relacional vs NoSQL se resume en una pregunta: ¿necesito transacciones ACID fuertes y consultas ad-hoc (relacional), o flexibilidad de esquema y escala horizontal barata (NoSQL)? No hay motor «mejor»: hay motor adecuado al acceso de datos.</p>
+      </section>
+
+      <section>
+        <h2 id="combinacion">Cómo se combinan</h2>
+        <p>El flujo canónico de un sistema a escala se lee así: el usuario entra a una <strong>CDN</strong> para los estáticos, un <strong>load balancer</strong> reparte entre réplicas de la <strong>API</strong>, la API consulta la <strong>caché</strong> antes que la base, las tareas pesadas van por una <strong>cola</strong> y la base de datos se alivia con réplicas y particionamiento. Cada bloque se añadió porque un requisito medible lo pedía.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para un sistema con 50.000 QPS de lectura y 500 QPS de escritura, propón dónde colocarías: caché, réplicas de lectura y cola. Justifica cada uno.</li>
+          <li>Escribe el flujo de una petición de lectura con cache-aside (incluye qué pasa si la caché se cae) usando el código de la sección de caché.</li>
+          <li>Identifica cuál de los cinco bloques NO añadirías en una aplicación pequeña (menos de 1.000 usuarios) y explica por qué.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Load balancer: reparte tráfico y elimina puntos únicos de fallo; debe ser stateless.</li>
+          <li>Caché: acelera lecturas y alivia la base; el patrón base es cache-aside con TTL e invalidación.</li>
+          <li>Colas: desacoplan trabajo lento y dan backpressure y persistencia al trabajo pendiente.</li>
+          <li>CDN: mueve los estáticos al borde y reduce el ancho de banda del origen.</li>
+          <li>Bases de datos: escalan con índices, caché, réplicas de lectura y finalmente particionamiento.</li>
+          <li>Cada bloque se justifica con un requisito y un número: si no hay número, quizá no hace falta.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="estimaciones-de-capacidad.html">Estimaciones de capacidad</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="cola-y-eventos-patterns.html">Patrones de colas y eventos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="estimaciones-de-capacidad.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Estimaciones de capacidad</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="modelado-de-datos.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Modelado de datos</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

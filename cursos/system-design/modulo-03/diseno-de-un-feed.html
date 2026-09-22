@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-diseno-de-un-feed">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caso: feed (newsfeed) · System Design · Backend Academy</title>
+<meta name="description" content="Diseña paso a paso un feed de noticias: fan-out push, pull e híbrido, caché de timelines, recorte y escalado con seguidores masivos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-diseno-de-un-feed"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Caso: feed (newsfeed)</span>
+      </nav>
+      <h1 class="lesson-title">Caso: feed (newsfeed)</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño completo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="requisitos">1. Requisitos</h2>
+        <p>Un feed es la lista de publicaciones de las personas que sigues, ordenada por relevancia, con <em>scrolling</em> infinito y carga rápida. Definimos el alcance:</p>
+        <ul>
+          <li><strong>Funcionales:</strong> ver el feed del usuario (post de seguidos, ordenados), publicar un post que aparece en feeds de seguidores, paginar con cursor. (Feed simple; los algoritmos de ML se mencionan como mejora.)</li>
+          <li><strong>No funcionales:</strong> el feed de un usuario se sirve en menos de 150 ms; debe sentirse «instantáneo» al seguir a alguien nuevo; el post debe aparecer en los feeds de los seguidores en segundos (eventual).</li>
+          <li><strong>Supuestos:</strong> 10 millones de usuarios, 1 millón activos diarios, 50 registros de seguimiento por usuario en promedio, 2 posts por usuario activo al día.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="fanout">2. Fan-out: el corazón del diseño</h2>
+        <p>Hay dos estrategias puras y una híbrida:</p>
+        <ul>
+          <li><strong>Pull (fan-out on read):</strong> al pedir el feed, se consultan los posts de los seguidos sobre la marcha. Barato de escribir, carísimo de leer: cada vista interroga a todos los seguidos.</li>
+          <li><strong>Push (fan-out on write):</strong> al publicar, el post se copia al timeline cacheado de <em>cada seguidor</em>. Lectura instantánea (una lista ya lista), pero costosa de escribir con muchos seguidores.</li>
+          <li><strong>Híbrido:</strong> fan-out on write para usuarios normales; fan-out on read para «celebrities» con millones de seguidores (copiar a un millón de timelines por post sería insostenible).</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python">MAX_SEGUIDORES_PUSH = 10000
+
+def publicar_post(autor_id: str, post: dict) -> None:
+    posts_db.insert(post)                          # fuente de verdad
+
+    seguidores = seguidores_db.ids_de(autor_id)
+    if len(seguidores) <= MAX_SEGUIDORES_PUSH:
+        fanout_push(seguidores, post)              # on write para la mayoría
+    else:
+        marca_celebridad(autor_id)                 # on read para los gigantes
+
+def fanout_push(seguidores: list, post: dict) -> None:
+    for seguidor in seguidores:
+        timeline_cache.lpush(f"timeline:{seguidor}", post["id"], maxlen=500)
+    cola_feed.pegar_evento("feed_actualizado", seguidores, post["id"])
+
+def leer_timeline(usuario_id: str) -> list:
+    ids = timeline_cache.lrange(f"timeline:{usuario_id}", 0, 20)
+    if not ids:                                    # timeline vacío → pull
+        return fanout_pull(usuario_id)
+    return posts_db.buscar_muchos(ids)</code></pre>
+        <p>La línea divisoria del híbrido se decide por costo: cuando los seguidores de un autor superan un umbral, el fan-out push cuesta más de lo que ahorra en lectura, y ese autor pasa al modo pull (su post se agrega al vuelo cuando alguien lo lee).</p>
+      </section>
+
+      <section>
+        <h2 id="cache">3. Caché de timelines</h2>
+        <p>La timeline por usuario es una <strong>lista de IDs</strong> en una caché (idealmente Redis con listas TRIM). Se recorta a ~500 post IDs: nadie recorre un millón de posts de una sentada, y el recorte hace que cada operación sea barata y acotada.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">MAX_TIMELINE = 500
+
+def agregar_a_timeline(usuario_id: str, post_id: str) -> None:
+    tl = f"timeline:{usuario_id}"
+    timeline_cache.pipeline()          # operación atómica de pipeline
+    timeline_cache.lpush(tl, post_id)
+    timeline_cache.ltrim(tl, 0, MAX_TIMELINE - 1)
+    timeline_cache.execute()</code></pre>
+        <p>Cosas sutiles que se aprenden con esta caché:</p>
+        <ul>
+          <li><strong>Eliminar un post:</strong> borrarlo del feed no es quitar el de la base: hay que quitarlo de todos los timelines que lo contienen (evento de borrado → workers).</li>
+          <li><strong>Frescor al seguir:</strong> al seguir a alguien nuevo, el timeline debe rellenarse con sus últimos IDs; aquí el push hibrido ya no aplica porque es evento único (<em>backfill</em>).</li>
+          <li><strong>Miss:</strong> si la caché de un usuario se pierde (o nunca existió), se regenera con un pull inicial y se vuelve a cachear.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="ranking">4. Ordenar: cronológico vs relevancia</h2>
+        <p>El orden por tiempo es trivial y cache-friendly: los IDs en la lista ya están ordenados por inserción. La relevancia (algoritmos) pide más: cada post recibe un <strong>score</strong> en el momento de escribirse, y el orden de la timeline se basa en puntuaciones clasificadas.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from datetime import datetime, timezone
+
+def score_post(interacciones: int, antiguedad_horas: float, peso_autor: float) -> float:
+    """Versión simple de un ranking: interacción joven pesa más."""
+    frescura = 1 / (antiguedad_horas + 2) ** 1.5
+    return interacciones * 0.4 + frescura * 10 + peso_autor * 0.1
+
+# Un post con pocas interacciones reciente y uno viral de hace un día
+print(score_post(interacciones=3, antiguedad_horas=0.5, peso_autor=1.0))
+print(score_post(interacciones=5000, antiguedad_horas=26, peso_autor=1.0))</code></pre>
+        <p>Los scores se calculan al publicar (con un batch de interacciones) y se reordenan en segundo plano, no en la lectura: así el flujo de leer sigue siendo «lista ya ordenada». El «pain point» clásico es el recálculo en caliente: un post que escala viral agita la lista; el diseño permite <em>boost</em> puntual en vez de recálculos masivos.</p>
+      </section>
+
+      <section>
+        <h2 id="escalado">5. Escalado y celebridades</h2>
+        <p>El caso celebrity (un autor con 30 millones de seguidores) acota el diseño: su post no se copia a 30 millones de timelines. En su lugar:</p>
+        <ul>
+          <li>El post queda marcado como «celebrity» en la base.</li>
+          <li>Al leer el feed, se hace un <strong>pull del top-N</strong> de posts de celebrities que sigo y se mezclan con la timeline cachead.</li>
+          <li>El merge ocurre en el borde o en primer nivel de la API (con caché corta), nunca en la base.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python">def leer_feed_hibrido(usuario_id: str) -> list:
+    normales = timeline_cache.lrange(f"timeline:{usuario_id}", 0, 20)
+
+    # Pull de los últimos posts de las celebrities seguidas (top 3 c/u).
+    celebrities = seguimos_celebrities(usuario_id)
+    extra = []
+    for c in celebrities:
+        extra.extend(celebrity_cache.lrange(f"celeb:{c}:recientes", 0, 2))
+
+    mezcla = normales + extra
+    mezcla.sort(key=score_post, reverse=True)      # orden por relevancia
+    return mezcla[:20]</code></pre>
+        <p>Este hybrid permite que el top del feed sea bueno aunque publiquen 100 celebrities a la vez, sin mover un byte hacia 100 millones de listas.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Calcula cuántas escrituras por día implica el fan-out push con los supuestos dados (1M activos × 2 posts). ¿A qué porcentaje del QPS total equivale?</li>
+          <li>Explica qué harías si un usuario con 50.000 seguidores empieza a publicar 100 veces al día: ¿cuándo lo moverías a modo celebrity?</li>
+          <li>Diseña el backfill al seguir a un usuario nuevo: ¿qué datos necesitas de su timeline y cómo evitas congestionar la caché?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Pull (on read) es barato de escribir y carísimo de leer; push (on write) es lo inverso.</li>
+          <li>El híbrido envía con push a la mayoría y con pull a celebrities con límites.</li>
+          <li>La timeline es una lista cacheada y recortada de IDs, no el post completo.</li>
+          <li>La relevancia se calcula como score en segundo plano, no en la lectura.</li>
+          <li>El backfill al seguir, el borrado de posts y el caso celebrity se resuelven con eventos y workers.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="cola-y-eventos-patterns.html">Patrones de colas y eventos</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+          <a class="related-lessons__link" href="consistencia-consenso.html">Consistencia y consenso</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="diseno-de-un-chat.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Caso: sistema de chat</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="diseno-de-busqueda.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Caso: búsqueda</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

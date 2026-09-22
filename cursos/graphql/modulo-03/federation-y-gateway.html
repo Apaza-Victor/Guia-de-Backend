@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-federation-y-gateway">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Federation y gateway · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a componer un supergraph con Apollo Federation: subgraphs con @key, resolución de entidades y el gateway que unifica varios servicios GraphQL para equipos grandes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-federation-y-gateway"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Federation y gateway</span>
+      </nav>
+      <h1 class="lesson-title">Federation y gateway</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Avanzado y producción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando un solo equipo crece demasiado o varios equipos despliegan servicios que comparten dominio, un único servidor GraphQL se vuelve un cuello de botella organizativo: un equipo no puede avanzar sin coordinarse con los demás.</p>
+        <p><strong>Apollo Federation</strong> resuelve esto dividiendo el schema en <strong>subgraphs</strong> (uno por servicio/equipo) que se componen en un <strong>supergraph</strong>, servido por un <strong>gateway</strong> que enruta cada campo al servicio dueño.</p>
+      </section>
+
+      <section>
+        <h2 id="supergraph">Supergraph y subgraphs</h2>
+        <p>El supergraph es el schema unificado que el gateway expone al cliente. Cada subgraph solo declara su parte: <code>productos</code> define el catálogo, <code>reviews</code> las reseñas. Para que un subgraph pueda "enriquecer" un tipo que pertenece a otro, Federation introduce las <strong>entidades</strong>:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql"># Subgraph de reviews
+type Review @key(fields: "id") {
+  id: ID!
+  cuerpo: String!
+  producto: Producto!
+}
+
+type Producto @key(fields: "id") {
+  id: ID! @external
+}
+
+extend type Query {
+  reviewsDeProducto(productoId: ID!): [Review!]!
+}</code></pre>
+        <p>La directiva <code>@key</code> declara la clave que identifica al objeto (<code>id</code>), <code>@external</code> marca que un campo viene de otro subgraph, y <code>extend type Query</code> añade operaciones al tipo raíz común.</p>
+      </section>
+
+      <section>
+        <h2 id="entidades">Resolver una entidad</h2>
+        <p>Cuando el gateway necesita los datos de <code>Producto</code> desde el subgraph de reviews, le envía una "referencia" con su clave. El subgraph resuelve esa entidad con <code>__resolveReference</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Producto: {
+    __resolveReference(reference) {
+      return { id: reference.id, nombre: `Producto ${reference.id}` };
+    },
+  },
+};</code></pre>
+        <p>El resultado puede incluir campos nuevos del subgraph que se mezclan con los del subgraph original en la respuesta final del supergraph.</p>
+      </section>
+
+      <section>
+        <h2 id="subgraph">Levantar un subgraph</h2>
+        <p>Un subgraph se publica como un Apollo Server normal, pero usando <code>buildSubgraphSchema</code> en lugar del schema plano. Se conecta a la red interna y el gateway lo descubre:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import { buildSubgraphSchema } from "@apollo/subgraph";
+
+const server = new ApolloServer({
+  schema: buildSubgraphSchema({ typeDefs, resolvers }),
+});
+
+const { url } = await startStandaloneServer(server, {
+  listen: { port: 4002 },
+});
+console.log(`Subgraph reviews en ${url}`);</code></pre>
+      </section>
+
+      <section>
+        <h2 id="gateway">Configurar el gateway</h2>
+        <p>El gateway conoce los subgraphs (por URL en la red interna o por un manifiesto) y compone el supergraph al arrancar. Los campos de cada subgraph se delegan de forma transparente:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { ApolloGateway, IntrospectAndCompose } from "@apollo/gateway";
+import { ApolloServer } from "@apollo/server";
+
+const gateway = new ApolloGateway({
+  supergraphSdl: new IntrospectAndCompose({
+    subgraphs: [
+      { name: "productos", url: "http://productos:4001/graphql" },
+      { name: "reviews", url: "http://reviews:4002/graphql" },
+    ],
+  }),
+});
+
+const server = new ApolloServer({ gateway });
+
+const { url } = await startStandaloneServer(server, { listen: { port: 4000 } });
+console.log(`Gateway en ${url}`);</code></pre>
+        <p>Desde el punto de vista del cliente, solo existe el gateway en <code>/graphql</code>: una query que toque <code>productos</code> y <code>reviews</code> se divide en llamadas a los subgraphs y se reensambla en una sola respuesta.</p>
+      </section>
+
+      <section>
+        <h2 id="federation-vs">Federation vs la agregación manual</h2>
+        <p>Federation no es la única vía para GraphQL en microservicios. Las alternativas y sus trade-offs:</p>
+        <ul>
+          <li><strong>Schema stitching:</strong> el antecesor; une schemas de forma más manual y frágil. Farming comprehensivo hoy es menos recomendado.</li>
+          <li><strong>BFF (Backend for Frontend):</strong> un servicio que agrega otros por código. Flexible, pero hay que mantener la agregación a mano y duplica lógica de composición.</li>
+          <li><strong>Monolito GraphQL:</strong> para equipos pequeños sigues mejor con un único servidor bien modularizado que con la infraestructura de gateway.</li>
+        </ul>
+        <p>Federation aporta composición declarativa (el report <code>graphos: schema diff</code> avisa de cambios rotos), pero introduce un componente más en la red y una capa de enrutado que medir y escalar.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuándo federar?</h2>
+        <p>La señal más clara es <strong>organizativa</strong>, no técnica:</p>
+        <ul>
+          <li>Varios equipos despliegan servicios de forma independiente.</li>
+          <li>Comparten entidades (<code>Producto</code>, <code>Pedido</code>) y quieren un solo contrato para el cliente.</li>
+          <li>Necesitan evolucionar el schema sin coordinar deploys en un solo repositorio.</li>
+        </ul>
+        <p>Si tu equipo es pequeño o despliegas un solo servicio, la complejidad de Federation no te compensa todavía. Empieza monomódulo; Federation escala contigo cuando la organización lo pide.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta dos subgraphs: <code>productos</code> con <code>Producto @key(id)</code> y <code>reviews</code> con <code>Review</code>.</li>
+          <li>Declara la relación entre <code>Review</code> y <code>Producto</code> con <code>@external</code> y <code>__resolveReference</code>.</li>
+          <li>Monta el gateway con <code>IntrospectAndCompose</code> y comprueba que una query cruza ambos subgraphs.</li>
+          <li>Responde en una frase cuál es la señal organizativa clave para empezar a federar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Federation divide el schema en subgraphs que se componen en un supergraph.</li>
+          <li>Las entidades se identifican con <code>@key</code> y se enriquecen con <code>@external</code> y <code>__resolveReference</code>.</li>
+          <li>El gateway compone el supergraph y enruta cada campo a su subgraph dueño.</li>
+          <li>Federation compite con stitching, BFF o el monolito; la señal de uso es organizativa.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="seguridad-y-limitacion.html">Seguridad y limitación</a>
+          <a class="related-lessons__link" href="dataloader-y-n-1.html">DataLoader y N+1</a>
+          <a class="related-lessons__link" href="../modulo-01/que-es-graphql.html">¿Qué es GraphQL?</a>
+          <a class="related-lessons__link" href="../modulo-02/servidor-express-graphql.html">Express + GraphQL</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="seguridad-y-limitacion.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Seguridad y limitación</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
+        <span class="label">Curso →</span>
+        <span class="title">GraphQL</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

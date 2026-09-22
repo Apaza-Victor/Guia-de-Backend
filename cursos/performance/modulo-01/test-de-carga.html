@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m1-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas de carga · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a diseñar y ejecutar pruebas de carga con k6, Locust y JMeter: tipos de escenarios, lectura de resultados y cómo no romper (a propósito) tu propio servicio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m1-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Pruebas de carga</span>
+      </nav>
+      <h1 class="lesson-title">Pruebas de carga</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Medir rendimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Una prueba de carga simula tráfico <em>real</em> contra tu sistema para responder una pregunta concreta: ¿cumple mi SLO cuando llegan 200, 500 o 2 000 usuarios simultáneos? El punto de partida es siempre el mismo del módulo: tienes un presupuesto de rendimiento y ahora lo pones a prueba.</p>
+        <p>Existen tres herramientas rey. <strong>k6</strong> (scriptable en JavaScript, moderno e integrable en CI), <strong>Locust</strong> (scripts en Python, muy buen modelo de usuarios concurrentes) y <strong>JMeter</strong> (histórico, con interfaz gráfica). Elegir una importa menos que entender los escenarios; aquí verás los tres.</p>
+      </section>
+
+      <section>
+        <h2 id="escenarios">Tipos de escenario</h2>
+        <p>Cada prueba responde a un objetivo distinto:</p>
+        <ul>
+          <li><strong>Prueba de carga normal:</strong> mantener el tráfico esperado durante un tiempo (p. ej. 200 RPS durante 15 min) y confirmar que la latencia se mantiene dentro del SLO.</li>
+          <li><strong>Prueba de estrés:</strong> subir la carga poco a poco hasta que el sistema empiece a degradarse. Descubre el límite y cómo falla (gracioso o catastrófico).</li>
+          <li><strong>Prueba de pico (spike):</strong> disparar el tráfico de golpe, muy alto, y ver cómo reacciona ante la súbita demanda. Típica para ventas, lanzamientos o eventos.</li>
+          <li><strong>Prueba de resistencia (soak):</strong> carga estable durante horas o días para encontrar fugas de memoria y degradación lenta.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> corre la prueba contra un entorno que se parezca a producción (misma base de datos, misma caché, misma red). Probar contra tu laptop homologa una isla, no tu servicio.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="k6">Prueba de carga con k6</h2>
+        <p>k6 define escenarios en un script JavaScript con etapas de carga. Aquí, un spike que sube a 300 usuarios virtuales en 30 segundos:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '30s', target: 50 },    // rampa de subida
+    { duration: '30s', target: 300 },   // pico: 300 usuarios virtuales
+    { duration: '30s', target: 0 }      // rampa de bajada
+  ],
+  thresholds: {
+    'http_req_duration{expected_response:true}': ['p(95)<300'],
+    'http_req_failed': ['rate<0.01']
+  }
+};
+
+export default function () {
+  const res = http.get('https://api.mi-servicio.com/productos/lista?cat=juguetes');
+  check(res, { 'status 200': (r) => r.status === 200 });
+  sleep(1); // 1 segundo de «pensamiento» entre peticiones por usuario
+}</code></pre>
+        <p>Ejecutarla es un comando, y la salida te da directo los percentiles que definiste como SLO:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">k6 run spike.js
+
+# Fragmento de resultado esperado:
+#     http_req_duration........: avg=122ms  min=38ms  med=98ms  max=940ms
+#       { expected_response:true }........: p(90)=180ms p(95)=255ms p(99)=610ms
+#     http_req_failed...........: 0.32%  ✓ ✓ ✗ (el 0.32% falló)
+#     iter_duration.............: avg=1.13s  min=1.04s  max=1.95s
+
+# thresholds:
+#   p(95)<300 -- p(95)=255ms: ✓   (cumple el presupuesto)
+#   rate<0.01 -- 0.32%:      ✗   (el 0.32% de errores rompe el umbral del 1%)</code></pre>
+        <p>Observa el poder de los thresholds: k6 falla la ejecución en CI si el p95 o la tasa de errores superan lo pactado. El SLO se vuelve código.</p>
+      </section>
+
+      <section>
+        <h2 id="locust">Prueba de carga con Locust</h2>
+        <p>Locust define al usuario como una clase Python con pesos que simulan proporción de tráfico entre endpoints:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from locust import HttpUser, task, between
+
+class UsuarioTienda(HttpUser):
+    wait_time = between(1, 3)  # el usuario «piensa» entre 1 y 3 segundos
+
+    @task(4)  # 4 de cada 5 peticiones consultan catálogo
+    def ver_catalogo(self):
+        self.client.get("/productos/lista?cat=juguetes")
+
+    @task(1)  # 1 de cada 5 hace checkout completo
+    def comprar(self):
+        with self.client.post("/carrito/comprar", json={"producto": 42}, catch_response=True) as r:
+            if r.status_code != 201:
+                r.failure("checkout fallo con status " + str(r.status_code))
+
+# Ejecución desde el CLI:
+# locust -f usuario_tienda.py --host https://api.mi-servicio.com \
+#   --users 500 --spawn-rate 20 --run-time 10m</code></pre>
+        <p>El 80/20 entre catálogo y checkout reproduce el patrón de tráfico real mucho mejor que disparar el mismo endpoint a todas partes.</p>
+      </section>
+
+      <section>
+        <h2 id="resultados">Cómo leer los resultados</h2>
+        <p>Tres lecturas, en este orden obligatorio:</p>
+        <ol>
+          <li><strong>¿Cumple el SLO bajo esa carga?</strong> Si no, el problema no es la prueba: es el sistema. Deja de probar y empieza a perfilar.</li>
+          <li><strong>¿Dónde empieza a degradarse?</strong> Normalmente la latencia del p99 se dispara antes que la del p50: es la señal de cola.</li>
+          <li><strong>¿Qué recurso se satura primero?</strong> La prueba de carga debe ir acompañada del monitoreo del servidor (CPU, memoria, I/O, conexiones a la BD). Sin el monitoreo, el resultado de k6 es solo un dato suelto.</li>
+        </ol>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma el script de k6 de arriba y ajusta los stages a un escenario «normal» (por ejemplo 50 usuarios constantes durante 5 minutos).</li>
+          <li>Corre el spike contra tu propio endpoint y anota en qué stage p(95) dejó de cumplir tu SLO.</li>
+          <li>Repite con el monitoreo del servidor abierto: ¿qué recurso (CPU, memoria, BD, red) se saturó primero? Ese es tu cuello de botella.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las pruebas de carga piden una pregunta concreta: ¿cumplo mi SLO bajo N usuarios?</li>
+          <li>Los escenarios base son: carga normal, estrés, pico y resistencia. Cada uno responde algo distinto.</li>
+          <li>k6 (JS), Locust (Python) y JMeter (GUI) son las tres herramientas canónicas; k6 integra thresholds en CI.</li>
+          <li>Una prueba de carga sin monitoreo del servidor es un dato a medio leer.</li>
+          <li>Si el SLO se rompe bajo carga, deja de probar y empieza a perfilar (siguiente lección).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="slo-y-presupuesto-de-rendimiento.html">SLO y presupuesto de rendimiento</a>
+          <a class="related-lessons__link" href="benchmarking-y-perfiles.html">Benchmarking y perfiles</a>
+          <a class="related-lessons__link" href="cuellos-de-botalla.html">Identificar cuellos de botella</a>
+          <a class="related-lessons__link" href="../modulo-03/estrategia-de-rendimiento.html">Estrategia integral</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

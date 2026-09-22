@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m1-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El rol del arquitecto en el equipo · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Conoce qué hace realmente un arquitecto de software en un equipo ágil: decisiones, comunicación, evangelización técnica y cómo evita convertirse en un cuello de botella.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m1-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">El rol del arquitecto en el equipo</span>
+      </nav>
+      <h1 class="lesson-title">El rol del arquitecto en el equipo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Durante décadas imaginamos al arquitecto como «el señor que dibuja todos los diagramas y que decide todo desde una torre». Esa imagen está obsoleta. El arquitecto moderno no vive apartado: participa en el equipo, escribe código, descubre la arquitectura junto a los demás y, sobre todo, <strong>comunica</strong>.</p>
+        <p>La arquitectura de un sistema rara vez nace completa en un documento. Evoluciona mientras el equipo construye. El arquitecto es la persona responsable de que esa evolución siga siendo coherente.</p>
+      </section>
+
+      <section>
+        <h2 id="que-hace">Qué hace un arquitecto</h2>
+        <ul>
+          <li><strong>Decide lo difícil:</strong> define y protege las decisiones estructurales de alto impacto.</li>
+          <li><strong>Gestiona trade-offs:</strong> evalúa opciones, cuantifica costes y elige con argumentos.</li>
+          <li><strong>Traduce negocio a técnica:</strong> convierte requisitos vagos en atributos de calidad medibles.</li>
+          <li><strong>Establece estándares:</strong> convenciones de código, flujos de integración y reglas de dependencia.</li>
+          <li><strong>Remueve obstáculos:</strong> facilita herramientas, plataformas y decisiones que desbloquean al equipo.</li>
+          <li><strong>Evangeliza:</strong> explica por qué importa la arquitectura y mantiene al equipo alineado.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="capas">El arquitecto en tres niveles</h2>
+        <p>En equipos grandes es útil pensar en alcances distintos:</p>
+        <ul>
+          <li><strong>Arquitecto de solución:</strong> un proyecto o dominio específico (la API de pagos, el sistema de búsqueda).</li>
+          <li><strong>Arquitecto de empresa (enterprise):</strong> la organización completa: cómo los sistemas se integran entre sí.</li>
+          <li><strong>Arquitecto técnico:</strong> una plataforma concreta (infraestructura, datos, seguridad).</li>
+        </ul>
+        <p>En startups y equipos chicos todas estas funciones recaen en una sola persona o, mejor aún, en <strong>todo el equipo junto</strong>: la arquitectura es una responsabilidad compartida, no un rol individual aislado.</p>
+      </section>
+
+      <section>
+        <h2 id="anti-patron">El anti-patrón del jefe de torre</h2>
+        <p>Hay un fracaso clásico que debes reconocer:</p>
+        <div class="callout callout--warning">
+          <p><strong>El arquitecto-torre de marfil:</strong> dibuja diagramas perfectos sin tocar código, tarda semanas en responder, y la implementación real se desvía de sus planes porque nadie le consultó. El resultado: documentación hermosa y sistema caótico.</p>
+        </div>
+        <p>El antídoto es simple: <strong>el arquitecto escribe código</strong>. Conoce las restricciones reales, acompaña a los nuevos miembros, participa en las review y detecta cuándo una decisión pensada no sobrevive el contacto con la realidad. Un buen arquitecto tiene las manos sucias de código casi todos los días.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo en el día a día</h2>
+        <p>Un equipo descubre que un endpoint de catálogo tarda mucho. El arquitecto no impone una solución: abre un spike, mide, propone una caché con invalidación, la prueba en staging y plantea un ADR. Después documenta, comparte la decisión y, cuando otro equipo enfrenta lo mismo, ya hay un patrón aprobado que seguir.</p>
+        <p>Ese flujo de <em>medir → proponer → validar → registrar</em> es la rutina real del rol.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lista 3 decisiones técnicas de un sistema que conoces y cómo se tomó cada una. ¿Fue participativa o impuesta?</li>
+          <li>Imagina que te nombran arquitecto de tu proyecto: escribe qué harías en tu primera semana (medición, estándares, prioridades).</li>
+          <li>Identifica en tu equipo actual (o en tus compañeros de estudio) qué decisiones podrían delegarse a todo el grupo y cuáles necesitan a una persona responsable.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El arquitecto moderno escribe código y trabaja dentro del equipo, no en una torre.</li>
+          <li>Su trabajo es decidir lo difícil, comunicar y remover obstáculos.</li>
+          <li>La arquitectura es una responsabilidad compartida con un responsable claro.</li>
+          <li>Registrar decisiones (como los ADRs) es parte central del rol.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="rol-del-arquitecto.html">El rol del arquitecto</a>
+          <a class="related-lessons__link" href="adr-documentando-decisiones.html">Documentando decisiones con ADRs</a>
+          <a class="related-lessons__link" href="../modulo-04/srp-en-el-mundo-real.html">SRP en el mundo real</a>
+          <a class="related-lessons__link" href="../modulo-07/comunicando-decisiones-al-equipo.html">Comunicando decisiones al equipo</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

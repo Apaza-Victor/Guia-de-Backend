@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m6-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agregados y value objects · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Agregados y value objects en DDD: la raíz de agregado, invariantes, consistencia y por qué los value objects hacen el modelo inmutable y claro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m6-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Agregados y value objects</span>
+      </nav>
+      <h1 class="lesson-title">Agregados y value objects</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Hexagonal y DDD</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Dos de las piezas más poderosas del modelado táctico que ya has visto en módulo 6: el <strong>value object</strong> (inmutable, sin identidad) y el <strong>agregado</strong> (un sello de consistencia alrededor de varias entidades). Juntos hacen que el dominio sea complicado por donde debe — y no por donde no.</p>
+      </section>
+
+      <section>
+        <h2 id="value">Value objects: inmutables y auténticos</h2>
+        <p>Un value object representa un concepto que se define <strong>por sus atributos</strong>: dos <code>Money(10, 'EUR')</code> son el mismo dinero aunque sean objetos distintos. Reglas de oro:</p>
+        <ul>
+          <li><strong>Inmutables:</strong> no tienen setters; cada «cambio» crea una instancia nueva.</li>
+          <li><strong>Igualdad estructural:</strong> se comparan por valor, no por referencia.</li>
+          <li><strong>Auto-validación:</strong> un <code>Email</code> inválido no puede existir.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+namespace Dominio;
+
+final class Dinero
+{
+    public function __construct(private float $cantidad, private string $moneda)
+    {
+        if ($cantidad &lt; 0) { throw new \DomainException('No hay dinero negativo'); }
+        if ($moneda !== 'MXN' &amp;&amp; $moneda !== 'EUR' &amp;&amp; $moneda !== 'USD') {
+            throw new \DomainException("Moneda no soportada: $moneda");
+        }
+    }
+
+    public function sumar(Dinero $otro): Dinero
+    {
+        if ($this-&gt;moneda !== $otro-&gt;moneda) {
+            throw new \DomainException('No se suman monedas distintas');
+        }
+        return new self($this-&gt;cantidad + $otro-&gt;cantidad, $this-&gt;moneda);
+    }
+
+    public function cantidad(): float { return $this-&gt;cantidad; }
+    public function moneda(): string { return $this-&gt;moneda; }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="agregado">Agregados: fronteras de consistencia</h2>
+        <p>Un <strong>agregado</strong> es un racimo de entidades y value objects con una <strong>raíz de agregado</strong> como único punto de acceso. La raíz garantiza que las <em>invariantes</em> se sigan cumpliendo siempre — incluso si dos clientes operan a la vez.</p>
+        <p>Ejemplo: <code>Pedido</code> (raíz) contiene líneas <code>ItemPedido</code>. Nadie puede tocar las líneas directamente: cambian a través del pedido, que vigila «no superar X», «no modificar confirmado», etc.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class Pedido
+{
+    /** @var ItemPedido[] */
+    private array $items = [];
+
+    public function agregarItem(Sku $sku, int $cantidad, Dinero $precio): void
+    {
+        if ($this-&gt;estado !== 'borrador') {
+            throw new \DomainException('Solo se edita en borrador');
+        }
+        if ($cantidad &lt;= 0) { throw new \DomainException('Cantidad inválida'); }
+        $this-&gt;items[] = new ItemPedido($sku, $cantidad, $precio);
+    }
+
+    public function total(): Dinero
+    {
+        return array_reduce(
+            $this-&gt;items,
+            fn(Dinero $acc, ItemPedido $item) =&gt; $acc-&gt;sumar($item-&gt;subtotal()),
+            new Dinero(0, 'MXN'),
+        );
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="reglas">Reglas de oro del agregado</h2>
+        <ol>
+          <li><strong>Tamaño pequeño:</strong> entre menos piezas, más fácil mantener la consistencia.</li>
+          <li><strong>Referencias por id:</strong> un agregado referencia a otro por su id, no con su objeto; límite el árbol.</li>
+          <li><strong>Consistencia del negocio sobre la técnica:</strong> «no cambiar el precio de la coursera aquí» es de negocio, no de base de datos.</li>
+          <li><strong>Transacción por agregado:</strong> cada persistencia afecta a UN agregado, no a media docena.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 id="porque">¿Por qué importa en backend?</h2>
+        <p>Los agregados son el dique de la <strong>concurrencia</strong>: si dos peticiones buscan «confirmar» el mismo pedido, la raíz es el guardián del estado y la transacción se serializa ahí. Diseñar agregados bien evita carreras, inconsistencia y «entidades zombie». Es trabajo de diseño de negocio, no de la BD.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Convierte 3 conceptos de tu modelo en value objects (email, precio, fecha, dirección...).</li>
+          <li>Marca la raíz del agregado que envuelve tu entidad central.</li>
+          <li>Haz que todo cambio pase por la raíz y referencie a otros agregados por id.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Value objects: inmutables, validan su contenido, se comparan por valor.</li>
+          <li>Agregado: raíz + frontera de consistencia para invariantes.</li>
+          <li>Transacciones: una por agregado; referencias entre agregados por id.</li>
+          <li>Bien modelados, son el dique de la concurrencia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-05/casos-de-uso-y-entidades.html">Casos de uso y entidades</a>
+          <a class="related-lessons__link" href="ddd-modelado-tactico.html">DDD: modelado táctico</a>
+          <a class="related-lessons__link" href="bounded-contexts.html">Bounded contexts</a>
+          <a class="related-lessons__link" href="../modulo-03/service-layer.html">Service Layer</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

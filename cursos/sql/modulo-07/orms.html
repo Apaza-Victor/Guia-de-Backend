@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="orms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORMs en el backend · SQL · Backend Academy</title>
+<meta name="description" content="Aprende qué es un ORM en el backend: mapear tablas a objetos, cuándo aligera el desarrollo, cuándo arde (N+1, joins ocultos) y alternativas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="orms"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7 · SQL en el backend</a><span class="sep">/</span>
+          <span class="current">ORMs en el backend</span>
+        </nav>
+        <h1 class="lesson-title">ORMs en el backend</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">⚔️ Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · SQL en el backend</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Un <strong>ORM</strong> (Object-Relational Mapping) modela tus tablas como objetos y traduce tus llamadas a SQL. Tienes Sequelize, TypeORM, Prisma (Node), SQLAlchemy (Python), Django ORM, ActiveRecord (Ruby), Hibernate (Java)… Todos resuelven lo mismo: que no repitas el mapeo a mano.</p>
+        </section>
+
+        <section>
+          <h2 id="modelo">Modelar y consultar</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JS (Sequelize)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const Cliente = db.define('cliente', {
+  nombre: DataTypes.STRING,
+  email:  DataTypes.STRING,
+});
+
+// El ORM genera: SELECT * FROM clientes WHERE id = 7
+const c = await Cliente.findByPk(7);
+c.nombre = 'Leo';
+await c.save(); // UPDATE clientes SET nombre = 'Leo' WHERE id = 7</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="pros">Las virtudes</h2>
+          <ul>
+            <li><strong>Seguridad:</strong> query builders/parametrizaciones vienen de serie (adiós inyección accidental).</li>
+            <li><strong>Velocidad de desarrollo:</strong> CRUD básico en pocas líneas.</li>
+            <li><strong>Portabilidad:</strong> cambias de motor y tu código apenas cambia.</li>
+            <li><strong>Validaciones y eventos:</strong> reglas de negocio cerca de los datos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="contras">El lado oscuro</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JS (Sequelize)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">// El problema N+1
+const clientes = await Cliente.findAll();        // 1 consulta
+for (const cli of clientes) {
+  await cli.getPedidos();                        // 1 consulta POR cada cliente
+}
+// 1 + N consultas. Con 1000 clientes → 1001 SELECTs.
+
+// Solución: eager loading (JOIN en una sola)
+const clientes = await Cliente.findAll({ include: Pedido });</code></pre>
+            </div>
+          </figure>
+          <p>Los ORMs esconden SQL: N+1, selects de columnas inútiles y joins inesperados. Si no conoces lo que hay debajo, tu "simple" llamada hace 200 consultas.</p>
+        </section>
+
+        <section>
+          <h2 id="decidir">¿Cuándo quieres SQL puro?</h2>
+          <ul>
+            <li>Reportes y agregaciones complejas (una consulta «de monstruo»).</li>
+            <li>Patrones de alto rendimiento: ventanas, CTEs, UPDATE en bloque.</li>
+            <li>Middle donde el ORM brilla menos: facturación, analítica.</li>
+          </ul>
+          <p>La tendencia madura: <strong>híbrido</strong>. ORM para CRUD y migraciones; SQL crudo (con parámetros) para lo pesado. Prisma incluso permite «queryRaw» para eso.</p>
+        </section>
+
+        <section>
+          <h2 id="principio">El principio que salva</h2>
+          <p>Nunca dejes que el ORM decida por ti cuando el rendimiento importa. Antes de entregar: <em>mira el SQL</em> que genera (log de consultas o EXPLAIN) y pregunta «¿cuántos round-trips?».</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea un modelo Cliente→Pedido en el ORM de tu stack.</li>
+            <li>Activa el log de queries y ejecuta el CRUD: ¿cuántos SELECTs salen?</li>
+            <li>Reescribe un reporte pesado en SQL crudo con parámetros.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>ORM mapea tablas a objetos y genera SQL.</li>
+            <li>Gana seguridad, velocidad y portabilidad en CRUD.</li>
+            <li>N+1, selects gordos y joins ocultos: su riesgo.</li>
+            <li>Híbrido (ORM + SQL crudo) es la práctica madura.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="consultas-preparadas.html">Consultas preparadas</a>
+            <a class="related-lessons__link" href="migraciones.html">Migraciones de esquema</a>
+            <a class="related-lessons__link" href="buenas-practicas-sql-backend.html">Buenas prácticas SQL en backend</a>
+            <a class="related-lessons__link" href="../modulo-03/inner-join.html">INNER JOIN</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

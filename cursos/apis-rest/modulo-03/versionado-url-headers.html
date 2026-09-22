@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="versionado-url-headers">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versionado: URL vs headers · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a versionar una API REST: versionado por URL, por cabecera, por parámetro de query y por tipo de medio, con pros y contras de cada uno.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="versionado-url-headers"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3 · Diseño REST</a><span class="sep">/</span>
+          <span class="current">Versionado: URL vs headers</span>
+        </nav>
+        <h1 class="lesson-title">Versionado: URL vs headers</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que">¿Para qué versionar?</h2>
+          <p>Cambiar el contrato (campos, endpoints, semántica) sin romper a los clientes actuales. Versionar = dar <strong>tiempo de migración</strong> y coraje para evolucionar.</p>
+        </section>
+
+        <section>
+          <h2 id="url">Versionado por URL (el campeón del amor)</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET https://api.tienda.test/api/v1/productos
+GET https://api.tienda.test/api/v2/productos</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Ventajas:</strong> visible, cachea bien, probar en un terminal es trivial, cada versión coexiste en su propio espacio.</li>
+            <li><strong>Contras:</strong> URLs con versión “fea”, difícil de enlazar con nitidez, riesgo de duplicar motores de enrutado.</li>
+            <li>Es la elección más frecuente (GitHub, Stripe, Twilio).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="headers">Versionado por cabecera</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/productos
+Accept: application/vnd.tienda.v2+json</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Ventajas:</strong> URL limpia, cohesión con la negociación de contenido, versionao del formato de forma elegante.</li>
+            <li><strong>Contras:</strong> invisible al ojear en un navegador, rompe caché compartida (hay que usar Vary), más complejo para clientes simples.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="query">Otras variantes</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http"># En el query (muy discutible; habitualmente anti-patrón)
+GET /api/productos?v=2&amp;page=1</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Query param:</strong> fácil de cachear mal; colisiona con filtros y la caché se complica. Evítalo como versión principal.</li>
+            <li><strong>Cabecera propietaria:</strong> <code>X-API-Version: 2</code> — simple pero no estándar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="recomendacion">Decisión práctica</h2>
+          <ul>
+            <li>API pública genérica → <strong>URL</strong> (/api/v1). Corta, legible, nadie la confunde.</li>
+            <li>API interna con contrato negociado por media type → <strong>Accept con vendor type</strong>.</li>
+            <li>Cualquier opción definida y documentada es mejor que «sin versión pero con sorpresas».</li>
+          </ul>
+          <p>Regla de saneamiento: versiona solo cuando haya cambios <strong>rotundos</strong>; los cambios aditivos (nuevos campos opcionales) no merecen versión.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Elige la estrategia de tu tienda y estampa v1 en todas sus URLs.</li>
+            <li>Escribe el flujo de migración de un cliente de v1 a v2.</li>
+            <li>Explica cuándo NO cambiarías de versión.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Versionar da tiempo de migración y coraje.</li>
+            <li>URL: visible y cacheable (la más usada).</li>
+            <li>Header: limpio pero invisible y enredoso para el caché sin Vary.</li>
+            <li>Cambios aditivos no merecen nueva versión.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="nombrando-recursos-plural.html">Nombrando recursos</a>
+            <a class="related-lessons__link" href="estructura-errores-consistente.html">Estructura de errores consistente</a>
+            <a class="related-lessons__link" href="cache-etag-cache-control.html">Caché con ETag y Cache-Control</a>
+            <a class="related-lessons__link" href="../modulo-04/serializacion-respuestas-consistentes.html">Serialización y respuestas consistentes</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

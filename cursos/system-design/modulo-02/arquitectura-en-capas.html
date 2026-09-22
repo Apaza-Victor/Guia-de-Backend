@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-arquitectura-en-capas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura en capas · System Design · Backend Academy</title>
+<meta name="description" content="Aprende el patrón de arquitectura en capas: presentación, lógica de negocio y datos, con sus reglas de dependencia, ventajas y riesgos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-arquitectura-en-capas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Arquitectura en capas</span>
+      </nav>
+      <h1 class="lesson-title">Arquitectura en capas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Separar responsabilidades</h2>
+        <p>La arquitectura en capas (o <em>layered architecture</em>) organiza el código en niveles donde cada uno tiene una responsabilidad definida y solo puede hablar con el nivel inmediato inferior. Es el patrón más adoptado del backend porque es simple de razonar y de explicar: <strong>cada capa es reemplazable</strong> mientras mantenga su contrato.</p>
+        <p>En su forma clásica tiene tres capas:</p>
+        <ul>
+          <li><strong>Presentación (API/HTTP):</strong> recibe las peticiones, valida el input y devuelve respuestas. No conoce reglas de negocio.</li>
+          <li><strong>Lógica de negocio (servicios/dominio):</strong> reglas, procesos y casos de uso. No conoce HTTP ni detalles de la base de datos.</li>
+          <li><strong>Datos (repositorios/ORM):</strong> persiste y consulta. No decide qué reglas se aplican.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="flujo">Flujo de una petición</h2>
+        <p>La petición baja de capa en capa y las respuestas suben en orden inverso. Cada capa transforma: se valida, se procesa, se persiste y se devuelve. Es la misma estructura detrás de casi todos los backends reales, de un proyecto chico a un sistema de carritos:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Capa de presentación: solo transporte HTTP y validación básica.
+from fastapi import FastAPI, HTTPException
+app = FastAPI()
+
+@app.post("/carrito/{usuario_id}/items")
+def agregar_item(usuario_id: int, item: dict):
+    cantidad = int(item["cantidad"])
+    if cantidad &lt;= 0:
+        raise HTTPException(400, "La cantidad debe ser positiva")
+    # La lógica de negocio vive en la capa de servicios.
+    return CarritoService.agregar_item(usuario_id, item["producto"], cantidad)
+
+
+# Capa de negocio: las reglas del dominio, sin saber de HTTP.
+class CarritoService:
+    @staticmethod
+    def agregar_item(usuario_id: int, producto_id: int, cantidad: int) -> dict:
+        if not ProductoRepository.existe(producto_id):
+            raise ValueError("Producto desconocido")
+        if cantidad > MAX_POR_ITEM:
+            raise ValueError(f"Máximo {MAX_POR_ITEM} unidades por item")
+        return CarritoRepository.agregar(usuario_id, producto_id, cantidad)
+
+
+# Capa de datos: cómo se guarda, sin decidir reglas.
+class CarritoRepository:
+    @staticmethod
+    def agregar(usuario_id: int, producto_id: int, cantidad: int) -> dict:
+        fila = ejecutar_sql(
+            "INSERT INTO carrito (usuario_id, producto_id, cantidad) "
+            "VALUES (%s, %s, %s) RETURNING id",
+            (usuario_id, producto_id, cantidad),
+        )
+        return {"id": fila[0], "usuario": usuario_id, "producto": producto_id}</code></pre>
+        <p>Si mañana cambiamos FastAPI por Express o la base por una NoSQL, la capa de negocio no se toca: solo cambian las capas de los extremos. Ese es el valor económico del patrón.</p>
+      </section>
+
+      <section>
+        <h2 id="reglas">Reglas de dependencia</h2>
+        <p>La regla de oro es la <strong>dirección de las dependencias</strong>: siempre hacia abajo. La presentación depende de la lógica de negocio; la lógica de negocio depende de la abstracción de datos; pero la capa de datos <strong>no debe depender</strong> de la presentación, y ninguna capa salta directamente a otra más profunda saltándose el medio.</p>
+        <ul>
+          <li>✔ La capa de API importa a los servicios.</li>
+          <li>✔ Los servicios importan a los repositorios (a través de interfaces).</li>
+          <li>✘ La capa de datos nunca importa a la capa de presentación.</li>
+          <li>✘ Un controlador no debe escribir SQL directo.</li>
+        </ul>
+        <p>Cuando las reglas de dependencia se respetan, los cambios en una capa no se filtran: un mal JSON no entra hasta la base, y un cambio de motor no sube hasta el endpoint.</p>
+      </section>
+
+      <section>
+        <h2 id="ventajas-riesgos">Ventajas y riesgos</h2>
+        <p><strong>Ventajas:</strong></p>
+        <ul>
+          <li>Separación clara que hace más fácil probar cada nivel por separado.</li>
+          <li>Componentes intercambiables si se mantienen los contratos.</li>
+          <li>Es fácil de dibujar, explicar y arrancar para un equipo nuevo.</li>
+        </ul>
+        <p><strong>Riesgos:</strong></p>
+        <ul>
+          <li><strong>Abstracciones con fugas (leaky abstractions):</strong> si la capa de datos «se escapa» (por ejemplo, el repositorio devuelve campos de la tabla a medias), la lógica de negocio termina sabiendo de la base.</li>
+          <li><strong>Capa de datos mono-bloque:</strong> muchas veces todas las lógicas comparten <em>una única base de datos</em>, incluso cuando sus datos no tienen relación; luego es imposible dividir servicios sin acoplarse.</li>
+          <li><strong>Transmisión de la API al dominio:</strong> si el modelo del endpoint es también el modelo de la tabla, cualquier cambio en la API obliga a tocar la base.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="estructura">La estructura en el repo</h2>
+        <p>Esta organización por carpetas es la que se ve en prácticamente todos los backends en capas; el árbol por sí solo ya cuenta la arquitectura:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">mi-servicio/
+├── app/
+│   ├── api/            # capa de presentación: routers, DTOs, validadores
+│   │   ├── routers/
+│   │   └── schemas.py
+│   ├── application/    # casos de uso y orquestación
+│   │   └── services/
+│   ├── domain/         # entidades, reglas y contratos de repositorio
+│   │   └── models.py
+│   └── infrastructure/ # capa de datos y conexión con el mundo externo
+│       ├── database/
+│       ├── repositories/
+│       └── external/
+├── tests/
+└── pyproject.toml</code></pre>
+        <p>La clave está en que la carpeta <code>domain</code> no importa a <code>infrastructure</code>: el dominio define la interfaz <code>Repositorio</code> y la infraestructura la implementa. Eso invierte la dependencia y mantiene el patrón en pie.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma un endpoint que conozcas (por ejemplo, «registrar usuario») y escribe en qué capa iría cada paso: validar el email, verificar que no exista, aplicar política de contraseñas, insertar en la tabla, responder el token.</li>
+          <li>Identifica una violación típica de capas en tu codebase actual (por ejemplo, SQL en un controlador) y propón a qué capa se movería.</li>
+          <li>Escribe el contrato de una clase <code>RepositorioUsuario</code> con dos métodos y su implementación ficticia para una base distinta en la infraestructura.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La arquitectura en capas separa presentación, negocio y datos con responsabilidades exclusivas.</li>
+          <li>Las dependencias apuntan siempre hacia abajo; ninguna capa salta niveles.</li>
+          <li>Los repositorios se definen en el dominio e implementan en infraestructura (inversión de dependencias).</li>
+          <li>Ventajas: testabilidad y reemplazo de componentes. Riesgos: abstracciones con fugas y capa de datos acoplada.</li>
+          <li>La estructura de carpetas del repo debe reflejar la separación de capas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolitica-vs-distribuida.html">Monolito vs distribuida</a>
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="que-es-system-design.html">¿Qué es system design?</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 2</span>
+        <span class="title">Patrones</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="monolitica-vs-distribuida.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Monolito vs distribuida</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

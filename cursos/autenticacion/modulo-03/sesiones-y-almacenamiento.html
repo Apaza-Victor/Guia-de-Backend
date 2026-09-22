@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sesiones-y-almacenamiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sesiones y almacenamiento · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Qué es una sesión del lado servidor, dónde se almacena (archivos, BD, Redis) y cómo funciona el identificador opaco en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="sesiones-y-almacenamiento"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Sesiones y almacenamiento</span>
+        </nav>
+        <h1 class="lesson-title">Sesiones y almacenamiento</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Sesiones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">El estado vive en el servidor</h2>
+          <p>En una sesión del lado servidor el cliente solo conoce un <strong>identificador opaco</strong>: un número sin significado. Todo lo demás (quién es el usuario, sus permisos, su carrito) vive en el servidor bajo ese id. Robar el id presta la sesión, pero no revela datos. La clave es que el servidor <strong>valida contra su almacén</strong> en cada petición.</p>
+        </section>
+
+        <section>
+          <h2 id="ubicaciones">Dónde almacenar</h2>
+          <ul>
+            <li><strong>Archivos (por defecto):</strong> sencillo para un servidor; no escala con varias máquinas.</li>
+            <li><strong>Base de datos:</strong> compartida entre servidores; cada petición es un SELECT/UPSERT.</li>
+            <li><strong>Redis:</strong> en memoria, con expiración nativa y lecturas rápidas; ideal a escala.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="php">Sesiones PHP nativas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Configurar antes de session_start()
+session_name("SID_APP");
+session_set_cookie_params([
+    "httponly" =&gt; true,
+    "secure"   =&gt; true,
+    "samesite" =&gt; "Lax",
+    "path"     =&gt; "/",
+]);
+
+session_start(); // crea o retoma la sesion del id de la cookie
+
+// Guardar datos de sesion (memoria, persistida al final)
+$_SESSION["user_id"] = 42;
+$_SESSION["nombre"]  = "Ana";
+
+// En otra peticion
+if (isset($_SESSION["user_id"])) {
+    $id = $_SESSION["user_id"]; // 42
+}</code></pre>
+            </div>
+          </figure>
+          <p>El identificador se genera con entropía criptográfica y la cookie asociada solo transporta ese valor. PHP se encarga de la persistencia y de la limpieza periódica.</p>
+        </section>
+
+        <section>
+          <h2 id="tabla">Modelo para guardar en base de datos</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE sesiones (
+    id          VARCHAR(128) PRIMARY KEY,
+    usuario_id  INT UNSIGNED NOT NULL,
+    datos       MEDIUMTEXT NOT NULL,          -- JSON serializado
+    creada_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expira_en   DATETIME NOT NULL,
+    CONSTRAINT fk_ses_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios (id) ON DELETE CASCADE,
+    INDEX idx_usuario (usuario_id)
+) ENGINE = InnoDB;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Arranca sesiones PHP nativas en un script y observa la cookie creada.</li>
+            <li>Inspecciona dónde se guardan los archivos de sesión en tu sistema.</li>
+            <li>Explica con tus palabras por qué el id de sesión debe ser «opaco».</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>La sesión de servidor guarda el estado; la cookie solo el id.</li>
+            <li>Archivos para desarrollo, BD/Redis para producción con varios servidores.</li>
+            <li>La cookie se configura antes de <code class="inline">session_start()</code>.</li>
+            <li>El id debe ser aleatorio, impredecible y opaco.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="expiracion-y-renovacion.html">Expiración y renovación</a>
+            <a class="related-lessons__link" href="proteccion-de-la-cookie-de-sesion.html">Protección de la cookie de sesión</a>
+            <a class="related-lessons__link" href="sesiones-en-bd-y-redis.html">Sesiones en Bases de Datos y Redis</a>
+            <a class="related-lessons__link" href="../modulo-01/identidad-y-estados-de-sesion.html">Identidad y estados de sesión</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

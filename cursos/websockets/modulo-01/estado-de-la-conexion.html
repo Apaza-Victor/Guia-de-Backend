@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-estado-de-la-conexion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estados de la conexión · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Descubre la máquina de estados de WebSocket: CONNECTING, OPEN, CLOSING y CLOSED, y cómo leerla con la propiedad readyState.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-estado-de-la-conexion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Estados de la conexión</span>
+      </nav>
+      <h1 class="lesson-title">Estados de la conexión</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 7 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de WebSocket</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="maquina-estados">Una máquina de estados en cuatro casillas</h2>
+        <p>Un WebSocket nunca está «a medias»: siempre está exactamente en uno de los cuatro estados que define la especificación. La propiedad que los expone se llama <code>readyState</code> y lees su valor en cualquier instante, tanto desde el cliente del navegador como desde algunos clientes en Node.js (el paquete <code>ws</code> también la implementa).</p>
+        <table class="table">
+          <thead>
+            <tr><th>Constante</th><th>Valor</th><th>Significado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CONNECTING</td><td>0</td><td>Aún no llega la respuesta 101; el handshake está en curso.</td></tr>
+            <tr><td>OPEN</td><td>1</td><td>Conexión activa; se puede enviar y recibir.</td></tr>
+            <tr><td>CLOSING</td><td>2</td><td>Se envió el cierre y se espera confirmación.</td></tr>
+            <tr><td>CLOSED</td><td>3</td><td>Conexión terminada; no se puede reutilizar.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2 id="readyState">Leyendo readyState</h2>
+        <p>Saber en qué estado está tu socket es la diferencia entre un <code>send()</code> que funciona y otro que lanza «call on closed WebSocket». El patrón típico es comprobar antes de actuar:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function enviarSiEstaListo(socket, datos) {
+  // 1 = OPEN. Cualquier otro estado no admite envíos.
+  if (socket.readyState !== WebSocket.OPEN) {
+    console.warn('Socket no abierto. Estado:', socket.readyState);
+    return false;
+  }
+  socket.send(JSON.stringify(datos));
+  return true;
+}
+
+const socket = new WebSocket('wss://api.miservidor.com/sockets');
+console.log('Acaba de crearse. Estado:', socket.readyState); // 0 CONNECTING
+
+socket.onopen = () =&gt; {
+  console.log('Conectado. Estado:', socket.readyState); // 1 OPEN
+  enviarSiEstaListo(socket, { tipo: 'ping', marcaTiempo: Date.now() });
+};</code></pre>
+      </section>
+
+      <section>
+        <h2 id="transiciones">El viaje completo: CONNECTING → OPEN → CLOSING → CLOSED</h2>
+        <p>La máquina de estados describe un viaje que casi nunca salta casillas en el orden lógico:</p>
+        <ol>
+          <li><strong>CONNECTING:</strong> el objeto <code>WebSocket</code> se crea, se abre el TCP y se negocia el handshake. En clientes abiertos está muy poco tiempo.</li>
+          <li><strong>OPEN:</strong> el estado productivo. Todos los mensajes viajan aquí. Si el servidor cierra, el cliente verá <code>onclose</code> y pasará directo a CLOSED.</li>
+          <li><strong>CLOSING:</strong> el cliente llamó a <code>close()</code> o recibió un frame de cierre, y está a la espera de la confirmación del otro lado.</li>
+          <li><strong>CLOSED:</strong> el frame de cierre se confirmó (o se superó el timeout, o murió el TCP). El socket es inservible: solo queda crear uno nuevo.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Detalle de implementación:</strong> si un socket se cierra por un error de red sin negociación, el navegador salta casi directamente de OPEN a CLOSED con código 1006 en <code>onclose</code>. No esperes ver CLOSING en ese caso: CLOSING describe un cierre cortés, no un corte en la red.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="estado-en-ui">Reflejar el estado en la interfaz</h2>
+        <p>Una buena práctica de producto es reflejar el estado de la conexión en la UI: «conectado», «reconectando…», «sin conexión». Para eso conviene una función auxiliar que traduzca el numérico a una etiqueta y a un estilo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function etiquetaDeEstado(socket) {
+  const estados = ['Conectando…', 'Conectado', 'Cerrando…', 'Desconectado'];
+  return estados[socket.readyState] || 'Desconocido';
+}
+
+function actualizarEstadoEnPantalla(socket, indicador) {
+  const etiqueta = etiquetaDeEstado(socket);
+  indicador.textContent = etiqueta;
+  indicador.dataset.estado = String(socket.readyState);
+  console.log('Estado del socket:', etiqueta);
+}
+
+// Uso: llama a la función en cada transición.
+socket.addEventListener('open', () =&gt; actualizarEstadoEnPantalla(socket, led));
+socket.addEventListener('close', () =&gt; actualizarEstadoEnPantalla(socket, led));</code></pre>
+      </section>
+
+      <section>
+        <h2 id="errores-tipicos">Errores típicos de estado</h2>
+        <ul>
+          <li><strong>«WebSocket is closed before the connection is established»:</strong> cerraste el socket mientras estaba CONNECTING.</li>
+          <li><strong>«The WebSocket connection to «wss://...» failed»:</strong> el handshake fue rechazado (auth, origen o servidor caído) y el estado cayó a CLOSED.</li>
+          <li><strong>Enviar desde fuera de OPEN:</strong> el <code>send()</code> lanza excepción; siempre guarda tus <code>send</code> detrás del check <code>readyState === WebSocket.OPEN</code>.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un socket y usa un <code>setInterval</code> para imprimir <code>socket.readyState</code> cada 300 ms desde el momento de crear el objeto.</li>
+          <li>Marca con un comentario qué número ves antes del <code>onopen</code> y qué número después.</li>
+          <li>Escribe una función <code>enviarConEstado</code> que devuelva <code>false</code> sin lanzar excepción cuando el socket no esté en OPEN.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>WebSocket tiene cuatro estados: CONNECTING (0), OPEN (1), CLOSING (2) y CLOSED (3).</li>
+          <li><code>readyState</code> lee el estado actual en cualquier momento.</li>
+          <li>Solo se puede <code>send()</code> cuando el estado es OPEN.</li>
+          <li>CLOSING es un cierre cortés; un corte de red salta a CLOSED con 1006.</li>
+          <li>Refleja el estado en la UI para que los usuarios entiendan si están conectados.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="abrir-cerrar-conexion.html">Abrir y cerrar la conexión</a>
+          <a class="related-lessons__link" href="cliente-websocket-web.html">Cliente WebSocket en el navegador</a>
+          <a class="related-lessons__link" href="../modulo-03/heartbeat-y-timeout.html">Heartbeat y timeouts</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="abrir-cerrar-conexion.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Abrir y cerrar la conexión</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">WebSockets en Node.js</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

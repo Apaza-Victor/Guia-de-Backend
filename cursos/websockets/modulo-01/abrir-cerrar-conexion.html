@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-abrir-cerrar-conexion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abrir y cerrar la conexión · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Gestiona el ciclo de vida de un WebSocket: eventos open, error y close, códigos de cierre y cómo cerrar la conexión desde el cliente o el servidor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-abrir-cerrar-conexion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Abrir y cerrar la conexión</span>
+      </nav>
+      <h1 class="lesson-title">Abrir y cerrar la conexión</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 7 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de WebSocket</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="eventos">Los eventos open, error y close</h2>
+        <p>La API WebSocket del navegador gira alrededor de cuatro eventos que describen toda la vida de la conexión: <code>onopen</code>, <code>onmessage</code>, <code>onerror</code> y <code>onclose</code>. Esta lección se centra en los tres puntos de <em>transición</em>: cuando se abre, cuando algo falla y cuando se cierra.</p>
+        <ul>
+          <li><strong>open:</strong> el handshake terminó bien y ya se puede enviar y recibir.</li>
+          <li><strong>error:</strong> algo salió mal en el transporte o en el protocolo. Ojo: los errores suelen ir seguidos de un cierre.</li>
+          <li><strong>close:</strong> la conexión terminó, con un código y una razón que explican por qué.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const socket = new WebSocket('wss://api.miservidor.com/sockets');
+
+socket.onopen = () =&gt; {
+  console.log('Sockets: listos para hablar.');
+  socket.send(JSON.stringify({ tipo: 'hola', usuario: 'ana' }));
+};
+
+socket.onerror = (err) =&gt; {
+  // El evento no trae la causa exacta; el cierre posterior sí suele
+  // explicar mejor qué pasó (y el motivo en el navegador, en console).
+  console.warn('Sockets: error en la conexión.', err.message);
+};
+
+socket.onclose = (evento) =&gt; {
+  console.log('Socket cerrado. Código:', evento.code, 'Razón:', evento.reason);
+  if (evento.code !== 1000) {
+    programarReconexion();
+  }
+};</code></pre>
+      </section>
+
+      <section>
+        <h2 id="codigos">Códigos de cierre</h2>
+        <p>El estándar define una lista de códigos numéricos que acompañan al frame de cierre. Conocer los principales te ahorra horas de depuración:</p>
+        <ul>
+          <li><code>1000 Normal Closure</code> — cierre a propósito, sin errores.</li>
+          <li><code>1001 Going Away</code> — el servidor se reinicia o la página se va (el servidor se tomó un descanso).</li>
+          <li><code>1002 Protocol Error</code> — bytes que no seguían las reglas del RFC.</li>
+          <li><code>1008 Policy Violation</code> — el servidor rechazó el mensaje por política (por ejemplo, contenido no permitido).</li>
+          <li><code>1009 Message Too Big</code> — intento de enviar un mensaje mayor que el límite configurado.</li>
+          <li><code>1011 Internal Error</code> — el servidor falló internamente y no puede seguir.</li>
+          <li><code>4000-4999</code> — reservados para usos de aplicación específicos.</li>
+        </ul>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "code": 1011,
+  "reason": "Error interno al procesar el mensaje",
+  "socketId": "ws_9f2c1a",
+  "reconnectable": true
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cerrar">Cerrar la conexión correctamente</h2>
+        <p>Cerrar es tan importante como abrir. Un WebSocket mal cerrado deja recursos colgados en el servidor y conexiones a medio limpiar. La forma educada es enviar un frame de cierre con un código y una razón, esperar a que el otro lado lo confirme, y solo entonces liberar.</p>
+        <p>En el navegador usas <code>socket.close()</code>. En el servidor (Node.js) con el paquete <code>ws</code>, el cierre se hace con <code>ws.close(codigo, razon)</code> y se puede escuchar el evento <code>close</code> para limpiar la memoria.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Cliente: cerrar con código y motivo.
+function salirDelChat() {
+  socket.close(1000, 'sesión finalizada por el usuario');
+}
+
+// Servidor (Node.js + ws): evitar que el cliente entre dos veces.
+const { WebSocketServer } = require('ws');
+const wss = new WebSocketServer({ port: 8080, clientTracking: true });
+
+wss.on('connection', (ws, req) =&gt; {
+  ws.send('Bienvenido. Serás avisado si la sala se cierra.');
+
+  ws.on('close', (code, reason) =&gt; {
+    console.log('Cliente desconectado. Código:', code, 'Razón:', reason.toString());
+  });
+
+  // Cerramos la sala cuando llega la orden de shutdown.
+  if (procesoApagandoServidor) {
+    ws.close(1001, 'Servidor entrando en mantenimiento');
+  }
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="escenarios">Escenarios de error comunes</h2>
+        <p>En la práctica, la mayoría de cierres inesperados caen en pocas categorías:</p>
+        <ul>
+          <li><strong>Batería o pestaña dormida:</strong> el navegador pausa timers y el socket muere de silencio en servidores que exigen heartbeat.</li>
+          <li><strong>Red inestable:</strong> se rompe el TCP por debajo y el cierre llega con código 1006, que significa «desconexión anómala» (no hubo frame de cierre).</li>
+          <li><strong>Reinicio del servidor:</strong> el despliegue tira las conexiones; suele aparecer 1001 o 1006 y debe disparar reconexión con backoff.</li>
+          <li><strong>Mensajes demasiado grandes:</strong> el peer corta con 1009, pide que ajustes el límite (p. ej. con el paquete ws se configura <code>maxPayload</code>).</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla de oro:</strong> el evento <code>onclose</code> es el único sitio donde debes decidir si reconectar. Aceptando el <code>code</code> decides: códigos 1000 y 1001 suelen ser intencionales; 1006 y 1011 casi siempre merecen reintentar.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Abre la consola y crea un socket contra <code>wss://echo.websocket.events</code>; define <code>onopen</code>, <code>onerror</code> y <code>onclose</code> y registra el código en cada cierre.</li>
+          <li>Llama a <code>socket.close(4001, 'cerrado por el ejercicio')</code> y comprueba qué código recibe el <code>onclose</code>.</li>
+          <li>Escribe una decisión: ¿qué haría tu cliente si recibe un cierre con código 1006 por tercera vez en un minuto? Justifícala en dos frases.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El ciclo de vida se controla con los eventos open, message, error y close.</li>
+          <li>Los errores suelen encadenarse con un cierre; el código de cierre explica la causa.</li>
+          <li>Códigos clave: 1000 normal, 1001 reinicio, 1008 política, 1009 excesivo, 1011 error interno, 1006 desconexión anómala.</li>
+          <li>Cerrar bien libera recursos del servidor; <code>onclose</code> decide si reconectar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="el-protocolo-websocket.html">El protocolo WebSocket</a>
+          <a class="related-lessons__link" href="estado-de-la-conexion.html">Estados de la conexión</a>
+          <a class="related-lessons__link" href="heartbeat-y-timeout.html">Heartbeat y timeouts</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="el-protocolo-websocket.html">
+        <span class="label">← Anterior</span>
+        <span class="title">El protocolo WebSocket</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="estado-de-la-conexion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Estados de la conexión</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

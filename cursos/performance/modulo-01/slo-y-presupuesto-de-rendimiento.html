@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m1-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLO y presupuesto de rendimiento · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a definir SLOs y presupuestos de rendimiento: cómo convertir la promesa «rápido» en objetivos medibles y cómo repartir el tiempo permitido entre cada servicio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m1-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">SLO y presupuesto de rendimiento</span>
+      </nav>
+      <h1 class="lesson-title">SLO y presupuesto de rendimiento</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Medir rendimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>«Queremos que el sistema vaya rápido» no es un objetivo. Un objetivo tiene <strong>número, ventana de tiempo y porcentaje de tolerancia</strong>. Un <strong>SLO</strong> (Service Level Objective) es exactamente eso: la promesa escrita y medible de cuánto tiempo puede tardar tu servicio, y con qué frecuencia puede fallar, sin que lo consideres un incidente.</p>
+        <p>El <strong>presupuesto de rendimiento</strong> es la cara práctica: si una petición de usuario no puede tardar más de 500 ms de principio a fin, ese tiempo se reparte como un presupuesto entre los servicios involucrados —app, base de datos, caché, dependencia externa— y cada equipo sabe cuántos milisegundos le corresponden.</p>
+      </section>
+
+      <section>
+        <h2 id="sli-slo-sla">SLI, SLO y SLA</h2>
+        <p>Tres siglas que conviene no mezclar:</p>
+        <ul>
+          <li><strong>SLI</strong> (indicador): la métrica que mides de verdad. Ejemplo: «p95 de latencia del endpoint de login en milisegundos» o «porcentaje de peticiones con error HTTP 5xx».</li>
+          <li><strong>SLO</strong> (objetivo): el umbral que decides. Ejemplo: «el p95 de login será menor a 300 ms y tendremos al menos el 99.5% de peticiones sin errores, medido en ventanas mensuales».</li>
+          <li><strong>SLA</strong> (acuerdo): el contrato comercial que se firma con un cliente y normalmente promete <em>menos</em> que el SLO para tener margen. El SLA se escribe en contratos; el SLO se escribe en dashboards.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> SLO interno = SLA externo × holgura. Si vendes un SLA de 99.9%, persigue un SLO interno de 99.95%. Lo que no mides con SLIs no lo puedes prometer con SLOs.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="definicion">Definiendo un SLO de rendimiento</h2>
+        <p>Una definición útil deja explícitas cuatro cosas: el SLI, el umbral, la ventana y el margen de error. Aquí tienes un ejemplo configurable en JSON, listo para guardarse junto al código o en un sistema de alarmas:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "servicio": "api-usuarios",
+  "slo_latencia": {
+    "nivel": "p95",
+    "max_ms": 300,
+    "ventana": "30 dias",
+    "tolerancia_fallas": "0.2%"
+  },
+  "slo_disponibilidad": {
+    "slis": ["proporcion_respuestas_exitosas", "proporcion_5xx"],
+    "minimo": 0.995,
+    "ventana": "30 dias"
+  },
+  "presupuesto_total_peticion": {
+    "max_ms": 500,
+    "desglose": {
+      "api_gateway": 50,
+      "servicio_usuarios": 100,
+      "base_de_datos": 80,
+      "capa_cache": 20,
+      "servicio_externo_pago": 250
+    }
+  }
+}</code></pre>
+        <p>El desglose del presupuesto es oro para el equipo: si el <code>servicio_externo_pago</code> se pasa de sus 250 ms, sabes <em>dónde</em> buscar antes de correr detrás de tu propio código.</p>
+      </section>
+
+      <section>
+        <h2 id="capacity-planning">Presupuesto de rendimiento y capacity planning</h2>
+        <p>El presupuesto guía dos trabajos: las <strong>optimizaciones de código</strong> (no necesito un p95 de 80 ms para la pantalla de inicio, y si lo tengo, tengo margen para dedicar algo de presupuesto a una feature nueva) y el <strong>capacity planning</strong> (cuánta máquina necesito cuando el tráfico estimado pase de X RPS).</p>
+        <p>Capacity planning en una línea: estima el tráfico pico esperado, multiplica por los recursos que consume cada petición y añade un colchón. Un cálculo simplificado:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Estimación de nodos necesarios para soportar el pico
+trafico_pico_rps = 2000          # 2000 peticiones/segundo en hora punta
+rps_por_nodo = 250               # medido con prueba de carga
+colchon = 1.6                    # +60% de margen para reinicios y picos imprevistos
+tiempo_reserva_ms = 0.0006       # 600 microsegundos de CPU por petición
+
+nodos = (trafico_pico_rps / rps_por_nodo) * colchon
+print(f"Nodos necesarios: {math_ceil(nodos)} (redondeado)")
+
+# Si una feature nueva duplica la CPU por petición -> nodos = (2000 / 250) * 1.6 * 2
+# Comparar con el presupuesto: si no cabe, la feature paga con optimizaciones.</code></pre>
+        <p>La magia no está en la fórmula, sino en que <strong>alguien la repite tras cada release</strong>. El capacity planning es un proceso periódico, no un cálculo único.</p>
+      </section>
+
+      <section>
+        <h2 id="alerta">Alarmando contra el presupuesto</h2>
+        <p>Un SLO sin alarma es un deseo. El patrón más usado es calcular el error budget disponible y disparar cuando se está gastando demasiado rápido:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Consulta de ejemplo con PromQL: minutos de error budget consumidos por latencia p95
+# El SLO es: p95 < 300ms el 99.8% de las veces en 30 dias.
+
+# Presupuesto total permitido: 30 * 1440 * 0.002 = 86.4 minutos
+# Minutos actuales sobre umbral (simplificado con un contador de eventos):
+sum(rate(http_p95_over_budget_events_total[1h])) * (30 * 1440 / 30) &lt; 86.4
+
+# Alerta lanzada cuando el gasto anualizado de error budget supera lo disponible</code></pre>
+        <p>No importa la herramienta: la idea es que el presupuesto agote un «banco de fallos» por mes. Cuando el banco se vacía, el equipo deja de hacer features nuevas y arregla la causa. Así el rendimiento deja de ser una opinión y pasa a ser un contrato con uno mismo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige el flujo crítico de tu producto (por ejemplo, «login» o «checkout») y escribe el SLO de latencia en el formato JSON de arriba: SLI, p95 máximo, ventana y tolerancia.</li>
+          <li>Fija su presupuesto total (¿cuánto puede tardar de punta a punta?) y reparte el presupuesto entre los servicios intervinientes.</li>
+          <li>Estima cuántos nodos necesitarías para tu tráfico pico actual con el script de capacity planning y compáralo con lo que ya tienes desplegado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un SLO es un objetivo medible: valor + ventana + porcentaje de tolerancia.</li>
+          <li>Se compone de SLIs (las métricas) y deja holgura frente al SLA comercial.</li>
+          <li>El presupuesto de rendimiento reparte los milisegundos del flujo completo entre servicios.</li>
+          <li>El capacity planning usa el presupuesto y el tráfico estimado para decidir cuánta máquina hace falta.</li>
+          <li>Las alertas gastan un error budget mensual; vaciarlo significa parar de escribir features y arreglar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-performance-backend.html">¿Qué es performance?</a>
+          <a class="related-lessons__link" href="test-de-carga.html">Pruebas de carga</a>
+          <a class="related-lessons__link" href="../modulo-03/estrategia-de-rendimiento.html">Estrategia integral</a>
+          <a class="related-lessons__link" href="../modulo-02/optimizacion-de-apis.html">Optimizar APIs</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event sourcing y sagas · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aplica event sourcing, CQRS y sagas coreografiadas sobre Kafka: el topic como sistema de registro, rehidratación de estado y transacciones compensadas por eventos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Event sourcing y sagas</span>
+      </nav>
+      <h1 class="lesson-title">Event sourcing y sagas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Kafka y event streaming</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Todo lo aprendido sobre Kafka —keys, particiones, retención, grupos, offsets— tiene un destino: permitir patrones de arquitectura que una base de datos transaccional clásica no puede sostener. Dos de ellos cierran este curso:</p>
+        <ul>
+          <li><strong>Event sourcing:</strong> guardar los hechos, no el estado. El topic ES la verdad.</li>
+          <li><strong>Sagas:</strong> coordinar transacciones largas entre servicios con eventos y compensaciones, en vez de una transacción distribuida.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="es">Event sourcing: el estado es derivado</h2>
+        <p>En el modelo clásico, guardamos el estado final: <code>INSERT INTO pedidos SET estado='enviado'</code>. En event sourcing guardamos <strong>la historia</strong>: el pedido no «está enviado», sino que <em>ocurrió</em> <code>pedido.creado</code>, luego <code>pedido.pagado</code>, luego <code>pedido.enviado</code>. El estado actual es una <strong>reducción</strong> (fold) de los eventos:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Reducción: el estado = aplicar todos los eventos en orden
+function reducir(estado = {}, evento) {
+  switch (evento.tipo) {
+    case 'pedido.creado':
+      return { ...estado, id: evento.pedidoId, items: evento.items, estado: 'creado' };
+    case 'pedido.pagado':
+      return { ...estado, estado: 'pagado', total: evento.total };
+    case 'pedido.enviado':
+      return { ...estado, estado: 'enviado', carrier: evento.carrier };
+    default:
+      return estado;
+  }
+}
+
+// leer todos los eventos del pedido 7 desde la partición (clave = pedido 7)
+const eventos = await leerTopic('pedidos', 'P-7');   // en orden
+const estadoFinal = eventos.reduce(reducir, {});     // { estado: 'enviado', ... }
+
+// Ventaja killer: podemos REPROCESAR TODO el historial para
+// corregir un bug de algoritmo, o reconstruir un sistema nuevo.</code></pre>
+        <p>Kafka es un candidato natural para event sourcing por retención y reproducción; pero «natural» no significa modo automático: el topic principal (<code>pedidos</code>) se hace <strong>compactado</strong> o se respalda con topics de comandos, y el estado actualizado para consultas vive en una <strong>read model</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="cqrs">CQRS: la pareja inseparable</h2>
+        <p>Si el topic es la escritura, necesitas una <strong>lectura rápida</strong>. CQRS (Command Query Responsibility Segregation) separa ambas: se escriben eventos (comandos/escritura) y se mantiene una proyección optimizada para consultas que reacciona a esos eventos.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Proyección (read model) rehidratada por el topic
+from confluent_kafka import Consumer, KafkaError
+
+class ProyeccionPedidos:
+    def __init__(self, store):
+        self.store = store   # ej. tabla "pedidos_consulta" en Postgres
+
+    def aplicar(self, evento):
+        table = self.store['pedidos_consulta']
+        if evento.tipo == 'pedido.creado':
+            table.insert(id=evento.pedidoId, items=evento.items, estado='creado')
+        elif evento.tipo == 'pedido.pagado':
+            table.update(id=evento.pedidoId, estado='pagado', total=evento.total)
+        elif evento.tipo == 'pedido.enviado':
+            table.update(id=evento.pedidoId, estado='enviado')
+
+consumidor = Consumer({'bootstrap.servers': 'localhost:9092',
+                       'group.id': 'proyeccion-estado'})
+proyeccion = ProyeccionPedidos(store)
+
+while True:
+    msg = consumidor.poll(1.0)
+    if msg:
+        proyeccion.aplicar(json.loads(msg.value()))
+        consumidor.commit(asynchronous=False)</code></pre>
+        <p>Las consultas responden con la proyección (rápida, indexada), las escrituras publican eventos (inmutables, auditables). Ese es el patrón que usan los sistemas financieros, de logística y de inventario grandes.</p>
+      </section>
+
+      <section>
+        <h2 id="sagas">Sagas: transacciones largas por compensación</h2>
+        <p>Cuando un pedido toca ventas, inventario, pagos y envío, las bases de datos son distintas; una transacción ACID distribuida (2PC) es cara y frágil. La alternativa pragmática es la <strong>saga</strong>: una secuencia de transacciones locales que se coordina con eventos, y si una falla, se ejecutan <strong>compensaciones</strong> de las anteriores.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Saga coreografiada de un pedido (cada paso escucha su evento previo)
+
+pedido.creado ──> reservar stock
+                  si ok: stock.reservado ──> cobrar
+                                            si ok: pago.aprobado ──> generar envio
+                                            si NO: stock revertido (compensación)
+                  si NO: pedido.rechazado
+
+# Compensaciones en cadena:
+# pago falla  -> des-reservar stock      (compensación de reservar)
+# envio falla -> reembolsar pago         (compensación de cobrar)
+#                                          y des-reservar stock</code></pre>
+        <p>Cada paso es una transacción <em>local</em> (su propia base), y el orquestador —un consumidor que ve los eventos— decide si continuar o compensar.</p>
+      </section>
+
+      <section>
+        <h2 id="saga-codigo">Saga coreografiada en código</h2>
+        <p>El servicio de stock escribe un evento con el resultado. El servicio de pagos escucha, y ante un fallo emite la compensación:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// SERVICIO DE PAGOS: escucha 'stock.reservado' y cobra
+await consumidor.subscribe({ topic: 'stock', fromBeginning: false });
+
+await consumidor.run({
+  eachMessage: async ({ message }) => {
+    const ev = JSON.parse(message.value);
+    if (ev.tipo !== 'stock.reservado') return;
+
+    try {
+      const cobro = await pasarela.cobrar(ev.pedidoId, ev.total);
+      await publicar('pagos', { tipo: 'pago.aprobado', pedidoId: ev.pedidoId });
+      console.log('Pago OK:', ev.pedidoId);
+    } catch (e) {
+      // COMPENSACIÓN: stock debe revertir la reserva
+      await publicar('stock', { tipo: 'stock.revertido', pedidoId: ev.pedidoId });
+      await publicar('pedidos', { tipo: 'pedido.rechazado', pedidoId: ev.pedidoId,
+                                  motivo: e.message });
+      console.error('Pago fallido, compensando:', ev.pedidoId);
+    }
+  }
+});</code></pre>
+        <p>La saga no usa un coordinador central (coreografía): cada servicio «sabe» su paso y su compensación. La variante orquestada usa un servicio coordinador que publica comandos y espera eventos.</p>
+      </section>
+
+      <section>
+        <h2 id="consejos">Consejos para llevarlo a producción</h2>
+        <ul>
+          <li><strong>Eventos versionados</strong> (<code>pedido.pagado.v1</code>): los consumidores antiguos no se rompen.</li>
+          <li><strong>Conclina la mutabilidad:</strong> publica todo con <code>correlationId</code> para unir los pasos de una saga.</li>
+          <li><strong>Idempotencia en cada paso:</strong> los reintentos por rebalanceo no duplican efectos.</li>
+          <li><strong>Metrica la duración de la saga:</strong> una saga que nunca cierra es un error lógico + deuda.</li>
+          <li><strong>Toda compensación debe poder compensarse:</strong> diseña el camino de vuelta antes del de ida.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Recuerda:</strong> Kafka te da el bus, no el patrón. Event sourcing y sagas son decisiones de diseño tuyas; el broker solo aporta orden, retención y confirmación. Usa loop de verificación: ¿puedo reprocesar todo desde cero? ¿mi saga se atora ante un fallo intermedio?</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe la función <code>reducir</code> para los eventos de una cuenta bancaria (<code>cuenta.abierta</code>, <code>deposito.hecho</code>, <code>retiro.hecho</code>) y calcula el saldo final de un historial de 4 eventos.</li>
+          <li>Modela la saga de «pago de pedido» con tres compensaciones en un diagrama y haz una tabla paso/evento/falta/compensación.</li>
+          <li>Implementa una mini-saga coreografiada con dos consumidores de Kafka (stock y pagos) y verifica qué eventos se encadenan cuando el cobro falla.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Event sourcing guarda hechos inmutables; el estado se deriva reduciendo la historia.</li>
+          <li>CQRS separa escritura (eventos) de lectura (proyección optimizada).</li>
+          <li>Las sagas coordinan transacciones largas con pasos + compensaciones, sin 2PC.</li>
+          <li>La coreografía decide por eventos; la orquestación con un coordinador central.</li>
+          <li>Idempotencia, versionado y correlación son las llaves del patrón en producción.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="particiones-y-claves.html">Particiones y claves</a>
+          <a class="related-lessons__link" href="consumer-groups.html">Consumer groups y rebalanceo</a>
+          <a class="related-lessons__link" href="../modulo-01/mensajes-y-eventos.html">Mensajes vs eventos</a>
+          <a class="related-lessons__link" href="../modulo-01/garantias-de-entrega.html">Garantías de entrega</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

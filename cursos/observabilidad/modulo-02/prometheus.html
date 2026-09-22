@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m2-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prometheus · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende Prometheus: arquitectura de scraping, modelo de datos, configuración de targets y consultas con PromQL aplicadas a un backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m2-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Prometheus</span>
+      </nav>
+      <h1 class="lesson-title">Prometheus</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Herramientas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">Qué es Prometheus</h2>
+        <p><strong>Prometheus</strong> es el recolector de métricas open source más usado en backend: mantiene una base de datos de series temporales (TSDB) con tus métricas etiquetadas, hace <strong>scraping</strong> periódico de los endpoints <code class="inline">/metrics</code> de tus servicios y expone el lenguaje de consulta <strong>PromQL</strong>.</p>
+        <p>Su modelo es <em>pull</em>: Prometheus visita a cada servicio (HTTP), en lugar de que el servicio envíe a un host central. Esa decisión simplifica el discover de targets, da retry natural y evita picos de carga al recolector.</p>
+      </section>
+
+      <section>
+        <h2 id="configuracion">Configuración básica</h2>
+        <p>Todo se define en <code class="inline">prometheus.yml</code>: cada cuánto scrapear, qué jobs y qué targets. Mínimo viable con tu API y un exporter de PostgreSQL:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: "checkout-api"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["checkout-api:3000"]
+        labels:
+          environment: "prod"
+
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
+        labels:
+          environment: "prod"</code></pre>
+          </div>
+        </figure>
+        <p>Un «target» es una instancia concreta; un «job» es un grupo lógico de targets con la misma métrica. En Kubernetes los targets se descubren automáticamente vía la API (<code class="inline">kubernetes_sd_configs</code>); en Docker compose, con <code class="inline">dns_sd_configs</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="texto">Formato de texto de las métricas</h2>
+        <p>Lo que el servicio expone en <code class="inline">/metrics</code> es texto plano con el formato de Prometheus: nombre, etiquetas, valor y opcionalmente HELP y TYPE:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">plaintext</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text" data-language="text"># HELP http_requests_total Total de peticiones HTTP.
+# TYPE http_requests_total counter
+http_requests_total{method="GET",route="/v1/users",status="200"} 1234
+http_requests_total{method="GET",route="/v1/users",status="500"} 12
+
+# TYPE http_request_duration_seconds histogram
+http_request_duration_seconds_bucket{le="0.1",route="/v1/users"} 900
+http_request_duration_seconds_bucket{le="0.5",route="/v1/users"} 1190
+http_request_duration_seconds_bucket{le="+Inf",route="/v1/users"} 1234
+http_request_duration_seconds_sum{route="/v1/users"} 301.5
+http_request_duration_seconds_count{route="/v1/users"} 1234</code></pre>
+          </div>
+        </figure>
+        <p>De un histograma, Prometheus deriva automáticamente <code class="inline">_bucket</code>, <code class="inline">_sum</code> y <code class="inline">_count</code>. Escríbelo en una línea por serie; entre los valores: la instancia la añade Prometheus al scrape (label <code class="inline">instance</code>).</p>
+      </section>
+
+      <section>
+        <h2 id="promql">PromQL básico</h2>
+        <p>PromQL consulta series con selectores, funciones de agregación y operadores. Los tres patrones imprescindibles de un backend:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># 1. Velocidad (peticiones por segundo) en los últimos 5 minutos
+sum(rate(http_requests_total[5m])) by (route)
+
+# 2. Tasa de errores 5xx en porcentaje
+sum(rate(http_requests_total{status=~"5.."}[5m]))
+  / sum(rate(http_requests_total[5m])) * 100
+
+# 3. Percentil 99 de latencia
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route))</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li><code class="inline">rate(x[5m])</code> convierte un counter acumulado en velocidad por segundo.</li>
+          <li><code class="inline">sum(...) by (label)</code> agrega y conserva la dimensión elegida.</li>
+          <li><code class="inline">histogram_quantile(0.99, ..._bucket)</code> estima el p99 desde los buckets.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Cuidado:</strong> nunca consultes un counter crudo (<code class="inline">http_requests_total</code>) sin rate: su valor solo sube, no dice nada sobre el presente.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="rules">Reglas y alertas</h2>
+        <p>Las reglas de <em>recording</em> precalculan consultas caras; las de <em>alerting</em> disparan cuando la expresión se mantiene verdadera el tiempo indicado con <code class="inline">for</code>. Se definen en archivos de rules y se referencian en la configuración:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">groups:
+  - name: checkout.rules
+    rules:
+      - record: job:http_errors:ratio5m
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          / sum(rate(http_requests_total[5m]))
+      - alert: CheckoutTasaErrorAlta
+        expr: job:http_errors:ratio5m > 0.05
+        for: 10m
+        labels: { severity: page }
+        annotations:
+          summary: "La tasa de error de checkout supera el 5%"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Añade un endpoint <code class="inline">/metrics</code> a tu API (prom-client o prometheus_client) y levanta Prometheus contra él.</li>
+          <li>Escribe una consulta PromQL que muestre el tráfico por ruta y otra el p95 de latencia.</li>
+          <li>Crea una regla de alerting con <code class="inline">for: 5m</code> y comprueba en el UI que aparece PENDING y luego FIRING.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Prometheus scrapea cada 15 s los endpoints /metrics de tus servicios.</li>
+          <li>El formato de métricas es texto plano: nombre, etiquetas y valor.</li>
+          <li>Rate + sum by + histogram_quantile cubren el 90 % de las consultas.</li>
+          <li>Las reglas preparan datos y disparan alertas sin ruido de umbrales absolutos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="grafana.html">Grafana</a>
+          <a class="related-lessons__link" href="../modulo-01/metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="../modulo-03/alertas-inteligentes.html">Alertas inteligentes</a>
+          <a class="related-lessons__link" href="../modulo-03/dashboards-efectivos.html">Dashboards efectivos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

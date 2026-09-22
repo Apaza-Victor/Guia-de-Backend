@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m6-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CQRS: lectura y escritura · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="CQRS en backend: modelos separados para leer y escribir, con comandos, queries y proyecciones de lectura optimizadas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m6-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">CQRS: lectura y escritura</span>
+      </nav>
+      <h1 class="lesson-title">CQRS: lectura y escritura</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Modernos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p><strong>CQRS</strong> (Command Query Responsibility Segregation) propone lo obvio que a veces olvidamos: <strong>leer y escribir no son lo mismo</strong>. Separa el modelo que <strong>cambia</strong> estado (comandos) del modelo que <strong>consulta</strong> (queries), para que cada lado evolucione y escale según su naturaleza.</p>
+      </section>
+
+      <section>
+        <h2 id="mismo">El CRUD con un solo modelo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto del problema</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Un solo modelo de Pedido sirve para todo:
+  - confirmar/cancelar/envir (reglas de negocio, transacciones)
+  - listar 10.000 pedidos con filtros y orden (rendimiento)
+
+Lee mucho, escribe poco, pero un solo objeto acumula
+reglas (lentas) y proyecciones (rápidas). Resultado:
+reglas frágiles y queries torpes.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="estructura">Estructura CQRS: dos mundos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// ===== LADO ESCRITURA: comandos =====
+final class ConfirmarPedidoCommand
+{
+    public function __construct(public readonly string $pedidoId) {}
+}
+
+final class ConfirmarPedidoHandler
+{
+    public function __construct(private PedidoEscrituraRepo $repo) {}
+    public function __invoke(ConfirmarPedidoCommand $c): void
+    {
+        $pedido = $this-&gt;repo-&gt;buscar($c-&gt;pedidoId);
+        $pedido-&gt;confirmar();
+        $this-&gt;repo-&gt;guardar($pedido);
+    }
+}
+
+// ===== LADO LECTURA: queries =====
+final class PedidosDeClienteQuery
+{
+    public function __construct(public readonly string $clienteId, public readonly int $limite) {}
+}
+
+final class PedidosDeClienteHandler
+{
+    public function __construct(private PedidoLecturaRepo $lectura) {}
+    public function __invoke(PedidosDeClienteQuery $q): array
+    {
+        return $this-&gt;lectura-&gt;listarPorCliente($q-&gt;clienteId, $q-&gt;limite);
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Un bus de comandos y un bus de queries (o handlers separados) enrutan cada intención.</p>
+      </section>
+
+      <section>
+        <h2 id="proyecciones">Proyecciones: la lectura optimizada</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// La lectura escribe en una PROYECCIÓN (tabla/colección dedicada)
+final class PedidoLecturaRepo
+{
+    public function __construct(private PDO $db) {}
+
+    public function listarPorCliente(string $clienteId, int $limite): array
+    {
+        $stmt = $this-&gt;db-&gt;prepare(
+            'SELECT cliente_nombre, total, estado
+             FROM v_pedidos_lectura WHERE cliente_id = ? LIMIT ?'
+        );
+        $stmt-&gt;execute([$clienteId, $limite]);
+        return $stmt-&gt;fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+// Un listener mantiene la proyección al día cuando escribe
+// (o un worker asíncrono, si el desfase está permitido)
+</code></pre>
+          </div>
+        </figure>
+        <p>La proyección puede vivir en otra base, otra tecnología o estar desnormalizada para un dashboard.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuándo de verdad vale la pena?</h2>
+        <ul>
+          <li><strong>Dominio rico</strong> con reglas de escritura complejas.</li>
+          <li><strong>Lecturas exigentes</strong> (reportes, búsquedas) que superan mil veces las escrituras.</li>
+          <li><strong>Dos naturalezas de rendimiento:</strong> escalar lecturas con caché/replicas y escrituras con su propio camino.</li>
+          <li><strong>Equipos colaborando por frontera:</strong> quien modela pedido, quien modela reporte, sin pisarse.</li>
+        </ul>
+        <p><strong>No lo apliques a un CRUD simple:</strong> ahí separar modelos es ceremonia que no paga. Empieza con handlers separados sin buses, y sube complejidad solo si el dominio lo pide.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un módulo con lecturas pesadas y escrituras con reglas.</li>
+          <li>Separa handlers de comando y de query en carpetas distintas.</li>
+          <li>Quita reglas de negocio del código de lectura (solo proyección).</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>CQRS: modelos separados para leer y escribir.</li>
+          <li>Comandos cambian estado; queries leen, sin efectos.</li>
+          <li>Las lecturas usan proyecciones optimizadas.</li>
+          <li>Para dominios ricos o lecturas extremas; no en CRUD simples.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="dependency-injection.html">Dependency Injection</a>
+          <a class="related-lessons__link" href="event-driven-y-mensajeria.html">Event-driven y mensajería</a>
+          <a class="related-lessons__link" href="../modulo-04/command.html">Command</a>
+          <a class="related-lessons__link" href="../modulo-05/dto-y-objetos-de-transferencia.html">DTO y objetos de transferencia</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-modelos-de-fallos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelos de fallo · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende la clasificación clásica de fallos en sistemas distribuidos: crash, omisión, temporización y bizantino, y cómo cada modelo cambia tu estrategia de tolerancia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-modelos-de-fallos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Modelos de fallo</span>
+      </nav>
+      <h1 class="lesson-title">Modelos de fallo</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Antes de responder «¿cómo hago tolerante a fallos mi sistema?» hay que responder «¿qué tipo de fallos asumo?». Los <strong>modelos de fallo</strong> describen, de forma jerárquica, cómo se puede comportar mal un nodo. Cada modelo hace que el problema sea más difícil de resolver y, por tanto, más caro.</p>
+        <p>La clasificación clásica, propuesta por Chandy y Lamport en 1985, ordena los fallos de menor a mayor severidad: <strong>crash</strong> → <strong>omisión</strong> → <strong>temporización</strong> → <strong>bizantino</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="crash">Fallo por crash</h2>
+        <p>El nodo ejecuta su lógica correctamente hasta que, en un instante, <strong>deja de funcionar para siempre</strong> y no vuelve a responder. No corrompe datos, no envía mensajes raros: simplemente muere. Es el modelo más benigno y el que asumen la mayoría de bases de datos y servicios.</p>
+        <p>Estrategias aplicables: reiniciar, failover con un nodo de respaldo y replicación. Por eso el 99,9 % de los sistemas operan aquí y no necesitan lógica bizantina.</p>
+        <div class="callout">
+          <p><strong>Ojo:</strong> en el modelo crash se asume que el nodo caído <em>no se levanta con datos corruptos</em>. Si puede reiniciarse y continuar mal, ya no es un fallo crash puro.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="omision">Fallo por omisión</h2>
+        <p>El nodo está vivo pero <strong>no envía mensajes que debía enviar</strong> (omisión de envío) o <strong>recibe y no procesa</strong> lo que le llega (omisión de recepción). Un paquete perdido en la red cae aquí: nadie «se rompió», pero el mensaje no llegó.</p>
+        <ul>
+          <li><strong>Omisión de envío:</strong> un nodo decide (o no) despachar un mensaje pendiente; lo viste cuando una respuesta nunca llega.</li>
+          <li><strong>Omisión de recepción:</strong> el mensaje llega al buffer pero se descarta o el proceso no lo lee a tiempo.</li>
+        </ul>
+        <p>La red en IP (UDP, TCP sin ACK) provoca este tipo de fallos constantemente. La respuesta típica es el <strong>retry</strong> con timeout, que verás en detalle en el módulo 3.</p>
+      </section>
+
+      <section>
+        <h2 id="temporizacion">Fallo de temporización</h2>
+        <p>El nodo responde, pero <strong>fuera del tiempo esperado</strong>: respuestas demasiado lentas, relojes locales desviados o un proceso recién despertado por un GC largo. El problema no es que falte la respuesta, sino que <em>llegó tarde</em>.</p>
+        <p>Este modelo importa porque los timeouts del resto del sistema pueden interpretar un «lento» como un «caído», y tomar decisiones apresuradas como promover a un segundo líder. Por eso el consenso (módulo 2) usa tiempos de espera que evitan líderes espurios.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import time
+
+# Simulación: un nodo que responde pero con latencia variable
+def llamada_con_timeout(cliente, servicio, timeout_ms):
+    inicio = time.monotonic()
+    resp = cliente.llamar(servicio)
+    if time.monotonic() - inicio &gt; timeout_ms / 1000:
+        # Respondió tarde: en la práctica es indistinguible de un crash
+        return "TIMEOUT: tratar como fallo temporal"
+    return resp
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="bizantino">Fallo bizantino</h2>
+        <p>El peor caso: el nodo se comporta de forma <strong>arbitraria</strong> — miente, envía mensajes contradictorios, simula ser otro nodo o corrompe su estado. Puede deberse a un bug, a hardware defectuoso o a un atacante comprometiendo la máquina.</p>
+        <p>Tolerar fallos bizantinos (el famoso <em>problema de los generales bizantinos</em>) exige algoritmos como PBFT o cadenas de bloques: con <code>f</code> nodos bizantinos necesitas al menos <code>3f + 1</code> nodos en total. Por eso, en un backend «normal» se asume el modelo crash y se evita este coste.</p>
+      </section>
+
+      <section>
+        <h2 id="resumen-modelos">Resumen de los modelos</h2>
+        <p>Esta tabla resume la taxonomía. En JSON, para que tu código pueda clasificar fallos observados:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "fallos": [
+    { "nivel": 1, "tipo": "crash", "descripcion": "El nodo muere y no responde más" },
+    { "nivel": 2, "tipo": "omision", "descripcion": "El nodo no envía o no recibe mensajes" },
+    { "nivel": 3, "tipo": "temporizacion", "descripcion": "El nodo responde fuera de tiempo" },
+    { "nivel": 4, "tipo": "bizantino", "descripcion": "El nodo se comporta de forma arbitraria" }
+  ]
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="en-la-practica">En la práctica</h2>
+        <p>En producción casi siempre se asume una combinación pragmática: <strong>crash + omisión + temporización</strong> (el riesgo de nodos «lentos»). Por eso los clientes de bases de datos usan timeouts, reintentos y tolerancia a fallos con quórums.</p>
+        <p>Un ejemplo real: lanzar un proceso en un clúster y dejar que el orquestador lo reinicie si muere. En Kubernetes, esto se expresa como un <em>restartPolicy</em>, asumiendo fallos crash:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-cola
+spec:
+  replicas: 3
+  template:
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: worker
+          image: mi-worker:1.0
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+</code></pre>
+        <p>El <em>livenessProbe</em> detecta un nodo que dejó de responder (crash colgado) y lo reinicia; el <em>replicas: 3</em> cubre la omisión cuando uno de los tres se pierde temporalmente.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica las siguientes incidencias en un modelo de fallo concreto: a) un contenedor que el kernel mata por OOM, b) un paquete TCP que se reenvía pero llega tardísimo, c) una réplica de BD que devuelve filas duplicadas.</li>
+          <li>Para cada caso, propón una mitigación (reiniciar, retry con timeout, replicación…).</li>
+          <li>Responde por escrito: ¿por qué asumir fallo crash reducido hace viable un sistema como Redis, que no implementa tolerancia bizantina?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen2">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los modelos de fallo se ordenan por severidad: crash &lt; omisión &lt; temporización &lt; bizantino.</li>
+          <li>El modelo crash asume muerte limpia y es el más barato de tolerar.</li>
+          <li>La omisión y la temporización aparecen por la red y por la lentitud; se manejan con retries, timeouts y quórums.</li>
+          <li>El bizantino es el más caro (3f+1 nodos) y solo aparece en sistemas con adversarios o hardware no confiable.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-un-sistema-distribuido.html">¿Qué es un sistema distribuido?</a>
+          <a class="related-lessons__link" href="bases-de-la-comunicacion.html">Comunicación entre nodos</a>
+          <a class="related-lessons__link" href="../modulo-02/consenso-distribuido.html">Consenso distribuido</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-fallos-graceful.html">Manejo de fallos graceful</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

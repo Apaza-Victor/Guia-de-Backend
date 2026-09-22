@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-gestion-de-apis-externas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de APIs externas · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a gobernar las reglas de una API externa: rate limits, cuotas, versionado de contratos, headers de límite y gestión de errores comunes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-gestion-de-apis-externas"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Gestión de APIs externas</span>
+      </nav>
+      <h1 class="lesson-title">Gestión de APIs externas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Usar una API externa sin leer sus reglas es conducir sin señal de tránsito. Cada proveedor impone <strong>rate limits</strong> (cuántas peticiones por ventana), <strong>cuotas</strong> (cuántas peticiones por mes, muchas veces con cobro extra), <strong>contratos con versiones</strong> y un vocabulario de errores propio. Gestionar bien esa API significa conocer esas reglas, anticiparlas en el código y monitorizarlas en producción.</p>
+      </section>
+
+      <section>
+        <h2 id="rate-limits">Rate limits y headers</h2>
+        <p>La mayoría de las APIs comunican el estado de tu límite en los headers de la respuesta. Leyéndolos puedes decidir antes de que el proveedor te bloquee:</p>
+<pre class="code-block"><code class="language-bash" data-language="bash">curl -sI https://api.github.com/repos/github/rest-api-description \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
+  | grep -i -E "ratelimit|x-ratelimit"</code></pre>
+        <p>La respuesta típica incluye <code>X-RateLimit-Limit</code> (máximo por hora), <code>X-RateLimit-Remaining</code> (cuántas quedan) y <code>X-RateLimit-Reset</code> (segundos hasta que se renueve la ventana). Integrarlos en tu cliente te permite reducir la tasa proactivamente:</p>
+<pre class="code-block"><code class="language-python" data-language="python">def leer_encabezados_limite(resp) -> dict:
+    return {
+        "limite": int(resp.headers.get("X-RateLimit-Limit", 0)),
+        "restantes": int(resp.headers.get("X-RateLimit-Remaining", 0)),
+        "reinicia_en_s": int(resp.headers.get("X-RateLimit-Reset", 0)) - int(time.time()),
+    }
+
+def hay_cuota(resp) -> bool:
+    datos = leer_encabezados_limite(resp)
+    return datos["limite"] > 0 and datos["restantes"] > 0 and datos["reinicia_en_s"] > 0</code></pre>
+      </section>
+
+      <section>
+        <h2 id="errores">Errores que debes distinguir</h2>
+        <p>No todos los errores del proveedor son iguales. Aprender a distinguirlos evita reintentos inútiles y bloqueos innecesarios:</p>
+        <ul>
+          <li><code>400/422</code> — tu request está mal: corregir el código, no reintentar.</li>
+          <li><code>401/403</code> — credenciales o permisos: revisar secretos y scopes.</li>
+          <li><code>429</code> — rate limit alcanzado: esperar respetando <code>Retry-After</code>.</li>
+          <li><code>500/502/503</code> — problema del proveedor: reintentar con backoff.</li>
+        </ul>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "error": "rate_limit_exceeded",
+  "status": 429,
+  "retry_after_s": 47,
+  "sugerencia": "espera 47 segundos o baja la tasa antes de reintentar",
+  "reintentar": true
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cuotas">Cuotas y costes</h2>
+        <p>Además del límite por ventana existe la <strong>cuota mensual</strong>, que suele estar ligada a tu plan y tiene impacto económico. Estrategias para no quedarte sin crédito: cachear respuestas repetidas, procesar en lotes, alertar cuando el consumo supere un porcentaje y degradar el servicio (por ejemplo, geocodificar solo cuando es estrictamente necesario).</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> trata cada llamada a una API de terceros como un coste. Si puedes cachear, ahorras dinero cada vez que el resultado no cambia.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="contratos">Contratos y versionado</h2>
+        <p>Las APIs evolucionan. Los proveedores serios versionan (<code>/v1/</code>, <code>/v2/</code>) y mantienen periodos de deprecación. Tu defensa es doble: <strong>anclar la versión</strong> que testeas y <strong>tratar a la API como un contrato que puede cambiar</strong> aunque no lo anuncie:</p>
+        <ul>
+          <li>Lee el changelog antes de cada actualización de cliente o SDK.</li>
+          <li>Mantén tus tests de integración contra el sandbox del proveedor en CI periódico.</li>
+          <li>Registra en código qué campos consumes, para detectar campos eliminados de golpe.</li>
+        </ul>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">// Ancla la versión de la API y documenta los campos usados
+const CONFIG = {
+  baseUrl: 'https://api.proveedor.com/v2',
+  endpoints: {
+    crearPedido: { metodo: 'POST', ruta: '/orders' },
+    estadoPedido: { metodo: 'GET', ruta: '/orders/:id', camposUsados: ['status', 'trackingUrl'] }
+  }
+};</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Haz una petición a una API pública que use rate limits (por ejemplo, GitHub) y registra los headers de límite que devuelve.</li>
+          <li>Escribe una función que, ante un 429, lea <code>Retry-After</code> y espere ese tiempo antes de reintentar.</li>
+          <li>Inventa el contrato JSON de una API tuya y decide qué campos deprecarías manteniendo compatibilidad con <code>/v1</code>.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los rate limits se comunican por headers: límpialos en tu cliente y actúa proactivamente.</li>
+          <li>400 no se reintenta; 429 se espera; 5xx se reintenta con backoff.</li>
+          <li>Las cuotas tienen coste: cachea y procesa en lotes.</li>
+          <li>El contrato de una API externa puede cambiar sin previo aviso; ancla versiones y testea en sandbox.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="sdk-y-clientes.html">SDKs y clientes HTTP</a>
+          <a class="related-lessons__link" href="../modulo-02/mapa-y-geolocalizacion.html">Mapas y geolocalización</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-errores-reintentos.html">Errores y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-03/monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

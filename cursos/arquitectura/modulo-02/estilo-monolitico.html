@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m2-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estilo monolítico · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende qué es la arquitectura monolítica, sus ventajas reales, sus límites y por qué un monolito bien hecho sigue siendo una opción profesional.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m2-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Estilo monolítico</span>
+      </nav>
+      <h1 class="lesson-title">Estilo monolítico</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Estilos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un <strong>monolito</strong> es una aplicación que empaqueta toda su lógica en un único proceso desplegable: la API, la lógica de negocio, el acceso a datos y la validación viven en el mismo artefacto y se ejecutan juntos.</p>
+        <p>La palabra «monolito» suele sonar a error, pero la realidad es más matizada: <strong>la mayoría de los grandes sistemas del mundo funcionan como monolitos</strong>, y muchos que empezaron como microservicios han vuelto a converger. La clave no es evitar el monolito, sino hacerlo <em>bien estructurado</em>.</p>
+      </section>
+
+      <section>
+        <h2 id="ventajas">Ventajas del monolito</h2>
+        <ul>
+          <li><strong>Simplicidad:</strong> un solo artefacto, un solo despliegue, un solo lugar para el logging.</li>
+          <li><strong>Desarrollo rápido:</strong> sin complejidad de red entre servicios, las funcionalidades se integran con facilidad.</li>
+          <li><strong>Transacciones reales:</strong> en una sola base de datos, las operaciones compuestas son atómicas y consistentes.</li>
+          <li><strong>Rendimiento entre funciones:</strong> las llamadas son en proceso, sin latencia de red.</li>
+          <li><strong>Menos herramientas:</strong> no necesitas mallas de servicios, service discovery ni orquestaciones de entrada.</li>
+        </ul>
+        <p>Para la mayoría de productos que comienzan, es la opción con mejor relación coste/beneficio.</p>
+      </section>
+
+      <section>
+        <h2 id="limites">Límites y cuando cambiar</h2>
+        <ul>
+          <li><strong>Escala horizontal rígida:</strong> todo crece junto; no puedes escalar solo el módulo de pagos.</li>
+          <li><strong>Fronteras de equipo difusas:</strong> con muchos equipos, los despliegues de todo el sistema se bloquean entre sí.</li>
+          <li><strong>Riesgo completo:</strong> un bug o un recurso compartido puede tumbar todo el sistema.</li>
+        </ul>
+        <p>Cada límite real del monolito (no el teórico) es el disparador para pensar en modularizar o, en casos extremos, partir en servicios.</p>
+      </section>
+
+      <section>
+        <h2 id="codigo">Un monolito bien organizado</h2>
+        <p>Un monolito no es sinónimo de desorden. Observa cómo un paquete limpio separa responsabilidades dentro del mismo proceso:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Estructura de directorios</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">app/
+  Controllers/      (HTTP, validación de entrada)
+  Services/         (lógica de negocio)
+  Repositories/     (acceso a datos)
+  Domain/           (entidades y reglas puras)
+  Infrastructure/   (mailer, cache, storage)
+config/
+routes/
+tests/</code></pre>
+          </div>
+        </figure>
+        <p>Este arreglo Interno ya es «módulos en un monolito»: cada carpeta tiene un rol y las dependencias fluyen de afuera hacia adentro. Y no se caen porque las separaste; se caen cuando no hay disciplina en las capas.</p>
+      </section>
+
+      <section>
+        <h2 id="decision">Decisión</h2>
+        <p>Elige un monolito cuando: el equipo es pequeño o único, el dominio aún se descubre y el volumen de usuarios es moderado. Más adelante podrás partir en servicios <strong>por módulo</strong>, no por capa. Un monolito modular es el mejor punto de partida para casi cualquier backend.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Revisa el código de tu último proyecto y clasifica su estructura en capas (Controllers, Services, Repositories).</li>
+          <li>Escribe en qué casos concretos dividirías el monolito (equipos, escala, acoplamiento) y en cuáles no.</li>
+          <li>Responde: ¿por qué «todo el sistema se cae junto» es más grave que «una parte falla»? Da un ejemplo de cada lado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El monolito ejecuta toda la lógica en un único proceso desplegable.</li>
+          <li>Es simple, rápido de construir, fuerte en transacciones y con menos infraestructura.</li>
+          <li>Sus límites aparecen con muchos equipos y necesidades de escala independiente.</li>
+          <li>Un monolito modular, bien organizado, es un punto de partida profesional.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+          <a class="related-lessons__link" href="../modulo-03/repository-y-acceso-a-datos.html">Repository y acceso a datos</a>
+          <a class="related-lessons__link" href="../modulo-07/de-monolito-a-modulos.html">De monólito a módulos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

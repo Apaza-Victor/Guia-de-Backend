@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m2-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colas prioritarias y TTL · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Implementa colas prioritarias con RabbitMQ, tiempo de vida del mensaje (TTL) y colas delayed: mensajes que esperan, expiran y se despachan en el momento exacto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m2-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Colas prioritarias y TTL</span>
+      </nav>
+      <h1 class="lesson-title">Colas prioritarias y TTL</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · RabbitMQ y colas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>No todos los mensajes merecen el mismo trato. Un pago fallido que hay que reintentar debería saltarse la fila de los correos de marketing; y un verificador de identidad web, esperar solo unos minutos por si alguien necesita un reenvío.</p>
+        <p>RabbitMQ cubre ambos casos con mecanismos de la propia infraestructura:</p>
+        <ul>
+          <li><strong>Prioridad:</strong> saltarse la cola cuando el mensaje es más importante.</li>
+          <li><strong>TTL (time-to-live):</strong> morir solo (o redirigirse) tras un lapso si nadie lo consumió.</li>
+          <li><strong>Colas delayed:</strong> mensajes que esperan un tiempo definido antes de ser entregables.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="prioridad">Colas prioritarias</h2>
+        <p>Se activa declarando la cola con <code>x-max-priority</code> (número máximo de niveles, p. ej. 10). Cada mensaje lleva un header <code>priority</code> del 0 al máximo; el broker ordena la cola para que primero salga el de mayor prioridad.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function prioridadDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  // Cola con niveles de 0 a 10
+  await ch.assertQueue('tareas', {
+    durable: true,
+    arguments: { 'x-max-priority': 10 }
+  });
+
+  // Mensaje normal (prioridad 0 por defecto)
+  ch.sendToQueue('tareas', Buffer.from('{"tipo":"marketing"}'),
+    { persistent: true });
+
+  // Usuario PRO pagando: salta la fila
+  ch.sendToQueue('tareas', Buffer.from('{"tipo":"pago-urgente"}'), {
+    persistent: true,
+    priority: 10
+  });
+
+  console.log('pago-urgente se procesará antes que marketing');
+  await conn.close();
+}
+
+prioridadDemo();</code></pre>
+        <p>Límite y advertencia: si defines <code>priority: 999</code> sobre una cola con <code>x-max-priority: 10</code>, RabbitMQ lo trunca a 10. Y una cola prioritizada es <strong>más lenta</strong> (reordenación interna): no la uses para todo, solo cuando de verdad importe el orden de servicio.</p>
+      </section>
+
+      <section>
+        <h2 id="ttl">Message TTL: el reloj del mensaje</h2>
+        <p>El TTL define cuántos milisegundos vive un mensaje <em>sin ser consumido</em>. Pasado el tiempo, RabbitMQ lo expulsa: lo <strong>descarta</strong> o, si la cola tiene DLX, lo <strong>reenvía</strong> (patrón retry que ya vimos). Se puede fijar:</p>
+        <ul>
+          <li>Por mensaje (propiedad <code>expiration</code>): valiosa para ofertas y códigos con vigencia.</li>
+          <li>Por cola (argumento <code>x-message-ttl</code>): política global para toda la cola.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python">import pika
+
+canal = pika.BlockingConnection(pika.ConnectionParameters('localhost')).channel()
+
+# Cola con TTL base de 5 minutos
+canal.queue_declare(queue='ofertas', arguments={'x-message-ttl': 300000})
+
+# Este cupón en concreto vence en 30 segundos (TTL por mensaje manda)
+canal.basic_publish(
+    exchange='', routing_key='ofertas',
+    body=b'{"cupon":"FLASH30","descuento":30}',
+    properties=pika.BasicProperties(expiration='30000',
+                                     delivery_mode=2)
+)
+
+# El cupón FLASH30 desaparece a los 30 s si nadie lo consumió</code></pre>
+        <p>Dato sutil: el TTL se cuenta desde que el mensaje <strong>llega</strong> a la cola, no desde que se entrega al worker. Un mensaje en vuelo (ya entregado) no se expira hasta que vuelve.</p>
+      </section>
+
+      <section>
+        <h2 id="delayed">Colas delayed: el despertador</h2>
+        <p>La combinación TTL + DLX permite una cola «de espera»: publicas el mensaje con TTL de N segundos y una DLX que apunta a la cola real. Al expirar, pasa a la cola de trabajo. Es el patrón <em>delayed retry</em> ya usado en la lección anterior, y RabbitMQ ofrece además el plugin oficial <code>rabbitmq_delayed_message_exchange</code> para hacerlo con un solo exchange:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Activar el plugin de mensajes delayed
+rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
+# Con Docker
+docker exec rabbit rabbitmq-plugins enable rabbitmq_delayed_message_exchange</code></pre>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function delayedDemo() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  // Exchange de tipo x-delayed-message
+  await ch.assertExchange('retrasados', 'x-delayed-message', {
+    durable: true,
+    arguments: { 'x-delayed-type': 'direct' }
+  });
+  const q = await ch.assertQueue('recordatorios', { durable: true });
+  await ch.bindQueue(q.queue, 'retrasados', 'aviso');
+
+  // El mensaje no será entregable hasta dentro de 2 minutos
+  ch.publish('retrasados', 'aviso', Buffer.from(JSON.stringify({
+    tipo: 'recordatorio', correo: 'cliente@correo.com'
+  })), {
+    headers: { 'x-delay': 120000 }   // 120 s de espera
+  });
+
+  console.log('Recordatorio programado para +2 min');
+  await conn.close();
+}
+
+delayedDemo();</code></pre>
+      </section>
+
+      <section>
+        <h2 id="donde">Dónde brilla cada mecanismo</h2>
+        <ul>
+          <li><strong>Prioridad:</strong> colas de soporte pagado vs gratuito, mensajes críticos de monitorización, reintentos urgentes.</li>
+          <li><strong>TTL:</strong> cupones que expiran, ofertas por tiempo limitado, datos de sesión temporales, limpieza automática de colas sucias.</li>
+          <li><strong>Delayed:</strong> recordatorios («en 24 h envía esto»), cierre de carritos abandonados, escalado de alertas, trabajo programado a hora exacta.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>No confundas delayed con CRON:</strong> una cola delayed programa <em>mensajes individuales</em>, no procesos periódicos. Para «ejecuta esto cada día a las 3:00», sigue usando un cron que publique el mensaje.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Declara una cola <code>soporte</code> con <code>x-max-priority: 10</code> y publica 3 mensajes con prioridades 0, 10 y 5. Verifica el orden de consumo en el panel.</li>
+          <li>Configura una cola <code>cupones</code> con TTL de 1 minuto y DLQ, publica un cupón y observa cómo «muere» a la DLQ a los 60 s.</li>
+          <li>Diseña con delayed un flujo: «20 minutos después de la primera falta de pago, envíame un recordatorio de vencimiento, una vez».</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La prioridad se configura con <code>x-max-priority</code> y el header <code>priority</code> por mensaje.</li>
+          <li>El TTL (por cola o por mensaje) expira los mensajes no consumidos; con DLX, los redirige.</li>
+          <li>TTL + DLX = colas de espera («delayed») sin plugins.</li>
+          <li>El plugin <code>rabbitmq_delayed_message_exchange</code> añade un exchange <code>x-delayed-message</code> con header <code>x-delay</code>.</li>
+          <li>Prioridad, TTL y delayed resuelven problemas distintos; úsalos deliberadamente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="consumidor-resiliente.html">Consumidor resiliente</a>
+          <a class="related-lessons__link" href="workers-y-prefetch.html">Workers y prefetch</a>
+          <a class="related-lessons__link" href="../modulo-01/garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="../modulo-03/particiones-y-claves.html">Particiones y claves</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

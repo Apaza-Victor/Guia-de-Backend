@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profiling y correlación · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende profiling en producción con pprof, py-spy y async-profiler, y la correlación traza-métrica-log con convenciones semánticas (semconv).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Profiling y correlación</span>
+      </nav>
+      <h1 class="lesson-title">Profiling y correlación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Alertas y dashboards</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">El profiling como cuarto pilar</h2>
+        <p>Las trazas te dicen <em>dónde</em> se gasta el tiempo; el <strong>profiling</strong> te dice <em>en qué código</em>. Un perfil de CPU o de memoria es una fotografía del stack de llamadas del proceso: qué funciones se ejecutan y cuánto tiempo (o memoria, o locks) consumen.</p>
+        <p>Los flame graphs son su visualización clásica: cada barra es una función, su ancho la proporción de tiempo. El diagnóstico más típico en backend: el servicio no se cae, pero gasta 70 % de la CPU en serializar JSON de un campo que nadie lee.</p>
+      </section>
+
+      <section>
+        <h2 id="muestreo">Herramientas según el lenguaje</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash" data-language="bash"># Go: pprof nativo, muestra el proceso sin reiniciarlo
+go tool pprof -http=:8081 \
+  http://localhost:6060/debug/pprof/profile?seconds=30
+
+# Python: py-spy muestrea un proceso en marcha (sin cProfile)
+py-spy record --pid 4312 -o perfil.svg --duration 30
+py-spy top --pid 4312
+
+# JVM: async-profiler, CPU y heap de un proceso Java
+./profiler.sh -d 30 -o flat -f /tmp/cpu.txt 4312</code></pre>
+          </div>
+        </figure>
+        <p>La idea es la misma: <strong>muestrear</strong> el stack en marcha (entre 10 y 1000 veces por segundo) durante una ventana de tiempo, sin detener el servicio. La sobrecarga es pequeña y acotada a la ventana.</p>
+        <div class="callout">
+          <p><strong>Cuándo perfilas:</strong> cuando las trazas ya apuntaron a una función/operación concreta. El profiling responde el «¿por qué este span tarda tanto?». Perfilar a ciegas sin la traza que acote el problema es barrido de bala.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="continuo">Profiling continuo</h2>
+        <p>Versiones modernas (Parca, Pyroscope, Datadog, Elastic) recolectan perfiles de forma continua como si fueran métricas y los asocian por servicio y release. Ventajas: ves regresiones (un release que aumentó 20 % la CPU hasta notarlo) y correlacionas perfiles con el resto de señales por el mismo sentido temporal. Coste: algo de CPU por proceso muestreado — se configura con porcentaje objetivo.</p>
+      </section>
+
+      <section>
+        <h2 id="semconv">Semconv: que todos hablen igual</h2>
+        <p>La correlación entre señales exige que los nombres de los atributos sean consistentes. Las <strong>convenciones semánticas (SemConv)</strong> de OpenTelemetry definen cómo llamar a http, db, red, cloud, etc. Este es el motivo por el que puedes mirar un dashboard de Grafana que importaste y entender cada serie sin preguntar al que la creó:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "service.name": "checkout-api",
+  "service.version": "1.4.2",
+  "telemetry.sdk.language": "nodejs",
+
+  "http.request.method": "POST",
+  "http.route": "/v1/checkout",
+  "http.response.status_code": "504",
+  "url.domain": "api.tienda.com",
+
+  "db.system": "postgresql",
+  "db.operation": "SELECT",
+  "db.sql.table": "orders",
+
+  "cloud.provider": "aws",
+  "cloud.region": "us-east-1"
+}</code></pre>
+          </div>
+        </figure>
+        <p>Cuanto más uses los nombres estándar, mejor se integran Prometheus, Grafana, ELK y Jaeger entre sí — y migrar a otra herramienta no rompe tus dashboards: tus consultas y atributos sobreviven porque el vocabulario común.</p>
+      </section>
+
+      <section>
+        <h2 id="correlacion">El flujo completo de una incidencia</h2>
+        <p>Pongamos todas las piezas juntas: tu métrica p99 de checkout salta de 200 ms a 3 s. La investigación de 360°:</p>
+        <ol>
+          <li><strong>Métrica:</strong> el p99 subió exactamente a las 09:00 (dashboard RED).</li>
+          <li><strong>Traza:</strong> abres las trazas de esa ruta y ves que el span <code class="inline">SELECT stock</code> pasó de 50 ms a 2,5 s.</li>
+          <li><strong>Log:</strong> filtras por trace_id y el log dice «lock_time_ms=2400» en esa consulta.</li>
+          <li><strong>Perfil:</strong> el perfil del QPS de esa ruta muestra el driver de BD acumulando tiempo en <code class="inline">wait_for_connection</code>: el pool está saturado.</li>
+          <li><strong>Decisión:</strong> subir el pool + añadir índice = causa raíz atacada con datos, no con corazonadas.</li>
+        </ol>
+        <p>El filtro en ELK que une el paso 3, partiendo del trace_id que viste en el paso 2:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736" } },
+        { "term": { "span_id": "0b3f9d4c8e1a7062" } }
+      ]
+    }
+  },
+  "sort": [{ "@timestamp": { "order": "asc" } }],
+  "size": 50
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="reglas">Reglas para no perderse</h2>
+        <ul>
+          <li>Métricas prima la <em>alerta</em>: el objetivo del dashboard es detectar. Trazas el <em>dónde</em>; logs el <em>qué</em>; perfiles el <em>por qué en el código</em>.</li>
+          <li>Usa siempre el mismo trace_id en las tres señales: es la llave que une los sistemas.</li>
+          <li>SemConv por defecto; inventa nombres de atributos solo cuando no exista el estándar.</li>
+          <li>Perfila con ventana corta y dirigida por una traza, no como actividad del día a día.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma una ruta lenta de tu API y ejecuta un perfil de CPU de 30 s sobre el proceso (pprof, py-spy o async-profiler).</li>
+          <li>Identifica la función más cara del perfil y compárala con el span que más tarda en una traza de esa ruta.</li>
+          <li>Reescribe los atributos de tus logs y spans usando semconv para dejar de inventar nombres.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El profiling muestra en qué funciones se gasta CPU, memoria o tiempo de bloqueo.</li>
+          <li>Herramientas: pprof (Go), py-spy (Python), async-profiler (JVM); o profiling continuo de plataforma.</li>
+          <li>SemConv estandariza nombres de atributos para que las señales se integren.</li>
+          <li>Métrica → traza → log → perfil es un recorrido completo: cada señal cierra una parte del problema.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/opentelemetry.html">OpenTelemetry</a>
+          <a class="related-lessons__link" href="../modulo-01/trazas-distribuidas.html">Trazas distribuidas</a>
+          <a class="related-lessons__link" href="slos-y-slis.html">SLOs, SLIs y SRE</a>
+          <a class="related-lessons__link" href="../modulo-03/dashboards-efectivos.html">Dashboards efectivos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

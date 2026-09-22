@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particiones y claves · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Domina el particionado de Kafka: hashing de claves, orden por entidad, stickey partitioning, ubicación de eventos correlacionados y cómo elegir el número de particiones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Particiones y claves</span>
+      </nav>
+      <h1 class="lesson-title">Particiones y claves</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Kafka y event streaming</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La partición es la moneda de orden y paralelismo de Kafka. Todo lo que pidamos a Kafka en términos de «procesa los eventos de una entidad en el orden exacto en que ocurrieron» depende de <strong>cómo elijamos la clave</strong> que decide la partición.</p>
+        <p>Si la clave es correcta, los eventos de una misma entidad caen siempre en la misma partición y se procesan en orden. Si la clave es un timestamp o un ID global, el orden por entidad se rompe en mil pedazos.</p>
+      </section>
+
+      <section>
+        <h2 id="hashing">Cómo se elige la partición</h2>
+        <p>Cuando el productor envía un mensaje con <code>key</code>, Kafka la hashea (<code>murmur2</code>) y calcula <code>abs(hash(key)) % num_partitions</code>. Con la misma clave, siempre la misma partición:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// En kafkajs, el particionador DefaultPartitioner usa murmur2 y % N.
+// clave "usuario-4242" => siempre la misma partición (por ejemplo la 1)
+
+const mensajes = [
+  { key: 'usuario-4242', value: '{"tipo":"pedido.creado"}' },
+  { key: 'usuario-4242', value: '{"tipo":"pago.aprobado"}' },
+  { key: 'usuario-4242', value: '{"tipo":"pedido.enviado"}' }
+];
+
+// Los 3 eventos del USUARIO 4242 caen en la MISMA partición
+// -> se procesan en el orden exacto en que fueron publicados.
+
+// Dato práctico: NO confíes en cuál es esa partición;
+// confía en que ES SIEMPRE la misma mientras el nº de particiones no cambie.</code></pre>
+        <p>Sin clave (<code>key: null</code>), Kafka reparte en round-robin (o en ráfagas con sticky partitioning). Perfecto para logs y métricas donde el orden no importa.</p>
+      </section>
+
+      <section>
+        <h2 id="orden">El orden por entidad en acción</h2>
+        <p>Imagina el recorrido de un pedido: <em>creado</em> → <em>pagado</em> → <em>enviado</em> → <em>entregado</em>. El servicio que mantiene el estado del pedido debe verlos en ese orden. Con la clave <code>pedidoId</code>, ningún pedido salta ni se procesa paralelamente contra un estado viejo:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from confluent_kafka import Producer
+
+producer = Producer({'bootstrap.servers': 'localhost:9092'})
+
+def publicar(topic, clave, evento):
+    producer.produce(topic, key=clave.encode(), value=evento.encode())
+    producer.flush()   # confirma el envío
+
+# Todos los eventos del PEDIDO P-1 van a la misma partición y orden
+publicar('pedidos', 'P-1', '{"estado":"creado","ts":1}')
+publicar('pedidos', 'P-1', '{"estado":"pagado","ts":2}')
+publicar('pedidos', 'P-1', '{"estado":"enviado","ts":3}')
+
+# El consumidor que reconstruye el estado del pedido P-1
+# leerá: creado -> pagado -> enviado, SIEMPRE en ese orden.</code></pre>
+        <p>Éste es el contrato que permite hacer <em>estado derivado</em> con Kafka: el topic es la historia, y el consumidor aplica los hechos en orden.</p>
+      </section>
+
+      <section>
+        <h2 id="particionamiento">Elegir el número de particiones</h2>
+        <p>No elijas 100 particiones a lo loco. El número ideal depende de:</p>
+        <ul>
+          <li><strong>Cuánto throughput necesitas:</strong> más particiones = más paralelismo (un consumidor por partición como máximo, en el mismo grupo).</li>
+          <li><strong>Cuánta cardinalidad de claves tienes:</strong> con claves por usuario y 4 particiones, miles de usuarios comparten cada partición; con 24 particiones, se distribuyen mejor.</li>
+          <li><strong>El coste de la reordenación:</strong> cada partición es un archivo y metadatos en cada broker; miles de particiones degradan el rendimiento del broker.</li>
+          <li><strong>El reequilibrio:</strong> las particiones se asignan entre los consumidores; cuantas más particiones, más equilibrado (pero más lento el rebalanceo).</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla de dedo:</strong> empieza por 6-12 particiones por topic y multiplícalas solo cuando tu monitorización diga que el throughput lo exige. Los consumidores se escalan hasta el número de particiones; de ahí en adelante, añadir threads no ayuda.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="co-localizacion">Co-ubicar eventos correlacionados</h2>
+        <p>Cuando dos tipos de eventos deben procesarse juntos en orden, comparte la misma <strong>clave lógica</strong> entre topics. Por ejemplo <code>pedidos</code> y <code>envios</code> se particionan ambos por <code>pedidoId</code>: un consumidor que los une hace join por la misma clave sin barajar datos.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Ambos topics particionados por la MISMA clave lógica
+# topic "pedidos"  key = pedido-77  -> partición X
+# topic "envios"   key = pedido-77  -> partición X (mismo nº particiones)
+#  => join sin movimiento de datos entre brokers en la misma partición</code></pre>
+        <p>Esta propiedad (misma clave = misma partición = mismo orden) es la base de las tablas y joins de Kafka Streams, aunque allí se materializan con topics compactados.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Con un topic de 3 particiones, publica 9 eventos usando 2 claves diferentes. Verifica por tema: ¿por qué todos los de la clave A caen siempre en la misma partición?</li>
+          <li>Responde: ¿qué pasa si incrementas las particiones de 3 a 4 mientras hay mensajes no consumidos? ¿Qué le ocurre al orden de las claves ya hasheadas con el nº antiguo?</li>
+          <li>Diseña las claves para un sistema de seguimiento logístico: ¿qué agregarías para que un pedido con varios embarques se procese en orden y a la vez se reparta bien entre consumidores?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La clave decide la partición: <code>hash(clave) % nº_partitions</code>.</li>
+          <li>Misma clave = misma partición = orden secuencial garantizado por entidad.</li>
+          <li>Sin clave, round-robin/sticky: buen paralelismo, orden por entidad inexistente.</li>
+          <li>El nº de particiones fija el paralelismo y el coste del rebalanceo.</li>
+          <li>Co-ubicar eventos relacionados con la misma clave permite joins sin barajar datos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="kafka-conceptos.html">Kafka: conceptos</a>
+          <a class="related-lessons__link" href="consumer-groups.html">Consumer groups y rebalanceo</a>
+          <a class="related-lessons__link" href="productores-y-consumidores.html">Productores y consumidores</a>
+          <a class="related-lessons__link" href="event-sourcing-y-sagas.html">Event sourcing y sagas</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

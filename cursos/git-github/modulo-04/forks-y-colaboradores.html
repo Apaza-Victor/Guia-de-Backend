@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="forks-y-colaboradores">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forks y colaboradores · Git y GitHub · Backend Academy</title>
+<meta name="description" content="Forks para contribuir a proyectos ajenos y colaboradores para invitar a tu equipo, con ramas protegidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="git-github" data-current="forks-y-colaboradores"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Git y GitHub</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Forks y colaboradores</span>
+        </nav>
+        <h1 class="lesson-title">Forks y colaboradores</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Git y GitHub</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Colaboración y PR</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="dos">Dos caminos para colaborar</h2>
+          <p>En GitHub hay dos formas de tocar un proyecto: dentro del equipo (colaborador con push, o <strong>branch protected</strong> obligando PR) o desde fuera (fork del repo, sin permiso, vía pull request).</p>
+        </section>
+
+        <section>
+          <h2 id="fork">El flujo fork + PR</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># 1. boton Fork en GitHub (crea UNA COPIA en tu cuenta)
+
+# 2. clona TU fork y enlaza el original "upstream"
+git clone https://github.com/tu-usuario/util-lib.git
+git remote add upstream https://github.com/autor/util-lib.git
+
+# 3. empieza siempre desde el codigo mas reciente
+git fetch upstream
+git switch main
+git merge --ff-only upstream/main
+
+# 4. crea tu rama, haz tus commits, subela a TU fork</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="colab">El flujo colaborador</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># supongamos que te dan rol de colaborador sobre un repo
+git clone https://github.com/equipo/nuestro-proyecto.git
+git remote -v        # origin = repo del equipo, ya estas dentro
+
+# ramas protegidas (lo comun en equipos):
+#   - nadie puede pushear directo a main
+#   - todo llega por PR aprobado y CI en verde</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="proteger">Proteger las ramas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># Settings > Branches > Add rule (en GitHub)
+#   Require pull request reviewing: obligatorio revisar
+#   Require approvals: minimo 1 (o 2) aprobaciones
+#   Require status checks: la CI debe pasar
+#   Do not allow bypassing: ni el admin por accidente
+
+# resultado: main es una puerta giratoria
+# nada entra sin una revision humana y verde limpio</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Haz fork de una librería que uses en GitHub.</li>
+            <li>Clónalo y añade el remoto <code class="inline">upstream</code>.</li>
+            <li>Actualízalo con <code class="inline">git merge --ff-only upstream/main</code>.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Fork: copia del repo para contribuir sin permiso.</li>
+            <li>Colaborador: acceso directo, a menudo con ramas protegidas.</li>
+            <li>Ramas protegidas = PR + aprobaciones + CI.</li>
+            <li><code class="inline">upstream</code> es el repo original, <code class="inline">origin</code> el tuyo.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="pull-requests.html">Pull requests</a>
+            <a class="related-lessons__link" href="../modulo-03/remotos-y-git-remote.html">Remotos y git remote</a>
+            <a class="related-lessons__link" href="../modulo-02/gitflow-y-estrategias.html">GitFlow y estrategias de flujo</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Git</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Ramas y merges</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub y remotos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Colaboración y PR</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Git avanzado</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REST · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de REST: recursos y URLs, métodos HTTP, códigos de estado, cabeceras, JSON, endpoints, versionado, paginación, filtros, autenticación Bearer, idempotencia y OpenAPI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">REST</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🔗 REST</h1>
+          <p class="section-subtitle">Diseño de APIs REST: recursos, métodos, códigos de estado, versionado, paginación, filtros, autenticación e idempotencia. El estándar dominante en backend.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> APIs</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="recursos">Recursos y URLs</h2>
+              <ul>
+                <li>Un <strong>recurso</strong> es una entidad: usuarios, posts, pedidos. Va en plural y en minúscula.</li>
+                <li>Usa <strong>sustantivos</strong>; nunca verbos en la URL (los verbos son los métodos HTTP).</li>
+                <li>Identificadores al final: <code class="inline">/api/users/42</code>.</li>
+                <li>Subrecursos para relaciones: <code class="inline">/api/users/42/posts</code>.</li>
+                <li>Jerarquía máxima de 2 niveles si es posible.</li>
+              </ul>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">REST</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-rest">GET    /api/users                       → lista de usuarios
+POST   /api/users                       → crea un usuario
+GET    /api/users/42                    → detalle del usuario 42
+PUT    /api/users/42                    → reemplazo completo
+PATCH  /api/users/42                    → actualización parcial
+DELETE /api/users/42                    → borra el usuario
+
+GET    /api/users/42/posts              → posts de ese usuario
+
+# Nombres en kebab-case para rutas, snake_case para campos JSON
+GET /api/order-items/9
+{"order_id": 9, "total_amount": 100}
+
+# Evita:
+GET /api/getUsers        # verbo
+GET /api/users/list      # verbo encubierto
+POST /api/update-user    # verbo en URL
+GET /api/user            # singular</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="metodos">Métodos HTTP</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Método</th><th>Propósito</th><th>¿Idempotente?</th><th>Cuerpo?</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">GET</code></td><td>Leer (solo lectura)</td><td>Sí</td><td>No</td></tr>
+                    <tr><td><code class="inline">POST</code></td><td>Crear o acción compleja</td><td>No</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">PUT</code></td><td>Reemplazar por completo</td><td>Sí</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">PATCH</code></td><td>Actualizar parcialmente</td><td>No</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">DELETE</code></td><td>Eliminar</td><td>Sí</td><td>Opcional</td></tr>
+                    <tr><td><code class="inline">HEAD</code></td><td>Cabeceras sin body</td><td>Sí</td><td>No</td></tr>
+                    <tr><td><code class="inline">OPTIONS</code></td><td>Ver métodos permitidos</td><td>Sí</td><td>No</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p><strong>Idempotente</strong>: repetir la petición N veces produce el mismo efecto que una vez.</p>
+            </section>
+
+            <section>
+              <h2 id="status">Códigos de estado</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Código</th><th>Cuándo usarlo</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">200</code> OK</td><td>GET exitoso, PUT, PATCH.</td></tr>
+                    <tr><td><code class="inline">201</code> Created</td><td>POST que crea un recurso. Incluye <code class="inline">Location</code>.</td></tr>
+                    <tr><td><code class="inline">202</code> Accepted</td><td>Procesado en segundo plano.</td></tr>
+                    <tr><td><code class="inline">204</code> No Content</td><td>DELETE exitoso, cuerpo vacío.</td></tr>
+                    <tr><td><code class="inline">400</code> Bad Request</td><td>Datos inválidos o JSON mal formado.</td></tr>
+                    <tr><td><code class="inline">401</code> Unauthorized</td><td>Falta token o expiró.</td></tr>
+                    <tr><td><code class="inline">403</code> Forbidden</td><td>Autenticado pero sin permiso.</td></tr>
+                    <tr><td><code class="inline">404</code> Not Found</td><td>Recurso o endpoint inexistente.</td></tr>
+                    <tr><td><code class="inline">409</code> Conflict</td><td>Violación de estado (email duplicado, versión antigua).</td></tr>
+                    <tr><td><code class="inline">422</code> Unprocessable Entity</td><td>Validación semántica falla.</td></tr>
+                    <tr><td><code class="inline">429</code> Too Many Requests</td><td>Límite de rate limiting.</td></tr>
+                    <tr><td><code class="inline">500</code> Server Error</td><td>Fallo inesperado del servidor (no le informes al cliente del detalle).</td></tr>
+                    <tr><td><code class="inline">502/503/504</code></td><td>Pasarela / no disponible / timeout.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="cabeceras">Cabeceras importantes</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http"># Request
+Content-Type: application/json     # formato del body
+Accept: application/json           # formato que acepto
+Authorization: Bearer eyJhbGci...
+If-Match: "v1-etag"                # para concurrencia con ETag
+
+# Response
+Content-Type: application/json
+Location: /api/users/42            # dónde está el recurso creado
+ETag: "33a64df5"                   # versión del recurso
+Cache-Control: max-age=60
+Set-Cookie: sesion=abc; HttpOnly; Secure; SameSite=Lax
+RateLimit-Limit: 100
+RateLimit-Remaining: 87</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="json">JSON y errores consistentes</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-json">// Objeto único salvo para listas (nunca un array suelto)
+// Respuesta de lista con paginación
+{
+  "data": [
+    { "id": 1, "name": "Ada" },
+    { "id": 2, "name": "Grace" }
+  ],
+  "pagination": {
+    "page": 1,
+    "per_page": 10,
+    "total": 42,
+    "total_pages": 5
+  }
+}
+
+// Error consistente en toda la API
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "El campo email es obligatorio",
+    "details": [
+      { "field": "email", "message": "Formato no válido" }
+    ]
+  }
+}
+
+// Siempre define el mismo molde: data | error, nunca los dos.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="endpoints">Diseño de endpoints completo</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">REST</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-rest"># Crear usuario → 201 + Location
+POST /api/v1/users
+{ "email": "ada@dev.io", "name": "Ada" }
+→ 201 Created
+  Location: /api/v1/users/42
+
+# Leer lista con filtros y orden
+GET /api/v1/users?status=active&amp;role=admin&amp;sort=-created_at
+
+# Puntos de vista de un recurso específico
+GET /api/v1/users/42
+
+# Actualizar parcialmente
+PATCH /api/v1/users/42
+{ "name": "Ada Lovelace" }
+
+# Borrar
+DELETE /api/v1/users/42
+→ 204 No Content
+
+# Acciones de negocio: subrecurso o verbo POST puntual
+POST /api/v1/users/42/activate        # está bien documentado
+POST /api/v1/orders/9/refund</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="versionado">Versionado y paginación</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">REST</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-rest"># Versionado en la URL (simple y visible)
+/api/v1/users     /api/v2/users
+
+# ... o por cabecera Accept (más elegante, menos descubre)
+Accept: application/vnd.app.v2+json
+
+# Paginación por página
+GET /api/v1/posts?page=3&amp;per_page=20
+
+# Paginación por cursor (escalable en grandes volúmenes)
+GET /api/v1/posts?cursor=eyJpZCI6Mn0
+→ { "data": [...], "next_cursor": "eyJpZCI6ODU=" }
+
+# Cursor: estable aunque inserten filas; página: puede repetir/saltar.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="filtros">Filtros, búsqueda y orden</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">REST</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-rest"># Cada parámetro como query string
+GET /api/v1/orders?status=paid
+GET /api/v1/orders?from=2026-01-01&amp;to=2026-06-30
+GET /api/v1/orders?min_total=100
+
+# Búsqueda de texto
+GET /api/v1/products?q=laptop
+
+# Sintaxis de filtros avanzada (JSON API) o con - para descendente
+GET /api/v1/users?sort=-created_at      # más recientes primero
+GET /api/v1/users?fields=id,name        # solo columnas pedidas
+
+# Selección de campos (sparse fields) para payloads ligeros
+GET /api/v1/products?fields=id,name,price</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="autenticacion">Autenticación: Bearer tokens</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http"># 1. Login → token
+POST /api/v1/auth/login
+{ "email": "ada@dev.io", "password": "..." }
+→ 200
+{ "token": "eyJhbGciOiJIUzI1NiIs..." }
+
+# 2. Usar en cada petición protegida
+GET /api/v1/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+# JWT típico (3 partes: header.payload.firma)
+# header: {"alg":"HS256","typ":"JWT"}
+# payload: {"sub":42,"role":"admin","exp":1730000000}
+# firma: HMAC con secret del servidor
+
+# Precauciones
+#   - exp siempre corto (15 min–1 h); refresh token largo solo en cookie HttpOnly
+#   - HTTPS obligatorio, no guardes tokens en localStorage si puedes evitarlo
+#   - Validation en servidor: secreto, algo, exp y sub
+#   - Revocación: lista negra o versión de sesión en BD (si la necesitas)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="idempotencia">Idempotencia</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http"># El cliente puede enviar una clave de idempotencia
+POST /api/v1/payments
+Idempotency-Key: 9d1c9b0f-1234
+
+# El servidor guarda la clave y la respuesta de la primera vez.
+# Si repites con la misma clave → devuelve la MISMA respuesta,
+# sin crear un segundo cobro. Clave: UUID por cada operación nueva.
+
+# Casos típicos: pagos, envío de emails, transferencias.
+
+# Idempotencia que ya da HTTP:
+#   GET    → sí
+#   PUT    → sí (mismo cuerpo, mismo estado final)
+#   DELETE → sí (borrar lo ya borrado da 204/404, sin efecto nuevo)
+#   POST   → NO: por eso se protege con Idempotency-Key en el servidor</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="openapi">Documentar con OpenAPI</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-yaml">openapi: 3.1.0
+info:
+  title: API de Usuarios
+  version: "1.0"
+paths:
+  /users:
+    get:
+      summary: Lista usuarios
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/User" } }
+    post:
+      summary: Crea un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInput" }
+      responses:
+        "201": { description: Creado }
+        "422": { description: Validación falla }
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+    UserInput:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+
+# Swagger UI y herramientas de generación de clientes lo leen.
+# Alternativas válidas: GraphQL, gRPC, tRPC; REST sigue siendo el rey
+# por simplicidad y compatibilidad universal.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Nombres de recursos en <strong>plural y kebab-case</strong>; JSON en <strong>snake_case</strong>.</li>
+                <li>Molde de respuesta fijo y errores con código propio además del HTTP.</li>
+                <li>Paginación y filtros desde el principio, aunque el listado sea pequeño.</li>
+                <li>Safe methods (<code class="inline">GET</code>) nunca modifican estado.</li>
+                <li>Versiona la API desde el día uno: <code class="inline">/api/v1</code>.</li>
+                <li>Tokens con <code class="inline">exp</code> corto + refresh rotado; rate limiting para todo lo público.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="http.html">Siguiente: HTTP <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

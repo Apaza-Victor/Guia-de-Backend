@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-servidor-express-graphql">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Express + GraphQL · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a integrar GraphQL dentro de una aplicación Express en Node.js: middleware graphqlHTTP, context por request y resolvers conectados a una base de datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-servidor-express-graphql"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Express + GraphQL</span>
+      </nav>
+      <h1 class="lesson-title">Express + GraphQL</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Implementación con Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Si tu aplicación ya vive sobre <strong>Express</strong>, montar GraphQL en un endpoint aparte te permite convivir REST y GraphQL en el mismo servicio: guardas el middleware de auth, el log de peticiones y las rutas existentes, y añades un único <code>app.use('/graphql', ...)</code>.</p>
+        <p>La librería clásica de Douglas Wilson, <code>express-graphql</code>, expone el <code>graphqlHTTP</code> middleware; la moderna <code>graphql-http</code> es su sucesora y monta el <code>createHandler</code>. Veremos el patrón con la primera y la alternativa de la segunda.</p>
+      </section>
+
+      <section>
+        <h2 id="instalacion">Instalación</h2>
+        <p>Además de Express y GraphQL, instala el adaptador. En proyectos nuevos se recomienda <code>graphql-http</code>; para seguir el patrón histórico usa <code>express-graphql</code>:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash">npm install express graphql express-graphql
+npm install --save-dev nodemon</code></pre>
+      </section>
+
+      <section>
+        <h2 id="middleware">Montar el middleware</h2>
+        <p>La integración más directa: cualquier petición a <code>/graphql</code> la resuelve el middleware, que además sirve <code>graphiql: true</code> para explorar la API en el navegador:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import express from "express";
+import { graphqlHTTP } from "express-graphql";
+import { schema } from "./schema.js";
+
+const app = express();
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  }),
+);
+
+app.listen(4000, () => console.log("API en http://localhost:4000/graphql"));</code></pre>
+        <p>El middleware acepta una función en vez de un objeto para que cada request tenga su propio contexto:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const handler = graphqlHTTP((req, res, params) => ({
+  schema,
+  graphiql: true,
+  context: {
+    db: pool,
+    usuario: req.usuario ?? null,
+  },
+}));
+
+app.use("/graphql", handler);</code></pre>
+      </section>
+
+      <section>
+        <h2 id="context">El context por request</h2>
+        <p>El context es el puente entre el mundo HTTP y los resolvers. Aquí se inyecta el pool de base de datos y la identidad del usuario autenticado, para que los resolvers solo accedan a <code>context</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import jwt from "jsonwebtoken";
+
+const handler = graphqlHTTP((req, res, params) => {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  let usuario = null;
+  if (token) {
+    try {
+      usuario = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      usuario = null;
+    }
+  }
+  return {
+    schema,
+    context: { db: pool, usuario },
+  };
+});</code></pre>
+        <p>Así, un resolver puede exigir sesión sin volver a parsear headers ni tocar la base para cada campo.</p>
+      </section>
+
+      <section>
+        <h2 id="base-de-datos">Conectar la base de datos</h2>
+        <p>Con el pool en el context, los resolvers se vuelven delgados: reciben <code>args</code> y consultan:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    productos: async (parent, args, context) => {
+      const { rows } = await context.db.query(
+        "SELECT * FROM productos ORDER BY nombre",
+      );
+      return rows;
+    },
+    producto: async (parent, args, context) => {
+      const { rows } = await context.db.query(
+        "SELECT * FROM productos WHERE id = $1",
+        [args.id],
+      );
+      return rows[0] ?? null;
+    },
+  },
+};</code></pre>
+        <p>Como Express ya parsea el cuerpo, las operaciones llegan en el payload JSON estándar <code>{ query, variables }</code> y el middleware lo desenvuelve por ti.</p>
+      </section>
+
+      <section>
+        <h2 id="alternativa">La alternativa gráfica: graphql-http</h2>
+        <p>Si prefieres el adaptador moderno, el patrón cambia poco: mismo <code>schema</code>, misma idea de middleware:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { createHandler } from "graphql-http/lib/use/express";
+
+app.use(
+  "/graphql",
+  createHandler({
+    schema,
+    context: (req) => ({ db: pool, usuario: req.usuario ?? null }),
+  }),
+);</code></pre>
+        <p>La diferencia práctica está en el mantenimiento: <code>express-graphql</code> quedó en modo de soporte y <code>graphql-http</code> recibe las novedades de la especificación. Para proyectos nuevos, empieza por ella.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Integra <code>/graphql</code> en una app Express que ya tenga una ruta <code>GET /</code> respondiendo HTML.</li>
+          <li>Inyecta el pool de PostgreSQL (o un mock con <code>query</code>) en el context mediante la función de <code>graphqlHTTP</code>.</li>
+          <li>Escribe un resolver <code>productos</code> que lea de <code>context.db</code>.</li>
+          <li>Corrobora que <code>graphiql: true</code> sirve el IDE en el endpoint y prueba una consulta real.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li><code>express-graphql</code> (y su sucesor <code>graphql-http</code>) montan GraphQL como middleware Express.</li>
+          <li>GraphQL y REST pueden convivir en la misma aplicación.</li>
+          <li>El <code>context</code> por request inyecta la base de datos y al usuario autenticado.</li>
+          <li>Los resolvers consumen <code>context.db</code> y <code>args</code> sin tocar HTTP.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="apollo-server-basico.html">Apollo Server básico</a>
+          <a class="related-lessons__link" href="argumentos-y-variables.html">Argumentos y variables</a>
+          <a class="related-lessons__link" href="errores-y-estados.html">Errores y validación</a>
+          <a class="related-lessons__link" href="mutations-validaciones.html">Mutations y validación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="apollo-server-basico.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Apollo Server básico</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="argumentos-y-variables.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Argumentos y variables</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

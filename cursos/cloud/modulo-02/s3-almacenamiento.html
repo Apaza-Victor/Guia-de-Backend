@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="s3-almacenamiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S3: almacenamiento de archivos · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Usa S3 para tu Backend: buckets, presigned URLs, políticas públicas/privadas y versionado de objetos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="s3-almacenamiento"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">S3: almacenamiento de archivos</span>
+      </nav>
+      <h1 class="lesson-title">S3: almacenamiento de archivos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · AWS</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">El cajón infinito de AWS</h2>
+        <p><strong>S3 (Simple Storage Service)</strong> guarda <strong>objetos</strong> (archivos con metadatos) en <strong>buckets</strong> (contenedores con nombre único global). Es el almacenamiento más usado del mundo: fotos, backups, logs, assets de una API. Casi ilimitado, duradero y barato.</p>
+      </section>
+
+      <section>
+        <h2 id="conceptos">Conceptos clave</h2>
+        <ul>
+          <li><strong>Bucket:</strong> contenedor con nombre único global (<code class="inline">mi-api-media</code>).</li>
+          <li><strong>Objeto:</strong> clave (ruta lógica) + datos + metadatos. "Carpetas" son prefijos: <code class="inline">usuarios/42/avatar.png</code>.</li>
+          <li><strong>Región:</strong> se elige al crear el bucket y define latencia y precio.</li>
+          <li><strong>Versionado:</strong> guarda cambios de un objeto (protección contra borrados).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="comandos">Comandos básicos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># crear bucket (el nombre debe ser único global)
+aws s3api create-bucket \
+  --bucket mi-api-media \
+  --region sa-east-1 \
+  --create-bucket-configuration LocationConstraint=sa-east-1
+
+# subir un archivo
+aws s3 cp ./avatar.jpg s3://mi-api-media/usuarios/42/avatar.jpg
+
+# listar
+aws s3 ls s3://mi-api-media/usuarios/42/
+
+# descargar
+aws s3 cp s3://mi-api-media/usuarios/42/avatar.jpg ./avatar.jpg</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="acceso">Público o privado: con cuidado</h2>
+        <p>Por defecto los objetos son <strong>privados</strong> (solo los ve con permisos). Un bucket público expone todo internet, lo que ha causado millones de filtraciones:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># subir un archivo de acceso público (para assets públicos de la API)
+aws s3 cp scripts/app.js s3://mi-api-media/scripts/app.js \
+  --acl public-read
+
+# NUNCA: abrir el bucket completo "a todo el mundo"
+aws s3api put-public-access-block \
+  --bucket mi-api-media \
+  --public-access-block-configuration \
+  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true</code></pre>
+          </div>
+        </figure>
+        <p>Para archivos privados que tu API sirva a usuarios autenticados, se usan <strong>presigned URLs</strong> (enlaces temporales firmados):</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">import boto3
+from datetime import timedelta
+
+s3 = boto3.client("s3", region_name="sa-east-1")
+
+url = s3.generate_presigned_url(
+    "get_object",
+    Params={"Bucket": "mi-api-media", "Key": "facturas/2026/09/reporte.pdf"},
+    ExpiresIn=3600,          # válida 1 hora
+)
+
+print(url)  # el usuario descarga el archivo si está autenticado</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="backend">S3 en el Backend</h2>
+        <ul>
+          <li><strong>Rama privada:</strong> fotos de perfil, documentos, facturas: la API firma URLs temporales.</li>
+          <li><strong>Rama pública:</strong> estáticos del frontend, assets, imágenes de catálogo.</li>
+          <li><strong>Backups:</strong> versionado + regla de vida útil (Glasier para archivos de años).</li>
+          <li><strong>Eventos:</strong> al cargar un objeto se dispara una Lambda (thumbnail, validación).</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un bucket, sube un archivo y listalo desde la línea de comandos.</li>
+          <li>Genera una presigned URL con boto3 o la CLI y descarga el archivo con ella.</li>
+          <li>Evalúa qué de tu app debería ser público, qué privado y qué a proteger con versionado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>S3 guarda archivos como objetos en buckets con nombres únicos globales.</li>
+          <li>Los objetos son privados por defecto; el acceso público se concede con cuidado.</li>
+          <li>Las presigned URLs sirven archivos privados por tiempo limitado.</li>
+          <li>El versionado y los eventos S3→Lambda completan su uso Backend.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

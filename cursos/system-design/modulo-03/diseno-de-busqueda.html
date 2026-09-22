@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-diseno-de-busqueda">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caso: búsqueda · System Design · Backend Academy</title>
+<meta name="description" content="Diseña paso a paso un motor de búsqueda: índice invertido, tokenización, ranking de relevancia y particionado del índice a escala.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-diseno-de-busqueda"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Caso: búsqueda</span>
+      </nav>
+      <h1 class="lesson-title">Caso: búsqueda</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño completo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="requisitos">1. Requisitos</h2>
+        <p>Diseñemos búsqueda de productos en una tienda a escala, con 100 millones de productos y millones de consultas diarias:</p>
+        <ul>
+          <li><strong>Funcionales:</strong> buscar por texto libre (título, descripción), con filtros (categoría, precio, marca), ordenar por relevancia y por precio, y paginar. Sin sinónimos complejos ni ML (se declaran fuera de alcance).</li>
+          <li><strong>No funcionales:</strong> el primer resultado en menos de 200 ms (p95); frescura del índice en minutos; disponible 99.9%; un producto nuevo debe encontrarse poco después de publicarse.</li>
+          <li><strong>Supuestos:</strong> 500.000 consultas/día (≈6 QPS promedio, pico ~20), 100 millones de documentos, tamaño medio de documento 2 KB.</li>
+        </ul>
+        <p>Con esos QPS, la clave de diseño no es el tráfico: es el <strong>índice y su distribución</strong>. Un índice de 100 millones de documentos no cabe en una máquina cómoda; de ahí que casi todo en este caso gira alrededor de particionarlo.</p>
+      </section>
+
+      <section>
+        <h2 id="indice-invertido">2. Índice invertido</h2>
+        <p>El corazón de la búsqueda por texto es el <strong>índice invertido</strong>: un mapa de término → lista de documentos que lo contienen (posting list). En vez de escanear 100 millones de documentos por consulta, el buscador consulta unos pocos términos y cruza listas.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from collections import defaultdict
+
+def tokenizar(texto: str) -> list[str]:
+    return texto.lower().split()
+
+def construir_indice(docs: list[dict]) -> dict:
+    indice = defaultdict(list)
+    for doc in docs:
+        for token in set(tokenizar(f'{doc["titulo"]} {doc["descripcion"]}')):
+            indice[token].append(doc["id"])
+    return dict(indice)
+
+docs = [
+    {"id": 1, "titulo": "Laptop Gamer RTX", "descripcion": "16 GB RAM SSD"},
+    {"id": 2, "titulo": "Laptop Oficina", "descripcion": "8 GB RAM SSD"},
+    {"id": 3, "titulo": "Monitor 27", "descripcion": "4K IPS"},
+]
+indice = construir_indice(docs)
+print(indice["laptop"])      # [1, 2]
+print(indice["ssd"])         # [1, 2]</code></pre>
+        <p>El índice es un dato precomputado: se construye indexando doc a doc y después solo se consulta. La consulta «laptop ssd» intersecta las posting lists y devuelve los ids presentes en ambas. Términos <strong>stopwords</strong> (el, la, de) se filtran y <strong>raros y frecuentes</strong> se ponderan distinto, que es lo que alimenta el ranking.</p>
+      </section>
+
+      <section>
+        <h2 id="tokenizacion">3. Tokenización y normalización</h2>
+        <p>El texto real exige normalizar antes de indexar: pasar a minúsculas, quitar tildes según idioma, manejar plurales y dividir correctamente. En español, «celular» y «celulars» no deben ser términos distintos; los buscadores reales aplican <em>stemming</em> o diccionarios de normalización.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import unicodedata, re
+
+def normalizar(term: str) -> str:
+    """Minúsculas, sin tildes y solo alfanuméricos."""
+    sin_acentos = unicodedata.normalize("NFD", term)
+    sin_acentos = "".join(ch for ch in sin_acentos
+                          if unicodedata.category(ch) != "Mn")
+    return re.sub(r"[^a-z0-9 ]", "", sin_acentos.lower())
+
+print(normalizar("Café ☕"))     # cafe
+print(normalizar("Laptops!"))    # laptops</code></pre>
+        <p>Esta normalización se aplica a la consulta y a la indexación con <em>las mismas reglas</em>: si no coinciden, el término buscado nunca encuentra su posting list. Mantener reglas idénticas entre indexador y consumidor es una fuente clásica de búsquedas que «no encuentran nada».</p>
+      </section>
+
+      <section>
+        <h2 id="relevancia">4. Ranking de relevancia</h2>
+        <p>Buscar más que devolver documentos: hay que <strong>ordenar por relevancia</strong>. El modelo clásico es TF-IDF y su refinamiento moderno <strong>BM25</strong>: penaliza términos que aparecen en todos lados y premia los que aparecen en el documento y la posición del término.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import math
+
+def bm25(tf: int, dl: int, avgdl: float, N: int, df: int,
+         k1: float = 1.2, b: float = 0.75) -> float:
+    """Score BM25 de un término en un documento."""
+    idf = math.log(1 + (N - df + 0.5) / (df + 0.5))
+    den = tf + k1 * (1 - b + b * (dl / avgdl))
+    return idf * (tf * (k1 + 1) / den)
+
+texto_virgen = [("gamer", 5, 200), ("laptop", 3, 200)]   # término, tf, longitud doc
+N, avgdl, df = 100_000_000, 150, 5_000_000
+for termino, tf, dl in texto_virgen:
+    print(termino, round(bm25(tf, dl, avgdl, N, df), 3))</code></pre>
+        <p>El ranking admite <strong>boosts</strong>: un término en el título pesa más que en la descripción, y la marca o el precio de un producto premium se puede multiplicar. Los boosts son configuración del índice, no del código de consulta, lo que permite que producto ajuste relevancia sin deploy.</p>
+        <p>La salida de la query sería algo así — el buscador devuelve el id, el score y los campos cacheados para pintar la tarjeta:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "query": "laptop gamer",
+  "tiempo_ms": 45,
+  "total": 1284,
+  "resultados": [
+    { "id": 88211, "score": 24.7, "titulo": "Laptop Gamer 15\" RTX 4070", "precio": 1899.99 },
+    { "id": 88234, "score": 19.1, "titulo": "Laptop Gamer 14\" RTX 4060", "precio": 1499.99 }
+  ],
+  "filtros_aplicados": { "categoria": null, "precio_max": null }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="escalado">5. Escalar el índice</h2>
+        <p>El índice de 100 millones de documentos se escala de dos formas complementarias:</p>
+        <ul>
+          <li><strong>Sharding por documento</strong> (distribución por id): cada shard guarda su subconjunto del índice. Una consulta se envía a todos los shards en paralelo (fan-out), cada uno responde sus top-N, y el coordinador fusiona (merge). El costo de red crece con el número de shards.</li>
+          <li><strong>Sharding por término</strong> (distribución por palabra): la posting list de cada término vive en un lugar; la consulta de 3 términos toca 3 máquinas. Elegante para consultas cortas, pero crea términos «calientes» y consultas que tocan muchas máquinas a la vez.</li>
+        </ul>
+        <p>La decisión típica en producción es <strong>sharding por documento + réplicas</strong>, con el <em>tiering</em> en caliente y frío: los documentos «hot» (productos populares) se replican más veces y viven en memoria; el resto comparte disco y responde más lento.</p>
+      </section>
+
+      <section>
+        <h2 id="operacion">6. Operación del índice</h2>
+        <p>El índice no se actualiza en cada venta: se construye en lotes (<strong>índice primario o full index</strong>) y se fusiona con deltas que se producen mientras se indexa. La estrategia clásica de los motores: <strong>full + incremental</strong>.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Pipeline de indexado diario (pseudocódigo de operación)
+def job_indexado_diario():
+    lotes = leer_productos_del_dia()              # deltas de la jornada
+    for lote in reagrupar(lotes, tamano=50_000):
+        indice_delta = construir_indice(lote)     # el mejor momento del día
+        subir_a_nodos_calientes(indice_delta)     # compilar y desplegar
+        marcar_delta_como_servido()
+
+# La búsqueda sirve siempre el índice completo + los deltas activos</code></pre>
+        <p>Los motores modernos (Elasticsearch/OpenSearch, Vespa, Solr) automatizan estas piezas: sharding, réplicas, fusiones de segmentos y rebalanceo. El diseñador de sistemas elige los parámetros (número de shards, réplicas, refresh interval) pensando en el compromiso «frescura vs costo de reindexación».</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Construye el índice invertido de 3 frases tuyas y resuelve la consulta de dos palabras intersectando las listas.</li>
+          <li>Explica por qué «un producto nuevo debe aparecer en minutos» obliga a un pipeline de deltas, y qué pasaría con solo un full-index diario.</li>
+          <li>Si tu búsqueda tuviera 500.000 QPS en vez de 6, ¿cómo cambiaría la elección entre sharding por documento y por término?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El índice invertido mapea término → documentos y permite consultas sin escanear todo.</li>
+          <li>Normalizar y tokenizar con las mismas reglas en indexación y consulta es crítico para el idioma.</li>
+          <li>BM25 + boosts sitúa la relevancia: frecuencias, raridades y campos importantes.</li>
+          <li>El índice se parte por documento o por término, con réplicas y tiering caliente/frío.</li>
+          <li>La frescura se logra con índice completo + deltas incrementales, no reindexando todo.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+          <a class="related-lessons__link" href="estimaciones-de-capacidad.html">Estimaciones de capacidad</a>
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="presentar-tu-diseno.html">Presentar y comunicar</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="diseno-de-un-feed.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Caso: feed (newsfeed)</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="presentar-tu-diseno.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Presentar y comunicar</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

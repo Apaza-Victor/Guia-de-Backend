@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-apis-de-ia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APIs de IA · Backend para IA · Backend Academy</title>
+<meta name="description" content="Compara OpenAI, Claude y Gemini: formato de cada API, llamadas reales desde el backend y manejo de errores y rate limits.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-apis-de-ia"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">APIs de IA</span>
+      </nav>
+      <h1 class="lesson-title">APIs de IA</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Los modelos de IA se consumen vía HTTPS igual que cualquier API REST: un JSON de entrada, un JSON de salida y una clave de autenticación. Lo que cambia entre proveedores es el <em>formato exacto</em>, los nombres de los modelos y detalles como la estructura de mensajes.</p>
+        <p>Aquí comparamos los tres grandes que verás en producción — <strong>OpenAI</strong>, <strong>Anthropic (Claude)</strong> y <strong>Google (Gemini)</strong> — para que puedas integrar cualquiera de ellos y, sobre todo, migrar cuando cambien los precios o el rendimiento.</p>
+      </section>
+
+      <section>
+        <h2 id="formato-comun">El formato común: chat completions</h2>
+        <p>Los tres proveedores coinciden en la idea central: envías un arreglo de mensajes con <code>role</code> y <code>content</code>, y el modelo responde con el siguiente mensaje de la conversación. Esto no es casualidad: es la forma más flexible de construir diálogos con contexto.</p>
+        <p>La diferencia práctica está en detalles: OpenAI usa <code>messages</code> y un único <code>Authorization: Bearer</code>; Anthropic además exige el header <code>anthropic-version</code>; Gemini acepta el cuerpo mediante <code>contents</code>. Veamos cada llamada.</p>
+      </section>
+
+      <section>
+        <h2 id="openai">OpenAI: el estándar de facto</h2>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: 'Respondes en español, de forma breve.' },
+      { role: 'user', content: '¿Qué es una API key y por qué no debe ir al navegador?' }
+    ],
+    temperature: 0.4,
+    max_tokens: 200
+  })
+});
+
+const data = await res.json();
+console.log(data.choices[0].message.content);</code></pre>
+        <p>Toda la identidad del cliente, incluida la key, viaja en el header <code>Authorization</code>. Nunca la pongas en la URL ni en el cuerpo: los logs y los proxies la capturarían.</p>
+      </section>
+
+      <section>
+        <h2 id="claude">Claude: Anthropic</h2>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const res = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01'
+  },
+  body: JSON.stringify({
+    model: 'claude-3-5-sonnet-latest',
+    max_tokens: 1024,
+    system: 'Eres un asistente de soporte en español.',
+    messages: [
+      { role: 'user', content: 'Explica el error 429 en una frase.' }
+    ]
+  })
+});
+
+const data = await res.json();
+console.log(data.content[0].text);</code></pre>
+        <p>Nota las diferencias con OpenAI: la key viaja en <code>x-api-key</code> (no Bearer), se exige <code>anthropic-version</code>, el prompt del sistema es un campo separado <code>system</code> y la salida se lee en <code>content[0].text</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="gemini">Gemini: Google</h2>
+        <pre class="code-block"><code class="language-bash" data-language="bash">curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$GEMINI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          { "text": "Resume las claves para integrar IA en un backend en 3 puntos." }
+        ]
+      }
+    ]
+  }'</code></pre>
+        <p>Gemini pone la key en la query string (por diseño de Google) y usa el objeto <code>contents → parts → text</code> en lugar de <code>messages</code>. Aunque cada proveedor difiere, siempre responden con JSON estructurado: puedes unificar las tres llamadas detrás de una misma interfaz en tu servicio.</p>
+      </section>
+
+      <section>
+        <h2 id="errores">Manejo de errores y rate limits</h2>
+        <p>Las APIs de IA fallan igual que cualquier API externa: pueden devolver <code>401</code> (key inválida), <code>429</code> (límite de peticiones o de tokens por minuto) o <code>5xx</code> (caída temporal del proveedor). Tu backend debe traducir esos errores a algo entendible y reintentar solo cuando tenga sentido.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">async function llamarConReintento(mensajes, intentos = 3) {
+  for (let i = 0; i &lt; intentos; i++) {
+    const res = await fetch(process.env.OPENAI_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages: mensajes })
+    });
+
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get('retry-after')) || 2 ** i;
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
+    if (res.status >= 500 && i &lt; intentos - 1) {
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
+      continue;
+    }
+    if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+    return res.json();
+  }
+  throw new Error('El proveedor no respondió tras los reintentos');
+}</code></pre>
+        <p>El header <code>retry-after</code> de un <code>429</code> te dice cuándo reintentar. No reintentes un <code>401</code> ni un <code>400</code>: son errores permanentes y el reenvío solo duplicará la factura.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Integra la llamada de OpenAI y la de Claude en dos funciones del mismo módulo de Node.js.</li>
+          <li>Añade un <code>AbortController</code> con timeout de 30 segundos a ambas llamadas para que una respuesta lenta no cuelgue tu servidor.</li>
+          <li>Fuerza un error (por ejemplo, una key vacía) y verifica que tu función lo lanza como una excepción con un mensaje claro, sin exponer la key.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las APIs de IA son REST sobre HTTPS: JSON de entrada, JSON de salida y una key de autenticación.</li>
+          <li>OpenAI usa <code>Authorization: Bearer</code> y <code>messages</code>; Claude exige <code>x-api-key</code> y <code>anthropic-version</code>; Gemini usa <code>contents/parts</code> y key en la URL.</li>
+          <li>Unifica los tres proveedores detrás de una interfaz propia para poder cambiar de modelo sin reescribir tu código.</li>
+          <li>Reintenta solo ante <code>429</code> y <code>5xx</code>, respetando <code>retry-after</code>; nunca ante errores de autenticación.</li>
+          <li>Usa timeouts en todas las llamadas: la IA debe degradarse, no congelar tu servicio.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-inteligencia-artificial.html">¿Qué es la IA en el backend?</a>
+          <a class="related-lessons__link" href="prompts-y-completions.html">Prompts y completions</a>
+          <a class="related-lessons__link" href="lenguaje-natural-y-llms.html">Lenguaje natural y LLMs</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="lenguaje-natural-y-llms.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Lenguaje natural y LLMs</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="prompts-y-completions.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Prompts y completions</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

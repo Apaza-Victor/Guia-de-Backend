@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="dependencias-y-lockfile">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dependencias y lockfile · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Domina dependencies, devDependencies, peerDependencies y el papel del package-lock.json para que todos instalen exactamente lo mismo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="dependencias-y-lockfile"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Dependencias y lockfile</span>
+        </nav>
+        <h1 class="lesson-title">Dependencias y lockfile</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Módulos y npm</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="tipos">Los cuatro tipos de dependencias</h2>
+          <p>El <code class="inline">package.json</code> separa las dependencias por finalidad, y cada categoría se instala o descarta según el contexto:</p>
+          <ul>
+            <li><strong>dependencies:</strong> lo que tu app necesita en producción (express, pg, bcrypt).</li>
+            <li><strong>devDependencies:</strong> herramientas solo en desarrollo (nodemon, eslint, jest).</li>
+            <li><strong>peerDependencies:</strong> paquetes que esperas que el consumidor aporte (plugins, por ejemplo).</li>
+            <li><strong>optionalDependencies:</strong> funcionamiento opcional que no debe romper la instalación.</li>
+          </ul>
+          <p>Al desplegar en producción se instala solo lo imprescindible con <code class="inline">npm install --omit=dev</code> (o <code class="inline">NODE_ENV=production</code>), lo que ahorra tiempo y espacio en el servidor.</p>
+        </section>
+
+        <section>
+          <h2 id="node_modules">node_modules y el árbol</h2>
+          <p>Cuando instalas Express, npm también descarga las dependencias de Express (sus "hijos"). Todo termina en <code class="inline">node_modules</code>, que puede tener miles de archivos. Por eso <code class="inline">node_modules</code> nunca debe subirse a Git: cada quien lo regenera con <code class="inline">npm install</code>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># ¿Cuántos paquetes hay instalados?
+npm ls
+
+# Árbol completo, incluyendo subdependencias
+npm ls --all
+
+# Ver solo paquetes con vulnerabilidades conocidas
+npm audit</code></pre>
+            </div>
+          </figure>
+          <p><code class="inline">npm audit</code> en particular es tu brújula de seguridad: revisa las dependencias contra la base de datos de vulnerabilidades y te sugiere actualizar o parchear.</p>
+        </section>
+
+        <section>
+          <h2 id="lockfile">package-lock.json: la memoria de las versiones exactas</h2>
+          <p>El <code class="inline">package.json</code> dice "usa express 4.x". Pero <em>x</em> evoluciona: <code class="inline">npm install</code> hoy puede dejar una versión distinta que mañana. Para que todo el equipo (y la producción) instale <strong>exactamente lo mismo</strong>, npm genera <code class="inline">package-lock.json</code>, un mapa con las versiones exactas de todas las dependencias y sus subdependencias.</p>
+          <ul>
+            <li>El lockfile se crea automáticamente al primer <code class="inline">npm install</code>.</li>
+            <li>Debe <strong>comprometerse</strong> al repositorio (es parte del contrato del equipo).</li>
+            <li>Cambia solo cuando alguien modifica dependencias; las diffs pequeñas son señal de instalaciones limpias.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "name": "mi-api",
+  "lockfileVersion": 3,
+  "packages": {
+    "node_modules/express": {
+      "version": "4.19.2",
+      "resolved": "https://registry.npmjs.org/express/-/express-4.19.2.tgz",
+      "integrity": "sha512-..."
+    }
+  }
+}</code></pre>
+            </div>
+          </figure>
+          <p>El campo <code class="inline">integrity</code> es un hash (SRI) que garantiza que el archivo descargado no fue alterado.</p>
+        </section>
+
+        <section>
+          <h2 id="actualizar">Actualizar dependencias con cabeza</h2>
+          <p>Actualizar "a lo bruto" puede romper la app. Las herramientas que usa npm:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># Ver qué versiones hay instaladas y cuáles están desactualizadas
+npm outdated
+
+# Instalar una versión concreta
+npm install express@4.19.0
+
+# Revisar qué rompería un upgrade a la mayor versión
+npm install -g npm-check-updates
+ncu</code></pre>
+            </div>
+          </figure>
+          <p>Regla profesional: lee el changelog antes de subir una mayor, corre los tests y despliega en un entorno de prueba. Una actualización a ciegas es el origen clásico del bug "en mi máquina funciona".</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Instala <code class="inline">express</code> en un proyecto y ejecuta <code class="inline">npm ls --depth=1</code> para ver su árbol.</li>
+            <li>Revisa el <code class="inline">package-lock.json</code> generado y localiza integrity de express.</li>
+            <li>Ejecuta <code class="inline">npm audit</code> y anota el resumen de la salida.</li>
+            <li>Explica por qué <code class="inline">node_modules</code> no debe entrar a Git, y el lockfile sí.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>dependencies, devDependencies, peerDependencies y optionalDependencies cubren cada caso.</li>
+            <li>Producción instala solo dependencies con <code class="inline">--omit=dev</code>.</li>
+            <li>El lockfile fija versiones exactas: se comparte, no se ignora.</li>
+            <li><code class="inline">node_modules</code> no viaja en Git.</li>
+            <li><code class="inline">npm audit</code> y <code class="inline">npm outdated</code> vigilan seguridad y frescura.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

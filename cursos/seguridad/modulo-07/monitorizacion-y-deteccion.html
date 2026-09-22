@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="monitorizacion-y-deteccion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitorización y detección · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Métricas, logs y alertas para detectar ataques: señales de fuerza bruta, scraping y anomalías en Prometheus y grep a tus logs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="monitorizacion-y-deteccion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Monitorización y detección</span>
+        </nav>
+        <h1 class="lesson-title">Monitorización y detección</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Auditoría</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="nivel">Detectar antes de lamentar</h2>
+          <p>No puedes impedir todo, pero sí notar las señales a tiempo: una ráfaga de 401, picos de 500 en la misma ruta, scraping masivo, cambios de permisos. La detección es métricas + logs + alertas que te avisan <em>mientras</em> ocurre.</p>
+        </section>
+
+        <section>
+          <h2 id="metricas">Métricas que importan</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Prometheus query</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># fuerza bruta: muchos 401 seguidos de logins
+sum(increase(http_requests_total{handler="/login",status="401"}[5m])) by (pod) &gt; 20
+
+# inventa de respuesta en una ruta critica
+rate(http_requests_total{handler="/checkout",status=~"5.*"}[5m]) &gt; 0.02
+
+# picos de trafico anormales (scraping)
+rate(http_requests_total[5m]) / (# dividido por el promedio semanal) &gt; 5</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Metrics-server / Prometheus</strong> para CPU, RAM, conexiones; <strong>Kibana/Grafana</strong> para visualizar.</li>
+            <li>Logs estructurados (JSON) para filtrar y alertar con <code class="inline">loki</code> o similares.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="logs">Buscar señales en los logs</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># 401/403 de golpe: candidatos a fuerza bruta
+grep -P "401|403" /var/log/nginx/access.log | cut -d" " -f1 | sort | uniq -c | sort -rn | head
+
+# rutas de admin intentadas sin sesion
+grep -E "admin|\.env|\.git" /var/log/nginx/access.log | head -20
+
+# ataque con payloads tipicos
+grep -iE "union select|script|javascript:|--[ -]" access.log | head -20</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="plan">Lo mínimo desplegable</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash"># traslada el stack minimo:
+#  - exporter de nginx/prometheus en cada servicio
+#  - alertas por canal (mail/slack/telegram)
+#  - alerta 0: la telemetria misma cae (si no ves, no existe)
+#  - un runbook por alerta: que revisar primero
+
+# contrato: la alerta llega en menos de 5 minutos, no en tres dias.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Exporta métricas HTTP de tu API con límite.</li>
+            <li>Crea una alerta de +20 logins 401 en 5 minutos.</li>
+            <li>Dispara el ataque y comprueba que la alerta llega.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Detección temprana acorta el daño.</li>
+            <li>Métricas de errores, 401 y tráfico anómalo.</li>
+            <li>Logs estructurados + alertas con runbook.</li>
+            <li>Si no se ve, no existió: monitoriza la monitorización.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="plan-de-respuesta-a-incidentes.html">Plan de respuesta a incidentes</a>
+            <a class="related-lessons__link" href="../modulo-05/logs-seguros.html">Logs seguros</a>
+            <a class="related-lessons__link" href="../modulo-05/rate-limiting.html">Rate limiting</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

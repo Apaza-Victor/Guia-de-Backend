@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="funciones-array-map-filter-reduce">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funciones útiles: array_map, filter y reduce · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende a transformar, filtrar y resumir colecciones en PHP con array_map, array_filter y array_reduce, en estilo funcional para el backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="funciones-array-map-filter-reduce"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Funciones útiles: array_map, filter y reduce</span>
+        </nav>
+        <h1 class="lesson-title">Funciones útiles: array_map, filter y reduce</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Arrays y estructuras de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que-funcional">El estilo funcional con arrays</h2>
+          <p>Cuando tratas colecciones, la mayor parte del trabajo se reduce a tres operaciones: <strong>transformar cada elemento</strong> (map), <strong>quedarse con los que cumplen una condición</strong> (filter) y <strong>acumular un resultado</strong> (reduce). PHP las tiene como funciones que reciben un <em>callback</em>.</p>
+          <p>Muchas veces se combinan con <strong>funciones flecha</strong> (PHP 7.4+) que permiten escribir la lógica en una línea sin crear funciones auxiliares.</p>
+        </section>
+
+        <section>
+          <h2 id="array-map">array_map: transformar</h2>
+          <p><code class="inline">array_map</code> aplica una función a cada elemento y devuelve un array nuevo del mismo tamaño. El array original no se toca.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$distancias = [1.5, 42.0, 3.2, 12.9];
+
+// Con una función con nombre
+function redondearADecimal(float $n): float {
+    return round($n, 1);
+}
+$redondeadas = array_map('redondearADecimal', $distancias);
+
+// Con una función flecha (más legible)
+$enKilometros = array_map(fn(float $n) =&gt; $n * 1.609, $distancias);
+
+var_dump($redondeadas);
+var_dump($enKilometros);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="array-filter">array_filter: filtrar</h2>
+          <p><code class="inline">array_filter</code> recorre el array y conserva únicamente los elementos para los que el callback devuelve <code class="inline">true</code>. Sin callback, elimina todos los valores falsy.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$productos = [
+    ["nombre" =&gt; "Teclado",  "precio" =&gt; 49,   "stock" =&gt; 0],
+    ["nombre" =&gt; "Monitor",  "precio" =&gt; 210,  "stock" =&gt; 5],
+    ["nombre" =&gt; "Webcam",   "precio" =&gt; 35,   "stock" =&gt; 2],
+];
+
+$disponibles = array_filter($productos, fn($p) =&gt; $p["stock"] &gt; 0);
+
+// array_values reindexa; sin él las claves conservan su número original
+$disponibles = array_values($disponibles);
+
+foreach ($disponibles as $p) {
+    echo "{$p['nombre']}: {$p['stock']} uds" . PHP_EOL;
+}
+
+// Filtrar valores falsy: quita null, "", 0 y false de una vez
+$entrada = [1, null, 2, "", 3, false];
+$limpio = array_filter($entrada);
+var_dump(array_values($limpio));
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="array-reduce">array_reduce: acumular</h2>
+          <p><code class="inline">array_reduce</code> reduce una colección a un único valor. El callback recibe el <em>acumulador</em> y el elemento actual, y devuelve el nuevo acumulador.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$ventas = [120.5, 89.0, 250.75, 15.0];
+
+$total = array_reduce($ventas, fn(float $acc, float $v) =&gt; $acc + $v, 0.0);
+echo "Total: $total" . PHP_EOL;
+
+// Ejemplo más práctico: contar por categoría
+$pedidos = ["digital", "fisico", "digital", "digital"];
+
+$conteo = array_reduce($pedidos, function (array $acc, string $tipo): array {
+    $acc[$tipo] = ($acc[$tipo] ?? 0) + 1;
+    return $acc;
+}, []);
+
+var_dump($conteo);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>El tercer argumento es el valor inicial del acumulador. En el ejemplo del conteo, inicia en <code class="inline">[]</code> porque queremos ir «engordando» un array.</p>
+        </section>
+
+        <section>
+          <h2 id="combinando">Combinar las tres</h2>
+          <p>El proceso real de una API suele ser: filtro, transformo y resumo. Encadenar estas funciones produce código declarativo y fácil de leer.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$lineasPedido = [
+    ["producto" =&gt; "Ratón",  "precio" =&gt; 25, "uds" =&gt; 2, "devuelto" =&gt; false],
+    ["producto" =&gt; "Pad",    "precio" =&gt; 12, "uds" =&gt; 1, "devuelto" =&gt; true],
+    ["producto" =&gt; "Taza",   "precio" =&gt; 8,  "uds" =&gt; 3, "devuelto" =&gt; false],
+];
+
+$totalCobrable = array_reduce(
+    array_map(
+        fn($l) =&gt; $l["precio"] * $l["uds"],
+        array_filter($lineasPedido, fn($l) =&gt; !$l["devuelto"])
+    ),
+    fn(float $acc, float $subtotal) =&gt; $acc + $subtotal,
+    0.0
+);
+
+echo "Total cobrable: $totalCobrable €" . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Se lee de dentro hacia fuera: <em>filtra lo no devuelto, calcula cada subtotal y suma todo</em>.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Con <code class="inline">array_map</code>, convierte un array de nombres a mayúsculas con <code class="inline">strtoupper</code>.</li>
+            <li>Con <code class="inline">array_filter</code> y una función flecha, quédate con los números mayores que 20.</li>
+            <li>Con <code class="inline">array_reduce</code>, calcula el producto de todos los números de un array (inicia el acumulador en 1).</li>
+            <li>Combina las tres para: recibir precios, descartar los negativos, aplicarles el IVA y sumar el resultado.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li><code class="inline">array_map</code> transforma cada elemento y devuelve un array nuevo.</li>
+            <li><code class="inline">array_filter</code> conserva los elementos que cumplen la condición; sin callback quita los falsy.</li>
+            <li><code class="inline">array_reduce</code> acumula un valor a lo largo de la colección.</li>
+            <li>Las funciones flecha <code class="inline">fn($x) =&gt; ...</code> hacen el estilo funcional mucho más legible.</li>
+            <li>Combinadas resuelven «filtra, transforma y resume», el patrón estrella del backend.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

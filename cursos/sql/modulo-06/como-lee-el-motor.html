@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="como-lee-el-motor">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo lee el motor · SQL · Backend Academy</title>
+<meta name="description" content="Aprende cómo el motor de SQL procesa una consulta: parseo, optimizador, plan de ejecución y costos, para entender por qué unas consultas son rápidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="como-lee-el-motor"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6 · Optimización</a><span class="sep">/</span>
+          <span class="current">Cómo lee el motor</span>
+        </nav>
+        <h1 class="lesson-title">Cómo lee el motor</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">⚔️ Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Optimización</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>SQL es <em>declarativo</em>: dices QUÉ quieres, no CÓMO conseguirlo. El motor decide el cómo. Para optimizar bien, hay que saber cómo piensa ese motor.</p>
+        </section>
+
+        <section>
+          <h2 id="fases">Las tres fases</h2>
+          <ol>
+            <li><strong>Parseo:</strong> ¿es SQL válido? ¿existen las tablas y columnas? Se valida sin leer datos.</li>
+            <li><strong>Optimización:</strong> el optimizador estima costos (filas a leer, índices disponibles, estrategias) y genera un <strong>plan de ejecución</strong>.</li>
+            <li><strong>Ejecución:</strong> el motor recorre el plan, lee datos y devuelve filas.</li>
+          </ol>
+          <p>El plan depende de estadísticas (cuántas filas por valor), índices, y a veces órdenes mal elegidos. De ahí que un plan pueda ser «sabio» aunque tu consulta se escriba torcida… o al revés.</p>
+        </section>
+
+        <section>
+          <h2 id="costo">El costo</h2>
+          <p>El motor estima un «precio» por operación: leer un bloque de disco, aplicar un filtro, ordenar. La moneda ideológica: menos bloques leídos = más rápido. Un <code class="inline">FULL TABLE SCAN</code> lee la tabla entera (barato para 100 filas, brutal para 50 millones).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Búsqueda por clave primaria: el ÍNDICE permite llegar directo
+SELECT * FROM productos WHERE id = 42;
+-- Plan típico: "table products" con type=const → 1 fila, sin escanear.
+
+-- Búsqueda por columna SIN índice
+SELECT * FROM productos WHERE nombre = 'Teclado';
+-- Plan típico: type=ALL → FULL TABLE SCAN (lee todo).</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="errores">Errores de optimizador</h2>
+          <ul>
+            <li><strong>Estadísticas desactualizadas:</strong> el plan cree que hay 10 filas y hay 10 millones.</li>
+            <li><strong>Funciones sobre la columna:</strong> <code class="inline">WHERE YEAR(fecha)=2025</code> rompe el uso del índice (mejor rango de fechas).</li>
+            <li><strong>Comodín inicial:</strong> <code class="inline">LIKE '%texto'</code> tampoco usa índice.</li>
+            <li><strong>JOIN con costes altos:</strong> el optimizador elige estrategia (nested loop, hash…) según sus estimaciones.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Inutiliza el índice (función sobre la columna)
+WHERE YEAR(fecha) = 2025
+-- En su lugar, rango puro:
+WHERE fecha &gt;= '2025-01-01' AND fecha &lt; '2026-01-01';
+
+-- Igual con LIKE: esta es la forma «amigable con índices»
+WHERE nombre LIKE 'Tecl%'</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="conclusion">Y luego está el cache</h2>
+          <p>Los datos viven en páginas de memoria caché. Repetir una consulta es insoportablemente rápido si ya está en caché. Por eso medir «a ciegas» engaña: mide consultas <em>frías</em> y <em>calientes</em>.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe «el mismo resultado» de dos formas: con función sobre columna y con rango.</li>
+            <li>Razona por qué una puede usar índice y la otra no.</li>
+            <li>Piensa: ¿qué necesita el optimizador para decidir bien?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>SQL es declarativo; el motor decide el plan.</li>
+            <li>Parseo → optimización → ejecución.</li>
+            <li>Menos bloques leídos = más rápido.</li>
+            <li>Funciones y comodines rompen índices.</li>
+            <li>El caché maquilla las mediciones.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="explain.html">Leer planes con EXPLAIN</a>
+            <a class="related-lessons__link" href="indices-creacion.html">Índices: crearlos y cuándo</a>
+            <a class="related-lessons__link" href="optimizando-consultas-lentas.html">Optimizando consultas lentas</a>
+            <a class="related-lessons__link" href="../../bases-datos/modulo-04/indices-rendimiento.html">Índices y rendimiento</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

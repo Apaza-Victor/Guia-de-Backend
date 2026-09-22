@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-bounded-context">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bounded contexts · Microservicios · Backend Academy</title>
+<meta name="description" content="Aprende a trazar límites de dominio con bounded context de DDD: lenguajes ubícuos, contextos acotados, context maps y cómo definir los servicios de forma correcta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-bounded-context"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Bounded contexts</span>
+      </nav>
+      <h1 class="lesson-title">Bounded contexts</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de microservicios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La palabra «cliente» significa cosas distintas según el área de una empresa. Para ventas es quien compra; para finanzas es quien adeuda; para logística es una dirección de envío. Si un solo sistema modela al «cliente» de las tres formas, el modelo se vuelve ambiguo, contradictorio y frágil.</p>
+        <p>El <strong>bounded context</strong> (contexto acotado) es la frontera dentro de la cual un modelo de dominio tiene un significado <strong>único y no ambiguo</strong>. Es el concepto central de <strong>Domain-Driven Design (DDD)</strong> y la herramienta más fiable para definir dónde cortar microservicios.</p>
+      </section>
+
+      <section>
+        <h2 id="lenguaje">El lenguaje ubicuo</h2>
+        <p>Cada contexto acotado posee su propio <strong>lenguaje ubicuo</strong>: el vocabulario compartido entre el negocio y los desarrolladores dentro de esa frontera. Ese lenguaje define los términos exactos que usarás para clases, tablas, endpoints y eventos.</p>
+        <ul>
+          <li><strong>Contexto Ventas:</strong> `Pedido`, `LíneaDePedido`, `Descuento`, `Total`.</li>
+          <li><strong>Contexto Pagos:</strong> `Cargo`, `Reembolso`, `Transacción`, `ProcesadorDePago`.</li>
+          <li><strong>Contexto Inventario:</strong> `Producto`, `Stock`, `Almacén`, `Reserva`.</li>
+        </ul>
+        <p>Nótese que <code>Producto</code> aparece en Ventas e Inventario, pero con <strong>significados distintos</strong>: en uno es el ítem que se vende, en el otro la unidad que se almacena. Nunca fuerces a ambos a compartir la misma tabla o la misma clase.</p>
+      </section>
+
+      <section>
+        <h2 id="context-map">Context map</h2>
+        <p>El <strong>context map</strong> es el diagrama que muestra cómo se relacionan los contextos entre sí. Los patrones de relación más comunes:</p>
+        <ul>
+          <li><strong>Shared Kernel:</strong> dos contextos comparten una parte pequeña del modelo (por ejemplo, un DTO de evento), pero el resto es privado.</li>
+          <li><strong>Customer/Supplier:</strong> un contexto provee datos y el otro los consume tal cual los recibe.</li>
+          <li><strong>Conformist:</strong> el contexto consumidor acepta el modelo del proveedor sin intentar traducirlo.</li>
+          <li><strong>Anticorruption Layer (ACL):</strong> una capa traductora protege al contexto consumidor de los cambios del proveedor.</li>
+        </ul>
+        <p>El patrón más recomendado entre microservicios es <strong>Shared Kernel mínimo</strong> (contratos de eventos) combinado con <strong>ACL</strong> cuando un servicio consume el modelo de otro.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: el cliente con significados distintos</h2>
+        <p>Este ejemplo muestra por qué dos contextos no deben compartir el modelo. En Python, un cliente de Ventas y un cliente de Pagos representan conceptos distintos:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">from dataclasses import dataclass
+
+# Contexto Ventas: el cliente es quien compra
+@dataclass
+class ClienteVentas:
+    id: str
+    nombre: str
+    email: str
+    historial_de_compras: list
+
+# Contexto Pagos: el cliente es la entidad que genera cargos
+@dataclass
+class ClientePagos:
+    id: str
+    metodo_de_pago_principal: str
+    saldo_pendiente: float
+    limite_de_credito: float</code></pre>
+          </div>
+        </figure>
+        <p>Son el «mismo» cliente del mundo real, pero modelos distintos dentro de cada contexto. Cada microservicio modela <strong>solo lo que le importa</strong> de esa entidad.</p>
+      </section>
+
+      <section>
+        <h2 id="limites">Cómo los bounded contexts definen servicios</h2>
+        <p>Cuando un frontend quiere mostrar el resumen de un pedido, no necesita unificar los tres modelos. Necesita una <strong>agregación</strong> que consulte a cada servicio. El contrato entre ellos se define con eventos y DTOs isomórficos, jamás con la clase interna del otro servicio.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "event": "pedido_creado",
+  "version": 1,
+  "payload": {
+    "pedido_id": "ORD-314159",
+    "cliente_id": "CLI-42",
+    "total": 2590.50,
+    "moneda": "MXN"
+  }
+}
+// Este evento lo publica el contexto Ventas.
+// El contexto Pagos lo recibe y crea su propia entidad interna.</code></pre>
+          </div>
+        </figure>
+        <p>El evento es un <strong>contrato acotado</strong>: Ventas define su significado, Pagos lo consume y cada uno actualiza sus propios datos. No comparten tablas ni clases.</p>
+      </section>
+
+      <section>
+        <h2 id="practica">Reglas para trazarlo en la práctica</h2>
+        <ul>
+          <li>Pregunta al negocio qué significa cada término en cada área; si hay dos significados, hay dos contextos.</li>
+          <li>Un servicio debe mapearse a <strong>un</strong> bounded context (o una parte cohesiva de él).</li>
+          <li>Los datos compartidos solo viajan como <strong>contratos de interfaz</strong> (eventos, DTOs), nunca como acceso directo a la base de datos.</li>
+          <li>Dos equipos que necesitan un mismo modelo con reglas distintas no deben compartir repositorio ni esquema.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escoge una empresa conocida (un banco, un e-commerce) y lista 3 bounded contexts posibles.</li>
+          <li>Para cada uno, escribe 4 términos de su lenguaje ubicuo.</li>
+          <li>Identifica una entidad que aparezca en dos contextos con significados distintos y describe ambos modelos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un bounded context es la frontera donde un modelo de dominio tiene significado único.</li>
+          <li>Cada contexto tiene su lenguaje ubicuo propio.</li>
+          <li>Los contextos se comunican con contratos (events, DTOs, ACL), no compartiendo tablas.</li>
+          <li>Son la herramienta base para decidir dónde cortar los microservicios.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="como-dividir-servicios.html">Cómo dividir servicios</a>
+          <a class="related-lessons__link" href="que-son-microservicios.html">¿Qué son los microservicios?</a>
+          <a class="related-lessons__link" href="antipatrones.html">Antipatrones comunes</a>
+          <a class="related-lessons__link" href="../modulo-02/contratos-y-versionado.html">Contratos y versionado</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

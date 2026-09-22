@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m3-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productores y consumidores · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Escribe productores y consumidores de Kafka con Node.js y Python: producer API, acks, consumer groups, commits automáticos y manuales y suspensión de errores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m3-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Productores y consumidores</span>
+      </nav>
+      <h1 class="lesson-title">Productores y consumidores</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Kafka y event streaming</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Con la teoría de topics y particiones sobre la mesa, toca escribir de verdad. En esta lección verás el <strong>producer API</strong> y el <strong>consumer API</strong> de Kafka con sus decisiones más delicadas: en qué condición confirmar una escritura (<code>acks</code>) y cuándo y cómo <em>commitar</em> el offset del consumidor.</p>
+        <p>Trabajaremos con <code>kafkajs</code> (Node.js) y <code>confluent-kafka</code> (Python).</p>
+      </section>
+
+      <section>
+        <h2 id="productor">El productor: acks y orden</h2>
+        <p>El productor serializa el evento, elige partición (por clave o round-robin) y lo envía. La garantía se decide con la opción <code>acks</code>:</p>
+        <ul>
+          <li><code>acks=0</code>: dispara y olvida. Rápido, pierde datos si algo falla.</li>
+          <li><code>acks=1</code>: el líder lo escribió. Casi nada se pierde; el líder puede caerse tras confirmar.</li>
+          <li><code>acks=all</code> (+ <code>min.insync.replicas</code>): todas las réplicas ISR confirmaron. Máxima seguridad.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { Kafka } = require('kafkajs');
+
+const kafka = new Kafka({
+  clientId: 'api-pedidos',
+  brokers: ['localhost:9092']
+});
+
+const productor = kafka.producer({
+  allowAutoTopicCreation: true,
+  transactionTimeout: 30000
+});
+
+async function publicarPedido(pedido) {
+  await productor.connect();
+
+  // acks=-1 en kafkajs equivale a acks=all (espera a réplicas ISR)
+  await productor.send({
+    topic: 'pedidos',
+    acks: -1,
+    messages: [
+      {
+        key: String(pedido.usuarioId),   // orden por usuario
+        value: JSON.stringify(pedido),
+        timestamp: new Date().toISOString()
+      }
+    ]
+  });
+
+  console.log('Pedido publicado:', pedido.id);
+}
+
+await publicarPedido({ id: 'P-2026-0001', usuarioId: 4242, total: 129.90 });</code></pre>
+        <p>El productor <strong>no borra envíos fallidos</strong>: ante un error retry activo <code>retries</code> y <code>retry.backoff.ms</code>. Con <code>idempotent: true</code> (productor idempotente) Kafka evita duplicados debidos a reintentos, enlazado con la garantía exactly-once que vimos en el módulo 1.</p>
+      </section>
+
+      <section>
+        <h2 id="consumidor">El consumidor y el commit de offsets</h2>
+        <p>El consumidor pertenece a un <strong>grupo</strong> (<code>group.id</code>) y lee asignaciones de particiones. Su únicorecordatorio es el <strong>offset</strong>: el broker lo guarda en un topic interno (<code>__consumer_offsets</code>) cuando el consumidor <em>commitea</em>.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from confluent_kafka import Consumer, KafkaError
+
+conf = {
+    'bootstrap.servers': 'localhost:9092',
+    'group.id': 'servicio-facturacion',
+    'auto.offset.reset': 'earliest',
+    'enable.auto.commit': False,   # commit manual: control total
+    'session.timeout.ms': 10000,
+}
+
+consumidor = Consumer(conf)
+consumidor.subscribe(['pedidos'])
+
+try:
+    while True:
+        msg = consumidor.poll(1.0)
+        if msg is None:
+            continue
+        if msg.error():
+            if msg.error().code() == KafkaError._PARTITION_EOF:
+                continue
+            raise KafkaError(msg.error())
+
+        facturar(msg.value())       # trabajo real
+
+        # Commit MANUAL: solo después de persistir el efecto
+        consumidor.commit(asynchronous=False)
+        print(f'Offset commiteado: {msg.partition()}/{msg.offset()}')
+
+finally:
+    consumidor.close()</code></pre>
+      </section>
+
+      <section>
+        <h2 id="commit">Auto-commit vs commit manual</h2>
+        <p>La trampa que más dinero ha costado en producción:</p>
+        <ul>
+          <li><strong>Auto-commit (por defecto):</strong> el cliente commitea cada N segundos. Si el proceso muere antes del commit pero después de procesar, al reentrar se reprocesa (duplicado). Bien para eventos ligeros idempotentes.</li>
+          <li><strong>Commit manual:</strong> tú decides el instante. Lo normal: procesar y persistir el efecto, <em>después</em> commit. Así, fallo antes del commit = reprocesar con seguridad (at-least-once).</li>
+          <li><strong>Antes!No commitees antes de procesar:</strong> el efecto se pierde y el offset avanza: datos que desaparecen sin remedio.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const consumidor = kafka.consumer({ groupId: 'facturacion' });
+
+await consumidor.connect();
+await consumidor.subscribe({ topic: 'pedidos', fromBeginning: false });
+
+await consumidor.run({
+  eachMessage: async ({ topic, partition, message, heartbeat }) => {
+    // 1) Procesar el evento (facturar, guardar, notificar)
+    const factura = await generarFactura(JSON.parse(message.value));
+
+    // 2) Persistir el resultado ANTES de commitear
+    await db.crearFactura(factura);
+
+    // 3) El offset se commitea tras el éxito (at-least-once)
+    //    kafkajs auto-commitea al terminar eachMessage
+    console.log('Factura creada:', factura.id);
+  }
+});</code></pre>
+        <p>En este flujo, un fallo tras <code>generarFactura</code> pero antes de <code>crearFactura</code>... no existe: si cualquier paso lanza excepción, el offset no avanza y el mensaje se entrega en el próximo rebalanceo. Idempotencia en la base (clave <code>pedidoId</code> única) cierra la duplicidad.</p>
+      </section>
+
+      <section>
+        <h2 id="errores">Manejo de errores del consumidor</h2>
+        <ul>
+          <li><strong>Eventos corruptos:</strong> captura el parseo y envía el payload crudo a un topic <code>errores</code>; commitea igual para no bloquear la partición.</li>
+          <li><strong>Dependencias caídas:</strong> no commitees; deja que el rebalanceo reprocese cuando la dependencia vuelva.</li>
+          <li><strong>Particiones muy grandes:</strong> procesa con <code>eachBatch</code> para batching eficiente en vez de <code>eachMessage</code>.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python"># Ejemplo mínimo del flujo de eventos corruptos
+try:
+    datos = json.loads(msg.value())
+except json.JSONDecodeError:
+    productor_correos.produce(
+        topic='errores',
+        value=msg.value(),           # guardamos el crudo para debug
+        headers={'motivo': 'payload_invalido'}
+    )
+    consumidor.commit(asynchronous=False)  # y seguimos adelante
+else:
+    procesar(datos)
+    consumidor.commit(asynchronous=False)</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un productor con keys por <code>usuarioId</code> y publica 6 pedidos de 2 usuarios distintos; verifica con la CLI que cada usuario cae siempre en la misma partición.</li>
+          <li>Implementa un consumidor con commit manual y desconéctalo a mitad de trabajo. ¿El evento se reprocesa? ¿Dónde quedó el offset?</li>
+          <li>Responde: con auto-commit cada 5 s y un efecto que tarda 10 s, ¿cuántos duplicados esperarías ante un crash? ¿Y con commit manual?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El productor define las garantías con <code>acks</code> (0, 1 o all) y la clave de partición.</li>
+          <li>El consumidor pertenece a un grupo y lee sus particiones asignadas con offsets propios.</li>
+          <li>Commit manual después de persistir el efecto es la combinación segura (at-least-once).</li>
+          <li>El auto-commit facilita duplicados; el commit antes de procesar pierde datos.</li>
+          <li>Eventos corruptos van a un topic de errores; el flujo no se bloquea.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="kafka-conceptos.html">Kafka: conceptos</a>
+          <a class="related-lessons__link" href="consumer-groups.html">Consumer groups y rebalanceo</a>
+          <a class="related-lessons__link" href="../modulo-01/garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="event-sourcing-y-sagas.html">Event sourcing y sagas</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

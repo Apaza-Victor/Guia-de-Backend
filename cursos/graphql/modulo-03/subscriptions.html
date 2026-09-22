@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-subscriptions">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscriptions · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende GraphQL Subscriptions: qué son, cómo definirlas en el schema, el patrón PubSub y cómo suscribirse desde el cliente por WebSocket en tiempo real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-subscriptions"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Subscriptions</span>
+      </nav>
+      <h1 class="lesson-title">Subscriptions</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Avanzado y producción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Una query lee, una mutation escribe y una <strong>subscription</strong> escucha: el servidor empuja datos al cliente cuando ocurre un evento, sin que el cliente tenga que preguntar. Es la forma que tiene GraphQL de ofrecer tiempo real sobre <strong>WebSocket</strong>.</p>
+        <p>Los casos típicos son los mismos que estudiaste en el curso de WebSockets: notificaciones, chats, feeds en vivo, paneles de monitoreo, colaboración y estados de pedidos que cambian en marcha.</p>
+      </section>
+
+      <section>
+        <h2 id="que-es">El tercer tipo raíz</h2>
+        <p>La subscription se declara en el schema como un tipo raíz más. Cada campo de <code>Subscription</code> describe un evento al que el cliente puede conectarse:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">type Subscription {
+  nuevoMensaje(canalId: ID!): Mensaje!
+}
+
+type Mensaje {
+  id: ID!
+  canalId: ID!
+  texto: String!
+  autor: Usuario!
+  enviadoEn: String!
+}</code></pre>
+        <p>El cliente no hace la "petición" de datos: establece una conexión persistente y espera que el servidor le envíe cada evento que cumpla el filtro (aquí, por <code>canalId</code>).</p>
+      </section>
+
+      <section>
+        <h2 id="pubsub">PubSub: el bus en memoria</h2>
+        <p>El servidor necesita un mecanismo para conectar los eventos a los suscriptores. En Apollo se usa un <strong>PubSub</strong>, a menudo en memoria para empezar:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { PubSub } from "graphql-subscriptions";
+
+const pubsub = new PubSub();
+const CANAL_NUEVO_MENSAJE = "nuevo_mensaje";
+let contador = 0;</code></pre>
+        <p>La constante es el nombre del "canal" interno: las mutations publican en él y las subscriptions escuchan. En producción, PubSub en memoria no sirve con múltiples instancias; se sustituye por Redis, como verás al escalar.</p>
+      </section>
+
+      <section>
+        <h2 id="resolver">Resolver de suscripción</h2>
+        <p>Un resolver de subscription no devuelve un valor directo; expone un <code>subscribe</code> que escucha el canal. La mutation, al guardar el mensaje, publica el evento:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Mutation: {
+    enviarMensaje: (parent, { canalId, texto }, context) => {
+      const mensaje = {
+        id: String(++contador),
+        canalId,
+        texto,
+        autor: context.usuario,
+        enviadoEn: new Date().toISOString(),
+      };
+      pubsub.publish(CANAL_NUEVO_MENSAJE, { nuevoMensaje: mensaje });
+      return mensaje;
+    },
+  },
+  Subscription: {
+    nuevoMensaje: {
+      subscribe: (parent, { canalId }) => pubsub.asyncIterator(CANAL_NUEVO_MENSAJE),
+    },
+  },
+};</code></pre>
+        <p>El contrato es <code>publish(tema, payload)</code> aquí y <code>subscribe</code> allá. La clave del payload coincide con el nombre del campo de la subscription (<code>nuevoMensaje</code>).</p>
+      </section>
+
+      <section>
+        <h2 id="cliente">El cliente por WebSocket</h2>
+        <p>Desde el cliente se establece la conexión con <code>graphql-ws</code> (el estándar de la industria) y se suscribe a la operación. El servidor le envía cada evento en <code>next</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { createClient } from "graphql-ws";
+
+const client = createClient({ url: "ws://localhost:4000/graphql" });
+
+const unsubscribe = client.subscribe(
+  {
+    query: `
+      subscription {
+        nuevoMensaje(canalId: "c1") {
+          texto
+          autor { nombre }
+        }
+      }`,
+  },
+  {
+    next: (result) => {
+      console.log("Nuevo mensaje:", result.data.nuevoMensaje);
+    },
+    error: (err) => console.error("Error de subscription:", err),
+    complete: () => console.log("Suscripción terminada"),
+  },
+);</code></pre>
+        <p>La función devuelta permite cancelar la suscripción cuando el componente se desmonta. La conexión WebSocket se reutiliza para varias subscriptions al mismo tiempo y gestiona el keep-alive por sí misma.</p>
+      </section>
+
+      <section>
+        <h2 id="infra">Consideraciones de infraestructura</h2>
+        <p>Las subscriptions mantienen conexiones abiertas de forma persistente, lo que cambia las reglas frente a HTTP:</p>
+        <ul>
+          <li><strong>Escalado:</strong> cada nodo debe conocer los eventos de todos; se usa un PubSub compartido (Redis) en vez del de memoria.</li>
+          <li><strong>Carga:</strong> cada suscripción consume memoria y sockets; hay que vigilarlas y expulsar a los clientes inactivos.</li>
+          <li><strong>Autenticación:</strong> el handshake del WebSocket debe validar el token igual que una petición HTTP.</li>
+          <li><strong>TLS:</strong> en producción el cliente usa <code>wss://</code>, no <code>ws://</code>.</li>
+        </ul>
+        <p>Si tu caso solo requiere que la UI se entere de cambios (no bidireccional), a veces un simple poll o SSE con cache HTTP es más barato que una conexión persistente por usuario.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Declara un campo de subscription <code>notificacionesNuevas</code> que emita un objeto <code>Notificacion</code>.</li>
+          <li>Haz que una mutation <code>crearNotificacion</code> publique el evento por PubSub.</li>
+          <li>Conecta un cliente <code>graphql-ws</code> que loguee cada evento recibido.</li>
+          <li>Escribe en una frase qué haría falta cambiar en el PubSub para desplegar dos instancias del servidor.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las subscriptions son el tercer tipo raíz: escuchan eventos en lugar de leer o escribir.</li>
+          <li>El servidor usa PubSub: las mutations publican, las subscriptions escuchan.</li>
+          <li>El resolver de suscripción expone <code>subscribe</code> y devuelve un <code>asyncIterator</code>.</li>
+          <li>El cliente se conecta por WebSocket con <code>graphql-ws</code>.</li>
+          <li>En producción se necesita un PubSub compartido (Redis), TLS y autenticación en el handshake.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="seguridad-y-limitacion.html">Seguridad y limitación</a>
+          <a class="related-lessons__link" href="dataloader-y-n-1.html">DataLoader y N+1</a>
+          <a class="related-lessons__link" href="federation-y-gateway.html">Federation y gateway</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="../modulo-02/mutations-validaciones.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Mutations y validación</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="fragmentos-y-uniones.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Fragmentos, uniones e interfaces</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

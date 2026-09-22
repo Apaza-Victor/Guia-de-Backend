@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-webhooks">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Webhooks · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a recibir webhooks: qué son, cómo se diferencian del polling, cómo verificar firmas HMAC, responder a reintentos y deduplicar eventos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-webhooks"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Webhooks</span>
+      </nav>
+      <h1 class="lesson-title">Webhooks</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Casi toda la vida con terceros se reduce a dos modelos: <strong>preguntar o ser avisado</strong>. Consultar cada 30 segundos si el pago se confirmó (polling) es ineficiente y lento. El <strong>webhook</strong> invierte el flujo: el proveedor te llama a ti cuando algo ocurre, enviando un HTTP POST con los detalles del evento. Tu servidor se convierte temporalmente en el cliente.</p>
+        <p>Recibir avisos suena sencillo, pero implica cuatro responsabilidades que no puedes saltarte: <strong>verificar la firma</strong>, <strong>responder rápido</strong>, <strong>deduplicar eventos</strong> y <strong>tolerar reintentos</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="vs-polling">Webhook vs polling</h2>
+        <ul>
+          <li><strong>Polling:</strong> tu sistema consulta «¿pasó algo?» en intervalos fijos. Simple, pero late incluso cuando no hay cambios, desperdicia peticiones y añade latencia de hasta un intervalo completo.</li>
+          <li><strong>Webhook:</strong> el proveedor te avisa en el momento exacto. Casi en tiempo real y sin peticiones perdidas, pero requiere que tu endpoint esté público, disponible y seguro.</li>
+        </ul>
+        <p>En la práctica se complementan: los webhooks entregan el evento de forma inmediata y un <strong>polling de respaldo</strong> recupera eventos perdidos cuando un webhook falla o llega tarde.</p>
+      </section>
+
+      <section>
+        <h2 id="firma">Verificar la firma</h2>
+        <p>Cualquiera puede fingir ser Stripe o GitHub y mandarte un POST falso. Por eso los proveedores firman cada payload con un esquema HMAC: calculan el hash del mensaje con un secreto que solo tú y ellos conocen y lo envían en un header. Tu trabajo es recalcular ese hash y compararlo:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">import crypto from 'node:crypto';
+
+const SECRETO = process.env.WEBHOOK_SECRETO;
+
+function firmaValida(payloadBruto, firmaRecibida, timestamp) {
+  const payload = `${timestamp}.${payloadBruto}`;
+  const esperado = crypto
+    .createHmac('sha256', SECRETO)
+    .update(payload)
+    .digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(esperado), Buffer.from(firmaRecibida));
+}</code></pre>
+        <p>Usa <code>timingSafeEqual</code> (comparación en tiempo constante) en lugar de <code>===</code> para no filtrar información por el tiempo de comparación, y regístrala incluso con <code>idempotency-key</code> en recibido.</p>
+      </section>
+
+      <section>
+        <h2 id="respuesta">Responder rápido y de forma correcta</h2>
+        <p>El proveedor espera el <code>200</code> en pocos segundos. Si respondes <code>4xx</code> o <code>5xx</code>, o si se agota el tiempo, el webhook se considera fallido y se reintenta. Por eso el patrón ganador es: <strong>valida, encuela y responde 200</strong>; el trabajo pesado se hace después:</p>
+<pre class="code-block"><code class="language-python" data-language="python">@app.post("/webhooks/pagos")
+def webhook_pago():
+    cuerpo = envio.get_json()
+    if not firma_valida(envio):          # rechaza falsificaciones
+        return "", 401
+    encolar_workflow_pago(cuerpo)        # respondemos antes de procesar
+    return "", 200                       # 200 = evento aceptado
+</code></pre>
+        <p>Si el procesamiento fuera síncrono dentro del handler, un trabajador lento provocaría que el webhook se reintente (por timeout) y recibas el mismo evento dos veces.</p>
+      </section>
+
+      <section>
+        <h2 id="reintentos">Reintentos e idempotencia</h2>
+        <p>Los proveedores reintentan con backoff: envían de nuevo el mismo evento pasados segundos o minutos. Como no puedes controlar cuántas veces llega, tu handler debe ser <strong>idempotente</strong>: procesar dos veces el mismo <code>evento.id</code> produce el mismo resultado. La técnica estándar es registrar los IDs ya procesados:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "id": "evt_1MpF2rLsdH...",
+  "type": "payment_intent.succeeded",
+  "created": 1699992000,
+  "data": { "object": { "id": "pi_3MpF...", "amount": 4900, "currency": "mxn" } }
+}</code></pre>
+<pre class="code-block"><code class="language-bash" data-language="bash">curl -X POST https://tu-api.com/webhooks/pagos \
+  -H "Stripe-Signature: t=1699992000,v1=abc123...." \
+  -H "Content-Type: application/json" \
+  -d '{"id":"evt_1MpF2rLsdH","type":"payment_intent.succeeded","data":{}}'</code></pre>
+        <p>Antes de ejecutar la lógica de negocio, inserta el <code>id</code> con una clave única en tu base. Si la inserción falla por duplicado, el evento ya se procesó y simplemente respondes 200.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea una tabla <code>webhook_events</code> con una restricción única sobre el <code>evento_id</code> y escribe el SQL.</li>
+          <li>Implementa la verificación HMAC en JavaScript o Python con tu propio secreto de prueba.</li>
+          <li>Escribe el handler que responde 200, encola el trabajo y rechaza con 401 una firma inválida.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un webhook es un aviso HTTP del proveedor a tu servidor cuando ocurre un evento.</li>
+          <li>El polling complementa a los webhooks para recuperar eventos perdidos.</li>
+          <li>Siempre verifica la firma HMAC antes de confiar en el payload.</li>
+          <li>Responde 200 rápido y procesa después en una cola.</li>
+          <li>Los webshooks pueden llegar varias veces: deduplica por ID y sé idempotente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-son-las-integraciones.html">¿Qué son las integraciones?</a>
+          <a class="related-lessons__link" href="../modulo-02/pasarelas-de-pago.html">Pasarelas de pago</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-errores-reintentos.html">Errores y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-03/colas-para-tareas-lentas.html">Colas para tareas lentas</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

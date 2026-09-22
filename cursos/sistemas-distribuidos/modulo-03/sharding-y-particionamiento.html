@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-sharding-y-particionamiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sharding y particionamiento · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende sharding y particionamiento de datos: particionado por rango, por hash y hash consistente, cómo reequilibrar y evitar puntos calientes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-sharding-y-particionamiento"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Sharding y particionamiento</span>
+      </nav>
+      <h1 class="lesson-title">Sharding y particionamiento</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y casos reales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La replicación copia los mismos datos en varias máquinas; el <strong>particionado</strong> (sharding) reparte <em>datos distintos</em> entre máquinas. Cada partición o <strong>shard</strong> guarda un subconjunto de las claves. Así, el tamaño y la carga se dividen horizontalmente: agrega máquinas y ganas capacidad.</p>
+      </section>
+
+      <section>
+        <h2 id="objetivos">Objetivos del particionado</h2>
+        <ul>
+          <li><strong>Escanear pocos datos:</strong> una consulta va solo al shard que la contiene.</li>
+          <li><strong>Escribir en paralelo:</strong> escrituras repartidas entre distintas máquinas.</li>
+          <li><strong>Evitar puntos calientes:</strong> ninguna máquina debe recibir la mayor parte del tráfico.</li>
+        </ul>
+        <p>El sufijo <em>sharding</em> aparece siempre que una única base de datos se queda corta (miles de millones de filas o QPS muy alto). El reto: <strong>elegir la función de particionado</strong> y reequilibrar cuando crezca el número de shards.</p>
+      </section>
+
+      <section>
+        <h2 id="rango">Particionado por rango</h2>
+        <p>Asigna rango continuos de claves a cada shard:</p>
+        <ul>
+          <li><em>shard-1</em>: claves de <code>0000</code> a <code>1FFF</code></li>
+          <li><em>shard-2</em>: claves de <code>2000</code> a <code>3FFF</code></li>
+          <li><em>shard-3</em>: claves de <code>4000</code> a <code>FFFF</code></li>
+        </ul>
+        <p>Ventaja: las consultas por rangos contiguos caen en un mismo shard. Desventaja: ciertas claves (por ejemplo, los usuarios más recientes) crean puntos calientes.</p>
+        <pre class="code-block"><code class="language-sql" data-language="sql">-- PostgreSQL declarativo: partición por rango de fecha
+CREATE TABLE eventos (
+    id uuid,
+    ocurrido_en timestamptz NOT NULL
+) PARTITION BY RANGE (ocurrido_en);
+
+CREATE TABLE eventos_2024 PARTITION OF eventos
+    FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+
+CREATE TABLE eventos_2025 PARTITION OF eventos
+    FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="hash">Particionado por hash</h2>
+        <p>Aplicas una función de hash a la clave y asignas el resultado a un shard:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import hashlib
+
+NUMERO_DE_SHARDS = 16
+
+def shard_de_clave(clave):
+    digesto = hashlib.sha256(clave.encode()).hexdigest()
+    return int(digesto, 16) % NUMERO_DE_SHARDS
+
+# Distribución aproximadamente uniforme de claves entre shards
+for clave in ["usuario-1", "usuario-2", "producto-7", "pedido-99"]:
+    print(clave, "-&gt;", shard_de_clave(clave))
+</code></pre>
+        <p>El hash reparte bien y elimina puntos calientes por clave, pero las consultas por rango mueren: cada clave se reparte pseudoaleatoriamente. Y reequilibrar es costoso, porque casi todas las claves cambian de shard cuando <code>NUMERO_DE_SHARDS</code> cambia.</p>
+      </section>
+
+      <section>
+        <h2 id="consistente">Hash consistente</h2>
+        <p>Para minimizar los movimientos al añadir o quitar máquinas, se usa el <strong>hash consistente</strong>: las claves y los nodos se mapean a un anillo; cada clave cae en el primer nodo que encuentra en el sentido de las agujas del reloj. Si añades un nodo, solo las claves cercanas a él se mueven (<em>1/n</em> en promedio).</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Redis Cluster reparte las 16384 slots con hash consistente.
+# Un slot se mueve mínimo cuando cambia el mapa de nodos:
+redis-cli cluster addslots 0 1 2 3           # añadir slots al nodo actual
+redis-cli cluster setslot 3000 migrating 1   # migrar un slot a otro nodo
+redis-cli cluster rebalance --threshold 10%  # reequilibrar automático
+</code></pre>
+        <p>Este anillo es la razón por la que Cassandra y Redis Cluster resisten bien el escalado: añadir una máquina redistribuye una fracción mínima de los datos.</p>
+      </section>
+
+      <section>
+        <h2 id="tabla-ruteo">Tabla de ruteo</h2>
+        <p>Al final del día, el sistema necesita saber dónde vive cada clave. Un diseño clásico guarda un mapa clave→shard:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "tipo": "tabla_de_ruteo",
+  "meta": { "generacion": 12, "total_shards": 16 },
+  "shards": {
+    "shard-01": { "host": "sdb1.prod", "rango": "SHA-0000 a SHA-03FF" },
+    "shard-02": { "host": "sdb2.prod", "rango": "SHA-0400 a SHA-07FF" }
+  },
+  "regla": "sha256(clave) mod 16 -> ver tabla de shards"
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="reasignacion">Reequilibrio y trampas</h2>
+        <ul>
+          <li><strong>Cross-shard queries:</strong> consultas que necesitan juntar datos de varios shards (joins, agregados) se vuelven costosas.</li>
+          <li><strong>Hot keys:</strong> una clave popular (una celebridad, un producto virando) crea un shard caliente. Solución parcial: <em>key splitting</em> (dividir la clave en varias nuevas).</li>
+          <li><strong>Migración:</strong> mover datos entre shards mientras se sirve tráfico es delicado; se hace en lotes y con verificación.</li>
+        </ul>
+        <p>Por eso la elección de la <strong>clave de shard</strong> es una de las decisiones más importantes y permanentes de un sistema: cambiarla después cuesta una migración masiva.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para «mensajes de una app de chat», ¿qué clave usarías (usuario, sala, fecha)? Justifica qué consultas se benefician.</li>
+          <li>Implementa el hash por shard del ejemplo y añade el manejo de «distribución desigual» simulando 1000 claves: ¿cuántas caen en cada shard?</li>
+          <li>Compara por escrito particionar por rango (por fecha de pedido) vs por hash (por usuario): ¿cuándo prefieres uno u otro?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El sharding reparte datos distintos entre máquinas y escala horizontalmente.</li>
+          <li>El particionado por rango favorece consultas de rango; el por hash reparte bien pero mata los rangos.</li>
+          <li>El hash consistente minimiza la migración al añadir/quitar nodos.</li>
+          <li>Las claves calientes y las consultas cross-shard son los dos grandes costos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="../modulo-02/quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="casos-kafka-cassandra.html">Casos: Kafka, Cassandra, Redis cluster</a>
+          <a class="related-lessons__link" href="diseñar-un-sistema-distribuido.html">Diseñar un sistema distribuido</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

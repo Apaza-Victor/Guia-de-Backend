@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="archivos-y-json">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manipulación de archivos y JSON · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende a leer y escribir archivos en PHP y a convertir datos entre PHP y JSON con json_encode y json_decode, preparándote para las APIs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="archivos-y-json"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Manipulación de archivos y JSON</span>
+        </nav>
+        <h1 class="lesson-title">Manipulación de archivos y JSON</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Arrays y estructuras de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="leer-archivos">Leer archivos</h2>
+          <p>PHP puede leer cualquier archivo del servidor. Las funciones habituales van desde <code class="inline">file_get_contents</code> (todo el contenido de una vez) hasta <code class="inline">fopen</code> + <code class="inline">fgets</code> para archivos grandes línea a línea.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Leer todo el archivo de una vez
+$contenido = file_get_contents("notas.txt");
+echo $contenido . PHP_EOL;
+
+// Leer todas las líneas como array
+$lineas = file("usuarios.txt");
+foreach ($lineas as $linea) {
+    echo "Línea: $linea";
+}
+
+// Archivo gigante: procesar línea a línea
+$archivo = fopen("logs.txt", "r");
+while (($linea = fgets($archivo)) !== false) {
+    echo $linea;
+}
+fclose($archivo);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Antes de leer, comprueba que el archivo existe con <code class="inline">file_exists</code> para evitar avisos desagradables.</p>
+        </section>
+
+        <section>
+          <h2 id="escribir-archivos">Escribir archivos</h2>
+          <p>Para guardar datos, tienes <code class="inline">file_put_contents</code> (escribe de una vez) o <code class="inline">fopen</code> con el modo <code class="inline">"w"</code> (sobrescribe) / <code class="inline">"a"</code> (añade al final).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Sobrescribir (o crear) un archivo
+$ok = file_put_contents("salida.txt", "Hola desde PHP" . PHP_EOL);
+echo $ok !== false ? "Escrito" : "Error al escribir" . PHP_EOL;
+
+// Añadir al final
+file_put_contents("actividad.log", date("Y-m-d H:i:s") . " - petición recibida" . PHP_EOL, FILE_APPEND);
+
+// Añadir con fopen en modo "a"
+$log = fopen("actividad.log", "a");
+fwrite($log, "log línea nueva" . PHP_EOL);
+fclose($log);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>En producción raramente escribirás archivos de datos: usarás una base de datos. Pero los <strong>logs</strong> y los <strong>archivos de configuración</strong> sí se leen y se escriben a diario.</p>
+        </section>
+
+        <section>
+          <h2 id="json-encode">De PHP a JSON: json_encode</h2>
+          <p>JSON es el formato en el que el backend habla con el mundo. <code class="inline">json_encode</code> convierte arrays y objetos de PHP en una cadena JSON lista para enviar en una API.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$usuario = [
+    "nombre" =&gt; "Lucía",
+    "edad"   =&gt; 31,
+    "rol"    =&gt; "admin",
+    "etiquetas" =&gt; ["php", "backend", "api"],
+];
+
+$json = json_encode($usuario, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+echo $json . PHP_EOL;
+
+// Sin opciones, el resultado es una línea compacta
+echo json_encode($usuario) . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Las opciones <code class="inline">JSON_UNESCAPED_UNICODE</code> (no escapar acentos) y <code class="inline">JSON_PRETTY_PRINT</code> (con saltos de línea) son las más usadas. En las APIs reales, la respuesta se envía con el header <code class="inline">Content-Type: application/json</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="json-decode">De JSON a PHP: json_decode</h2>
+          <p><code class="inline">json_decode</code> hace el camino inverso: convierte una cadena JSON en un objeto o, si pasas <code class="inline">true</code> como segundo argumento, en un array asociativo.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$stringJson = '{"producto":"Ratón","precio":19,"stock":120}';
+
+// Como array asociativo
+$datos = json_decode($stringJson, true);
+echo $datos["producto"] . PHP_EOL;   // Ratón
+echo $datos["precio"] . PHP_EOL;     // 19
+
+// Como objeto
+$objeto = json_decode($stringJson);
+echo $objeto-&gt;producto . PHP_EOL;    // Ratón
+
+// Un JSON inválido devuelve null
+var_dump(json_decode("{no es json}"));
+echo "Error: " . json_last_error_msg() . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>La comprobación de errores es obligatoria: cuando <code class="inline">json_decode</code> devuelve <code class="inline">null</code> no sabes si es un JSON inválido o la palabra <code class="inline">null</code> válida. Detectar el <strong>error al decodificar</strong> siempre hay que hacerlo con <code class="inline">json_last_error()</code> y <code class="inline">json_last_error_msg()</code>.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea un archivo <code class="inline">datos.json</code> con la estructura de un pedido (id, cliente, total, items).</li>
+            <li>Léelo con <code class="inline">file_get_contents</code> y decodifícalo a array asociativo.</li>
+            <li>Modifica el total y vuelve a guardarlo con <code class="inline">file_put_contents</code> y <code class="inline">json_encode</code>.</li>
+            <li>Prueba a decodificar JSON inválido y muestra el mensaje de <code class="inline">json_last_error_msg</code>.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Lee archivos con <code class="inline">file_get_contents</code>, <code class="inline">file</code> o <code class="inline">fopen</code>/<code class="inline">fgets</code>.</li>
+            <li>Escribe con <code class="inline">file_put_contents</code> y los modos <code class="inline">w</code> y <code class="inline">a</code>.</li>
+            <li><code class="inline">json_encode</code> serializa arrays/objetos a JSON para APIs.</li>
+            <li><code class="inline">json_decode($json, true)</code> devuelve un array asociativo.</li>
+            <li>Comprueba siempre el resultado de <code class="inline">json_decode</code> con <code class="inline">json_last_error</code>.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

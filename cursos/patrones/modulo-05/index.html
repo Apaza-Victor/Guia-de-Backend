@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 5 · Patrones de backend · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="Patrones propios del backend: Repository, Service Layer, DTO y Unit of Work para organizar la capa de datos, los servicios y las transacciones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="route">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <a class="breadcrumb__item" href="../../../index.html">Inicio</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../../../cursos/index.html">Cursos</a>
+    <span class="breadcrumb__sep">/</span>
+    <a class="breadcrumb__item" href="../index.html">Patrones de Diseño</a>
+    <span class="breadcrumb__sep">/</span>
+    <span class="breadcrumb__item breadcrumb__item--current">Módulo 5</span>
+  </nav>
+
+  <div class="route-hero">
+    <div class="route-hero__meta"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span><span class="route-hero__lessons">4 lecciones</span><span class="route-hero__time">~40 min</span></div>
+    <h1 class="route-hero__title">Módulo 5 · Patrones de backend</h1>
+    <p class="route-hero__lead">Los patrones que nacieron en el backend: esconder la base de datos, organizar servicios, transferir datos y coordinar transacciones.</p>
+  </div>
+
+  <div class="progress" data-progress="patrones">
+    <div class="progress__bar"><div class="progress__fill"></div></div>
+    <span class="progress__label">Progreso del curso</span>
+  </div>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
+    <ul class="route-goals">
+      <li>Pueda el negocio olvidar la base de datos con Repository.</li>
+      <li>Organizar los casos de uso en Service Layer.</li>
+      <li>Transportar datos entre capas con DTO.</li>
+      <li>Coordinar cambios y rollbacks con Unit of Work.</li>
+    </ul>
+  </section>
+
+  <section class="route-section">
+    <h2 class="route-section__title">Lecciones</h2>
+    <div class="grid grid--2">
+      <a class="card-route" href="repository-y-capa-de-datos.html">
+        <h3 class="card-route__title">Repository y la capa de datos</h3>
+        <p class="card-route__meta">El negocio no sabe de SQL</p>
+      </a>
+      <a class="card-route" href="service-layer-en-accion.html">
+        <h3 class="card-route__title">Service Layer en acción</h3>
+        <p class="card-route__meta">Los casos de uso con nombre</p>
+      </a>
+      <a class="card-route" href="dto-y-objetos-de-transferencia.html">
+        <h3 class="card-route__title">DTO y objetos de transferencia</h3>
+        <p class="card-route__meta">Datos limpios entre capas</p>
+      </a>
+      <a class="card-route" href="unit-of-work-y-transacciones.html">
+        <h3 class="card-route__title">Unit of Work y transacciones</h3>
+        <p class="card-route__meta">Todo o nada</p>
+      </a>
+    </div>
+  </section>
+
+  <div class="lesson-prevnext">
+    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../modulo-04/index.html">
+      <span class="lesson-prevnext__tag">Anterior</span><strong>Módulo 4 · Comportamiento</strong>
+    </a>
+    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-06/index.html">
+      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 6 · Patrones modernos</strong>
+    </a>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-que-son-microservicios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué son los microservicios? · Microservicios · Backend Academy</title>
+<meta name="description" content="Aprende qué es un microservicio, sus principios fundamentales, la relación con los 12 factores y cómo se ve un servicio real por dentro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-que-son-microservicios"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué son los microservicios?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué son los microservicios?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de microservicios</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un <strong>microservicio</strong> es una pieza de software pequeña, autónoma y desplegable de forma independiente que implementa una única capacidad de negocio. En lugar de tener una aplicación gigante que lo hace todo, se divide el sistema en servicios que se comunican entre sí por red, normalmente con HTTP o mensajes.</p>
+        <p>Cada servicio tiene su <strong>propio proceso</strong>, su <strong>propia base de datos</strong> y su <strong>propio ciclo de vida</strong>. Ese es el significado real de la palabra «independiente»: un equipo puede cambiar y desplegar el servicio de pagos sin tocar ni reiniciar el de catálogo.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion">Definición práctica</h2>
+        <p>Técnicamente, un microservicio se parece a esto desde fuera: una API HTTP pequeña que expone un puerto y lee/escribe sus propios datos. Observa este ejemplo mínimo en Python con FastAPI:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Pedido(BaseModel):
+    id: str
+    producto: str
+    total: float
+
+PEDIDOS = {}
+
+@app.get("/pedidos/{pedido_id}")
+def obtener_pedido(pedido_id: str):
+    if pedido_id not in PEDIDOS:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    return PEDIDOS[pedido_id]
+
+@app.post("/pedidos")
+def crear_pedido(pedido: Pedido):
+    PEDIDOS[pedido.id] = pedido
+    return {"status": "ok", "id": pedido.id}</code></pre>
+          </div>
+        </figure>
+        <p>Así de simple por fuera. La complejidad aparece cuando hay <strong>varios</strong> de estos servicios y deben coordinarse: quién conoce qué dirección IP, qué pasa si uno se cae, cómo se mantiene la consistencia de los datos.</p>
+      </section>
+
+      <section>
+        <h2 id="principios">Principios de los microservicios</h2>
+        <ul>
+          <li><strong>Modelado por negocio:</strong> cada servicio refleja una capacidad del dominio (pedidos, pagos, inventario), no una capa técnica (controllers, models, DAOs).</li>
+          <li><strong>Despliegue independiente:</strong> se puede hacer deploy de un servicio sin afectar a los demás.</li>
+          <li><strong>Data ownership:</strong> cada servicio administra su propia base de datos y no accede a la de los otros.</li>
+          <li><strong>Aislamiento de fallos:</strong> si un servicio falla, los demás pueden seguir operando.</li>
+          <li><strong>Automatización:</strong> CI/CD por servicio y observabilidad desde el primer día.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="doce-factores">La conexión con los 12 factores</h2>
+        <p>La metodología conocida como <strong>12-factor app</strong> (desarrollada por Heroku) describe buenas prácticas que se vuelven indispensables en microservicios. Las más críticas:</p>
+        <ul>
+          <li><strong>Configuración por entorno:</strong> la URL de la base de datos, claves y endpoints se inyectan con variables de entorno, nunca se hardcodean.</li>
+          <li><strong>Backing services:</strong> la base de datos, el cacheo y las colas se tratan como servicios adjuntos intercambiables.</li>
+          <li><strong>Stateless:</strong> el proceso no guarda estado local; el estado vive en servicios externos, lo que permite replicar instancias sin dolor.</li>
+          <li><strong>Logs como eventos:</strong> el servicio escribe a stdout y una herramienta externa los agrega.</li>
+        </ul>
+        <p>Así se ve la configuración de un servicio siguiendo estos principios, con variables de entorno inyectadas en un contenedor:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+          <div class="code-block__body">
+            <pre data-lang="json"><code class="language-json" data-language="json">{
+  "name": "servicio-pedidos",
+  "version": "1.4.0",
+  "config": {
+    "port": 8080,
+    "database_url": "${DATABASE_URL}",
+    "rabbitmq_url": "${RABBITMQ_URL}",
+    "cache_url": "${REDIS_URL}",
+    "log_level": "${LOG_LEVEL}"
+  }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="docker">Un servicio empaquetado</h2>
+        <p>Para que un servicio sea desplegable de forma independiente, normalmente se empaqueta en un contenedor. Un Dockerfile mínimo para el servicio Python anterior:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Dockerfile</span></div>
+          <div class="code-block__body">
+            <pre data-lang="dockerfile"><code class="language-dockerfile" data-language="dockerfile">FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]</code></pre>
+          </div>
+        </figure>
+        <p>Fíjate en la línea <code>ENV PORT=8080</code>: la configuración se declara en el entorno y puede sobrescribirse en cada despliegue sin recompilar la imagen.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">¿Cuándo tiene sentido?</h2>
+        <p>Los microservicios no son «mejores»; son un <strong>trade-off</strong>. Tienen sentido cuando el beneficio de desacoplar supera el costo de la complejidad distribuida:</p>
+        <ul>
+          <li>Equipos grandes que necesitan autonomía total para desplegar.</li>
+          <li>Escalado desigual entre módulos (búsqueda escala más que autenticación).</li>
+          <li>Tecnologías distintas por dominio (Python para ML, Go para streaming).</li>
+          <li>Límites de negocio claros entre pedidos, pagos y usuarios.</li>
+        </ul>
+        <p>Si ninguna de estas condiciones se cumple, un monolito bien modularizado es más barato de construir, operar y depurar.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un sistema que conozcas (una tienda, un CRM) y lista 3 o 4 candidatos a microservicio con su responsabilidad única.</li>
+          <li>Para cada candidato, escribe qué datos usaría y qué URL de configuración inyectarías por entorno.</li>
+          <li>Anota qué pasaría si uno de esos servicios se cae: ¿el resto del negocio sigue funcionando?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un microservicio es una capacidad de negocio pequeña, autónoma y desplegable sola.</li>
+          <li>Cada servicio tiene su proceso, su base de datos y su ciclo de vida propios.</li>
+          <li>Los principios clave son modelado por negocio, despliegue independiente y aislamiento de fallos.</li>
+          <li>Los 12 factores aportan configuración por entorno, statelessness y logs como eventos.</li>
+          <li>Solo conviene adoptarlos cuando el desacople justifica el costo de la complejidad distribuida.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="bounded-context.html">Bounded contexts</a>
+          <a class="related-lessons__link" href="como-dividir-servicios.html">Cómo dividir servicios</a>
+          <a class="related-lessons__link" href="../modulo-03/despliegue-de-microservicios.html">Despliegue de microservicios</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

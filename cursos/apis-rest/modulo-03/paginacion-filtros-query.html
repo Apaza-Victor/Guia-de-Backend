@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="paginacion-filtros-query">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paginación y filtros por query · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a paginar y filtrar colecciones REST: paginación por página y cursor, orden, filtros de query y respuestas paginadas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="paginacion-filtros-query"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3 · Diseño REST</a><span class="sep">/</span>
+          <span class="current">Paginación y filtros por query</span>
+        </nav>
+        <h1 class="lesson-title">Paginación y filtros por query</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Diseño</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="problematica">El problema de devolverlo todo</h2>
+          <p>Un GET a una colección no debe volcar 2 millones de filas. Paginar significa entregar un <strong>trozo firme</strong> (una página), con instrucciones claras de cómo pedir la siguiente.</p>
+        </section>
+
+        <section>
+          <h2 id="page">Paginación por página y offset</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/pedidos?page=3&amp;limit=20</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><code>limit</code> (o <code>per_page</code>): cuántos devuelves (con tope duro: 100).</li>
+            <li><code>page</code>: qué bloque de esos tantos.</li>
+            <li>Alternativa matemática: <code>offset=40</code> — igual de simple, igual de frágil cuando hay inserciones en mitad de la tabla.</li>
+            <li>Verdad práctica: <code>LIMIT/OFFSET</code> se degrada en tablas enormes.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="cursor">Paginación por cursor (el arma de las grandes colecciones)</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/pedidos?limit=20&amp;cursor=MzwiYXBwb...</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>El cursor es un <strong>marcador opaco</strong> (no llamable) que guarda tu posición: «sigue a partir de aquí».</li>
+            <li>Rápido con índices, a prueba de inserciones, sin resaltar por dónde saltar.</li>
+            <li>Lo sirven Stripe, GitHub y X.</li>
+          </ul>
+          <p>La respuesta debe traer el cursor siguiente dentro de <code>meta</code> o <code>links</code>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "data": [ ... ],
+  "meta": {
+    "limit": 20,
+    "next_cursor": "MzwiYXBwb..."
+  }
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="links">Enlaces de navegación: el header Link</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP response</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">HTTP/1.1 200 OK
+Link: &lt;https://api.tienda.test/api/v1/pedidos?limit=20&amp;cursor=...&gt; rel="next",
+      &lt;...&gt; rel="prev", &lt;...&gt; rel="first", &lt;...&gt; rel="last"</code></pre>
+            </div>
+          </figure>
+          <p>Estándar RFC 8288: los clientes buenos (<em>generic paginators</em>) siguen el rel sin entender tu esquema.</p>
+        </section>
+
+        <section>
+          <h2 id="filtros">Filtros y orden por query</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/pedidos?estado=enviado&amp;desde=2026-01-01&amp;hasta=2026-03-31
+GET /api/v1/productos?precio_gte=10&amp;precio_lte=50
+GET /api/v1/productos?sort=-precio&amp;sort=nombre</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>Filtros simples: <code>campo=valor</code>.</li>
+            <li>Rangos: <code>_gte</code>, <code>_lte</code>, o helpers <code>desde</code>/<code>hasta</code> explícitos.</li>
+            <li>Orden: <code>sort</code> con el campo, guion para descendente (<code>-precio</code>); múltiples por comas.</li>
+            <li>La lista real de filtros soportados va en tu OpenAPI; el cliente no inventa.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="cotas">Cotas para no volverte loco</h2>
+          <ol>
+            <li>Maximum <code>limit</code> (100 por defecto; revísalo).</li>
+            <li>Solo campos indexados ordenables/filtrables (o el servidor se ahoga).</li>
+            <li>Nunca filtras por campos sin índice en grandes tablas.</li>
+            <li>Documenta el esquema de paginación con un ejemplo visible.</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Diseña la paginación de una lista de 100.000 tickets.</li>
+            <li>Elige página o cursor y justifica por qué.</li>
+            <li>Escribe la URL que busca los 10 pedidos recién enviados, ordenados por fecha.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Nunca vuelques la colección entera.</li>
+            <li>page/limit simple; cursor opaco para escalas grandes.</li>
+            <li>Link header para navegación estándar; filtros y sort por query con límites duros.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="nombrando-recursos-plural.html">Nombrando recursos</a>
+            <a class="related-lessons__link" href="../modulo-02/cabeceras-peticion-respuesta.html">Cabeceras HTTP</a>
+            <a class="related-lessons__link" href="../modulo-06/rate-limiting-abuso-api.html">Rate limiting y abuso</a>
+            <a class="related-lessons__link" href="../modulo-05/definiendo-contrato-api.html">Definiendo el contrato</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

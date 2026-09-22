@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m1-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mensajería asíncrona · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende mensajería asíncrona: colas, productores y consumidores, el desacople entre servicios y cuándo conviene frente a una llamada HTTP síncrona.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m1-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Mensajería asíncrona</span>
+      </nav>
+      <h1 class="lesson-title">Mensajería asíncrona</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En una aplicación típica, cuando un usuario hace clic en «Comprar», el servidor debe validar el carrito, cobrar, actualizar inventario y enviar un correo. Si todo se hace dentro de la misma petición HTTP, el cliente espera cada operación, y el servicio de correo (lento, externo) convierte una operación de 50 ms en una de 3 segundos.</p>
+        <p>La <strong>mensajería asíncrona</strong> cambia ese modelo: en lugar de bloquearse llamando a otros servicios, el productor escribe un mensaje en una <strong>cola</strong> y responde inmediatamente. El trabajo de verdad lo hace después un <strong>consumidor</strong>, en el momento en que pueda. El resultado es un backend que no se detiene por la lentitud de sus dependencias.</p>
+      </section>
+
+      <section>
+        <h2 id="productores-consumidores">Productores, colas y consumidores</h2>
+        <p>Toda mensajería asíncrona se apoya en tres actores:</p>
+        <ul>
+          <li><strong>Productor:</strong> el servicio que crea el mensaje. No conoce quién lo va a procesar.</li>
+          <li><strong>Cola:</strong> el búfer intermedio que guarda mensajes hasta que alguien los consuma. Es durable: sobrevive a reinicios.</li>
+          <li><strong>Consumidor:</strong> el servicio que toma los mensajes uno a uno y ejecuta la tarea. Puede haber muchos consumidores compartiendo una cola.</li>
+        </ul>
+        <p>Este trío produce dos beneficios enormes. Primero, <strong>desacople</strong>: productor y consumidor se comunican con un mensaje, no con una llamada directa, y pueden evolucionar (o fallar) de forma independiente. Segundo, <strong>resiliencia</strong>: si el consumidor está caído, los mensajes esperan en la cola sin perderse.</p>
+      </section>
+
+      <section>
+        <h2 id="sincrono-vs-asincrono">Comunicación síncrona vs asíncrona</h2>
+        <p>La tabla rápida para decidir cuándo usar mensajería:</p>
+        <ul>
+          <li><strong>Síncrono (HTTP):</strong> necesitas la respuesta ya — leer un perfil, validar un token, consultar saldo. El cliente espera y recibe un resultado.</li>
+          <li><strong>Asíncrono (cola):</strong> la operación puede completarse en segundo plano — enviar correo, generar imágenes, indexar datos, notificar eventos. El cliente recibe inmediatamente una confirmación y ya.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si el cliente necesita el resultado de la operación para seguir, es síncrono. Si solo necesita saber que «se encargaron de ello», es asíncrono.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: enviar un correo sin bloquear</h2>
+        <p>Observa la diferencia. Sin mensajería, el endpoint de registro llama a un servicio de correo dentro de la petición y el usuario espera:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">app.post('/register', async (req, res) => {
+  const usuario = await db.insert('usuarios', req.body);
+
+  // Bloquea la respuesta mientras un servicio lento (SMTP) trabaja
+  await emailService.enviarBienvenida(usuario.email, usuario.nombre);
+
+  // El cliente solo recibe la respuesta 2-4 segundos después
+  res.status(201).json(usuario);
+});</code></pre>
+        <p>Con una cola, el endpoint publica un mensaje y responde en milisegundos. El envío del correo ocurre después, en otro proceso:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">app.post('/register', async (req, res) => {
+  const usuario = await db.insert('usuarios', req.body);
+
+  // Publicar en la cola 'emails' y responder al instante
+  await cola.publish('emails', {
+    tipo: 'bienvenida',
+    destinatario: usuario.email,
+    nombre: usuario.nombre
+  });
+
+  res.status(201).json(usuario);
+});
+
+// Otro proceso, a su propio ritmo, procesa la cola
+cola.consume('emails', async (msg) => {
+  await emailService.enviarBienvenida(msg.destinatario, msg.nombre);
+});</code></pre>
+        <p>Si el servicio de correo cae, los mensajes quedan encolados y se procesan cuando vuelve. El usuario no nota nada.</p>
+      </section>
+
+      <section>
+        <h2 id="segundo-plano">Trabajos en segundo plano: el caso más común</h2>
+        <p>Las colas también sirven para mover trabajo pesado fuera de la petición web. Generar un PDF, transcodificar un vídeo o procesar archivos CSV son candidatas perfectas:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Un CLI lanza un trabajo a la cola
+curl -X POST http://api/productos/importar \
+  -H "Content-Type: application/json" \
+  -d '{"archivo": "catalogo_2026.csv"}'
+
+# La API responde 202 Accepted al vuelo
+# Un worker aparte consume el archivo línea por línea
+
+python worker.py --queue importaciones
+# Linea 1/12000: producto sku-001 insertado
+# Linea 2/12000: producto sku-002 insertado
+# ...</code></pre>
+        <p>El cliente recibe un <code>202 Accepted</code> (aceptado, procesando) y puede consultar el estado del trabajo si el sistema lo expone. El procesamiento pesado nunca toca el hilo de la petición.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lista cinco operaciones de tu backend actual e identifica cuáles dependen de servicios lentos o externos (correo, SMS, pago, notificaciones, reportes).</li>
+          <li>Para cada una, decide: ¿el cliente necesita el resultado síncrono o basta con una confirmación? Las segundas van a una cola.</li>
+          <li>Amplía el ejemplo: ¿qué pasaría con los mensajes de «bienvenida» si el productor se cae justo después de publicar pero antes de responder? ¿Y si la cola no es durable?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La mensajería asíncrona separa la producción del mensaje de su procesamiento.</li>
+          <li>Productor, cola y consumidor desacoplan servicios que, de otro modo, esperarían el uno al otro.</li>
+          <li>Es síncrono cuando necesitas la respuesta; asíncrono cuando basta con confirmar la recepción.</li>
+          <li>Las colas aguantan caídas del consumidor: los mensajes esperan y no se pierden.</li>
+          <li>Trabajo pesado en segundo plano (archivos, reportes, correos) es el cilindro típico de una cola.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+          <a class="related-lessons__link" href="brokers-de-mensajes.html">Brokers de mensajes</a>
+          <a class="related-lessons__link" href="garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="../modulo-02/workers-y-prefetch.html">Workers y prefetch</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

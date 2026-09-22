@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m7-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De monólito a módulos · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Modularizar un monólito sin reescribirlo: boundaries internos, paquetes, public interfaces, deuda oculta y cuándo el salto a microservicios reales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m7-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 7</a><span class="sep">/</span>
+        <span class="current">De monólito a módulos</span>
+      </nav>
+      <h1 class="lesson-title">De monólito a módulos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · En la práctica</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El monólito no es un error: es el punto de partida correcto de casi todo producto. El error es <strong>dejarlo crecer sin límites</strong>. Ruinea a módulos es el paso intermedio que casi siempre conviene antes de soñar con microservicios: consigues los beneficios de un límite limpio sin renunciar a la simplicidad de un solo deploy.</p>
+      </section>
+
+      <section>
+        <h2 id="boundary">Los boundaries internos</h2>
+        <p>Un «monólito modulado» es un monólito con <strong>fronteras internas</strong>: cada módulo es una isla con su propio código de negocio, y solo expone una <em>interfaz pública</em> mínima al resto del sistema:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Estructura</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">src/Modulos/
+├── Pagos/
+│   ├── Public/          # lo único visible afuera (facades/contracts)
+│   │   ├── Pagar.php
+│   │   └── ResultadoPago.php
+│   └── Internal/        # implementación privada (nadie importa)
+│       ├── Servicios/
+│       └── Repositorios/
+├── Almacen/
+│   ├── Public/
+│   └── Internal/
+└── Núcleo/              # lo que comparten: Monedas, IDs, eventos</code></pre>
+          </div>
+        </figure>
+        <p>La regla de oro: <strong>solo se importa lo que está en Public/</strong>. Interno es un asunto del módulo. Esa es la frontera.</p>
+      </section>
+
+      <section>
+        <h2 id="pasos">Cómo modularizar (pasos que duelen pocos)</h2>
+        <ol>
+          <li><strong>Dibuja los módulos con el negocio:</strong> «Pagos», «Almacén», «Pedidos», no capas técnicas. Cada módulo = un bounded context.</li>
+          <li><strong>Mueve por pequeños PRs:</strong> primero una clase, luego su pareja, luego el repositorio, todo con tests en verde.</li>
+          <li><strong>Crea la fachada pública:</strong> el módulo solo sale por su <code>Public/</code>; el resto recibe una fachada.</li>
+          <li><strong>Corta las dependencias siamesas:</strong> si «Pagos» usa la tabla de «Pedidos», decide de quién es la regla y muévela.</li>
+          <li><strong>Convierte la regla en CI:</strong> Deptrac (PHP) puede fallar si alguien importa <code>Internal</code> de otro módulo.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 id="deuda">La deuda oculta del monólito</h2>
+        <p>El mayor problema no es el tamaño: es el <strong>acoplamiento invisible</strong> — tipos compartidos por la mesa, listeners globales, estado global, uso ran de la BD ajena. Modularizar saca esos lazos a la luz. Un buen momento para modularizar es cuando los despliegues ya no se pueden hacer seguros (tocar pagos rompe todo).</p>
+      </section>
+
+      <section>
+        <h2 id="micros">¿Y microservicios?</h2>
+        <p>Los microservicios resuelven problemas de <strong>escala de equipo y de despliegue</strong>, no de diseño. Empieza con un monólito bien modular. Si un módulo necesita escalar solo, cambiar tecnología, o ser desplegado independiente por un equipo propio, ese módulo es candidato a extraerse a servicio. Con los boundaries ya dibujados, la extracción es casi automática.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja los módulos de tu sistema según el negocio.</li>
+          <li>Detecta el peor acoplamiento entre dos de ellos y propón la fachada que lo corte.</li>
+          <li>Escribe la regla de CI que prohíba importar <code>Internal</code> de otro módulo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El monólito modulado es el paso previo natural a microservicios.</li>
+          <li>Cada módulo expone solo una interfaz pública; Internos son privados.</li>
+          <li>La modularización saca a la luz el acoplamiento invisible.</li>
+          <li>Separando con el negocio, la extracción a servicios queda allanada.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/modulos-paquetes-y-boundaries.html">Módulos, paquetes y boundaries</a>
+          <a class="related-lessons__link" href="../patrones/cqrs-lectura-escritura.html">CQRS</a>
+          <a class="related-lessons__link" href="estrategias-de-evolucion.html">Estrategias de evolución</a>
+          <a class="related-lessons__link" href="../modulo-06/bounded-contexts.html">Bounded contexts</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-despliegue-de-microservicios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Despliegue de microservicios · Microservicios · Backend Academy</title>
+<meta name="description" content="Despliegue de microservicios: dockerización, Kubernetes, CI/CD, despliegues blue-green y canary, y cómo liberar cada servicio de forma independiente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-despliegue-de-microservicios"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Despliegue de microservicios</span>
+      </nav>
+      <h1 class="lesson-title">Despliegue de microservicios</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Datos y resiliencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La ventaja clave de los microservicios es desplegarlos <strong>de forma independiente</strong>: actualizar pagos sin tocar inventario. Para que eso sea seguro y rápido hacen falta empaquetado, un orquestador y estrategias de liberación que protejan a los usuarios del cambio. Cerramos el curso viendo cómo se lleva eso a producción.</p>
+      </section>
+
+      <section>
+        <h2 id="docker">Empaquetar con Docker</h2>
+        <p>Cada servicio empaqueta su propia imagen con su runtime y dependencias exactas. Como las imágenes son inmutables, lo que probaste en CI es exactamente lo que corre en producción:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Dockerfile</span></div>
+          <div class="code-block__body">
+            <pre data-lang="dockerfile"><code class="language-dockerfile" data-language="dockerfile"># Imagen por servicio: runtime ligero de Node
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY src ./src
+USER node
+
+EXPOSE 8080
+HEALTHCHECK CMD wget -qO- http://localhost:8080/healthz
+CMD ["node", "src/index.js"]</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="kubernetes">Orquestación con Kubernetes</h2>
+        <p>Kubernetes administra réplicas, descubrimiento (recuerda la clase anterior), reinicios y actualizaciones. Un <code>Deployment</code> declara cuántas instancias queremos y cómo actualizarlas sin tiempo de inactividad:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (deployment)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicio-pagos
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: servicio-pagos }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  template:
+    metadata:
+      labels: { app: servicio-pagos }
+    spec:
+      containers:
+        - name: pagos
+          image: registry/pagos:v2.4.1
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+          resources:
+            requests: { cpu: "200m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }</code></pre>
+          </div>
+        </figure>
+        <p>La <code>readinessProbe</code> retira instancias que aún no están listas; el Deployment de tipo <code>RollingUpdate</code> reemplaza de una en una sin caída.</p>
+      </section>
+
+      <section>
+        <h2 id="cicd">CI/CD</h2>
+        <p>Cada servicio debe tener su propio pipeline: construir imagen → pruebas → escanear → desplegar. ¿The trick? que el pipeline de un servicio no conozca ni aplique el de los otros:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (GitHub Actions)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">name: deplojar-pagos
+on:
+  push:
+    branches: [main]
+    paths: ["services/pagos/**"]   # solo este servicio
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: construir imagen
+        run: docker build services/pagos -t registry/pagos:${{ github.sha }}
+      - name: pruebas
+        run: docker run --rm registry/pagos:${{ github.sha }} npm test
+      - name: desplegar
+        run: kubectl set image deployment/servicio-pagos pagos=registry/pagos:${{ github.sha }}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="estrategias">Estrategias de liberación</h2>
+        <ul>
+          <li><strong>RollingUpdate:</strong> reemplaza instancias poco a poco; simple y continua. La elección por defecto.</li>
+          <li><strong>Blue-green:</strong> se despliega la versión nueva (green) completa junto a la vieja (blue); cuando verde pasó pruebas, se conmuta el tráfico. Rollback inmediato.</li>
+          <li><strong>Canary:</strong> se envía un porcentaje pequeño del tráfico a la versión nueva; si las métricas aguantan, se amplía el porcentaje. El más usado en servicios con observabilidad madura.</li>
+        </ul>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML (canary con Istio)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: pagos-canary
+spec:
+  hosts: [servicio-pagos]
+  http:
+    - route:
+        - destination: { host: servicio-pagos, subset: estable }
+          weight: 90
+        - destination: { host: servicio-pagos, subset: canary }
+          weight: 10   # solo el 10% del tráfico a la versión nueva</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="config">Configuración y secretos</h2>
+        <p>Los servicios se deben comportar distinto en cada entorno sin recodificar. La configuración (URLs, umbrales) viaja como variables de entorno o ConfigMaps; los secretos, cifrados en el clúster (Secrets) o un gestor externo (Vault):</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash (kubectl)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="bash"><code class="language-bash" data-language="bash">kubectl create secret generic db-pagos \
+  --from-literal=username=pagos \
+  --from-file=password=/secure/db_password.txt
+
+kubectl create configmap pagos-config \
+  --from-literal=TIMEOUT_MS=1000 \
+  --from-literal=BROKER_URL=amqp://rabbitmq
+
+# Nada de secretos en el repo, imagen o logs.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="observabilidad">Observabilidad</h2>
+        <p>Desplegar rápido sin saber qué pasa es nadar a ciegas. Cada servicio debe emitir <strong>logs</strong> estructurados, <strong>métricas</strong> (latencia, errores, saturación) y un <strong>trace-id</strong> compartido para seguir una petición a través de la cadena. Con eso, un canary roto se detecta y revierte en minutos.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe el Dockerfile de un servicio Python con healthcheck y usuario sin privilegios.</li>
+          <li>Define el Deployment con rolling update para 4 réplicas de un servicio.</li>
+          <li>Explica cómo decidirías entre blue-green y canary para una librería de pagos.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Cada servicio se empaqueta e imagen inmutable con su propio runtime.</li>
+          <li>Kubernetes orquesta réplicas, descubrimiento y actualizaciones sin caída.</li>
+          <li>CI/CD por servicio, con paths de disparo propios y despliegue independiente.</li>
+          <li>Estrategias: rolling, blue-green y canary, según el riesgo y la observabilidad.</li>
+          <li>Configuración externa, secretos cifrados y observabilidad completa son imprescindibles.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/service-discovery.html">Service discovery</a>
+          <a class="related-lessons__link" href="resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+          <a class="related-lessons__link" href="circuit-breaker.html">Circuit breaker</a>
+          <a class="related-lessons__link" href="../modulo-01/que-son-microservicios.html">Qué son los microservicios</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

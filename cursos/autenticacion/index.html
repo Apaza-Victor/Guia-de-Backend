@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Curso de Autenticación y Autorización para backend: registro, login, passwords, sesiones, JWT, refresh tokens, roles, permisos y OAuth aplicados en la práctica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+</head>
+<body data-root=".">
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../../roadmap/index.html">Roadmap</a>
+      <a href="../../aprender/index.html">Aprender</a>
+      <a href="../../practica/index.html">Práctica</a>
+      <a href="../../proyectos/index.html">Proyectos</a>
+      <a href="../../recursos/index.html">Recursos</a>
+      <a href="../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside data-sidebar></aside>
+
+<main data-content>
+  <div class="container">
+    <article class="course" data-course-id="autenticacion">
+
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Curso de Autenticación y Autorización</span>
+      </nav>
+
+      <header class="lesson-hero">
+        <p class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></p>
+        <h1 class="lesson-title">Autenticación y Autorización</h1>
+        <p class="section-subtitle">Registro, login, passwords, sesiones, JWT, refresh tokens, roles, permisos y OAuth aplicados al backend.</p>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 28 lecciones</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> JWT · Sesiones · OAuth · RBAC</span>
+        </div>
+      </header>
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Sin autenticación no hay backend seguro: cada login, cada sesión y cada token protege los datos de tus usuarios. En este curso implementarás paso a paso el registro y el login, el hashing de contraseñas, las sesiones del lado servidor, los tokens JWT con refresh, los roles y permisos. Terminarás integrando login social con OAuth 2.0 y OpenID Connect, el esquema que usan los servicios más grandes de la web.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">⚙️ Intermedio</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">28</span></div>
+            <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🔐 Auth</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Implementar registro y login completos con hashing seguro de contraseñas.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Gestionar sesiones del lado servidor con expiración y renovación.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Emitir y validar tokens JWT (access y refresh) de forma segura.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Modelar roles, permisos y autorización con RBAC y middleware.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Integrar proveedores externos con OAuth 2.0 y OpenID Connect.</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+            <li><strong>APIs REST:</strong> saber construir endpoints y manejar peticiones HTTP.</li>
+            <li><strong>Seguridad básica:</strong> nociones de hashing y cookies.</li>
+            <li><strong>Bases de Datos:</strong> tablas de usuarios, tokens y sus relaciones.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+            <span class="tag tag--tech">JWT</span>
+            <span class="tag tag--tech">Sesiones</span>
+            <span class="tag tag--tech">OAuth</span>
+            <span class="tag tag--tech">RBAC</span>
+            <span class="tag tag--tech">bcrypt</span>
+            <span class="tag tag--tech">OIDC</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section>
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">Seis módulos que estructuran la identidad del usuario: sesiones, tokens, permisos y el login con servicios externos.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">1. Fundamentos</h3>
+            </div>
+            <p class="card__text">Identidad, sesión, cookies y por qué las contraseñas deben guardarse con hashing.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 40 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Autenticación vs autorización</li>
+              <li>Identidad y estados de sesión</li>
+              <li>Cookies y su rol en la web</li>
+              <li>Hashing vs encriptación</li>
+              <li>El modelo de amenazas del login</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">2. Registro y login</h3>
+            </div>
+            <p class="card__text">El flujo completo de alta de usuarios: validación, confirmación y restablecimiento.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 48 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Modelo de usuario y rol básico</li>
+              <li>Registro y validación de datos</li>
+              <li>Hashing con bcrypt y password_hash</li>
+              <li>Login y verificación de credenciales</li>
+              <li>Restablecimiento de contraseña</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">3. Sesiones (servidor)</h3>
+            </div>
+            <p class="card__text">Guarda el estado del usuario en el servidor y compara pros y contras con los tokens.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 45 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Sesiones y almacenamiento</li>
+              <li>Expiración y renovación</li>
+              <li>Protección de la cookie de sesión</li>
+              <li>Sesiones en bases de datos y Redis</li>
+              <li>Cierre de sesión y revocación</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">4. JWT</h3>
+            </div>
+            <p class="card__text">Tokens firmados para APIs stateless: claims, access, refresh y almacenamiento seguro.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 52 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>¿Qué es un JWT y sus partes?</li>
+              <li>Firmando tokens: HS256 y RS256</li>
+              <li>Access tokens y expiración</li>
+              <li>Refresh tokens y rotación</li>
+              <li>Almacenamiento seguro en el cliente</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">5. Autorización y RBAC</h3>
+            </div>
+            <p class="card__text">Roles, permisos y middleware para decidir quién puede hacer qué.</p>
+            <div class="card__meta">
+              <span>4 lecciones</span><span>≈ 40 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Roles de usuario</li>
+              <li>Permisos y claims</li>
+              <li>Middleware de autorización</li>
+              <li>Protegiendo rutas y funciones</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">6. OAuth 2.0 y OIDC</h3>
+            </div>
+            <p class="card__text">Login con Google y compañía: flujos OAuth, scopes e identidad con OpenID Connect.</p>
+            <div class="card__meta">
+              <span>4 lecciones</span><span>≈ 45 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>OAuth 2.0: actores y flujos</li>
+              <li>Authorization Code Flow</li>
+              <li>Scopes y consentimiento</li>
+              <li>OpenID Connect: ID tokens</li>
+              <li>Integrando un proveedor externo</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer" data-footer>
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><span>Módulo 1 · Fundamentos</span></li>
+          <li><span>Módulo 2 · Registro y login</span></li>
+          <li><span>Módulo 3 · Sesiones</span></li>
+          <li><span>Módulo 4 · JWT</span></li>
+          <li><span>Módulo 5 · Autorización y RBAC</span></li>
+          <li><span>Módulo 6 · OAuth 2.0 y OIDC</span></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../acerca/index.html">Acerca de</a>
+        <a href="../../favoritos/index.html">Favoritos</a>
+        <a href="../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

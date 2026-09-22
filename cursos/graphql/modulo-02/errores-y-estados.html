@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-errores-y-estados">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Errores y validación · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende el modelo de errores de GraphQL: el array errors con path y locations, extensiones con códigos, estados HTTP y el formateo seguro de errores internos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-errores-y-estados"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Errores y validación</span>
+      </nav>
+      <h1 class="lesson-title">Errores y validación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Implementación con Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>GraphQL no usa decenas de códigos HTTP para los errores de negocio: concentra toda la señal en el cuerpo. Una respuesta puede contener <code>data</code>, <code>errors</code> o ambos, siempre con la misma estructura JSON. Entenderla es imprescindible para escribir clientes robustos y servidores que no filtren información.</p>
+      </section>
+
+      <section>
+        <h2 id="formato">El formato del error</h2>
+        <p>Cada error incluye un mensaje, su ubicación en el texto de la consulta y la ruta hasta el campo que falló:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "errors": [
+    {
+      "message": "El post p99 no existe",
+      "locations": [{ "line": 3, "column": 5 }],
+      "path": ["post"]
+    }
+  ],
+  "data": { "post": null }
+}</code></pre>
+        <p><code>locations</code> señala dónde en el documento se pidió el campo; <code>path</code> indica qué campo del árbol falló (<code>["post"]</code>, o anidado como <code>["usuario", "posts"]</code>). El cliente puede pintar las partes que sí funcionaron y marcar las que no.</p>
+      </section>
+
+      <section>
+        <h2 id="parcial">Errores parciales</h2>
+        <p>Un dato importante: los errores de campo no tiran toda la respuesta. Si una query pide tres campos y uno falla, los otros dos se entregan con normalidad:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "errors": [{ "message": "Sin acceso", "path": ["usuario", "email"] }],
+  "data": { "usuario": { "nombre": "Ana Torres", "email": null } }
+}</code></pre>
+        <p>Es distinto del modelo REST (todo o error). Esto obliga al cliente a comprobar <code>errors</code> y tratar cada campo como posible Nulo en la UI.</p>
+      </section>
+
+      <section>
+        <h2 id="extensiones">Extensiones y códigos</h2>
+        <p>La especificación permite añadir metadatos en <code>extensions</code>. La convención práctica es un <code>code</code> estable para que el cliente decida sin parsear mensajes (traducir un mensaje es responsabilidad de la UI, no del backend):</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { GraphQLError } from "graphql";
+
+function permitirSolo(rol) {
+  if (context.usuario?.rol !== rol) {
+    throw new GraphQLError("No tienes permisos para esta operación", {
+      extensions: {
+        code: "FORBIDDEN",
+        http: { status: 403 },
+      },
+    });
+  }
+}</code></pre>
+        <p>Apollo Server interpreta la subclave <code>http.status</code> para elegir el código HTTP de la respuesta completa. Códigos frecuentes propios: <code>UNAUTHENTICATED</code>, <code>FORBIDDEN</code>, <code>NOT_FOUND</code>, <code>VALIDATION_ERROR</code>, <code>EMAIL_EXISTS</code>, <code>INTERNAL_SERVER_ERROR</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="codigos-http">Estados HTTP</h2>
+        <p>En GraphQL el HTTP suele quedarse en unos pocos estados:</p>
+        <ul>
+          <li><code>200 OK</code> — operación ejecutada; puede llevar <code>errors</code> de negocio dentro.</li>
+          <li><code>400 Bad Request</code> — JSON malformado o sintaxis inválida de la consulta.</li>
+          <li><code>401/403</code> — suelen forzarse con extensiones <code>http.status</code> en Apollo, o con middlewares de Express previos.</li>
+          <li><code>500</code> — fallo interno del servidor.</li>
+        </ul>
+        <p>Por eso no se puede decidir el comportamiento del cliente mirando solo el HTTP: hay que leer <code>errors[].extensions.code</code> para discriminar lógica de negocio.</p>
+      </section>
+
+      <section>
+        <h2 id="formatear">Formateo seguro de errores</h2>
+        <p>En producción jamás expongas un stacktrace ni detalles internos. Apollo permite reescribir lo que sale antes de responder con <code>formatError</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  formatError: (formattedError) => {
+    if (formattedError.extensions?.code === "INTERNAL_SERVER_ERROR") {
+      console.error("Error interno:", formattedError.message);
+      return { message: "Error interno del servidor" };
+    }
+    return formattedError;
+  },
+});</code></pre>
+        <p>Con este patrón, los errores intencionales (con su <code>code</code>) pasan tal cual, mientras que los inesperados se sustituyen por un mensaje genérico y el detalle queda en el log para el equipo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lanza un <code>GraphQLError</code> desde un resolver con <code>code: "NOT_FOUND"</code> y revisa el JSON completo que devuelve el servidor.</li>
+          <li>Haz que un campo de una query falle y comprueba que los demás campos de <code>data</code> se entregan igualmente.</li>
+          <li>Configura <code>formatError</code> para enmascarar los errores internos en producción.</li>
+          <li>Escribe un pequeño cliente que decida qué mostrar según <code>extensions.code</code> y no según el texto del mensaje.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La respuesta lleva <code>data</code> y/o <code>errors</code>; un fallo de campo no tumba a los demás.</li>
+          <li>Cada error tiene <code>locations</code> y <code>path</code> para localizarlo.</li>
+          <li>Las <code>extensions</code> aportan un <code>code</code> estable que el cliente debe usar.</li>
+          <li>HTTP se queda en pocos estados (normalmente 200) y la realidad viaja en el cuerpo.</li>
+          <li><code>formatError</code> evita filtrar stacktraces en producción.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="argumentos-y-variables.html">Argumentos y variables</a>
+          <a class="related-lessons__link" href="mutations-validaciones.html">Mutations y validación</a>
+          <a class="related-lessons__link" href="../modulo-03/seguridad-y-limitacion.html">Seguridad y limitación</a>
+          <a class="related-lessons__link" href="../modulo-03/federation-y-gateway.html">Federation y gateway</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="argumentos-y-variables.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Argumentos y variables</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="mutations-validaciones.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Mutations y validación</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

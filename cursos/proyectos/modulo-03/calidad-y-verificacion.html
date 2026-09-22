@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-calidad-y-verificacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calidad y verificación · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a blindar la calidad de un backend con CI, pruebas unitarias e integración y cobertura enfocada en los flujos críticos que producen dinero o datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-calidad-y-verificacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Calidad y verificación</span>
+      </nav>
+      <h1 class="lesson-title">Calidad y verificación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Comunicación y entrega</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="calidad-no-es-suerte">La calidad de un backend no es accidental</h2>
+        <p>En el frontend, una interfaz rota se nota a los tres segundos. En el backend, un defecto puede dormir en producción durante semanas: en una consulta que degrada, en un raza de integer que corrompe estados, en una validación que dejó escapar un cargo duplicado. Por eso la <strong>verificación automatizada</strong> no es un lujo: es el único sistema de indicadores que funciona 24/7 sin recordar a nadie.</p>
+        <p>Toda la calidad de un equipo backend se resume en una pregunta: <em>¿el código que está a punto de integrarse está verificado por una máquina, no solo por el que lo escribió?</em> Si no, cada merge es una apuesta.</p>
+      </section>
+
+      <section>
+        <h2 id="pipramide">La pirámide de pruebas</h2>
+        <p>Ningún tipo de prueba basta solo. La convención del backend es la <strong>pirámide de pruebas</strong>, de base ancha a cúspide:</p>
+        <ul>
+          <li><strong>Base — unitarias:</strong> rápidas y aisladas (función, clase, caso de negocio). Miles, corren en segundos.</li>
+          <li><strong>Medio — integración:</strong> componentes reales juntos: servicio + base de datos, endpoint + contrato. Decenas, corren en minutos.</li>
+          <li><strong>Cúspide — end-to-end:</strong> el flujo completo como lo usa el usuario. Pocas y caras, se usan para los caminos críticos.</li>
+        </ul>
+        <p>La pirámide existe porque cada nivel sube la fidelidad y sube la fragilidad: el e2e es el más parecido a la realidad y el que más se rompe por motivos ajenos al código. El diseño correcto es: <strong>muchas unitarias, suficientes de integración, pocas e2e</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="ci">La CI como portero del merge</h2>
+        <p>La <strong>integración continua (CI)</strong> ejecuta la verificación automáticamente en cada pull request. No es «deploy automático» ni «tests que alguien corre»: es la máquina que decide si el PR tiene derecho a discutirse en review con algo que ya verificó:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "pipeline": "merge a main",
+  "etapas": [
+    { "nombre": "lint", "comando": "npm run lint", "falla": "no revisar estilo a mano" },
+    { "nombre": "unitarias", "comando": "npx jest tests/unitarios", "falla": "detener PR" },
+    { "nombre": "integración", "comando": "npx jest tests/integracion", "falla": "detener PR" },
+    { "nombre": "migraciones", "comando": "prisma migrate dev --preview-feature", "falla": "revisar schema vs datos" },
+    { "nombre": "cobertura", "comando": "npx jest --coverage --coverageThreshold 80", "falla": "pedir tests del codigo nuevo" },
+    { "nombre": "contrato", "comando": "npx openapi-generator validate contrato.yml", "falla": "contrato inconsistente" }
+  ]
+}</code></pre>
+        <p>La regla de oro operativa: <strong>un PR no se mergea con CI roja</strong>. Si lo permiten «solo un momentito», la cadena entera pierde significado — y la siguiente persona que vea una roja pensará que también puede pasarla.</p>
+      </section>
+
+      <section>
+        <h2 id="test-integr">Pruebas de integración que valen la pena</h2>
+        <p>Son las que rompen de verdad en backend: el endpoint correcto con la base equivocada, el worker que asume campos que el productor no envía, el contrato que cambió sin aviso. Los equipos sanos las escriben como primer reflejo de cada historia, no como relleno.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const request = require('supertest');
+const { app } = require('../src/app');
+const db = require('../src/db');
+
+describe('Flujo crítico: cobro con saldo insuficiente', () => {
+  beforeEach(async () => {
+    await db('cuentas').insert([{ id: 1, saldo: 100 }, { id: 2, saldo: 5000 }]);
+  });
+
+  it('rechaza el cargo cuando el saldo cubre el movimiento', async () => {
+    const resp = await request(app)
+      .post('/v1/cargos')
+      .send({ cuentaId: 1, monto: 150, referencia: 'R-900' });
+
+    expect(resp.status).toBe(422);
+    const movimientos = await db('movimientos').where({ cuentaId: 1 });
+    expect(movimientos).toHaveLength(0); // nada a medias en la base
+  });
+});
+</code></pre>
+        <p>Fíjate que el test verifica el <strong>efecto colateral</strong> (la tabla movimientos), no solo el código HTTP: ahí es donde el backend muestra la verdad.</p>
+      </section>
+
+      <section>
+        <h2 id="cobertura">Cobertura: número necesario, no suficiente</h2>
+        <p>La <strong>cobertura</strong> (qué porcentaje de líneas tocan los tests) es un termómetro barato: si es baja, algo mal; si es alta, puede que cubras 90% de líneas y 10% de la lógica real. El 100% de cobertura no garantiza calidad — garantiza que alguien ejecutó código.</p>
+        <p>Usos correctos de la cobertura:</p>
+        <ul>
+          <li>Umbral mínimo como guardarraíl de la CI (p. ej. 70-80% global).</li>
+          <li>Detección de zonas muertas: el módulo de conciliación con 5% de cobertura es sospechoso.</li>
+          <li>Foco en lo crítico: el flujo de pagos, auth y datos merecen más cobertura que la capa de presentación.</li>
+        </ul>
+        <p>El criterio del equipo no debe ser «subamos la cobertura» sino <em>«¿los caminos que producen dinero o mueven datos están probados?»</em>. La cobertura es la evidencia, no el objetivo.</p>
+      </section>
+
+      <section>
+        <h2 id="gitlab-github">CI en lenguaje comunidad</h2>
+        <p>La descripción de la CI vive en el repo (GitHub Actions, GitLab CI, etc.) y es de tres líneas en cada lenguaje. El patrón mínimo es universal:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># .github/workflows/ci.yml (esquema)
+# name: CI
+# on: [push]
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     services:
+#       postgres:
+#         image: postgres:16
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: docker compose build
+#       - run: docker compose run --rm app npm run lint
+#       - run: docker compose run --rm app npx jest --coverage
+
+gh workflow run ci.yml --ref main   # lanzar a mano si hace falta</code></pre>
+        <p>La regla de calidad esencial: <strong>la CI local debe reproducirse localmente</strong>. Si solo pasa «en el servidor de CI», nadie la ejecutar en su máquina y la iteración se vuelve espera.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja la pirámide de pruebas de tu proyecto y anota cuántas pruebas tienes en cada nivel (aprox).</li>
+          <li>Escribe el pipeline de CI de tu equipo en 5 etapas, incluyendo lint, unitarias, integración, migraciones y cobertura.</li>
+          <li>Selecciona la prueba de integración del flujo que más dinero mueve en tu sistema y redacta su caso: precondición, acción, esperado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La calidad del backend no es accidental: se apoya en verificación automática que corre 24/7.</li>
+          <li>La pirámide de pruebas equilibra unitarias, integración y e2e según fidelidad y fragilidad.</li>
+          <li>La CI es el portero del merge: si no pasa, el PR no se integra, jamás «por un momento».</li>
+          <li>La cobertura es una señal barata de salud, no el objetivo; lo crítico es probar los caminos que movilizan dinero o datos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="code-review-y-colaboracion.html">Code review y colaboración</a>
+          <a class="related-lessons__link" href="entornos-y-despliegue.html">Entornos y despliegue</a>
+          <a class="related-lessons__link" href="../modulo-02/deuda-tecnica.html">Deuda técnica</a>
+          <a class="related-lessons__link" href="../modulo-01/requisitos-y-aclaraciones.html">Requerimientos y aclaraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="code-review-y-colaboracion.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Code review y colaboración</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="entornos-y-despliegue.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Entornos y despliegue</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

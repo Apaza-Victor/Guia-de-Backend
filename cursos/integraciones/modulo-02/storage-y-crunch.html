@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-storage-y-crunch">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Almacenamiento en la nube · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a subir archivos a la nube con S3: buckets, signed URLs para subida directa, expiración de acceso y entrega de contenido por CDN.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-storage-y-crunch"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Almacenamiento en la nube</span>
+      </nav>
+      <h1 class="lesson-title">Almacenamiento en la nube</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Integraciones prácticas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Guardar archivos en el disco de tu propio servidor se rompe en cuanto escala: espacio finito, backups manuales, y mal repartido si despliegas varias instancias. El <strong>almacenamiento en la nube</strong> (S3 y equivalentes) resuelve eso con objetos duraderos y baratos, pero obliga a decidir <strong>quién sube el archivo</strong>, <strong>quién lo lee</strong> y <strong>durante cuánto tiempo</strong>. La respuesta moderna no pasa por tus instancias: pasa por <strong>signed URLs</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="buckets">Buckets y objetos</h2>
+        <ul>
+          <li>Un <strong>bucket</strong> es un contenedor con una región, políticas de acceso y ciclo de vida (pasar a archivo frío y luego borrar).</li>
+          <li>Un <strong>objeto</strong> es un archivo identificado por una clave: <code>usuarios/42/avatar.webp</code> o <code>facturas/2026/09/factura.pdf</code>.</li>
+          <li>La clave es tu «sistema de archivos»: organizar <code>dominio/id/tipo</code> simplifica las políticas de acceso por prefijo.</li>
+          <li>Los buckets suelen ser <strong>privados por defecto</strong>; el acceso público se abre de forma controlada.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="signed-put">Subida directa con presigned PUT</h2>
+        <p>El peor patrón es que el archivo pase por tu servidor: consumes memoria, ancho de banda y CPU, y tu API se bloquea durante la subida. Con un <strong>presigned PUT</strong>, tu backend genera (en segundos) una URL con permisos temporales y el navegador sube directo al bucket:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import boto3
+from botocore.config import Config
+
+s3 = boto3.client("s3", region_name="us-east-1",
+                  config=Config(signature_version="s3v4"))
+
+def url_subida_directa(usuario_id: str, nombre: str, content_type: str) -> str:
+    clave = f"usuarios/{usuario_id}/{nombre}"
+    return s3.generate_presigned_url(
+        "put_object",
+        Params={
+            "Bucket": "mi-empresa-upl", "Key": clave,
+            "ContentType": content_type,
+        },
+        ExpiresIn=600,   # 10 minutos para empezar a subir
+    )</code></pre>
+        <p>El navegador recibe la URL firmada, hace un <code>PUT</code> directo y tu backend solo registra la clave en la base de datos. El archivo nunca pasa por tu servidor.</p>
+      </section>
+
+      <section>
+        <h2 id="descarga">Lectura con presigned GET</h2>
+        <p>Lo mismo para descargar contenido privado: la URL de lectura se genera al vuelo y expira. Perfecto para facturas, adjuntos y archivos restringidos por rol:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+export async function urlLectura(clave) {
+  return getSignedUrl(s3, new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET,
+    Key: clave
+  }), { expiresIn: 900 }); // 15 minutos de acceso
+}</code></pre>
+        <p>Verifica el permiso del usuario <strong>antes</strong> de firmar la URL. La firma solo autoriza el acceso temporal a la llave, pero no decide si ese usuario tiene derecho a leer.</p>
+      </section>
+
+      <section>
+        <h2 id="cdn">Servir por CDN</h2>
+        <p>Si ese avatar se va a ver miles de veces, pagar una petición original al bucket cada vez es desperdicio. Un <strong>CDN</strong> (CloudFront, Fastly) cachea el objeto en nodos de borde y lo sirve cerca del usuario, con cabeceras de cache:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "objeto": "usuarios/42/avatar.webp",
+  "estrategia": "CDN + origen privado",
+  "origen": { "tipo": "s3", "acceso": "OAC (Origin Access Control)" },
+  "cache_control": { "max_age_s": 604800, "immutable": true },
+  "invalidez_bajo_demanda": "solo versiones con hash en el nombre"
+}</code></pre>
+        <p>La técnica recomendada: nombres con hash de contenido (<code>avatar-v42.webp</code>). Así el CDN cachea para siempre y «invalidar» solo es crear un objeto nuevo. Las URLs públicas salen del CDN, nunca del bucket.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> sube directo con presigned PUT, sirve con presigned GET o CDN, y nunca guardes los archivos dentro de un request HTTP de tu API.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="seguridad">Seguridad básica del bucket</h2>
+        <ul>
+          <li>Bloquea el acceso público del bucket (Block Public Access) y entrega solo vía CDN/signed URL.</li>
+          <li>Usa <strong>IAM roles</strong> en las instancias en vez de claves estáticas de AWS.</li>
+          <li>Valida lado servidor: tipo (<code>image/webp</code>, <code>application/pdf</code>) y tamaño máximo antes de firmar la subida.</li>
+          <li>Configura un ciclo de vida: mover a <code>Glacier</code> archivos viejos y borrar temporales.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Genera un presigned PUT en Python (iniciamos sesión con credenciales de prueba) y súbete un archivo con <code>curl</code>.</li>
+          <li>Implementa el presigned GET y comprueba que la URL expira cuando corresponde.</li>
+          <li>Diseña el esquema de claves para tu producto: fotos de usuarios, facturas y exportaciones temporales.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los buckets guardan objetos privados identificados por una clave.</li>
+          <li>Los presigned PUT permiten que el navegador suba directo sin pasar por tu servidor.</li>
+          <li>Los presigned GET dan acceso temporal a contenido privado.</li>
+          <li>Un CDN con nombres con hash sirve el contenido de forma barata y rápida.</li>
+          <li>Siempre valida tipo y tamaño, y verifica permisos antes de firmar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/sdk-y-clientes.html">SDKs y clientes HTTP</a>
+          <a class="related-lessons__link" href="../modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-03/env-vars-y-secrets.html">Configuración y secretos</a>
+          <a class="related-lessons__link" href="../modulo-03/monitoreo-de-integraciones.html">Monitoreo de integraciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

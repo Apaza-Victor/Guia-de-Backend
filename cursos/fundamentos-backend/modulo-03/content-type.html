@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content-Type · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="Qué es Content-Type, valores MIME más usados y cómo el backend comunicación el formato de sus respuestas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Índice del curso">
+    <p class="sidebar__title">Fundamentos de Backend</p>
+    <section class="sidebar__module sidebar__group is-open">
+      <button class="sidebar__group-title" type="button" aria-expanded="true">
+        <span>Módulo 1 · Introducción</span>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </button>
+      <ul class="sidebar__links">
+        <li><a class="sidebar__link" href="../modulo-01/que-es-backend.html"><span class="check"></span>¿Qué es Backend?<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/que-hace-un-desarrollador-backend.html"><span class="check"></span>¿Qué hace un desarrollador Backend?<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/backend-vs-frontend.html"><span class="check"></span>Backend vs Frontend<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/fullstack.html"><span class="check"></span>Full Stack<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/que-es-cliente.html"><span class="check"></span>Cliente<span class="sidebar__dur">7 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/que-es-servidor.html"><span class="check"></span>Servidor<span class="sidebar__dur">7 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/cliente-servidor.html"><span class="check"></span>Cliente-Servidor<span class="sidebar__dur">12 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/que-es-request.html"><span class="check"></span>Request<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/que-es-response.html"><span class="check"></span>Response<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/request-response.html"><span class="check"></span>Request y Response<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/aplicaciones-web.html"><span class="check"></span>Aplicaciones Web<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/aplicaciones-moviles-backend.html"><span class="check"></span>Aplicaciones Móviles y Backend<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-01/arquitectura-basica.html"><span class="check"></span>Arquitectura Básica<span class="sidebar__dur">10 min</span></a></li>
+      </ul>
+    </section>
+    <section class="sidebar__module sidebar__group is-open">
+      <button class="sidebar__group-title" type="button" aria-expanded="true">
+        <span>Módulo 2 · Internet y la Web</span>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </button>
+      <ul class="sidebar__links">
+        <li><a class="sidebar__link" href="../modulo-02/como-funciona-internet.html"><span class="check"></span>¿Cómo funciona Internet?<span class="sidebar__dur">12 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/que-es-la-web.html"><span class="check"></span>La Web<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/que-es-un-navegador.html"><span class="check"></span>El Navegador<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/servidores.html"><span class="check"></span>Servidores<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/que-es-un-isp.html"><span class="check"></span>ISP<span class="sidebar__dur">7 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/que-es-una-ip.html"><span class="check"></span>Direcciones IP<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/ipv4.html"><span class="check"></span>IPv4<span class="sidebar__dur">7 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/ipv6.html"><span class="check"></span>IPv6<span class="sidebar__dur">7 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/puertos.html"><span class="check"></span>Puertos<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/dns.html"><span class="check"></span>DNS<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/dominio.html"><span class="check"></span>Dominios<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/hosting.html"><span class="check"></span>Hosting<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/vps.html"><span class="check"></span>VPS<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-02/cdn.html"><span class="check"></span>CDN<span class="sidebar__dur">8 min</span></a></li>
+      </ul>
+    </section>
+    <section class="sidebar__module sidebar__group is-open">
+      <button class="sidebar__group-title" type="button" aria-expanded="true">
+        <span>Módulo 3 · HTTP</span>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </button>
+      <ul class="sidebar__links">
+        <li><a class="sidebar__link" href="que-es-http.html"><span class="check"></span>HTTP<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="http-vs-https.html"><span class="check"></span>HTTPS<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="peticion-http.html"><span class="check"></span>Request HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="respuesta-http.html"><span class="check"></span>Response HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="headers-http.html"><span class="check"></span>Headers HTTP<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="body-http.html"><span class="check"></span>Body HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link is-active" href="content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
+      </ul>
+    </section>
+    <section class="sidebar__module sidebar__group is-open">
+      <button class="sidebar__group-title" type="button" aria-expanded="true">
+        <span>Módulo 4 · Arquitectura Web</span>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </button>
+      <ul class="sidebar__links">
+        <li><a class="sidebar__link" href="../modulo-04/monolito.html"><span class="check"></span>Monolito<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/arquitectura-cliente-servidor.html"><span class="check"></span>Arquitectura Cliente-Servidor<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/arquitectura-en-capas.html"><span class="check"></span>Arquitectura en Capas<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/mvc.html"><span class="check"></span>MVC<span class="sidebar__dur">11 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/que-es-una-api.html"><span class="check"></span>API<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/que-es-el-backend.html"><span class="check"></span>El Backend<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/base-de-datos.html"><span class="check"></span>Base de Datos<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/cache.html"><span class="check"></span>Cache<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/reverse-proxy.html"><span class="check"></span>Reverse Proxy<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-04/load-balancer.html"><span class="check"></span>Load Balancer<span class="sidebar__dur">10 min</span></a></li>
+      </ul>
+    </section>
+    <section class="sidebar__module sidebar__group is-open">
+      <button class="sidebar__group-title" type="button" aria-expanded="true">
+        <span>Módulo 5 · Formatos y Comunicación</span>
+        <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
+      </button>
+      <ul class="sidebar__links">
+        <li><a class="sidebar__link" href="../modulo-05/json.html"><span class="check"></span>JSON<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-05/xml.html"><span class="check"></span>XML<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-05/form-data.html"><span class="check"></span>Form Data<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-05/multipart.html"><span class="check"></span>Multipart<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-05/websockets.html"><span class="check"></span>WebSockets<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-05/sse.html"><span class="check"></span>Server-Sent Events<span class="sidebar__dur">9 min</span></a></li>
+      </ul>
+    </section>
+    <div class="sidebar-footer">
+      <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel: Principiante</span>
+      <span><i class="fa-solid fa-layer-group" aria-hidden="true"></i> 5 módulos · 55 lecciones</span>
+    </div>
+  </aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">Fundamentos de Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Content-Type</span>
+        </nav>
+        <h1 class="lesson-title">Content-Type</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Fundamentos de Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · HTTP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p><strong>Content-Type</strong> es el header que declara <em>el formato real del body</em> que viaja en un mensaje HTTP. Es la etiqueta del contenido: sin ella, el receptor no puede interpretar si lo que recibe es JSON, HTML, una imagen o texto plano.</p>
+          <p>Se escriben como <strong>tipos MIME</strong>: <code class="inline">tipo/subtipo</code>. Enviar y leer bien este header es una disciplina diaria del backend.</p>
+        </section>
+
+        <section>
+          <h2 id="conceptos-clave">Los valores que debes conocer</h2>
+          <ul>
+            <li><code class="inline">application/json</code> — el rey de las APIs. JSON.</li>
+            <li><code class="inline">application/xml</code> — API en XML.</li>
+            <li><code class="inline">text/html</code> — página web (HTML).</li>
+            <li><code class="inline">text/plain</code> — texto simple sin formato.</li>
+            <li><code class="inline">application/x-www-form-urlencoded</code> — formulario clásico (los datos en la misma línea del body).</li>
+            <li><code class="inline">multipart/form-data</code> — formulario con archivos.</li>
+            <li><code class="inline">image/png</code>, <code class="inline">image/jpeg</code>, <code class="inline">application/pdf</code> — archivos.</li>
+          </ul>
+          <p>Prima verlos en acción: cada respuesta de una API JSON, cada <code class="inline"><img></code> que se descarga… todo lleva su etiqueta.</p>
+        </section>
+
+        <section>
+          <h2 id="ejemplo">Ejemplo: la etiqueta del tarro</h2>
+          <p>Recibes un «tarro con algo». Si viene sin etiqueta (sin Content-Type), tienes que adivinar: ¿es mermelada o salsa? El backend jamás adivina: <em>le dice al receptor qué es lo que le manda</em>.</p>
+        </section>
+
+        <section>
+          <h2 id="codigo">Código: declarar tipos correctos</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Node.js (Express)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-javascript">const express = require("express");
+const app = express();
+
+// JSON: Express detecta y declara application/json
+app.get("/api/datos", (req, res) => {
+  res.json({ ok: true, lista: [1, 2, 3] });
+});
+
+// HTML en mano
+app.get("/", (req, res) => {
+  res.type("html").send("<h1>Hola</h1>");
+});
+
+// XML a mano (legado de sistemas)
+app.get("/feed", (req, res) => {
+  const xml = '<catalogo><item>portatil</item></catalogo>';
+  res.type("application/xml").send(xml);
+});
+
+app.listen(3000);</code></pre>
+            </div>
+          </figure>
+          <p>Usa <code class="inline">res.json()</code>/<code class="inline">res.type()</code> en vez de escribir a mano el header: menos errores y código más claro.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Con F12, anota el Content-Type de: una API JSON, una imagen y el HTML de una página.</li>
+            <li>Envía un POST con Content-Type JSON y otro con form-urlencoded; compara cuerpos.</li>
+            <li>Explica qué Content-Type usarías para una respuesta que es un PDF.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Content-Type declara el formato del body (tipos MIME).</li>
+            <li>JSON, HTML, XML, formularios y archivos tienen valores propios.</li>
+            <li>El backend lo fija en cada respuesta y lo lee en cada petición.</li>
+            <li>Un Content-Type erróneo rompe la comunicación.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="body-http.html">Body HTTP</a>
+            <a class="related-lessons__link" href="headers-http.html">Headers HTTP</a>
+            <a class="related-lessons__link" href="../modulo-05/json.html">JSON</a>
+            <a class="related-lessons__link" href="../modulo-05/multipart.html">Multipart</a>
+          </div>
+        </section>
+      </div>
+
+      <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+        <a class="lesson-prevnext__link" href="cache-control.html">
+          <span class="label">← Anterior</span>
+          <span class="title">Cache-Control</span>
+        </a>
+        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="status-codes.html">
+          <span class="label">Siguiente →</span>
+          <span class="title">Códigos de Estado HTTP</span>
+        </a>
+      </nav>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Internet</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · HTTP</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Formatos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

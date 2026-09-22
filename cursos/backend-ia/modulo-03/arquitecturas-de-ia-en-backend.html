@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-arquitecturas-de-ia-en-backend">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitecturas de IA en backend · Backend para IA · Backend Academy</title>
+<meta name="description" content="Piezas finales del curso: chatbot con historial persistido, asistentes con agentes y pipeline RAG en producción, con despliegue y escalado.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-arquitecturas-de-ia-en-backend"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Arquitecturas de IA en backend</span>
+      </nav>
+      <h1 class="lesson-title">Arquitecturas de IA en backend</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Producción de IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Con las piezas de los tres módulos podemos diseñar sistemas completos. Esta lección arma tres arquitecturas típicas de una empresa real: el <strong>chatbot con historial</strong>, el <strong>asistente con agentes</strong> y el <strong>pipeline RAG en producción</strong>. Ninguna es «el prompt del futuro»: todas son backends normales con una dependencia de red con memoria.</p>
+      </section>
+
+      <section>
+        <h2 id="chatbot">Chatbot con historial persistido</h2>
+        <p>El chatbot clásico mezcla memoria del usuario (mensajes anteriores) con contexto de negocio. El backend guarda el historial en Redis por sesión, arma los mensajes con el contexto y aplica límites de tokens de la lección de costos en cada request.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { createClient } from 'redis';
+import crypto from 'node:crypto';
+
+const redis = createClient();
+await redis.connect();
+
+const MAX_HISTORIA = 10; // últimos 10 turnos, recorte de ventana
+
+async function obtenerMensajes(sessionId) {
+  const clave = `chat:${sessionId}`;
+  const lista = await redis.lRange(clave, -MAX_HISTORIA, -1);
+  const historial = lista.map((m) => JSON.parse(m));
+
+  return [
+    { role: 'system', content: 'Eres soporte de la plataforma.' },
+    ...historial,
+  ];
+}
+
+export async function chatHandler(req, res) {
+  const sessionId = req.body.sessionId ?? crypto.randomUUID();
+  const mensajes = await obtenerMensajes(sessionId);
+  mensajes.push({ role: 'user', content: req.body.mensaje });
+
+  const data = await llm.completar(mensajes, { modelo });
+
+  await redis.rPush(`chat:${sessionId}`,
+    JSON.stringify({ role: 'user', content: req.body.mensaje }),
+    JSON.stringify({ role: 'assistant', content: data.contenido })
+  );
+  await redis.expire(`chat:${sessionId}`, 30 * 86400); // inactividad
+
+  res.json({ respuesta: data.contenido, sessionId });
+}</code></pre>
+        <p>Detalles de producción: recorta la ventana de tokens antes de enviar, nunca dejes crecer el historial sin límite, y usa el mismo <code>sessionId</code> que el cliente para mantener la conversación viva entre requests.</p>
+      </section>
+
+      <section>
+        <h2 id="agentes">Asistente con agentes</h2>
+        <p>Cuando el asistente necesita actuar (consultar la base, llamar una API interna), entra la arquitectura de agentes del módulo 2: el modelo produce <code>tool_calls</code>, tu backend las ejecuta y devuelve los resultados como contexto. El bucle se repite hasta que el modelo responde sin herramientas.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const HERRAMIENTAS = {
+  consultar_saldo: { fn: consultarSaldo, descripcion: 'saldos de cuenta' },
+  crear_recibo:    { fn: crearRecibo,    descripcion: 'genera un comprobante' },
+};
+
+async function resolverAsistente(mensajes) {
+  for (let turno = 0; turno < 5; turno++) {
+    const data = await llm.completar(mensajes, {
+      tools: Object.keys(HERRAMIENTAS),
+    });
+
+    if (!data.tool_calls.length) return data.contenido;
+
+    for (const llamada of data.tool_calls) {
+      const resultado = await HERRAMIENTAS[llamada.nombre].fn(llamada.args);
+      mensajes.push({
+        role: 'tool',
+        tool_call_id: llamada.id,
+        content: JSON.stringify(resultado),
+      });
+    }
+  }
+  throw new Error('Demasiados turnos de herramientas');
+}</code></pre>
+        <p>Regla de oro repetida: nunca ejecutes una <code>tool_call</code> que no esperabas (validación de guardrails del <code>módulo 3</code>) y registra cada paso para poder auditar por qué el asistente actuó. El corte de turnos evita los bucles infinitos que queman tokens.</p>
+      </section>
+
+      <section>
+        <h2 id="rag">Pipeline RAG en producción</h2>
+        <p>El RAG del módulo 2 en producción se vuelve asíncrono: el indexado corre por trabajos (colas), no en el request. El request solo lee del índice y reúne contexto. La separación evita que un usuario pague por procesos de ingestión y mantiene la búsqueda rápida.</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># worker/ingesta.py: corre en una cola, no en el request
+import pickle
+from redis import Redis
+
+redis = Redis(decode_responses=False)
+
+def indexar_documento(ruta, embedding_fn):
+    chunks = dividir_texto(open(ruta, encoding="utf-8").read())
+    vectors = [pickle.dumps(embedding_fn(c)) for c in chunks]
+    redis.delete(f"rag:{ruta}")
+    for c, v in zip(chunks, vectors):
+        redis.rPush(f"rag:{ruta}", v)       # búsqueda por similitud simple
+    redis.expire(f"rag:{ruta}", 7 * 86400)  # cache de contexto semanal
+    redis.publish("ingesta:fin", ruta)
+
+# app/main.py: el request solo consulta el índice
+def responder_con_rag(ruta, pregunta, embedding_fn, llm):
+    chunks = [pickle.loads(v) for v in redis.lRange(f"rag:{ruta}", 0, -1)]
+    contexto = top_similares(chunks, embedding_fn(pregunta), k=4)
+    prompt = ["Busca en este contexto y responde.", f"{contexto}", pregunta]
+    return llm(prompt)</code></pre>
+        <p>Los trabajos de ingesta se disparan cuando la fuente cambia (webhook, cron), y el request nunca toca el documento original: siempre responde sobre una copia vectorizada en caché. Así, una fuente caída no rompe el chatbot que usa su último índice.</p>
+      </section>
+
+      <section>
+        <h2 id="despliegue">Despliegue, escalado y cierre</h2>
+        <p>Las tres arquitecturas se despliegan como cualquier servicio: contenedor, cola, Redis y un proveedor LLM externo con su pin. El escalado es horizontal (todas las piezas son stateless salvo Redis, que escala aparte), y los guardrails, costos, monitoreo y versionado del módulo 3 son los requisitos, no el añadido.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># docker-compose de un servicio de IA típico
+services:
+  api:
+    build: .
+    ports: ["8080:8080"]
+    env:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}     # nunca en el repo
+      REDIS_URL: redis://redis:6379
+      MODELO_REGISTRO: prod
+    depends_on: [redis]
+  redis:
+    image: redis:7-bookworm
+    volumes: ["redis-data:/data"]
+  worker_ingesta:
+    build: .
+    command: python -m worker.ingesta
+    env:
+      REDIS_URL: redis://redis:6379
+    depends_on: [redis]
+
+# 3 réplicas del API detrás de un load balancer; Redis aparte.</code></pre>
+        <p>Con esto cierras el curso: en cada lección trabajaste una «skill» para un sistema como este. La IA en el backend no es magia: es un pipeline con límites, mediciones, seguridad y versionado, controlado por código como cualquier otra feature.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta el chatbot con historial en Redis y prueba 3 turnos seguidos manteniendo el <code>sessionId</code>.</li>
+          <li>Convierte tu feature en asistente con agentes (una <code>tool_call</code> propia) con corte máximo de 5 turnos.</li>
+          <li>Mueve la ingesta de tu RAG a un worker separado que los requests no bloqueen, y despliega el <code>docker-compose</code> localmente.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El chatbot persiste el historial en Redis y recorta la ventana de tokens en cada request.</li>
+          <li>El asistente con agentes itera <code>tool_calls</code> con límite de turnos; nunca ejecuta llamadas inesperadas.</li>
+          <li>El RAG en producción separa la ingesta (cola/worker) de la lectura (request rápido).</li>
+          <li>Todo el sistema se despliega como contenedores stateless con Redis aparte; los secretos nunca viajan en el repo.</li>
+          <li>Los guardrails, costos, monitoreo y versionado son parte de la arquitectura, no un capricho.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/agentes-y-tools.html">Agentes y herramientas</a>
+          <a class="related-lessons__link" href="../modulo-02/rag-basico.html">RAG básico</a>
+          <a class="related-lessons__link" href="seguridad-y-guardrails.html">Seguridad y guardrails</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="versionado-de-modelos.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Versionado de modelos</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
+        <span class="label">Curso completo</span>
+        <span class="title">Volver a Backend para IA</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

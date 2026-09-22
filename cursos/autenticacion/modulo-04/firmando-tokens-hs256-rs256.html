@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="firmando-tokens-hs256-rs256">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firmando tokens: HS256 y RS256 · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Diferencia entre HS256 (secreto compartido simétrico) y RS256 (claves asimétricas): cómo firmar y verificar un JWT en PHP con Firestore de clave pública.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="firmando-tokens-hs256-rs256"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Firmando tokens: HS256 y RS256</span>
+        </nav>
+        <h1 class="lesson-title">Firmando tokens: HS256 y RS256</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · JWT</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="simetrico-asimetrico">Simétrico frente a asimétrico</h2>
+          <ul>
+            <li><strong>HS256</strong>: un solo <strong>secreto</strong> compartido firmar y verificar. Rápido, pero el secreto solo puede estar en un servidor de confianza.</li>
+            <li><strong>RS256</strong>: <strong>clave privada</strong> firma, <strong>clave pública</strong> verifica. Lento, pero la clave pública se publica libremente, ideal cuando varios servicios (API gateway, microservicios) validan tokens de un mismo emisor.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="hs256">Firmar con HS256 en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function base64url(string $data): string
+{
+    return rtrim(strtr(base64_encode($data), "+/", "-_"), "=");
+}
+
+function firmar_hs256(array $claims, string $secreto): string
+{
+    $header   = ["alg" =&gt; "HS256", "typ" =&gt; "JWT"];
+    $h = base64url(json_encode($header));
+    $p = base64url(json_encode($claims));
+    $firma = hash_hmac("sha256", "$h.$p", $secreto, true);
+    return "$h.$p." . base64url($firma);
+}
+
+function verificar_hs256(string $token, string $secreto): ?array
+{
+    $partes = explode(".", $token);
+    if (count($partes) !== 3) return null;
+    [$h, $p, $s] = $partes;
+
+    $esperada = base64url(hash_hmac("sha256", "$h.$p", $secreto, true));
+    if (!hash_equals($esperada, $s)) return null; // compare en tiempo constante
+
+    $claims = json_decode(base64_decode(strtr($p, "-_", "+/")), true);
+    return is_array($claims) ? $claims : null;
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="rs256">Firmar con RS256</h2>
+          <p>Genera primero el par de claves y firma con privada:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
+openssl rsa -pubout -in private.pem -out public.pem</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function base64url(string $data): string
+{
+    return rtrim(strtr(base64_encode($data), "+/", "-_"), "=");
+}
+
+function firmar_rs256(array $claims, string $clavePrivada): string
+{
+    $header = ["alg" =&gt; "RS256", "typ" =&gt; "JWT"];
+    $h = base64url(json_encode($header));
+    $p = base64url(json_encode($claims));
+
+    openssl_sign("$h.$p", $firma, $clavePrivada, OPENSSL_ALGO_SHA256);
+    return "$h.$p." . base64url($firma);
+}
+
+function verificar_rs256(string $token, string $clavePublica): ?array
+{
+    $partes = explode(".", $token);
+    if (count($partes) !== 3) return null;
+    [$h, $p, $s] = $partes;
+
+    $ok = openssl_verify(
+        "$h.$p", base64_decode(strtr($s, "-_", "+/")), $clavePublica, OPENSSL_ALGO_SHA256
+    );
+    if ($ok !== 1) return null;
+
+    return json_decode(base64_decode(strtr($p, "-_", "+/")), true);
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="criterio">Qué elegir</h2>
+          <p>Un solo servicio monolítico: <strong>HS256</strong> es suficiente y rápido. Varios servicios que deben validar sin compartir secretos o API de terceros: <strong>RS256</strong>, publicando una <code class="inline">/.well-known/jwks.json</code>. Recuerda mandar <code class="inline">"alg"</code> fijo en el header y nunca aceptar el algoritmo «none» ni el del atacante (vulnerabilidad clásica de JWT).</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Firma el mismo payload con HS256 y RS256 y compara el tamaño del token.</li>
+            <li>Altera un byte del payload y confirma que la verificación devuelve <code class="inline">null</code>.</li>
+            <li>Explica en qué escenario usarías cada algoritmo.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>HS256: secreto compartido, simple y rápido.</li>
+            <li>RS256: clave privada firma, pública verifica — verificación descentralizada.</li>
+            <li>Usa <code class="inline">hash_equals</code> y tiempo constante para comparar firmas.</li>
+            <li>Jamás confíes en el algoritmo que declara el token.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="que-es-un-jwt.html">¿Qué es un JWT y sus partes?</a>
+            <a class="related-lessons__link" href="access-tokens-y-expiracion.html">Access tokens y expiración</a>
+            <a class="related-lessons__link" href="refresh-tokens-y-rotacion.html">Refresh tokens y rotación</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

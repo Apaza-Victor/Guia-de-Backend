@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-socket-io">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Socket.IO · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Conoce Socket.IO: diferencias con el paquete ws, eventos con nombre, salas y salas, y la reconexión automática.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-socket-io"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Socket.IO</span>
+      </nav>
+      <h1 class="lesson-title">Socket.IO</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · WebSockets en Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">¿Qué es Socket.IO?</h2>
+        <p>Socket.IO es una librería (servidor en Node + cliente en el navegador) que se apoya en WebSocket y le añade capas de valor: un mensaje de <em>eventos</em> con nombres y datos, salas y broadcast nativos, reconexión automática con backoff y una caída automática a long-polling cuando el WebSocket no puede atravesar un proxy o firewall.</p>
+        <p>No es WebSocket «con esteroides» para todo: añade <strong>overhead</strong> (salas, heartbeats propios, acuses) y limita el rendimiento puro respecto a <code>ws</code>. Para aplicaciones de chat y notificaciones es la opción más productiva; para streaming de máxima velocidad a millones de sockets, el protocolo puro gana.</p>
+      </section>
+
+      <section>
+        <h2 id="diferencia">ws vs Socket.IO frente a frente</h2>
+        <ul>
+          <li><strong>Nivel de abstracción:</strong> <code>ws</code> expone el protocolo tal cual (mensajes de texto/binario). Socket.IO organiza <em>eventos nombrados</em> con payload estructurado.</li>
+          <li><strong>Reconexión:</strong> en <code>ws</code> escribe tú la lógica; Socket.IO la trae por defecto con espera exponencial.</li>
+          <li><strong>Salas:</strong> en <code>ws</code> las construyes con mapas; Socket.IO trae <code>join</code>/<code>leave</code>.</li>
+          <li><strong>Transporte:</strong> Socket.IO intenta WebSocket y degrada a HTTP long-polling; <code>ws</code> solo WebSocket.</li>
+          <li><strong>Rendimiento:</strong> <code>ws</code> es más ligero; el bit de estado y el framework extra de Socket.IO tienen coste.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="eventos">Emitir y escuchar eventos</h2>
+        <p>El modelo de Socket.IO es el <em>pub/sub</em> discreto: el servidor emite eventos con nombre y el cliente los escucha (y al revés). El primer parámetro siempre es el nombre del evento y el segundo los datos.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Servidor (Node.js + Socket.IO)
+const { Server } = require('socket.io');
+const io = new Server(3000, { cors: { origin: '*' } });
+
+io.on('connection', (socket) =&gt; {
+  console.log('Cliente conectado:', socket.id);
+
+  // Escuchar un evento enviado por el cliente.
+  socket.on('mensaje', (payload) =&gt; {
+    console.log(payload.de, '-', payload.texto);
+    // Devolver respuesta (emit general) o acusar recibo (emit a uno).
+    socket.emit('recibido', { ok: true, cuando: Date.now() });
+  });
+
+  // Avisar a todos menos al emisor.
+  socket.broadcast.emit('usuario-conectado', { id: socket.id });
+});</code></pre>
+        <p>El cliente del navegador usa exactamente la misma API de eventos con la contrapartida <code>socket.on(...)</code> / <code>socket.emit(...)</code>, lo que elimina la tediosa tarea de parsear y enrutar JSON a mano.</p>
+      </section>
+
+      <section>
+        <h2 id="rooms">Rooms con Socket.IO</h2>
+        <p>Las salas son ciudadanos de primera clase. El método <code>join</code> añade un socket a una sala, <code>leave</code> lo quita, y <code>io.to(nombre).emit(...)</code> envía a todos sus miembros. Todo el mantenimiento (borrar salas vacías, limpiar sockets muertos) está resuelto.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">io.on('connection', (socket) =&gt; {
+  socket.on('entrar-a-partida', ({ partidaId, nombre }) =&gt; {
+    // Un socket puede estar en varias salas a la vez.
+    socket.join('partida:' + partidaId);
+    socket.data.nombre = nombre;
+
+    // Avisar al resto de jugadores.
+    io.to('partida:' + partidaId).emit('jugador-ue', {
+      nombre,
+      enPartida: io.sockets.adapter.rooms.get('partida:' + partidaId)?.size
+    });
+  });
+
+  socket.on('cambiar-ficha', (dato) =&gt; {
+    // Broadcast solo a la sala de la partida actual.
+    io.to('partida:' + dato.partidaId).emit('tablero', dato);
+  });
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="reconexion">Reconexión y gestión de estado</h2>
+        <p>Socket.IO reconecta solo: cuando pierde la conexión, espera un backoff exponencial (50 ms → 100 ms → 200 ms …) con un tope configurable y reintenta. El evento <code>disconnect</code> te permite saber que el cliente se fue, y <code>reconnect</code>/<code>connect</code> te dicen cuándo vuelve.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Servidor: librar estado entre desconexión y reconexión.
+io.on('connection', (socket) =&gt; {
+  socket.on('disconnect', (razon) =&gt; {
+    console.log(`${socket.id} se fue (${razon})`);
+    io.emit('presencia', { online: io.engine.clientsCount });
+  });
+
+  socket.on('alerta', () =&gt; {
+    // Bandera para controlar reintentos del cliente.
+    socket.emit('reintenta', { maximo: 5, esperaInicialMs: 500 });
+  });
+});</code></pre>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Cliente: la reconexión es automática.
+const socket = io('https://api.miservidor.com', {
+  reconnectionDelay: 500,
+  reconnectionDelayMax: 4000,
+  timeout: 10000
+});
+
+socket.on('connect', () =&gt; console.log('Conectado, id', socket.id));
+socket.on('disconnect', (razon) =&gt; console.log('Cayó:', razon));
+socket.on('viaje', (dato) =&gt; console.log('Estado del viaje:', dato.estado));</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Instala <code>socket.io</code> y el cliente, y monta un servidor que emita un evento <code>tick</code> cada segundo con <code>Date.now()</code>.</li>
+          <li>Crea una sala «partida:1» y conecta dos clientes; verifica que cambiar una ficha solo llega a esa sala.</li>
+          <li>Apaga el servidor con el cliente abierto y observa los intentos de reconexión en la consola; vuelve a encenderlo y comprueba que retoma la comunicación.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Socket.IO es WebSocket + conveniencia: eventos nombrados, salas, reconexión automática y fallback a polling.</li>
+          <li>ws es el protocolo puro y más ligero; Socket.IO aporta abstracción y resiliencia a costa de overhead.</li>
+          <li>Emitir/escuchar eventos (<code>emit</code>/<code>on</code>) elimina el enrutamiento manual de JSON.</li>
+          <li>Rooms con <code>join</code>, <code>leave</code> y <code>io.to(sala).emit</code>.</li>
+          <li>La reconexión automática con backoff la gestiona la librería, no tú.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="broadcast-de-mensajes.html">Broadcast y salas</a>
+          <a class="related-lessons__link" href="autenticacion-por-token.html">Autenticación por token</a>
+          <a class="related-lessons__link" href="../modulo-03/sticky-sessions-y-adaptadores.html">Sticky sessions y adaptadores</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="autenticacion-por-token.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Autenticación por token</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="cliente-websocket-web.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Cliente WebSocket en el navegador</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-cola-y-eventos-patterns">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrones de colas y eventos · System Design · Backend Academy</title>
+<meta name="description" content="Aprende los patrones de colas y eventos en system design: producer/consumer, prioridad, dead letter, fanout y garantías de entrega.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-cola-y-eventos-patterns"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Patrones de colas y eventos</span>
+      </nav>
+      <h1 class="lesson-title">Patrones de colas y eventos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Patrones</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Dos mundos: colas y eventos</h2>
+        <p>La mensajería asíncrona se divide en dos mentalidades complementarias:</p>
+        <ul>
+          <li><strong>Colas (punto a punto):</strong> un mensaje lo consume <em>una</em> de las instancias de un grupo de workers. Perfectas para distribuir trabajo: procesar imágenes, enviar correos.</li>
+          <li><strong>Eventos / Pub-Sub (uno a muchos):</strong> el mismo mensaje se entrega a <em>todos</em> los suscriptores interesados. Perfectos para notificar: «usuario registrado» lo escuchan el servicio de correos, el de analítica y el de scoring.</li>
+        </ul>
+        <p>Elegir el tipo equivocado produce uno de dos síntomas: mensajes duplicados donde debía haber uno (usar pub-sub) o trabajo perdido que debía llegar a varios (usar colas para eventos).</p>
+      </section>
+
+      <section>
+        <h2 id="producer-consumer">Producer y consumer con ACK</h2>
+        <p>En una cola de trabajo, el productor publica y el consumidor <strong>reconoce</strong> (ACK) después de terminar, no al recibir. Si el worker muere antes del ACK, el broker reentrega el mensaje a otro nodo.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import pika, json
+
+# Productor: encola una tarea sin bloquear la API.
+def encolar_thumbnails(producto_id: int, ruta_imagen: str) -> None:
+    conexion = pika.BlockingConnection(pika.ConnectionParameters("cola"))
+    canal = conexion.channel()
+    canal.queue_declare(queue="generar_thumbnails", durable=True)
+    canal.basic_publish(
+        exchange="",
+        routing_key="generar_thumbnails",
+        body=json.dumps({"producto_id": producto_id, "ruta": ruta_imagen}),
+        properties=pika.BasicProperties(delivery_mode=2),  # persistente
+    )
+    conexion.close()
+
+# Consumidor: procesa y solo entonces hace ACK.
+def consumidor(ch, method, properties, body):
+    datos = json.loads(body)
+    try:
+        generar_imagen_pequena(datos["producto_id"], datos["ruta"])
+        ch.basic_ack(delivery_tag=method.delivery_tag)   # trabajo terminado
+    except Exception:
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+
+canal.basic_qos(prefetch_count=1)  # un mensaje a la vez por worker
+canal.basic_consume("generar_thumbnails", consumidor)</code></pre>
+        <p>El ACK manual convierte la cola en un buffer seguro: si el proceso que trabaja se cae a mitad de la tarea, el mensaje vuelve a la cola y otro worker lo termina. Esta es la base del patrón <strong>at-least-once</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="dead-letter">Dead letter y prioridad</h2>
+        <p>Un mensaje que falla muchas veces puede envenenar la cola. La solución estándar es el <strong>dead letter exchange (DLX)</strong>: mensajes que superan el máximo de reintentos o la vida útil del TTL se mueven a una cola especial de inspección, sin bloquear el flujo normal.</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># Declaración de colas con dead letter y prioridad (configuración).
+exchange:
+  name: trabajos
+  type: direct
+
+queue trabajos_urgentes:
+  durable: true
+  arguments:
+    x-max-priority: 10
+    x-dead-letter-exchange: dlx
+    x-dead-letter-routing-key: fallidos
+    x-message-ttl: 3600000     # 1 hora viviendo en la cola
+
+queue fallidos:
+  durable: true</code></pre>
+        <p>Reglas prácticas:</p>
+        <ul>
+          <li><strong>Prioridad:</strong> solo para mensajes que importan en minutos (un pago): la cola la configura con <code>x-max-priority</code> y puede que redistribuir orden.</li>
+          <li><strong>TTL + DLX:</strong> el par estándar para que nada quede huérfano; el operador revisa <code>fallidos</code> con un dashboard.</li>
+          <li><strong>Reintentos exponenciales:</strong> no repitas sobre la misma cola; usa una cola de espera con backoff antes de la principal.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="fanout">Fanout: publicar a todos</h2>
+        <p>En el patrón pub-sub, un exchange de tipo <strong>fanout</strong> copia cada evento a todas las colas suscritas. Es la forma de propagar un hecho de dominio a muchos suscriptores sin que el productor conozca a ninguno.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "evento": "usuario_registrado",
+  "version": "1.0",
+  "id_ocurrencia": "evt_a1b2c3",
+  "ocurrido_en": "2026-09-21T08:15:30Z",
+  "entidad": { "id": "usr_8821", "email": "ana@correo.com" },
+  "detalles": {
+    "fuente": "api-registro",
+    "region": "us-east-1"
+  }
+}</code></pre>
+        <p>Un detalle que muchos equipos pasan por alto: <strong>un evento es un hecho del pasado, no una orden</strong>. Enviamos «usuario_registrado» y cada suscriptor decide su acción; si enviamos «envía el correo de bienvenida», el productor se está acoplando al comportamiento de otro sistema. Guardar primero el evento en una tabla/stream y procesarlo después (event sourcing, outbox) protege contra entregas perdidas.</p>
+      </section>
+
+      <section>
+        <h2 id="garantias">Garantías de entrega e idempotencia</h2>
+        <p>La garantía práctica de los brokers es <strong>at-least-once</strong>: puede que el mismo mensaje llegue dos veces (por un reintento o un ACK perdido). Por eso el consumidor debe ser <strong>idempotente</strong>: procesar el mismo evento dos veces debe producir el mismo resultado.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">def procesar_registro(evento: dict) -> None:
+    clave = f"procesado:{evento['id_ocurrencia']}"
+    if redis.exists(clave):
+        return                      # ya lo vimos; idempotencia
+    enviar_correo_bienvenida(evento["entidad"])
+    redis.setex(clave, 24 * 3600, "1")</code></pre>
+        <p>La idempotencia se consigue con claves de deduplicación (el <code>id_ocurrencia</code> del evento), con tablas de processed-events o con operaciones matemáticamente idempotentes (guardar el máximo de un valor, por ejemplo). Sin ella, un reintento normal se convierte en correos duplicados o saldos duplicados.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Para «procesar cada pago exactamente una vez por el servicio de facturación», elige cola o pub-sub y justifica.</li>
+          <li>Para «avisar a correos, notificaciones push y data warehouse de cada usuario nuevo», elige el patrón y escribe el evento JSON que publicarías.</li>
+          <li>Implementa en pseudocódigo un consumidor idempotente para «aumentar el contador de pedidos de un usuario» que pueda recibir el mismo evento 3 veces.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Colas = punto a punto (trabajo); eventos/pub-sub = uno a muchos (notificación).</li>
+          <li>El ACK debe llegar al finalizar el trabajo, no al recibir; así el broker reentrega tareas huérfanas.</li>
+          <li>DLX + TTL y prioridades evitan colas envenenadas y mensajes huérfanos.</li>
+          <li>Un evento describe un hecho pasado; los suscriptores deciden sus acciones.</li>
+          <li>La entrega real es at-least-once: los consumidores deben ser idempotentes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="monolitica-vs-distribuida.html">Monolito vs distribuida</a>
+          <a class="related-lessons__link" href="dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a>
+          <a class="related-lessons__link" href="bloques-de-construccion.html">Bloques de construcción</a>
+          <a class="related-lessons__link" href="diseno-de-un-feed.html">Caso: feed (newsfeed)</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="monolitica-vs-distribuida.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Monolito vs distribuida</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="dedicla-y-caching-patterns.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Patrones de durabilidad y caché</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

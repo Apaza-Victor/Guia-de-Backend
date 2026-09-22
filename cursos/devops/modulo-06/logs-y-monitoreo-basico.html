@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="logs-y-monitoreo-basico">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logs y monitoreo básico · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Aprende logs estructurados, rotación, métricas y un dashboard para monitorear tu API sin montar un stack gigante.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="logs-y-monitoreo-basico"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Logs y monitoreo básico</span>
+      </nav>
+      <h1 class="lesson-title">Logs y monitoreo básico</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · DevOps en el Backend</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">El valor de un buen log</h2>
+        <p>Un servidor sin logs es una caja negra: sabes que algo pasó, no qué. Con <strong>logs estructurados</strong> (pares clave-valor en JSON) y <strong>métricas</strong> agregadas, desbloqueas la depuración: cada error tiene contexto para entender el porqué sin adivinar.</p>
+      </section>
+
+      <section>
+        <h2 id="estructurados">Logs estructurados en JSON</h2>
+        <p>En vez de un string libre de formato, cada evento es un objeto JSON con timestamp, nivel, request_id y datos útiles:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">import json
+import logging
+import sys
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        data = {
+            "ts": record.created,
+            "level": record.levelname,
+            "msg": record.getMessage(),
+            "logger": record.name,
+        }
+        extra = getattr(record, "data", None)
+        if extra:
+            data.update(extra)
+        return json.dumps(data, ensure_ascii=False)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(JsonFormatter())
+logging.getLogger().addHandler(handler)
+
+logging.info("usuario registrado", extra={"data": {"user_id": 42, "email": "algo@mail.com"}})</code></pre>
+          </div>
+        </figure>
+        <p>La clave <code class="inline">request_id</code> (generada por request y pasada a los logs de ese request) te permite juntar todas las piezas de una petición, incluida la que falló.</p>
+      </section>
+
+      <section>
+        <h2 id="rotacion">Rotación de logs</h2>
+        <p>Los logs crecen sin fin y llenan el disco. <code class="inline">logrotate</code> los renombra, comprime y borra según la política:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">ini</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-ini"># /etc/logrotate.d/api
+/srv/api/logs/*.log {
+    daily
+    rotate 14        # guarda 14 copias
+    compress         # gzip las viejas
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        kill -USR1 $(cat /var/run/gunicorn.pid)
+    endscript
+}</code></pre>
+          </div>
+        </figure>
+        <p>El postrotate avisa al proceso (gunicorn y Nginx entienden esa señal) para que reabra el archivo nuevo.</p>
+      </section>
+
+      <section>
+        <h2 id="metricas">Métricas mínimas sin stack gigante</h2>
+        <p>Para un proyecto pequeño basta un endpoint <code class="inline">/metrics</code> con contadores en memoria:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">from prometheus_client import Counter, Histogram, generate_latest
+
+REQUESTS = Counter("http_req_total", "Requests", ["status"])
+LATENCY = Histogram("http_latency_seconds", "Latencia", buckets=(0.1, 0.3, 1, 3))
+ERRORS = Counter("http_errors_total", "Errores 5xx")
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type="text/plain; version=0.0.4")
+
+# en cada request
+REQUESTS.labels(status=resp.status_code).inc()
+LATENCY.observe(elapsed)
+if resp.status_code &gt;= 500:
+    ERRORS.inc()</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li><strong>Prometheus:</strong> scrapea tu <code class="inline">/metrics</code> cada 15 s y guarda la serie.</li>
+          <li><strong>Grafana:</strong> dashboard con requests, latencia p95 y tasa de error.</li>
+          <li>Las alertas: "tasa 5xx &gt; 5% en 5 min" o "latencia p99 &gt; 1 s".</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="comandos">Investigación diaria</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># colas: ver los últimos logs con formato
+journalctl -u api.service -n 50 --no-pager
+
+# filtrar por nivel y buscar un request_id
+journalctl -u api.service -p err --since "10 minutes ago" \
+  | grep "req-9f2a"</code></pre>
+          </div>
+        </figure>
+        <p>Combinar métricas (qué pasa) y logs (por qué) te da la imagen completa en minutos.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Convierte los logs de tu API a formato JSON con un <code class="inline">request_id</code> por petición.</li>
+          <li>Agrega un endpoint <code class="inline">/metrics</code> con contadores de requests y errores.</li>
+          <li>Configura logrotate y verifica que un log gigante se rota y comprime.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los logs estructurados en JSON con <code class="inline">request_id</code> hacen depurable cualquier error.</li>
+          <li>logrotate evita que los logs llenen el disco.</li>
+          <li>Contadores en <code class="inline">/metrics</code> + Prometheus + Grafana = monitoreo completo.</li>
+          <li>Las alertas convierten las métricas en acción temprana.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

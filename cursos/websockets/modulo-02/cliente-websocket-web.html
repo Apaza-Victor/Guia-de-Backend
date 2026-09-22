@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-cliente-websocket-web">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cliente WebSocket en el navegador · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Domina la API WebSocket del navegador: crear la conexión, enviar y analizar mensajes JSON, y construir una reconexión manual con backoff.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-cliente-websocket-web"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Cliente WebSocket en el navegador</span>
+      </nav>
+      <h1 class="lesson-title">Cliente WebSocket en el navegador</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · WebSockets en Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="api">La API WebSocket del navegador</h2>
+        <p>El navegador trae WebSocket de serie: no hace falta instalar nada. Con el constructor global <code>new WebSocket(url, [protocolos])</code> inicia el handshake y a partir de ahí vives dentro de su ciclo de vida: <code>onopen</code>, <code>onmessage</code>, <code>onerror</code> y <code>onclose</code>.</p>
+        <ul>
+          <li><code>send(datos)</code> — envía texto, JSON string o binario (Blob/ArrayBuffer).</li>
+          <li><code>close(codigo, razon)</code> — cierra la conexión de forma cortés.</li>
+          <li><code>binaryType</code> — elige si los binarios llegan como Blob o ArrayBuffer.</li>
+          <li><code>readyState</code> — el estado actual (0 a 3).</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const socket = new WebSocket('wss://api.miservidor.com/sockets');
+
+socket.onopen = () =&gt; {
+  console.log('Conectado. Enviando datos…');
+  socket.send(JSON.stringify({ tipo: 'iniciar-sesion', sala: 'general' }));
+};
+
+socket.onmessage = (evento) =&gt; {
+  // evento.data es string (texto) o Blob/ArrayBuffer (binario).
+  console.log('Recibido:', evento.data);
+};
+
+socket.onerror = (err) =&gt; console.warn('Error del socket', err);
+
+socket.onclose = (evento) =&gt; console.log('Cerrado:', evento.code, evento.reason);</code></pre>
+      </section>
+
+      <section>
+        <h2 id="enviar-analizar">Enviar y analizar mensajes JSON</h2>
+        <p>El protocolo transmite texto, no objetos. La disciplina diaria es: <strong>serializar al enviar</strong> (<code>JSON.stringify</code>) y <strong>parsear al recibir</strong> (<code>JSON.parse</code>), siempre protegiendo el parseo contra mensajes malformados, porque te puede escribir un cliente cualquiera.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">function enviar(socket, tipo, datos) {
+  const marco = JSON.stringify({ tipo, datos });
+  if (socket.readyState === WebSocket.OPEN) socket.send(marco);
+}
+
+function recibir(evento) {
+  try {
+    const mensaje = JSON.parse(evento.data);
+    rutearPorTipo(mensaje); // switch a mano por "tipo"
+  } catch {
+    console.warn('Mensaje que no era JSON:', evento.data);
+  }
+}
+
+function rutearPorTipo(m) {
+  switch (m.tipo) {
+    case 'chat':
+      pintarMensaje(m.datos);
+      break;
+    case 'presencia':
+      pintarConectados(m.datos);
+      break;
+    case 'estado-pedido':
+      actualizarPedido(m.datos);
+      break;
+    default:
+      console.log('Tipo desconocido:', m.tipo);
+  }
+}</code></pre>
+        <p>Este patrón de <em>envelope</em> ({tipo, datos}) es el mismo que verás detrás del modelo de eventos de Socket.IO y hace tu cliente fácil de ampliar: añadir un caso al switch y listo.</p>
+      </section>
+
+      <section>
+        <h2 id="reconexion-manual">Reconexión manual con backoff</h2>
+        <p>La API nativa no reconecta sola: cuando la conexión se cae, tienes que crearla otra vez. El esquema estándar es el <strong>backoff exponencial</strong>: espera corta al principio y esperas crecientes tras cada fallo, con un tope para no martillear al servidor.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">let intento = 0;
+const ESPERA_INICIAL_MS = 500;
+const ESPERA_MAXIMA_MS = 15000;
+
+function conectarConBackoff() {
+  const socket = new WebSocket('wss://api.miservidor.com/sockets');
+
+  socket.onopen = () =&gt; intento = 0; // salió bien, reiniciamos contador
+
+  socket.onclose = (evento) =&gt; {
+    if (!evento.wasClean) {
+      const espera = Math.min(
+        ESPERA_INICIAL_MS * Math.pow(2, intento),
+        ESPERA_MAXIMA_MS
+      );
+      const jitter = espera * (0.5 + Math.random() * 0.5); // evitar avalanchas
+      intento += 1;
+      console.log(`Reconexión en ${Math.round(jitter)} ms (intento ${intento})`);
+      setTimeout(conectarConBackoff, jitter);
+    }
+  };
+
+  socket.onmessage = (evento) =&gt; recibir(evento);
+
+  return socket;
+}
+
+const socket = conectarConBackoff();</code></pre>
+        <p>El <strong>jitter</strong> (variación aleatoria) evita el «thundering herd»: si mil clientes caen a la vez y todos esperan 2 s exactos, vuelven a golpear juntos. Añadir un toque de aleatoriedad reparte los golpes.</p>
+      </section>
+
+      <section>
+        <h2 id="gestion-estado">Integrar con el estado de la app</h2>
+        <p>Un cliente de calidad expone su estado para que la UI reaccione: botón deshabilitado mientras reconecta, cola de mensajes si hiciera falta, indicador de «en línea».</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const estado = { conectado: false, reintentando: false };
+
+const socket = new WebSocket('wss://api.miservidor.com/sockets');
+
+socket.onopen = () =&gt; {
+  estado.conectado = true;
+  estado.reintentando = false;
+  actualizarBarraDeEstado();
+};
+
+socket.onclose = () =&gt; {
+  estado.conectado = false;
+  estado.reintentando = true;
+  actualizarBarraDeEstado();
+  programarReconexion();
+};
+
+function actualizarBarraDeEstado() {
+  document.querySelector('#indicador').textContent =
+    estado.reintentando ? 'Reconectando…' : (estado.conectado ? 'En línea' : 'Sin conexión');
+}</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Sirve tu servidor de la lección «Servidor WebSocket con Node» y ábrelo desde una página local con <code>new WebSocket('ws://localhost:8080')</code>.</li>
+          <li>Envía un mensaje <code>{tipo:'mensaje', texto:'hola'}</code> y pinta el eco recibido dentro de un elemento <code>&lt;div&gt;</code>.</li>
+          <li>Implementa la reconexión con backoff y verifícala apagando y encendiendo el servidor: registra los tiempos de espera en consola.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El navegador ofrece WebSocket con <code>new WebSocket(url)</code> y cuatro eventos: open, message, error, close.</li>
+          <li>Envía con <code>send</code> y parsea <code>event.data</code> para leer mensajes.</li>
+          <li>Serializa JSON al salir y valida al entrar: nunca asumas que el otro lado manda JSON válido.</li>
+          <li>La reconexión manual se escribe con backoff exponencial + jitter.</li>
+          <li>El estado de la conexión debe reflejarse en la UI y reiniciar el contador al reconectar con éxito.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="socket-io.html">Socket.IO</a>
+          <a class="related-lessons__link" href="estado-de-la-conexion.html">Estados de la conexión</a>
+          <a class="related-lessons__link" href="../modulo-03/heartbeat-y-timeout.html">Heartbeat y timeouts</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="socket-io.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Socket.IO</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Escalar y asegurar WebSockets</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

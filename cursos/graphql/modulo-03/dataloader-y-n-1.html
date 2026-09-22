@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-dataloader-y-n-1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataLoader y el problema N+1 · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a resolver el problema N+1 en GraphQL con DataLoader: batching de consultas, caché por request y resolvers eficientes de relaciones.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-dataloader-y-n-1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">DataLoader y N+1</span>
+      </nav>
+      <h1 class="lesson-title">DataLoader y N+1</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Avanzado y producción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Viste en la lección de resolvers que cada campo se resuelve de forma independiente. Esa libertad tiene un precio: si pides una lista de posts y el resolver de cada <code>autor</code> consulta la base por separado, una sola query dispara <strong>1 + N</strong> consultas. Ese es el famoso <strong>problema N+1</strong>, el enemigo de la latencia de GraphQL.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema en código</h2>
+        <p>Este schema tan inocente esconde la trampa: pedir 100 posts con sus autores son 1 consulta (posts) + 100 consultas (un autor cada una):</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Query: {
+    posts: async (parent, args, context) => {
+      const { rows } = await context.db.query("SELECT * FROM posts");
+      return rows;
+    },
+  },
+  Post: {
+    autor: async (post, args, context) => {
+      const { rows } = await context.db.query(
+        "SELECT * FROM usuarios WHERE id = $1",
+        [post.autorId],
+      );
+      return rows[0];
+    },
+  },
+};</code></pre>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">query {
+  posts {
+    titulo
+    autor { nombre }
+  }
+}</code></pre>
+        <p>Con 100 posts el servidor hace 101 viajes a la base. Cuantos más niveles anidados pidas, peor: <code>posts → autor → posts del autor → …</code> crece de forma exponencial en el peor caso.</p>
+      </section>
+
+      <section>
+        <h2 id="dataloader">DataLoader: batching automático</h2>
+        <p><strong>DataLoader</strong> resuelve el N+1 agrupando todas las llamadas que llegan en el mismo "tick" del event loop y ejecutándolas en <em>una sola</em> consulta. Es un concepto sencillo con dos superpoderes:</p>
+        <ul>
+          <li><strong>Batching</strong> — junta los <code>load(id)</code> de una tanda y los resuelve juntos.</li>
+          <li><strong>Caching</strong> — recuerda resultados dentro de una sola request para no duplicar trabajo.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import DataLoader from "dataloader";
+
+async function batchUsuarios(ids) {
+  const { rows } = await pool.query(
+    "SELECT * FROM usuarios WHERE id = ANY($1::int[])",
+    [ids],
+  );
+  const porId = new Map(rows.map((usuario) => [usuario.id, usuario]));
+  return ids.map((id) => porId.get(id) ?? null);
+}
+
+const cargadorUsuarios = new DataLoader(batchUsuarios);</code></pre>
+        <p>La regla del loader: debe devolver <strong>un resultado por cada id recibido</strong>, en el mismo orden. Por eso se reconstruye el arreglo con <code>ids.map(...)</code> y se rellena con <code>null</code> lo que falte.</p>
+      </section>
+
+      <section>
+        <h2 id="resolver">Usar el loader en el resolver</h2>
+        <p>El resolver cambia de "consulta por id" a "carga por clave". Los N resolvers de <code>autor</code> se ejecutan en el mismo tick, el loader los agrupa y solo cruza la red una vez:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Post: {
+    autor: (post, args, context) => context.cargadores.usuarios.load(post.autorId),
+  },
+  Comentario: {
+    autor: (comentario, args, context) => context.cargadores.usuarios.load(comentario.autorId),
+  },
+};</code></pre>
+        <p>En una query que pidiera posts, autores y comentarios con sus autores: 1 consulta de posts + 1 lote de usuarios + 1 lote de comentarios + 1 lote de usuarios = 4 llamadas en total, en vez de decenas.</p>
+      </section>
+
+      <section>
+        <h2 id="caching">Caché por request, no global</h2>
+        <p>El punto clave de diseño: <strong>los loaders se crean por request y se desechan al terminar</strong>. Así el caché evita duplicados dentro de una operación (por ejemplo, el mismo autor aparece en 20 posts) sin provocar datos obsoletos entre peticiones distintas:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { ApolloServer } from "@apollo/server";
+
+function crearCargadores() {
+  return {
+    usuarios: new DataLoader(batchUsuarios),
+    comentarios: new DataLoader(batchComentarios),
+  };
+}
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: () => ({ cargadores: crearCargadores() }),
+});</code></pre>
+        <p>Si compartieras el loader entre usuarios distintos, un usuario podría ver datos del caché de otro — y los datos quedarían rancios. El ciclo de vida del loader = ciclo de vida de la operación.</p>
+      </section>
+
+      <section>
+        <h2 id="alternativas">Alternativas y cuándo prescindir</h2>
+        <p>No todo requiere DataLoader:</p>
+        <ul>
+          <li>Si la consulta raíz ya hace un <strong>JOIN</strong> en SQL y devuelve los autores embebidos, ningún loader hace falta.</li>
+          <li>Los <strong>ORMs</strong> (Prisma, Sequelize, TypeORM) ofrecen eager loading con <code>include</code>; DataLoader brilla cuando el acceso a datos es por repositorios o APIs remotas.</li>
+          <li>Para relaciones anidadas profundas conviene combinarlo con paginación para acotar el tamaño del lote.</li>
+        </ul>
+        <pre class="code-block"><code class="language-sql" data-language="sql">SELECT p.id, p.titulo, u.nombre AS autor
+FROM posts p
+JOIN usuarios u ON u.id = p.autor_id
+WHERE p.publicado = true;</code></pre>
+        <p>Regla práctica: mide primero. Si una query muestra N+1 en el log de consultas, data loader es la cura correcta.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Recrea el schema posts → autor y observa cuántas consultas dispara con 20 posts en el log.</li>
+          <li>Implementa <code>batchUsuarios</code> con un DataLoader que agote con <code>ANY($1::int[])</code>.</li>
+          <li>Reemplaza el resolver <code>Post.autor</code> por <code>cargadores.usuarios.load(...)</code> y compara el número de consultas.</li>
+          <li>Razona por escrito por qué el loader debe vivirse por request y no ser global.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El N+1 ocurre cuando cada campo relacionado consulta la base por separado.</li>
+          <li>DataLoader agrupa los <code>load</code> del mismo tick en un solo lote.</li>
+          <li>Devuelve resultados en el mismo orden que los ids recibidos y con <code>null</code> para los ausentes.</li>
+          <li>El caché es por request; nunca un loader compartido entre usuarios.</li>
+          <li>Antes de optimizar, comprueba si un JOIN o el eager loading del ORM lo resuelven.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/resolvers.html">Resolvers</a>
+          <a class="related-lessons__link" href="fragmentos-y-uniones.html">Fragmentos, uniones e interfaces</a>
+          <a class="related-lessons__link" href="seguridad-y-limitacion.html">Seguridad y limitación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="fragmentos-y-uniones.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Fragmentos, uniones e interfaces</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="seguridad-y-limitacion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Seguridad y limitación</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

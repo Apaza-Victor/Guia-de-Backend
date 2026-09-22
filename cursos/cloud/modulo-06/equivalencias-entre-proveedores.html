@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="equivalencias-entre-proveedores">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equivalencias entre AWS, GCP y Azure · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Traduce tus conocimientos entre AWS, Google Cloud y Azure: la tabla de equivalencias de servicios Backend y sus nombres.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="equivalencias-entre-proveedores"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Equivalencias entre AWS, GCP y Azure</span>
+      </nav>
+      <h1 class="lesson-title">Equivalencias entre AWS, GCP y Azure</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Costos y Estrategia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Un mismo platillo, tres recetas</h2>
+        <p>AWS, GCP y Azure compiten por resolver lo mismo. La buena noticia para el backender: si dominas los conceptos en uno, el siguiente es "cambiar los nombres". Esta lección es la tabla de traducción que convierte tu experiencia en portátil.</p>
+      </section>
+
+      <section>
+        <h2 id="tabla">La tabla de equivalencias</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Necesidad          AWS                GCP               Azure
+-----------------  -----------------  -----------------  ----------------
+Máquina virtual    EC2                Compute Engine     Virtual Machines
+Contenedores       ECS / EKS          Cloud Run / GKE    Container Apps / AKS
+Almacenar archivos S3                 Cloud Storage      Blob Storage
+Base relacional    RDS                Cloud SQL          Azure SQL / DB for Postgres
+NoSQL key-value    DynamoDB           Firestore/ BigT    Cosmos DB
+Funciones serverl  Lambda             Cloud Functions    Azure Functions
+API HTTP           API Gateway        Cloud Endpoints    API Management
+Balanceador        ELB / ALB          Cloud Load Bal.    Azure Load Balancer
+Cola de mensajes   SQS                Pub/Sub            Service Bus
+Logs + métricas    CloudWatch         Cloud Monitoring   Azure Monitor
+Permisos           IAM                IAM                Azure AD / RBAC
+Notif eventos      SNS/SES            Pub/Sub            Event Grid
+CDN                CloudFront         Cloud CDN          Azure CDN</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="diferencias">Las diferencias que importan</h2>
+        <ul>
+          <li><strong>Modelos de identidad:</strong> AWS usa IAM puro; Azure apuesta por Azure AD / Entra ID y está casado con el ecosistema Microsoft (mejor si tu empresa ya usa Office 365).</li>
+          <li><strong>Déploys:</strong> GCP brilla con contenedores (Cloud Run despliega una imagen sin que armes orquestación manual). Azure se integra fuerte con CI/CD de Azure DevOps y GitHub.</li>
+          <li><strong>Serverless:</strong> Lambda es de las más maduras; Cloud Functions es sencilla; Azure Functions permite varios lenguajes y binding con servicios de Microsoft.</li>
+          <li><strong>Precios:</strong> difieren según servicio y región; los precios "por invocación" son por momentos distintos entre proveedores.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="elegir">Cómo elegir proveedor</h2>
+        <ul>
+          <li><strong>Familiaridad del equipo:</strong> la curva de aprendizaje real pesa más que la propaganda. Si el equipo ya conoce AWS, no migres "porque es más barato en papel".</li>
+          <li><strong>Integración existente:</strong> empresa con Microsoft = Azure; móviles + analítica de Firebase = GCP; comunidad y servicios vastos = AWS.</li>
+          <li><strong>Servicios gestionados específicos:</strong> algunos casos solo están en una nube (DynamoDB vs Firestore vs Cosmos: elige por modelo y no por marca).</li>
+          <li><strong>Costo total:</strong> si no es un requisito legal, compara a 3 años incluyendo el esfuerzo de operar y de salida (“exit” es difícil en cualquier lado).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="multinube">¿Y el multi-cloud?</h2>
+        <p>Usar dos nubes a la vez añade complejidad (redes, IAM, y duplicar operación). Solo compensa cuando hay un requisito fuerte (disponibilidad entre proveedores, cumplimiento, o equipos separados). Para el 99% de los proyectos, <strong>una nube bien usada supera a dos a medias</strong>.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Traduce tu arquitectura mental (VM + S3 + Postgres + Lambda) a los nombres de GCP y Azure.</li>
+          <li>Investiga un servicio exclusivo de cada nube y decide cuál usarías.</li>
+          <li>Escribe 3 criterios que usarías para elegir proveedor en un proyecto nuevo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los tres grandes resuelven lo mismo con nombres distintos: conoce los conceptos, los nombres viajan.</li>
+          <li>Cada nube tiene sesgo: Azure-Microsoft, GCP-contenedores, AWS-catálogo.</li>
+          <li>La elección se basa en equipo, integración existente y costo total, no en marca.</li>
+          <li>El multi-cloud es una excepción justificada, no una moda global.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

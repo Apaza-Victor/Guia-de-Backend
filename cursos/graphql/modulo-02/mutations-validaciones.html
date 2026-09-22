@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-mutations-validaciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutations y validación · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a escribir mutations robustas en GraphQL: input types, validación de negocio en el resolver y transacciones de base de datos con rollback.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-mutations-validaciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Mutations y validación</span>
+      </nav>
+      <h1 class="lesson-title">Mutations y validación</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Implementación con Node.js</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Una mutation escribe y por tanto exige más cuidado que una query: validar la entrada, proteger el dato, garantizar consistencia y responder con el resultado útil. GraphQL te facilita el tipo de entrada mediante <strong>input types</strong>, pero la validación de negocio y las transacciones son puro backend.</p>
+        <p>La regla general: <strong>el schema valida la forma; el resolver valida el significado</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="input-types">Input types</h2>
+        <p>En vez de recibir una decena de argumentos sueltos, una mutation recibe un <strong>input object</strong>: un tipo de solo entrada (se declara con <code>input</code>) agrupando todos los campos:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">enum Rol {
+  ADMIN
+  EDITOR
+  LECTOR
+}
+
+input NuevoUsuarioInput {
+  nombre: String!
+  email: String!
+  password: String!
+  rol: Rol = LECTOR
+}
+
+type Mutation {
+  crearUsuario(input: NuevoUsuarioInput!): Usuario!
+}</code></pre>
+        <p>A diferencia de <code>type</code>, un <code>input</code> no tiene resolvers ni relaciones: es un plano de datos puro. Los inputs pueden anidarse, listarse y asignar valores por defecto, como <code>rol</code> aquí.</p>
+      </section>
+
+      <section>
+        <h2 id="mutation">La operación desde el cliente</h2>
+        <p>El cliente pasa las variables tipadas como un solo objeto y selecciona qué ve del resultado:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">mutation CrearUsuario($input: NuevoUsuarioInput!) {
+  crearUsuario(input: $input) {
+    id
+    nombre
+    email
+  }
+}</code></pre>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "input": {
+    "nombre": "Valeria Ruiz",
+    "email": "valeria@example.com",
+    "password": "S3gura*123"
+  }
+}</code></pre>
+        <p>Devolver el objeto recién creado (con el <code>id</code> generado) evita una segunda petición para refrescar la UI.</p>
+      </section>
+
+      <section>
+        <h2 id="validacion">Validar en el resolver</h2>
+        <p>Aquí están las reglas que el tipo de datos no conoce: el email no puede repetirse, la contraseña debe cumplir una política. Fallar se expresa lanzando un <code>GraphQLError</code> con su <code>code</code>:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { GraphQLError } from "graphql";
+import bcrypt from "bcrypt";
+
+const resolvers = {
+  Mutation: {
+    crearUsuario: async (parent, { input }, context) => {
+      const existe = await context.db.usuarios.porEmail(input.email);
+      if (existe) {
+        throw new GraphQLError("El email ya está registrado", {
+          extensions: { code: "EMAIL_EXISTS" },
+        });
+      }
+      if (input.password.length &lt; 8) {
+        throw new GraphQLError("La contraseña debe tener 8 caracteres o más", {
+          extensions: { code: "VALIDATION_ERROR", campo: "password" },
+        });
+      }
+      const hash = await bcrypt.hash(input.password, 10);
+      return context.db.usuarios.crear({ ...input, password: hash });
+    },
+  },
+};</code></pre>
+        <p>Nunca guardes la contraseña en claro: el hash (bcrypt/argon2) es responsabilidad del resolver, no del schema.</p>
+      </section>
+
+      <section>
+        <h2 id="transacciones">Transacciones</h2>
+        <p>Cuando una mutation toca varias tablas, una operación a medias corrompe los datos. La solución es una <strong>transacción</strong>: todo se confirma (<code>COMMIT</code>) o todo se revierte (<code>ROLLBACK</code>):</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const resolvers = {
+  Mutation: {
+    crearPedido: async (parent, { items, usuarioId }, context) => {
+      const cliente = await context.db.pool.connect();
+      try {
+        await cliente.query("BEGIN");
+        const { rows } = await cliente.query(
+          "INSERT INTO pedidos (usuario_id, estado) VALUES ($1, $2) RETURNING id",
+          [usuarioId, "PENDIENTE"],
+        );
+        const pedidoId = rows[0].id;
+        for (const item of items) {
+          await cliente.query(
+            "INSERT INTO pedido_items (pedido_id, producto_id, cantidad) VALUES ($1, $2, $3)",
+            [pedidoId, item.productoId, item.cantidad],
+          );
+        }
+        await cliente.query("COMMIT");
+        return { id: pedidoId, estado: "PENDIENTE" };
+      } catch (error) {
+        await cliente.query("ROLLBACK");
+        throw new GraphQLError("No se pudo crear el pedido", {
+          extensions: { code: "TRANSACTION_FAILED" },
+        });
+      } finally {
+        cliente.release();
+      }
+    },
+  },
+};</code></pre>
+        <p>El patrón es siempre el mismo: <code>BEGIN</code> al inicio, <code>COMMIT</code> al éxito, <code>ROLLBACK</code> en el <code>catch</code> y liberar el cliente en el <code>finally</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="idempotencia">Idempotencia y buenas prácticas</h2>
+        <p>Al igual que en REST, una mutation mal reintentada puede duplicar efectos. Algunas protecciones habituales:</p>
+        <ul>
+          <li><strong>Claves únicas</strong> en BD para emails, slugs o códigos de pago.</li>
+          <li><strong>Tokens de idempotencia</strong>: un campo opcional en el input que se reutiliza en el callback de pago para no cargar dos veces la tarjeta.</li>
+          <li><strong>Versionado de concurrencia</strong>: comparar un <code>versión</code> o <code>updatedAt</code> del recurso antes de actualizar.</li>
+        </ul>
+        <p>Decidir qué campo validar con el schema, cuál con una librería (zod, joi) y cuál en la BD es parte del diseño. La regla de oro: <em>cerca de la fuente</em>. El constraint único de la BD debe estar siempre, aunque el resolver lo compruebe antes por DX.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Define un input <code>ActualizarPerfilInput</code> con <code>nombre</code>, <code>biografia</code> y <code>avatar</code> (todos opcionales).</li>
+          <li>Escribe una mutation <code>actualizarPerfil(id, input)</code> que valide que el id pertenece al usuario autenticado.</li>
+          <li>Comprueba el email duplicado y lanza <code>GraphQLError</code> con <code>code</code> propio.</li>
+          <li>Envuelve la creación de un pedido + sus líneas en una transacción con COMMIT/ROLLBACK.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los <code>input</code> types agrupan los argumentos de una mutation.</li>
+          <li>El schema valida la forma; el resolver valida el significado de negocio.</li>
+          <li>Los errores intencionales se lanzan como <code>GraphQLError</code> con <code>extensions.code</code>.</li>
+          <li>Las escrituras multi-tabla van dentro de transacciones con COMMIT/ROLLBACK.</li>
+          <li>La idempotencia se protege con constraints únicos y tokens de idempotencia.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="argumentos-y-variables.html">Argumentos y variables</a>
+          <a class="related-lessons__link" href="errores-y-estados.html">Errores y validación</a>
+          <a class="related-lessons__link" href="../modulo-03/seguridad-y-limitacion.html">Seguridad y limitación</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="errores-y-estados.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Errores y validación</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Módulo 3 · Avanzado y producción</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

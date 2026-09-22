@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="despliegue-api-en-la-nube">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Despliegue de una API con estrategia · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Despliega una API Backend completa en la nube con presupuesto mínimo: diseño, seguridad, presupuesto y monitoreo de gasto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="despliegue-api-en-la-nube"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Despliegue de una API con estrategia</span>
+      </nav>
+      <h1 class="lesson-title">Despliegue de una API con estrategia</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Costos y Estrategia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Todo el curso en un despliegue</h2>
+        <p>Este proyecto final junta cada pieza: una API Flask con Postgres, archivos en S3 y un frontend de estáticos; con presupuesto, seguridad y costos bajo control. El objetivo: producción real por <strong>menos de $5/mes</strong> en AWS (o su equivalente gratis en GCP/Azure).</p>
+      </section>
+
+      <section>
+        <h2 id="diseno">Diseño y arquitectura</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">[Usuarios]
+   │ 443
+   ▼
+[ALB / Nginx en AWS]  (capa pública)
+   │
+   ├──► [EC2 t3.micro · API Flask+Gunicorn]  (solo VPC)
+   │        │  datos → [RDS db.t3.micro Postgres]  (solo VPC)
+   │        └─ archivos → [S3 bucket privado]  (presigned URLs)
+   │
+   └──► [S3 público · estáticos del frontend] + CloudFront (opcional)
+
+Presupuesto: ~$5/mes con free tier absorbiendo EC2 + RDS micro.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="paso1">Paso 1: red y seguridad</h2>
+        <ul>
+          <li>VPC propia con dos subredes (una pública para el ELB, una privada para la API y la DB).</li>
+          <li>Security groups draconianos: <em>API: solo 80/443 del load balancer y SSH desde tu IP</em>; <em>DB: solo 5432 del SG de la API</em>.</li>
+          <li>Usuarios IAM con roles mínimos (EC2 con rol que solo lee su bucket).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="paso2">Paso 2: los recursos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># 1. base de datos (solo VPC, free tier)
+aws rds create-db-instance \
+  --db-instance-identifier api-db \
+  --engine postgres --engine-version 16.3 \
+  --db-instance-class db.t3.micro \
+  --allocated-storage 20 \
+  --master-username apiuser \
+  --no-publicly-accessible \
+  --backup-retention-period 7
+
+# 2. bucket privado para los archivos y bucket público para el front
+aws s3api create-bucket --bucket mi-api-media --region sa-east-1 \
+  --create-bucket-configuration LocationConstraint=sa-east-1
+aws s3api create-bucket --bucket mi-api-front --region sa-east-1 \
+  --create-bucket-configuration LocationConstraint=sa-east-1
+
+# 3. permisos del rol de la instancia: solo S3 del bucket privado</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="paso3">Paso 3: desplegar la API</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># en la instancia (EC2), con el entorno ya configurado:
+scp -i mi-api.pem ./app.tar.gz ubuntu@IP:/srv/
+ssh -i mi-api.pem ubuntu@IP
+  cd /srv
+  sudo apt install python3-venv -y
+  python3 -m venv venv
+  venv/bin/pip install -r requirements.txt
+  # variables de entorno (EnvironmentFile en systemd)
+  echo "DATABASE_URL=postgresql://...sa-east-1.rds.amazonaws.com:5432/apidb" &gt; /etc/api/api.env
+  echo "S3_BUCKET=mi-api-media" &gt;&gt; /etc/api/api.env
+  sudo systemctl enable --now api</code></pre>
+          </div>
+        </figure>
+        <p>La API usa el rol de la instancia para firmar las presigned URLs de S3: cero Access Keys en el servidor.</p>
+      </section>
+
+      <section>
+        <h2 id="paso4">Paso 4: presupuesto y monitoreo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># alerta de presupuesto (antes del primer recurso real)
+aws budgets create-budget \
+  --account-id 123456789012 \
+  --budget '{"BudgetName": "api-prod", "BudgetLimit": {"Amount": 5, "Unit": "USD"}, "BudgetType": "COST", "TimeUnit": "MONTHLY"}' \
+  --notifications-with-subscribers '[
+    {"Notification": {"NotificationType":"ACTUAL","ComparisonOperator":"GREATER_THAN","Threshold":80,"ThresholdType":"PERCENTAGE"},
+     "Subscribers": [{"SubscriptionType":"EMAIL","Address":"tu@correo.com"}]}
+  ]'
+
+# monitoreo: endpoint /health y métricas de CPU/RAM en CloudWatch</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="checklist">Checklist final</h2>
+        <ul>
+          <li>✔ API sin acceso público directo: la entrada es el load balancer y Nginx.</li>
+          <li>✔ DB privada en la VPC, con backups de 7 días.</li>
+          <li>✔ Archivos privados por presigned URL; front estático en S3 público.</li>
+          <li>✔ Roles IAM y cero secretos en el código.</li>
+          <li>✔ Presupuesto a $5 con alerta al 80%.</li>
+          <li>✔ Rotar credenciales y detener instancias de prueba fuera de horario.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Despliega esta arquitectura en tu proveedor con los recursos mínimos que pague $0.</li>
+          <li>Verifica que no puedes llegar a la DB ni a la API por buro de internet.</li>
+          <li>Borra o detén los recursos no esenciales y registra tu factura al cierre del mes.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Una API de producción es cloud: VPC + EC2/API + RDS + S3, bien segmentada.</li>
+          <li>La seguridad se declara: subredes privadas y security groups mínimos.</li>
+          <li>El presupuesto se configura antes del primer recurso.</li>
+          <li>Con free tier y buenas prácticas, producción real cabe en $5/mes o $0.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

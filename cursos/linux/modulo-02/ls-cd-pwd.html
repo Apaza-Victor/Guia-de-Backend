@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="ls-cd-pwd">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navega con ls, cd y pwd · Linux y Terminal · Backend Academy</title>
+<meta name="description" content="Movéte por el árbol de directorios con ls, cd y pwd en bash.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="linux" data-current="ls-cd-pwd"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Linux y Terminal</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Navega con ls, cd y pwd</span>
+        </nav>
+        <h1 class="lesson-title">Navega con ls, cd y pwd</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Linux y Terminal</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Navegación y archivos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="ubicacion">Saber dónde estás</h2>
+          <p><code class="inline">pwd</code> imprime tu directorio actual y <code class="inline">ls</code> lista su contenido. Son los dos primeros reflejos del administrador.</p>
+        </section>
+        <section>
+          <h2 id="trio">Los tres básicos</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">pwd                  # a que directorio pertenezco ahora
+ls                   # lista el contenido visible
+ls -la               # lista detallada incluyendo ocultos
+cd /var/www          # cambia de directorio
+cd ..                # sube un nivel
+cd ~  o  cd          # va a tu home
+cd -                 # vuelve al ultimo directorio</code></pre>
+            </div>
+          </figure>
+        </section>
+        <section>
+          <h2 id="flags">ls con personalidad</h2>
+          <p>Al listar recuerda: nombre va después de la bandera y las banderas se combinan (<code class="inline">ls -lh</code> para tamaños legibles, <code class="inline">ls -lt</code> para ordenar por tiempo). Los fanáticos de mirar kilobytes cumplen con <code class="inline">du -sh</code>.</p>
+        </section>
+        <section class="exercise" id="ejercicio">
+          <h2>Ejercicio</h2>
+          <p>Desde tu home haz <code class="inline">cd /var/log</code>, ejecuta <code class="inline">pwd</code> y <code class="inline">ls -la</code>, y vuelve con <code class="inline">cd -</code>. Pasa de tu home a <code class="inline">/etc</code> y de vuelta usando solo atajos (tilde y guion).</p>
+        </section>
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>pwd: dónde estoy · ls: qué hay · cd: adónde voy.</li>
+            <li>La tilde y el guion son tu atajo diario al home y al último lugar.</li>
+            <li>ls -la no falla jamás: tamano, dueño y fecha.</li>
+          </ul>
+        </section>
+        <section id="relacionadas">
+          <h2>Para seguir aprendiendo</h2>
+          <p>Crea tus propias carpetas en <a href="crear-archivos-y-directorios.html">crear archivos y directorios</a> y descubre qué significan los permisos de <a href="permisos-rwx-chmod.html">rwx</a>.</p>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

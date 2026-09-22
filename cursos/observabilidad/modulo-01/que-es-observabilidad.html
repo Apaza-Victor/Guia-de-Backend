@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es la observabilidad? · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende qué es la observabilidad, por qué importa en backend y en qué se diferencia del monitoreo tradicional de dashboards.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m1-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es la observabilidad?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es la observabilidad?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">Qué es la observabilidad</h2>
+        <p>La <strong>observabilidad</strong> es la capacidad de comprender el estado interno de un sistema a partir de los datos que produce por fuera: logs, métricas y trazas. La palabra viene de la teoría de control: un sistema es «observable» si puedes reconstruir su estado interno solo con sus salidas.</p>
+        <p>En la práctica, para un backend significa esto: si algo raro pasa en producción, <em>tienes los datos para responder qué pasó, dónde, cuándo y por qué</em>, sin tener que lanzar una caja negra improvisada.</p>
+      </section>
+
+      <section>
+        <h2 id="monitoreo-vs">Observabilidad vs monitoreo</h2>
+        <p>Son conceptos distintos y conviven. El <strong>monitoreo</strong> es lo que conocíamos desde siempre: definir una lista de métricas conocidas (CPU, peticiones, errores), graficarlas y levantar alarmas cuando cruzan un umbral. Piensa en un conjunto fijo de preguntas predefinidas.</p>
+        <p>La <strong>observabilidad</strong> en cambio te permite hacer preguntas nuevas sobre datos que ya recolectas, incluso preguntas que no habías previsto. La diferencia no está en las herramientas sino en el diseño de los datos: alta dimensionalidad, contexto rico y correlación entre señales.</p>
+        <ul>
+          <li><strong>Monitoreo:</strong> «el contador de errores 5xx subió». Sabes lo que mides porque lo decidiste antes.</li>
+          <li><strong>Observabilidad:</strong> «¿qué tienen en común los fallos de esta mañana?». Puedes responderlo segmentando logs y métricas por tenant, ruta, proveedor o versión.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> el monitoreo responde «¿está caído?»; la observabilidad responde «¿qué está pasando y por qué?» incluso cuando nunca antes viste esa situación.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: el error que no se ve</h2>
+        <p>Imagina una API de checkout que un día empieza a devolver errores. Con un monitoreo clásico solo contamos eventos conocidos:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">javascript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-javascript" data-language="javascript">const http = require('node:http');
+const client = require('prom-client');
+
+const totalRespuestas = new client.Counter({
+  name: 'http_respuestas_totales',
+  help: 'Total de respuestas emitidas.',
+  labelNames: ['status'],
+});
+
+http.createServer((req, res) => {
+  res.on('finish', () => {
+    totalRespuestas.inc({ status: String(res.statusCode) });
+  });
+}).listen(3000);</code></pre>
+          </div>
+        </figure>
+        <p>Esto te dice que el 10 % de las respuestas son 500. Pero no te dice <em>por qué</em>. El mismo contador existiría para cualquier fallo, y con él no puedes responder «¿es un solo proveedor de pagos?» o «¿afecta solo a un tenant?».</p>
+        <p>Con observabilidad, cada fallo se registra con contexto rico. Un solo log estructurado ya permite responder preguntas que no estabas haciendo:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">json</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-json" data-language="json">{
+  "level": "error",
+  "ts": "2026-02-18T09:31:02.184Z",
+  "msg": "timeout al conectar con el proveedor de pagos",
+  "service": "checkout-api",
+  "version": "1.4.2",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "payments_provider": "mercadopago",
+  "tenant": "acme-123",
+  "http.method": "POST",
+  "http.route": "/v1/checkout",
+  "http.status_code": 504
+}</code></pre>
+          </div>
+        </figure>
+        <p>Ahora la pregunta «¿los errores se concentran en algún proveedor?» se responde en segundos agrupando por <code class="inline">payments_provider</code>:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python" data-language="python">fallos_por_proveedor = {"stripe": 0.2, "mercadopago": 11.4, "banco": 0.05}
+for proveedor, tasa in fallos_por_proveedor.items():
+    if tasa > 5:
+        print(f"{proveedor} concentra {tasa:.1f}% de los errores: revisar integración")
+
+# Sin datos etiquetados no puedes hacer esta pregunta:
+# el monitor solo sabe que hubo 990 errores de 32 000 peticiones.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="para-que">Para qué sirve</h2>
+        <ul>
+          <li><strong>Investigar incidentes rápido:</strong> reducir el tiempo medio de detección (MTTD) y de resolución (MTTR).</li>
+          <li><strong>Entender a los usuarios:</strong> ver latencia, errores y uso por segmento (tenant, país, versión).</li>
+          <li><strong>Tomar decisiones:</strong> ¿qué mejoramos primero? Los datos lo dicen, no la intuición.</li>
+          <li><strong>Evitar el groundhog: una misma alerta que nunca se diagnostica de verdad.</strong></li>
+        </ul>
+        <p>En un monolito pequeño quizá alcance con ver el log de un proceso. En un backend moderno con microservicios, colas, cachés y varias bases de datos, sin observabilidad investigar un fallo es intentar ver la película completa viendo un solo fotograma.</p>
+      </section>
+
+      <section>
+        <h2 id="principios">Tres principios al diseñar datos</h2>
+        <dl class="definition-list">
+          <dt>Alta dimensionalidad</dt><dd>cada evento lleva etiquetas de contexto (ruta, client_id, proveedor, región), no solo un número agregado.</dd>
+          <dt>Identidad compartida</dt><dd>un mismo identificador (trace_id) cruza logs, métricas y trazas de toda la petición.</dd>
+          <dt>Consultas ad hoc</dt><dd>puedes agrupar, filtrar y correlacionar sin escribir nueva instrumentación.</dd>
+        </dl>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>De tu último proyecto, escribe 3 preguntas que hoy no podrías responder con los logs que tienes.</li>
+          <li>Clasifica cada dato que guardas hoy como «dato agregado» o «dato de alta dimensionalidad».</li>
+          <li>Reescribe un log de error en JSON añadiendo 5 campos de contexto que ayuden a diagnosticar el fallo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La observabilidad permite comprender el estado interno de un sistema a partir de sus datos de salida.</li>
+          <li>El monitoreo responde preguntas que ya sabías; la observabilidad, preguntas imprevistas.</li>
+          <li>Se apoya en logs, métricas y trazas de alta dimensionalidad y correlacionadas.</li>
+          <li>Con buenos datos, investigar un incidente pasa de horas a minutos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="los-tres-pilares.html">Los tres pilares</a>
+          <a class="related-lessons__link" href="logs-estructurados.html">Logs estructurados</a>
+          <a class="related-lessons__link" href="metricas.html">Métricas</a>
+          <a class="related-lessons__link" href="../modulo-02/prometheus.html">Prometheus</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

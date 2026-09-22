@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="dicts-y-conjuntos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dicts y conjuntos · Python para Backend · Backend Academy</title>
+<meta name="description" content="Trabaja con diccionarios y conjuntos en Python: creación, operaciones comunes, iteración y sus usos para datos no relacionales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="python" data-current="dicts-y-conjuntos"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Dicts y conjuntos</span>
+        </nav>
+        <h1 class="lesson-title">Dicts y conjuntos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Estructuras de datos y módulos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-es-dict">Qué es un dict</h2>
+          <p>Un <strong>diccionario</strong> (dict) guarda pares <strong>clave → valor</strong>. Se escribe entre llaves <code class="inline">{}</code> y mantiene el orden de inserción desde Python 3.7. En backend es la representación natural de un documento JSON: campos con nombre, sin posición fija.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">usuario = {
+    "id": 1001,
+    "nombre": "Ana",
+    "roles": ["admin", "lector"],
+    "activo": True,
+}
+
+print(usuario["nombre"])     # Ana
+print(usuario.get("ciudad", "no definida"))  # no definida</code></pre>
+            </div>
+          </figure>
+          <p><code class="inline">clave["x"]</code> lanza <code class="inline">KeyError</code> si no existe; <code class="inline">.get()</code> devuelve un valor por defecto. Elegir uno u otro es una decisión consciente: el primero dice "esto debe estar"; el segundo "esto es opcional".</p>
+        </section>
+
+        <section>
+          <h2 id="operaciones-dict">Operaciones habituales</h2>
+          <ul>
+            <li>Agregar/actualizar: <code class="inline">usuario["ciudad"] = "Lima"</code>.</li>
+            <li>Eliminar: <code class="inline">usuario.pop("roles")</code> o <code class="inline">del usuario["roles"]</code>.</li>
+            <li>Comprobar clave: <code class="inline">"id" in usuario</code>.</li>
+            <li>Recorrer: <code class="inline">for clave, valor in usuario.items()</code>.</li>
+            <li>Obtener llaves, valores o pares: <code class="inline">usuario.keys()</code>, <code class="inline">usuario.values()</code>, <code class="inline">usuario.items()</code>.</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">for campo, valor in usuario.items():
+    print(f"{campo}: {valor}")
+
+# Otro patrón muy útil: contar apariciones
+conteos = {}
+for letra in "backend":
+    conteos[letra] = conteos.get(letra, 0) + 1
+print(conteos)  # {'b': 1, 'a': 1, 'c': 1, 'k': 1, 'e': 1, 'n': 1, 'd': 1}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="que-es-set">Qué es un conjunto (set)</h2>
+          <p>Un <strong>conjunto</strong> es una colección de elementos <strong>únicos</strong> y <strong>sin orden</strong>. Se escribe con <code class="inline">{valores}</code> (ojo: <code class="inline">{}</code> vacío crea un dict, no un set; para un set vacío usa <code class="inline">set()</code>).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">permitidos = {"GET", "POST", "PUT", "DELETE"}
+requeridos = {"GET", "POST"}
+
+# Python determina "igual que": si al elemento ya está, no se duplica
+print(len(permitidos))  # 4
+
+print(requeridos &lt;= permitidos)   # ¿requeridos es subconjunto? True
+print("PATCH" not in permitidos)  # True
+print(permitidos | {"PATCH"})     # unión: ahora son 5</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><code class="inline">|</code> unión, <code class="inline">&amp;</code> intersección, <code class="inline">-</code> diferencia, <code class="inline">^</code> diferencia simétrica.</li>
+            <li><code class="inline">&lt;=</code> subconjunto, <code class="inline">&lt;</code> subconjunto propio.</li>
+            <li>Elementos cadena, número o tupla: todo lo <strong>inmutable</strong>; nunca una lista.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="por-que">El caso backend: "¿está permitido?"</h2>
+          <p>Cada petición HTTP llega con un método. Validarlo con un set es O(1) y sencillo:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-python">VERBOS_HTTP = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+
+def validar_metodo(metodo: str) -&gt; bool:
+    return metodo in VERBOS_HTTP
+
+for metodo in ["GET", "TRACE", "get"]:
+    print(metodo, "-&gt;", validar_metodo(metodo))</code></pre>
+            </div>
+          </figure>
+          <p>Fíjate: <code class="inline">"get"</code> devuelve False porque los métodos HTTP distinguen mayúsculas. Decidir normalizar antes de validar (p. ej. <code class="inline">upper()</code>) es parte del diseño de tu middleware.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea un dict con una respuesta HTTP simulada: status, headers (dict anidado) y body.</li>
+            <li>Recorre los headers y muéstralos como <code class="inline">Clave: valor</code>.</li>
+            <li>Define un set de IPs en lista negra y comprueba tres IPs de ejemplo con un solo <code class="inline">in</code>.</li>
+            <li>Calcula qué métodos HTTP faltan para completar todos los de la lista.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Los dicts mapean claves a valores y se parecen a los objetos JSON.</li>
+            <li><code class="inline">dict.get</code> con default evita KeyError para claves opcionales.</li>
+            <li>Los sets guardan únicos e implementan álgebra de conjuntos.</li>
+            <li>Conjuntos: O(1) para pertenencia, ideal para validar verbos o listas negras.</li>
+            <li>Elementos de set o clave de dict deben ser inmutables.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos y módulos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

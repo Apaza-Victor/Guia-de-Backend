@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="modelo-de-precios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entender el modelo de precios · Cloud para Backend · Backend Academy</title>
+<meta name="description" content="Cómo cobran las nubes públicas: VM por hora, almacenamiento por GB, funciones por invocación y la trampa de la salida de datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="modelo-de-precios"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Cloud para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Entender el modelo de precios</span>
+      </nav>
+      <h1 class="lesson-title">Entender el modelo de precios</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Costos y Estrategia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Cuatro formas de cobrar</h2>
+        <p>Casi todo recurso de la nube se cobra con uno de estos medidores: <strong>por tiempo</strong> (VM), <strong>por tamaño</strong> (almacenamiento), <strong>por uso</strong> (invocaciones, mensajes) o <strong>por transferencia</strong> (salida de datos). Entender qué medidor usa cada pieza es el 90% del control de la factura.</p>
+      </section>
+
+      <section>
+        <h2 id="vm">VM: por hora (o segundo)</h2>
+        <p>Una instancia cobra mientras está <em>encendida</em>. La matemática simple te salva:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">t3.micro ≈ $0.0075/hor
+  siempre encendida: 24 h × 30 d = 720 h ≈ $5.40/mes
+  solo pruebas (40 h/mes)          ≈ $0.30/mes
+
+La lección: pagas las horas ENCENDIDA, no la existencia.
+Detenerla fuera de horario la convierte en casi gratis.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="almacenamiento">Almacenamiento: por GB-mes</h2>
+        <p>S3 y los discos cobran por los GB guardados durante el mes, y además por operaciones (GET, PUT). Las reglas de vida (mover a capas frías) reducen el costo de archivos viejos:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># mover backups &gt; 30 días a capa fría (más barata por GB)
+aws s3api put-lifecycle-configuration \
+  --bucket mi-api-backups \
+  --lifecycle-configuration '{
+    "Rules": [{
+      "ID": "mover-backups-a-fria",
+      "Status": "Enabled",
+      "Filter": {"Prefix": "backups/"},
+      "Transitions": [{
+        "Days": 30,
+        "StorageClass": "GLACIER_IR"
+      }]
+    }]
+  }'</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="funciones">Funciones: por invocación + ms de ejecución</h2>
+        <p>Lambda cobra por cada invocación y por la duración (redondeo a ms) multiplicada por la memoria configurada. Por eso: una función con poca memoria y poco tiempo es casi gratis; una con 10 GB de RAM y 15 min se paga como una VM.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">1M invocaciones × 200 ms × 128 MB  ≈ pocos USD
+1M invocaciones × 5 s    × 3 GB   ≈ decenas de USD
+
+Optimizar: reducir memoria solo si el runtime lo soporta
+(reduce el costo por ms y también paralelismo del container).</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="egress">La trampa: salida de datos (egress)</h2>
+        <p>La entrada (ingress) y el tráfico interno suelen ser gratis, pero <strong>sacar datos de la nube hacia internet</strong> se cobra por GB y suele ser un cargo inesperado gigante para APIs con mucho tráfico. Mitigaciones:</p>
+        <ul>
+          <li>Usa una <strong>CDN</strong> (CloudFront) para servir assets: el tráfico cachead le cuesta un fracción.</li>
+          <li>Comprime respuestas (gzip/brotli) para transferir menos bytes.</li>
+          <li>Devuelve paginado y con campos mínimos: menos bytes = menos dinero y mejor latencia.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Calcula el costo de una t3.micro siempre encendida vs 40 h/mes (usa precios aproximados de tu región).</li>
+          <li>Identifica qué medidor aplica a: S3, una Lambda, una DB RDS, CloudFront.</li>
+          <li>Nombra dos formas de reducir el egress de tu API.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>VM cobra por horas encendida; almacenamiento por GB-mes; funciones por invocación+ms.</li>
+          <li>El egress (salida) es el cargo sorpresa más común: CDN y compresión lo doman.</li>
+          <li>Las reglas de vida mueven archivos viejos a capas baratas.</li>
+          <li>Conocer el medidor de cada pieza es la base del control financiero.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · AWS</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

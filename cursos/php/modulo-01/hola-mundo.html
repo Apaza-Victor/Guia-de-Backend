@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="hola-mundo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu primer script: hola mundo · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Escribe tu primer programa en PHP, ejecútalo desde la terminal y desde el navegador, y aprende las funciones echo y print con ejemplos reales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="hola-mundo"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Tu primer script: hola mundo</span>
+        </nav>
+        <h1 class="lesson-title">Tu primer script: hola mundo</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 7 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a PHP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="primer-script">Tu primer script</h2>
+          <p>Crea un archivo llamado <code class="inline">hola.php</code> con el siguiente contenido. Los archivos de PHP pueden vivir en cualquier carpeta, pero lo normal es agruparlos dentro de un directorio de proyecto.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+echo "Hola, mundo!";
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Todo el código del lenguaje se escribe dentro de las etiquetas <code class="inline">&lt;?php ... ?&gt;</code>. Sin ellas, PHP no sabe qué texto debe interpretar como código y qué texto debe enviar tal cual al resultado.</p>
+        </section>
+
+        <section>
+          <h2 id="cli-vs-web">Desde la terminal y desde el navegador</h2>
+          <p>PHP puede ejecutarse de dos formas: como un <strong>script de consola</strong> o como un <strong>programa web</strong>.</p>
+          <p>Para la línea de comandos, ejecuta el archivo directamente con el intérprete:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Terminal</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">php hola.php</code></pre>
+            </div>
+          </figure>
+          <p>En el primer caso verás el texto <code class="inline">Hola, mundo!</code> impreso en la consola. Para la versión web, levanta el servidor de desarrollo <code class="inline">php -S localhost:8000</code> en la carpeta del proyecto y visita <code class="inline">http://localhost:8000/hola.php</code>: el navegador hará la petición HTTP, PHP lo ejecutará en el servidor y devolverá el resultado.</p>
+        </section>
+
+        <section>
+          <h2 id="echo-y-print">echo y print: escribir en la salida</h2>
+          <p>Las dos construcciones más usadas para generar texto son <code class="inline">echo</code> y <code class="inline">print</code>. Ambos imprimen a la salida, pero <code class="inline">echo</code> permite varios argumentos y es ligeramente más rápido.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+echo "Con echo ";
+echo "puedo ", "encadenar ", "argumentos", PHP_EOL;
+
+print "Y print devuelve el valor 1" . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Observa la otra novedad: el punto (.) encadena strings y <code class="inline">PHP_EOL</code> representa un salto de línea que funciona en cualquier sistema operativo.</p>
+          <p>También puedes escribir <code class="inline">&lt;?= ?&gt;</code>, la etiqueta corta de eco, que es exactamente lo mismo que <code class="inline">&lt;?php echo ... ?&gt;</code>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTML con PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;p&gt;El año actual es &lt;?= date("Y") ?&gt;&lt;/p&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe <code class="inline">hola.php</code> con tu nombre dentro del mensaje, por ejemplo <em>«Hola, Ana»</em>, y ejecútalo con <code class="inline">php hola.php</code>.</li>
+            <li>Levanta el servidor de desarrollo y comprueba que el navegador muestra el mismo texto.</li>
+            <li>Modifica el archivo para que imprima tu nombre con <code class="inline">echo</code> y tu edad con <code class="inline">print</code> en dos líneas.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>El código PHP va dentro de <code class="inline">&lt;?php ... ?&gt;</code>.</li>
+            <li>Se ejecuta igual desde la terminal que desde el servidor web.</li>
+            <li><code class="inline">echo</code> y <code class="inline">print</code> generan la salida; <code class="inline">&lt;?= ?&gt;</code> es la abreviatura de echo.</li>
+            <li>El punto «.» concatena textos y <code class="inline">PHP_EOL</code> añade un salto de línea portable.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

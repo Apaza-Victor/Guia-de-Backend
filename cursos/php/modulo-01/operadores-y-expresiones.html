@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="operadores-y-expresiones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operadores y expresiones · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende los operadores de PHP: aritméticos, de comparación, lógicos, de asignación y el operador de nave espacial, con ejemplos de precedencia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="operadores-y-expresiones"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Operadores y expresiones</span>
+        </nav>
+        <h1 class="lesson-title">Operadores y expresiones</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a PHP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="aritmeticos">Operadores aritméticos</h2>
+          <p>Los operadores aritméticos trabajan con números y producen un valor numérico. Son los mismos que conoces de las matemáticas, con dos extra: la división entera de módulo y la potencia.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$a = 17;
+$b = 5;
+
+echo $a + $b . PHP_EOL;   // 22 suma
+echo $a - $b . PHP_EOL;   // 12 resta
+echo $a * $b . PHP_EOL;   // 85 multiplicación
+echo $a / $b . PHP_EOL;   // 3.4 división (float)
+echo $a % $b . PHP_EOL;   // 2   resto de la división
+echo $a ** 2 . PHP_EOL;   // 289 potencia
+
+// Incremento y decremento
+$a++;
+$a--;
+echo $a . PHP_EOL;        // 17
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>El operador de módulo (<code class="inline">%</code>) es muy práctico en el backend: sirve para saber si un número es par (<code class="inline">$n % 2 === 0</code>), para paginar resultados o para distribuir turnos entre servidores.</p>
+        </section>
+
+        <section>
+          <h2 id="comparacion">Operadores de comparación</h2>
+          <p>Comparan dos valores y devuelven un booleano. La gran enseñanza de PHP es la diferencia entre comparar <strong>valor</strong> y comparar <strong>valor y tipo</strong>.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$numero = 5;
+$texto = "5";
+
+var_dump($numero == $texto);   // true  (solo valor)
+var_dump($numero === $texto);  // false (tipos distintos)
+var_dump($numero != $texto);   // false
+var_dump($numero !== $texto);  // true
+var_dump($numero &lt; 10);        // true
+var_dump($numero &gt;= 5);        // true
+
+// Operador de nave espacial (PHP 7+): -1, 0 o 1
+echo $numero &lt;=&gt; $texto . PHP_EOL; // 0: son "iguales" por valor
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>La regla de oro en el backend moderno: salvo que tengas un motivo explícito, usa siempre los operadores estrictos <code class="inline">===</code> y <code class="inline">!==</code> para evitar sorpresas con datos que llegan de formularios o de una API.</p>
+        </section>
+
+        <section>
+          <h2 id="logicos">Operadores lógicos</h2>
+          <p>Combinan booleanos o condiciones para formar expresiones compuestas. En PHP 8 conviene conocer el operador <code class="inline">and</code>, <code class="inline">or</code>, <code class="inline">xor</code> y, sobre todo, la versión con símbolos que es la preferida por su precedencia predecible.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$edad = 25;
+$tieneLicencia = true;
+
+$puedeConducir = ($edad &gt;= 18 &amp;&amp; $tieneLicencia);
+$esJubilado = ($edad &gt;= 65 || $edad &lt; 18);
+$noEsNulo = !($edad === null);
+
+var_dump($puedeConducir); // true
+var_dump($esJubilado);    // false
+var_dump($noEsNulo);      // true
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="asignacion">Asignación y precedencia</h2>
+          <p>Los operadores de asignación se combinan con una operación: <code class="inline">+=</code>, <code class="inline">-=</code>, <code class="inline">*=</code>, <code class="inline">/=</code>, <code class="inline">.=</code>, etc. El último es típico para ir montando una cadena de texto pieza a pieza.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$total = 100;
+$total += 25;      // 125
+$total *= 0.9;     // 112.5 (10% de descuento)
+$total -= 2;       // 110.5
+
+$saludo = "Hola";
+$saludo .= ", ";
+$saludo .= "mundo";
+echo $saludo . PHP_EOL;   // Hola, mundo
+
+// Precedencia: primero la potencia, luego multiplicación, luego suma
+$resultado = 2 + 3 * 2 ** 2;   // 2 + 3 * 4 = 14
+echo $resultado . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>La precedencia define qué operador se evalúa primero. En caso de duda, usa paréntesis: son gratis, aclaran la intención y evitan bugs sutiles.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Dada $base=1200 y $porcentaje=15, calcula el valor del descuento con multiplicación y muéstralo.</li>
+            <li>Comprueba con <code class="inline">var_dump</code> si un número guardado como string <code class="inline">"1200"</code> es igual con <code class="inline">==</code> y con <code class="inline">===</code> al entero 1200.</li>
+            <li>Escribe una condición con <code class="inline">&amp;&amp;</code> y <code class="inline">||</code> que sea verdadera solo para años bisiestos (divisibles por 4 pero no por 100, o divisibles por 400).</li>
+            <li>Usa <code class="inline">%=</code> para comprobar si 27 es par o impar e imprime el mensaje.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Aritméticos: <code class="inline">+ - * / % **</code>, más incremento y decremento.</li>
+            <li>Comparación: <code class="inline">== != &lt; &gt; &lt;= &gt;= === !==</code> y el operador <code class="inline">&lt;=&gt;</code>.</li>
+            <li>Lógicos: <code class="inline">&amp;&amp; || ! xor</code>; prefiere los simbólicos.</li>
+            <li>Asignación combinada: <code class="inline">+= -= *= /= .= %=</code>.</li>
+            <li>La precedencia importa: usa paréntesis cuando haya dudas.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

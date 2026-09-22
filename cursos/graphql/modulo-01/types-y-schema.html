@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-types-y-schema">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipos y Schema · GraphQL · Backend Academy</title>
+<meta name="description" content="Aprende a definir tipos en GraphQL: escalares, tipos objeto, listas, el operador de no nulo y el schema completo en SDL, con enums y tipos personalizados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-types-y-schema"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">GraphQL</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Tipos y Schema</span>
+      </nav>
+      <h1 class="lesson-title">Tipos y Schema</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos de GraphQL</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Todo en GraphQL gira alrededor del <strong>schema</strong>: la definición completa de todos los tipos, campos y operaciones que la API entiende. Escrito en <strong>SDL</strong> (Schema Definition Language), es el contrato entre cliente y servidor, y además es la fuente de verdad para la validación y la documentación automática.</p>
+        <p>Entender bien los tipos del schema es entender GraphQL: cada campo tiene un tipo, y ese tipo determina qué puedes consultar y qué no. Empecemos por los elementos más básicos.</p>
+      </section>
+
+      <section>
+        <h2 id="escalares">Tipos escalares</h2>
+        <p>Los <strong>escalares</strong> son los ladrillos atómicos: representan un valor simple que no se puede descomponer en campos. GraphQL define cinco integrados:</p>
+        <ul>
+          <li><code>Int</code> — números enteros</li>
+          <li><code>Float</code> — números decimales</li>
+          <li><code>String</code> — texto UTF-8</li>
+          <li><code>Boolean</code> — verdadero o falso</li>
+          <li><code>ID</code> — identificador único serializado como string</li>
+        </ul>
+        <p>Un tipo objeto agrupa escalares. Observa cómo se declara un usuario:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">type Usuario {
+  id: ID!
+  nombre: String!
+  email: String!
+  edad: Int
+  altura: Float
+  activo: Boolean!
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="tipos-objeto">Tipos objeto y listas</h2>
+        <p>Un <strong>tipo objeto</strong> define un conjunto de campos con nombre y describe entidades como usuario, post o pedido. Los campos pueden ser escalares, otros objetos o listas de cualquiera de ellos:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">type Post {
+  id: ID!
+  titulo: String!
+  contenido: String
+  autor: Usuario!
+  vistas: Int!
+}
+
+type Usuario {
+  id: ID!
+  nombre: String!
+  posts: [Post!]!
+}</code></pre>
+        <p>La anidación es lo que hace potente a GraphQL: <code>autor</code> es un objeto completo y <code>posts</code> una lista de posts. El cliente podrá recorrer estas relaciones en una sola consulta porque el schema lo permite explícitamente.</p>
+      </section>
+
+      <section>
+        <h2 id="no-null">El operador de no-null: !</h2>
+        <p>El signo de exclamación declara que un campo <strong>no puede ser nulo</strong>: es obligatorio. Es crucial para la API porque permite garantizar contratos fuertes:</p>
+        <ul>
+          <li><code>String</code> — puede ser <code>null</code> o un string.</li>
+          <li><code>String!</code> — siempre devuelve un string; nunca <code>null</code>.</li>
+          <li><code>[Post]</code> — lista que puede ser <code>null</code>, cuyos elementos pueden ser <code>null</code>.</li>
+          <li><code>[Post!]!</code> — lista siempre presente y sin elementos nulos dentro.</li>
+        </ul>
+        <p>La doble exclamación de la lista (<code>[Post!]!</code>) es un idioma común: garantiza que siempre habrá una lista y que cada post dentro tendrá valor. El cliente puede confiar en ello sin comprobaciones defensivas.</p>
+      </section>
+
+      <section>
+        <h2 id="schema">Definir el schema completo</h2>
+        <p>El schema se compone de los tipos de datos más los <strong>tipos raíz</strong>: por convención <code>Query</code> (lecturas), <code>Mutation</code> (escrituras) y opcionalmente <code>Subscription</code> (eventos). Todo lo demás son datos que esos raíces devuelven:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">type Query {
+  usuario(id: ID!): Usuario
+  posts: [Post!]!
+  post(id: ID!): Post
+}
+
+type Mutation {
+  crearPost(titulo: String!, contenido: String!): Post!
+}
+
+type Usuario {
+  id: ID!
+  nombre: String!
+  email: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  titulo: String!
+  contenido: String
+  autor: Usuario!
+  vistas: Int!
+}</code></pre>
+        <p>Fíjate en que <code>Query</code> y <code>Mutation</code> son tipos como cualquier otro: tienen campos con tipos y argumentos. Si un campo no está en el schema, no existe en la API, y una consulta que lo pida fallará en la validación.</p>
+      </section>
+
+      <section>
+        <h2 id="enums">Enums y escalares personalizados</h2>
+        <p>Un <strong>enum</strong> limita un campo a un conjunto cerrado de valores, ideal para estados y roles:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">enum Rol {
+  ADMIN
+  EDITOR
+  LECTOR
+}
+
+type Usuario {
+  id: ID!
+  rol: Rol!
+}</code></pre>
+        <p>Cuando los cinco escalares no bastan —fechas, horas, monedas, claves de color— se puede definir un <strong>escalar personalizado</strong>:</p>
+        <pre class="code-block"><code class="language-graphql" data-language="graphql">scalar Fecha
+
+type Evento {
+  id: ID!
+  nombre: String!
+  comienzaEn: Fecha!
+}</code></pre>
+        <p>Un scalar personalizado exige implementar su serialización y deserialización en el servidor (cómo se convierte de/a JSON), algo que verás en la práctica en el módulo 2. También existen los <strong>input types</strong>, tipos especiales para agrupar argumentos, que se estudian en la lección de mutations.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige una entidad de tu dominio (producto, pedido, curso…) y escribe su tipo objeto en SDL.</li>
+          <li>Añade una relación: un campo que apunte a otro tipo y una lista de ese tipo con no-null en ambos niveles.</li>
+          <li>Define un enum para el estado de esa entidad (por ejemplo: <code>PENDIENTE</code>, <code>PAGADO</code>, <code>ENVIADO</code>).</li>
+          <li>Completa un <code>type Query</code> con dos campos: uno que devuelva una entidad por ID y otro que devuelva todas.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El schema en SDL es el contrato tipado entre cliente y servidor.</li>
+          <li>Hay cinco escalares integrados: Int, Float, String, Boolean e ID, más los personalizados.</li>
+          <li>Los tipos objeto agrupan campos y permiten anidar relaciones y listas.</li>
+          <li>El <code>!</code> marca campos no-null; <code>[T!]!</code> garantiza listas sin nulos.</li>
+          <li><code>Query</code>, <code>Mutation</code> y <code>Subscription</code> son los tipos raíz del schema.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-graphql.html">¿Qué es GraphQL?</a>
+          <a class="related-lessons__link" href="queries-y-mutations.html">Queries y Mutations</a>
+          <a class="related-lessons__link" href="resolvers.html">Resolvers</a>
+          <a class="related-lessons__link" href="introspeccion-y-tools.html">Introspección y herramientas</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="que-es-graphql.html">
+        <span class="label">← Anterior</span>
+        <span class="title">¿Qué es GraphQL?</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="queries-y-mutations.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Queries y Mutations</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

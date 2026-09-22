@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m1-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarking y perfiles · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a perfilar tu código con cProfile, Node CPU Profiler y flame graphs: dónde se va realmente el tiempo y cómo comparar alternativas sin autoengañarte.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m1-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Benchmarking y perfiles</span>
+      </nav>
+      <h1 class="lesson-title">Benchmarking y perfiles</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Medir rendimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La prueba de carga te dice <em>qué</em> está lento bajo demanda. El <strong>perfilado</strong> te dice <em>dónde</em> se va el tiempo. Un profiler observa el programa mientras corre y responde: «el 63% del tiempo de cada petición lo gasta <code>join_productos()</code>». Casi siempre, el resultado sorprende: no es donde imaginabas.</p>
+        <p>El <strong>benchmarking</strong>, por su lado, compara dos alternativas (versión A vs versión B, algoritmo X vs Y) de forma controlada para decidir con números en vez de corazonadas.</p>
+      </section>
+
+      <section>
+        <h2 id="cprofile">Perfilado en Python con cProfile</h2>
+        <p>cProfile mide cuántas veces se llama cada función y cuánto tiempo consume (incluyendo todo lo que llama internamente). Ejecutar un script con el profiler es un cambio de una línea:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Perfila los primeros 2000 requisitos de un informe de ventas
+python -m cProfile -o perfil.prof generar_informe.py 2000
+
+# Ordena el resultado por tiempo acumulado y muestra lo primero
+python -m pstats -s cumtime perfil.prof</code></pre>
+        <p>Los detalles del propio script de prueba importan más que la herramienta. El código debe ejercitar el camino que realmente importa —con datos realistas, no con dos filas—:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># generar_informe.py
+import cProfile
+
+
+def agregar_linea(resumen: list, venta: dict) -> None:
+    linea = f"{venta['producto']}: {venta['total']:.2f} EUR | {venta['fecha']}"
+    resumen.append(linea)  # list.append crece sin copiar toda la lista
+
+
+def generar(cantidad: int) -> list:
+    resumen = []
+    for i in range(cantidad):
+        venta = {"producto": f"sku-{i % 50}", "total": i * 1.1, "fecha": "2026-01-0" + str(i % 9)}
+        agregar_linea(resumen, venta)
+    return resumen
+
+
+if __name__ == "__main__":
+    cProfile.run("generar(2000)", sort="cumtime")</code></pre>
+        <p>Con perfiladores gráficos (Python <code>snakeviz</code>, Node <code>flamegraphs</code>), el resultado se ve como llamas: cada barra es una función, la anchura es el tiempo en ella, y la altura, la profundidad de las llamadas.</p>
+      </section>
+
+      <section>
+        <h2 id="node">Perfilado en Node.js</h2>
+        <p>Node trae un profiler de CPU integrado: genera un archivo <code>.cpuprofile</code> que puedes abrir en Chrome DevTools o en herramientas de visualización:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Ejecuta el servidor 20 segundos tomando muestras del stack 1000 veces/seg
+node --cpu-prof --cpu-prof-dir=profiles --cpu-prof-interval=1000 src/servidor.js
+
+# Abrir profiles/*.cpuprofile en Chrome DevTools:
+# DevTools → Performance → cargar archivo (Load Profile)</code></pre>
+        <p>Y midiendo una función puntual dentro del código, con alto-resolución:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { performance } = require('node:perf_hooks');
+
+const N = 100_000;
+const datos = Array.from({ length: N }, (_, i) => ({ id: i, grupo: i % 100 }));
+
+const inicio = performance.now();
+const mapa = new Map();
+for (const fila of datos) {
+  if (!mapa.has(fila.grupo)) mapa.set(fila.grupo, []);
+  mapa.get(fila.grupo).push(fila);
+}
+console.log(`Agrupar ${N} registros: ${(performance.now() - inicio).toFixed(2)} ms`);
+// Importante: revisar si el coste es aceptable y compararlo con
+// la alternativa (reduce, filtros anidados) antes de tocar nada.</code></pre>
+        <p>Nota: las mejoras micro como esta casi nunca son la respuesta. El profiler primero te mostrará el 80% del tiempo en 2 o 3 funciones: ahí trabajas.</p>
+      </section>
+
+      <section>
+        <h2 id="flame">Flame graphs y el patrón del tiempo real</h2>
+        <p>Un flame graph es la mejor balanza para decidir. En producciones reales, las sorpresas típicas son:</p>
+        <ul>
+          <li><strong>JSON.stringify</strong> de objetos enormes que se serializan en cada petición.</li>
+          <li><strong>Regex</strong> sobre cadenas largas, sobre todo con backtracking cuadrático.</li>
+          <li><strong>Copias de listas</strong> dentro de bucles (<code>list[:]</code>, spread <code>...</code>, <code>slice</code>).</li>
+          <li><strong>Logging síncrono</strong> de alto volumen, que escribe a disco en el hilo principal.</li>
+          <li><strong>Serialización en la capa de BD</strong>: toda la fila se convierte a objeto aunque solo se use una columna.</li>
+        </ul>
+        <p>El 90% de los casos de rendimiento de producción terminan en esta lista corta. Perfilar es descartar rápido el 10% restante.</p>
+      </section>
+
+      <section>
+        <h2 id="benchmark">Benchmarking honesto</h2>
+        <p>Benchmarkear es medir comparaciones, y las comparaciones se autoengañan con facilidad. Tres reglas de oro:</p>
+        <ol>
+          <li><strong>Mide las dos versiones en el mismo proceso y máquina</strong>, alternando el orden (para no premiar siempre a la primera por la caché del sistema).</li>
+          <li><strong>Repite y reporta más que el promedio:</strong> mejor mediana y percentiles que media.</li>
+          <li><strong>Mide el escenario real, no el ideal.</strong> Si en producción hay 200 campos por objeto, tu benchmark no puede usar objetos de 2 campos.</li>
+        </ol>
+        <p>Un loop de benchmark en JavaScript que evita el error de medir una sola ejecución:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const { performance } = require('node:perf_hooks');
+
+function benchmark(fn, iteraciones = 1_000) {
+  // Calentamiento: deja que JIT y cachés se estabilicen
+  for (let i = 0; i < 100; i++) fn(i);
+  const tiempos = [];
+  for (let i = 0; i < iteraciones; i++) {
+    const t0 = performance.now();
+    fn(i);
+    tiempos.push(performance.now() - t0);
+  }
+  tiempos.sort((a, b) => a - b);
+  const mediana = tiempos[Math.floor(tiempos.length / 2)];
+  const p95 = tiempos[Math.floor(tiempos.length * 0.95)];
+  return { mediana_ms: mediana.toFixed(3), p95_ms: p95.toFixed(3) };
+}
+
+const generarIdClasico = (i) => "cli-" + i;
+const generarIdPlantilla = (i) => `cli-${i}`;
+console.log("clasico:  ", benchmark(generarIdClasico));
+console.log("plantilla:", benchmark(generarIdPlantilla));
+// Decidir con números, no con opiniones.</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige la función más llamada de tu servicio (o el endpoint más usado).</li>
+          <li>Perfílala en tu lenguaje: cProfile + snakeviz en Python, <code>--cpu-prof</code> en Node.</li>
+          <li>Mira el flame graph y escribe las 3 funciones que más tiempo consumen. Si una de ellas no aparece en tu lista mental de sospechosos, estás ante el punto exacto que el profiler quería mostrarte.</li>
+          <li>Compara dos alternativas de implementación con el loop de benchmark de arriba y decide con la mediana y el p95.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El perfilado responde «dónde» se va el tiempo; la prueba de carga, «cuándo» se rompe.</li>
+          <li>cProfile ordena por tiempo acumulado; Node exporta <code>.cpuprofile</code> que DevTools visualiza.</li>
+          <li>Los flame graphs agrupan el tiempo por pila de llamadas: busca las barras anchas.</li>
+          <li>El 90% de los casos reales: serialización, regex, copias en bucles, logging síncrono y mapeos innecesarios.</li>
+          <li>El benchmark honesto usa calentamiento, mediana y p95, y escenario realista.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="test-de-carga.html">Pruebas de carga</a>
+          <a class="related-lessons__link" href="cuellos-de-botalla.html">Identificar cuellos de botella</a>
+          <a class="related-lessons__link" href="../modulo-02/concurrencia-y-asincronia.html">Concurrencia y asincronía</a>
+          <a class="related-lessons__link" href="../modulo-02/optimizacion-de-bases-de-datos.html">Optimizar bases de datos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

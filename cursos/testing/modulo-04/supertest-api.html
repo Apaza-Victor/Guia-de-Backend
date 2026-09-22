@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m4-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supertest para tu API · Testing Backend · Backend Academy</title>
+<meta name="description" content="Pruebas E2E de HTTP con Supertest en Node: levantar la app, hacer peticiones reales y validar status code, cuerpo y headers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m4-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">Supertest para tu API</span>
+      </nav>
+      <h1 class="lesson-title">Supertest para tu API</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · E2E</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="porque">Un E2E útil empieza por HTTP</h2>
+        <p><strong>Supertest</strong> dispara peticiones HTTP reales contra tu aplicación sin abrir un puerto: lo usan Apps con Express, Koa, Fastify y demás. Verifica <strong>status, cuerpo, headers y cookies</strong> tal como llegaría a un cliente.</p>
+      </section>
+
+      <section>
+        <h2 id="instalar">Instalar y primer test</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">npm init -y
+npm install express supertest --save-dev
+npm install jest --save-dev   # o el runner que uses</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript · test/api.test.js</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-js">const request = require('supertest');
+const app = require('../src/app');
+
+describe('GET /saludo', () =&gt; {
+  it('responde con un saludo JSON', async () =&gt; {
+    const res = await request(app).get('/saludo');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ mensaje: 'hola' });
+  });
+});</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="verbos">Los verbos y estados HTTP que importan</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-js">it('crea un recurso y devuelve 201 con Location', async () =&gt; {
+  const res = await request(app)
+    .post('/api/usuarios')
+    .send({ email: 'ana@ejemplo.com' });
+
+  expect(res.status).toBe(201);
+  expect(res.headers.location).toMatch(/\/api\/usuarios\/\d+/);
+});
+
+it('valida la entrada y responde 422', async () =&gt; {
+  const res = await request(app)
+    .post('/api/usuarios')
+    .send({ email: 'no-es-un-email' });
+
+  expect(res.status).toBe(422);
+  expect(res.body.errores).toContain('email invalido');
+});</code></pre>
+          </div>
+        </figure>
+        <ul>
+          <li>2xx: éxito. <strong>201</strong> = creado, <strong>204</strong> = sin cuerpo.</li>
+          <li>4xx: error del cliente. <strong>400/422</strong> = validación.</li>
+          <li><strong>401</strong>: sin autenticar · <strong>403</strong>: sin permiso · <strong>404</strong>: no existe.</li>
+          <li><strong>429</strong>: rate limit · <strong>5xx</strong>: bug de servidor.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="auth">Autenticación y cookies</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-js">let token;
+
+beforeAll(async () =&gt; {
+  const login = await request(app)
+    .post('/api/login')
+    .send({ email: 'ana@ejemplo.com', password: 'Secreta!1' });
+  token = login.body.token;
+});
+
+it('accede al perfil con el token', async () =&gt; {
+  const res = await request(app)
+    .get('/api/perfil')
+    .set('Authorization', `Bearer ${token}`);
+
+  expect(res.status).toBe(200);
+});
+
+it('rechaza sin token', async () =&gt; {
+  const res = await request(app).get('/api/perfil');
+
+  expect(res.status).toBe(401);
+});</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="aim">No confundir con unit</h2>
+        <ul>
+          <li>Supertest con la app real es <strong>E2E fino</strong>: HTTP entra, todo el middleware corre, salen headers.</li>
+          <li>Si tu app usa una BD, este test la toca: prepara base limpia antes (rollback/truncate).</li>
+          <li>Para repetir 100 veces el mismo camino, mejor unit. Para proteger el flujo de verdad, Supertest.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Levanta tu API con Express (o tu framework PHP en un puerto).</li>
+          <li>Prueba con Supertest: 200 de un GET, 404 de uno inexistente.</li>
+          <li>Añade autenticación para que /api/perfil exija token.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Supertest dispara HTTP real a la app sin abrir puertos.</li>
+          <li>Verifica status, body, headers y cookies.</li>
+          <li>Conoce los códigos: 201, 422, 401, 403, 429, 5xx.</li>
+          <li>Prepara base limpia: los E2E tocan la BD de verdad.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="flujos-completos-api.html">Flujos completos de API</a>
+          <a class="related-lessons__link" href="../modulo-03/testing-http-y-servicios-externos.html">Testing HTTP externo</a>
+          <a class="related-lessons__link" href="../modulo-03/pruebas-contractuales.html">Pruebas contractuales</a>
+          <a class="related-lessons__link" href="pruebas-e2e-en-ci.html">Pruebas E2E en CI</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Integración</a></li>
+          <li><a href="index.html">Módulo 4 · E2E</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

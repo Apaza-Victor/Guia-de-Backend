@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="registro-y-validacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro y validación de datos · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Implementa el endpoint de registro con validación estricta, normalización de email, política de contraseñas y respuesta de API correcta en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="registro-y-validacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Registro y validación de datos</span>
+        </nav>
+        <h1 class="lesson-title">Registro y validación de datos</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Registro y Login</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Validar antes de confiar</h2>
+          <p>El registro es la puerta de entrada: todo dato que llega debe asumirse hostil hasta la validación. La validación vive en el <strong>servidor</strong> (el navegador ayuda, pero no defiende), y combina formato, política de contraseñas y unicidad del email.</p>
+        </section>
+
+        <section>
+          <h2 id="reglas">Reglas típicas</h2>
+          <ul>
+            <li><strong>Email:</strong> formato válido y normalizado a minúsculas.</li>
+            <li><strong>Contraseña:</strong> mínimo de 8 caracteres (mejor 12), sin límites absurdos que fomenten malas claves, y permitir símbolos.</li>
+            <li><strong>Nombre:</strong> longitud entre 2 y 100, sin HTML.</li>
+            <li><strong>Unicidad:</strong> el email no debe existir ya; se responde 409 Conflict.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="php">Endpoint en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+// POST /api/registro  body: {email, password, nombre}
+
+$body = json_decode(file_get_contents("php://input"), true);
+$email    = mb_strtolower(trim($body["email"] ?? ""));
+$password = (string) ($body["password"] ?? "");
+$nombre   = trim($body["nombre"] ?? "");
+
+$errores = [];
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errores["email"] = "Formato de email invalido";
+}
+if (strlen($password) &lt; 12) {
+    $errores["password"] = "Minimo 12 caracteres";
+}
+if (mb_strlen($nombre) &lt; 2 || mb_strlen($nombre) &gt; 100) {
+    $errores["nombre"] = "El nombre debe tener 2-100 caracteres";
+}
+
+if ($errores) {
+    http_response_code(422);
+    exit(json_encode(["error" =&gt; "Datos invalidos", "detalles" =&gt; $errores]));
+}
+
+$exists = $db-&gt;prepare("SELECT 1 FROM usuarios WHERE email = ?");
+$exists-&gt;execute([$email]);
+if ($exists-&gt;fetch()) {
+    http_response_code(409);
+    exit(json_encode(["error" =&gt; "El email ya esta registrado"]));
+}
+
+$hash = password_hash($password, PASSWORD_BCRYPT, ["cost" =&gt; 12]);
+$ins  = $db-&gt;prepare("INSERT INTO usuarios (email, password_hash, nombre) VALUES (?, ?, ?)");
+$ins-&gt;execute([$email, $hash, $nombre]);
+
+http_response_code(201);
+echo json_encode(["mensaje" =&gt; "Usuario creado"]);</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="codigos">Códigos de respuesta</h2>
+          <ul>
+            <li><strong>201 Created:</strong> usuario creado.</li>
+            <li><strong>409 Conflict:</strong> email ya registrado.</li>
+            <li><strong>422 Unprocessable Entity:</strong> validación fallida (hostil o no).</li>
+            <li>Evita 500 para errores del cliente.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Añade una regla de «no hay espacios en la contraseña» al validador.</li>
+            <li>Prueba el endpoint con curl: email inválido, email repetido y caso feliz.</li>
+            <li>Responde: ¿por qué conviene responder 409 y no 422 para el email duplicado?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Toda validación vive en el servidor, asumiendo entrada hostil.</li>
+            <li>Normaliza el email; aplica una política de contraseñas realista.</li>
+            <li>201/409/422 cubren los tres desenlaces del registro.</li>
+            <li>Nunca devuelvas el hash ni datos internos en la respuesta.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="modelo-de-usuario-y-rol.html">Modelo de usuario y rol básico</a>
+            <a class="related-lessons__link" href="hashing-con-bcrypt.html">Hashing con bcrypt y password_hash</a>
+            <a class="related-lessons__link" href="login-y-verificacion.html">Login y verificación de credenciales</a>
+            <a class="related-lessons__link" href="restablecimiento-de-contrasena.html">Restablecimiento de contraseña</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

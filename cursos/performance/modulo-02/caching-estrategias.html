@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m2-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caching y estrategias · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende caching con Redis y CDN: cache-aside, read-through y write-through, TTLs, y cómo invalidar un caché sin romper la consistencia del sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m2-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Caching y estrategias</span>
+      </nav>
+      <h1 class="lesson-title">Caching y estrategias</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Optimización</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El caché es el arma de rendimiento más efectiva porque ataca al problema de raíz: la mayoría de las peticiones piden <strong>los mismos datos</strong> que otra persona acaba de pedir. Si esos datos —catálogo, perfiles, precios— se sirven desde una capa rápida sin volver a calcularlos ni leer la base de datos, la latencia cae de decenas de milisegundos a microsegundos y la carga sobre la BD se desploma.</p>
+        <p>Pero el caché también es la fuente número uno de bugs sutiles: contenido obsoleto servido sin dolor hasta que alguien lo nota. Por eso esta lección dedica la mitad a las estrategias <em>y</em> a la invalidación.</p>
+      </section>
+
+      <section>
+        <h2 id="aside">Cache-aside (lazy caching)</h2>
+        <p>El patrón más usado: la aplicación consulta el caché primero; si hay un <strong>miss</strong> (no está), lee la fuente de verdad, la guarda en caché con TTL y responde. En el siguiente hit, sale directo de caché.</p>
+        <p>Con Redis y Node, el flujo es directo:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">import { createClient } from 'redis';
+
+const redis = createClient({ url: 'redis://cache:6379' });
+
+async function obtenerProducto(id) {
+  const clave = `producto:${id}`;
+
+  // 1. Intentar por el caché
+  const cacheado = await redis.get(clave);
+  if (cacheado) return JSON.parse(cacheado);   // hit: cero lectura a la BD
+
+  // 2. Miss: leer la fuente de verdad
+  const producto = await db.query(
+    'SELECT * FROM productos WHERE id = $1', [id]
+  );
+
+  // 3. Guardar con TTL (60 s en este caso) y responder
+  await redis.set(clave, JSON.stringify(producto), { EX: 60 });
+  return producto;
+}
+
+// Uso: la primera llamada tarda ~30 ms (BD),
+// las siguientes ~2 ms si el TTL no ha expirado.</code></pre>
+        <p>Ventajas: simple, no toca el flujo de escritura, los datos se calientan solos cuando se piden. Inconveniente: la primera petición tras expirar el TTL siempre paga el coste completo (se conoce a ese raro usuario como «el que calienta el caché»).</p>
+      </section>
+
+      <section>
+        <h2 id="thru">Read-through y write-through</h2>
+        <p>Las variantes «perfectas» mueven el caché al lado de la fuente de verdad y no al código de negocio:</p>
+        <ul>
+          <li><strong>Read-through:</strong> una librería/DAO gestiona el patrón anterior por ti: pides <code>repo.get(id)</code>, y si no está en caché, la librería lee la BD y la llena. Tu código no sabe que existe un caché.</li>
+          <li><strong>Write-through:</strong> al escribir, primero escribes en el caché y después en la BD (o viceversa). Garantiza que el siguiente <em>read</em> encuentre el dato fresco; lo malo es que paga el coste de escribir dos veces.</li>
+          <li><strong>Write-behind:</strong> escribes solo al caché, y un proceso posterior sincroniza la BD. Muy rápido, pero pierdes algo si el proceso cae antes de flushear.</li>
+        </ul>
+        <pre class="code-block"><code class="language-python" data-language="python"># Cache-aside read-through con redis-py y un repositorio
+import json
+import redis
+
+cache = redis.Redis(host="cache", port=6379)
+TTL_SEG = 300
+
+
+def obtener_perfil(usuario_id: int) -> dict:
+    clave = f"perfil:{usuario_id}"
+    valor = cache.get(clave)
+    if valor is not None:
+        return json.loads(valor)          # hit
+
+    perfil = repositorio.buscar(usuario_id)   # la fuente de verdad
+    if perfil is not None:
+        cache.setex(clave, TTL_SEG, json.dumps(perfil))  # miss -> rellena
+    return perfil
+
+
+def guardar_perfil(usuario_id: int, datos: dict) -> None:
+    # Write-through: guardar en BD y refrescar el caché en la misma operación
+    datos["actualizado_en"] = "2026-02-01T10:30:00Z"
+    repositorio.guardar(usuario_id, datos)
+    cache.setex(f"perfil:{usuario_id}", TTL_SEG, json.dumps(datos))</code></pre>
+      </section>
+
+      <section>
+        <h2 id="redis">Primeros pasos con Redis</h2>
+        <p>Redis es el estándar para caché en memoria compartida en el backend: sub-milisegundo, con TTL nativo y estructuras útiles. Un par de comandos esenciales desde el CLI:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Conectarse y cachear un valor con expiración
+redis-cli -h cache
+SET producto:42 '{"nombre":"Balón","precio":12.5}' EX 60    # TTL de 60 segundos
+GET producto:42
+TTL producto:42        # segundos restantes de vida
+DEL producto:42        # invalidación manual
+
+# Solo guardar si NO existe (evita sobrescribir un caché aún válido)
+SETNX producto:42 '{"nombre":"Balón","precio":12.5}'
+
+# Cachear un listado con expiración y forzar revalidación posterior
+SET lista:juguetes '[{"id":1},{"id":2}]' EX 120</code></pre>
+        <p>El comando <code>SETNX</code> sirve además para implementar un sencillo lock distribuido. Y recuerda la regla de oro de las claves: <code>recurso:id</code>, minúsculas, sin espacios, con TTL, y con «versión» cuando cambie el formato (<code>producto:v2:42</code>).</p>
+      </section>
+
+      <section>
+        <h2 id="invalidation">Invalidación: el arte difícil</h2>
+        <p>Cachear es fácil; mantenerlo coherente es el trabajo. Tres estrategias, de más simple a más robusta:</p>
+        <ol>
+          <li><strong>TTL corto:</strong> aceptas que los datos vivan obsoletos un rato (segundos/minutos) y se autocorrijan. Ideal para catálogos, precios con margen de error y feeds.</li>
+          <li><strong>Invalidación directa:</strong> cuando algo cambia, <code>DEL</code> de las claves afectadas. Simple pero frágil: olvidaste una clave y el dato viejo se sirve hasta que expire.</li>
+          <li><strong>Versionado + invalidación por eventos:</strong> publicas un evento «producto_actualizado» y los listeners borran la clave. Es la que escala en arquitecturas con varios servicios.</li>
+        </ol>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Invalidación directa tras una escritura, en el mismo proceso
+app.post('/productos/:id', async (req, res) => {
+  const id = req.params.id;
+  await db.query('UPDATE productos SET ... WHERE id = $1', [id]);
+
+  // Borrar las claves que dependen de este producto
+  await redis.del(`producto:${id}`);          // el detalle
+  await redis.del('lista:juguetes');          // el listado que lo muestra
+  res.status(200).json({ ok: true });
+});</code></pre>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> si no estás seguro de poder invalidar bien una clave, ponle un TTL conservador y acepta la inconsistencia momentánea. Un dato viejo 30 segundos casi siempre es un precio mucho menor que un bug de datos eternos.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="cache-stampede">El efecto stampede (y su remedio)</h2>
+        <p>Un miss golpea a todos a la vez: cuando el TTL de una clave popular expira, 100 peticiones leen de la BD <em>al mismo tiempo</em> si 100 procesos piden la clave. Esto es un <strong>cache stampede</strong>. Remedios: TTL con jitter (aleatorio) que espacie las expiraciones, y single-flight (una sola recarga bajo lock) para que solo uno recalcule mientras los demás esperan.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Añadir jitter al TTL: cada relleno expira en un momento ligeramente distinto
+const TTL_BASE = 120;
+const jitter = Math.floor(Math.random() * 20); // +0..19 s
+await redis.set(clave, json, { EX: TTL_BASE + jitter });</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige 3 datos de tu sistema que se lean mucho y cambien poco (catálogo, países, config). Clasifícalos: ¿qué TTL tolerarían? ¿Qué nivel de inconsistencia es aceptable?</li>
+          <li>Implementa cache-aside con Redis (o el sistema que tengas) para el más leído y mide la latencia antes y después con <code>curl -w</code> o tu herramienta habitual.</li>
+          <li>Anota las claves que tendrías que borrar si cambias un producto y compara con la lista de claves que tu código realmente usa: cualquier desajuste ahí es un bug de invalidación futuro.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El cache-aside lee caché → miss → lee fuente → rellena con TTL → responde.</li>
+          <li>Read-through y write-through mueven el caché a la capa de datos; write-behind gana velocidad y pierde durabilidad.</li>
+          <li>Redis ofrece TTL, <code>SETNX</code> y sub-milisegundo; las claves se nombran <code>recurso:id</code> con TTL y versión.</li>
+          <li>Invalidación: TTL corto, DEL directo o eventos. Si dudas, TTL conservador gana en seguridad.</li>
+          <li>El jitter en el TTL evita el cache stampede.</li>
+          <li>La CDN es la misma idea llevada al borde de la red (se amplía en el módulo 3).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="optimizacion-de-bases-de-datos.html">Optimizar bases de datos</a>
+          <a class="related-lessons__link" href="optimizacion-de-apis.html">Optimizar APIs</a>
+          <a class="related-lessons__link" href="../modulo-03/cdny-edge-caching.html">CDN y edge caching</a>
+          <a class="related-lessons__link" href="../modulo-01/que-es-performance-backend.html">¿Qué es performance?</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

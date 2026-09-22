@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m2-l1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RabbitMQ: conceptos · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Aprende los conceptos de RabbitMQ: exchanges, queues, bindings, routing keys, brokers, vhosts, durabilidad y el vocabulario esencial de AMQP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m2-l1"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">RabbitMQ: conceptos</span>
+      </nav>
+      <h1 class="lesson-title">RabbitMQ: conceptos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · RabbitMQ y colas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>RabbitMQ implementa el protocolo <strong>AMQP 0-9-1</strong>. A diferencia del modelo ingenuo «productor → cola → consumidor», en RabbitMQ el productor <strong>nunca publica a una cola directamente</strong>: publica a un <strong>exchange</strong>, y es el exchange quien decide a qué colas deja el mensaje mediante las reglas que llamamos <strong>bindings</strong>.</p>
+        <p>Entender esos cuatro elementos —exchange, queue, binding y routing key— es entender RabbitMQ. Son la misma arquitectura flexible que permite colas, pub/sub y routing selectivo con el mismo servidor.</p>
+      </section>
+
+      <section>
+        <h2 id="elementos">Los cuatro elementos</h2>
+        <ul>
+          <li><strong>Exchange:</strong> el buzón de entrada del mensaje. Recibe mensajes de los productores y los enruta con su lógica propia (direct, fanout, topic, headers).</li>
+          <li><strong>Queue (cola):</strong> búfer durable donde esperan los mensajes hasta que un consumidor los tome y confirme.</li>
+          <li><strong>Binding:</strong> el enlace «intereso por X de este exchange». Define qué llega a cada cola.</li>
+          <li><strong>Routing key:</strong> la etiqueta que el productor pone al mensaje y que el exchange compara contra los bindings para decidir.</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Modelo AMQP (diagrama mental)
+Productor -> EXCHANGE --routing key---> BINDING -> QUEUE -> Consumidor
+                      \--otros bindings--> QUEUE 2 -> Consumidor 2</code></pre>
+        <p>Un exchange tiene <strong>nombre</strong>, <strong>tipo</strong> y <strong>flags</strong> (durable). Las colas, por su parte, se suscriben a los exchanges con bindings; una cola puede tener muchos bindings del mismo o de distintos exchanges.</p>
+      </section>
+
+      <section>
+        <h2 id="comandos">Declarar con Node.js: el primer ejemplo</h2>
+        <p>El flujo mínimo en código. Declaramos un exchange <code>eventos</code>, una cola <code>registros</code>, el binding entre ambos y publicamos un mensaje:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function setup() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+
+  // 1. Declarar el exchange (durable: sobrevive a reinicios)
+  await ch.assertExchange('eventos', 'topic', { durable: true });
+
+  // 2. Declarar la cola (durable también)
+  await ch.assertQueue('registros', { durable: true });
+
+  // 3. Binding: la cola 'registros' escucha los eventos 'usuario.*'
+  await ch.bindQueue('registros', 'eventos', 'usuario.*');
+
+  // 4. Publicar: routing key 'usuario.creado' coincide con el binding
+  ch.publish('eventos', 'usuario.creado', Buffer.from(JSON.stringify({
+    usuarioId: 4242
+  })), { persistent: true });
+
+  console.log('Evento publicado y enrutado a la cola "registros"');
+  await conn.close();
+}
+
+setup();</code></pre>
+        <p>La «magia» está en el paso 3 y el 4: el binding <code>usuario.*</code> captura cualquier routing key que empiece por <code>usuario.</code>. El productor jamás menciona colas: publica solo con una routing key.</p>
+      </section>
+
+      <section>
+        <h2 id="consumir">Consumir de la cola</h2>
+        <p>El consumidor, por el otro lado, no necesita saber nada del exchange: solo escucha su cola y confirma cada mensaje con ACK:</p>
+        <pre class="code-block"><code class="language-python" data-language="python"># Consumidor en Python con la librería pika
+import pika, json
+
+conexion = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+canal = conexion.channel()
+
+# La misma cola debe existir (mismas propiedades)
+canal.queue_declare(queue='registros', durable=True)
+
+def handler(ch, method, properties, body):
+    evento = json.loads(body)
+    print(f'Evento {method.routing_key}: usuario {evento["usuarioId"]}')
+    # Trabajo completado -> confirmar
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+canal.basic_consume(queue='registros', on_message_callback=handler)
+canal.start_consuming()</code></pre>
+        <p>Sin el <code>basic_ack</code>, RabbitMQ volvería a entregar el mensaje en el próximo intento (at-least-once, como vimos en la lección anterior).</p>
+      </section>
+
+      <section>
+        <h2 id="flags">Durabilidad, vhosts y otras piezas</h2>
+        <ul>
+          <li><strong>Durability:</strong> un exchange/cola <code>durable: true</code> sobrevive al reinicio del broker. Las colas durables además guardan mensajes persistentes. Sin ambos flags, todo desaparece al apagar.</li>
+          <li><strong>Durabilidad (persistence):</strong> mensajes marcados <code>persistent: true</code> se escriben en disco. Sin él se guardan solo en memoria.</li>
+          <li><strong>Virtual host (vhost):</strong> espacio de aislamiento lógico dentro del broker. Usa un vhost por entorno (dev, staging, prod) o por equipo.</li>
+          <li><strong>Default exchange:</strong> un exchange especial e implícito cuyo nombre es vacío. Publicar sin exchange equivale a <code>sendToQueue</code>: enruta directo a la cola con el nombre igual a la routing key.</li>
+          <li><strong>Binding key / routing key:</strong> en un binding <code>queue.bind(exchange, key)</code> la key define el patrón a emparejar.</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Consola de gestión de RabbitMQ (docker run rabbitmq:3-management)
+# http://localhost:15672  -> Exchanges / Queues / Bindings por vhost
+# Ver mensajes, políticas TTL y gráficas de velocidad desde el panel</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Dibuja con lápiz y papel un flujo con exchange, dos colas y dos bindings que difieran solo en la routing key.</li>
+          <li>Ejecuta el ejemplo de Node.js con Docker y verifica en el panel (pestaña Exchanges → Bindings) que la cola <code>registros</code> recibe el mensaje.</li>
+          <li>Responde: si el consumidor Python se conecta a una cola que el productor declaró con <code>durable: false</code>, pero con el mismo nombre y propiedades distintas, ¿qué error esperarías ver?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El productor publica al exchange, nunca directamente a una cola.</li>
+          <li>El exchange, con bindings y routing keys, decide el destino de cada mensaje.</li>
+          <li>Colas y exchanges durables sobreviven reinicios; mensajes persistentes, además, sobreviven a discos.</li>
+          <li>Los vhosts aíslan entornos dentro del mismo broker.</li>
+          <li>Consumir sin ACK = reentrega = posibles duplicados (idempotencia).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="exchanges-y-routing.html">Exchanges y routing</a>
+          <a class="related-lessons__link" href="workers-y-prefetch.html">Workers y prefetch</a>
+          <a class="related-lessons__link" href="../modulo-01/colas-vs-pubsub.html">Colas vs Pub/Sub</a>
+          <a class="related-lessons__link" href="../modulo-03/kafka-conceptos.html">Kafka: conceptos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

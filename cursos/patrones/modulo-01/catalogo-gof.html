@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m1-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El catálogo GOF · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="Los 23 patrones del libro Gang of Four clasificados en creacionales, estructurales y de comportamiento, con su propósito y ejemplos de backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m1-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">El catálogo GOF</span>
+      </nav>
+      <h1 class="lesson-title">El catálogo GOF</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El libro <em>Design Patterns</em> (Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides — los <strong>Gang of Four</strong>) catalogó 23 patrones en tres familias. Aunque muchos nacieron para UI, la mayoría se aplica directo al backend. Este es el mapa mental que necesitas para navegar el curso.</p>
+      </section>
+
+      <section>
+        <h2 id="creacionales">Creacionales (5)</h2>
+        <p><strong>Controlan la creación de objetos</strong>: cuándo, cómo y quién crea. En backend aparecen al construir servicios, repositorios y fábricas complejas.</p>
+        <ul>
+          <li><strong>Abstract Factory</strong> — familias de productos relacionados.</li>
+          <li><strong>Builder</strong> — construcción paso a paso de un objeto complejo (un pedido con pasos).</li>
+          <li><strong>Factory Method</strong> — un método decide la clase concreta del producto.</li>
+          <li><strong>Prototype</strong> — clonar objetos como base (menos común en backend).</li>
+          <li><strong>Singleton</strong> — garantizar una única instancia (cuidado: en backend casi siempre lo resuelve el contenedor).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="estructurales">Estructurales (7)</h2>
+        <p><strong>Definen cómo se componen objetos y clases</strong>. Ideales para adaptar librerías, componer middlewares y dar interfaces limpias.</p>
+        <ul>
+          <li><strong>Adapter</strong> — traducir una interfaz a otra (una pasarela de pagos que se envuelve para encajar en el contrato del dominio).</li>
+          <li><strong>Bridge</strong> — separar abstracción e implementación (menos común).</li>
+          <li><strong>Composite</strong> — tratar individuos y agrupaciones igual (un árbol de categorías).</li>
+          <li><strong>Decorator</strong> — añadir comportamiento sin herencia (middleware/cache sobre un servicio).</li>
+          <li><strong>Facade</strong> — fachada que simplifica un subsistema (un cliente HTTP que encapsula la API de Stripe).</li>
+          <li><strong>Flyweight</strong> — compartir estado común para ahorrar memoria (pooling).</li>
+          <li><strong>Proxy</strong> — un intermediario que controla el acceso (cache, lazy-load, control de acceso).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="comportamiento">Comportamiento (11)</h2>
+        <p><strong>Definen cómo se comunican y coordinan los objetos</strong>. El pan de cada día de los sistemas de eventos y de las reglas de negocio intercambiables.</p>
+        <ul>
+          <li><strong>Chain of Responsibility</strong> — varios manejadores encadenados (middleware HTTP).</li>
+          <li><strong>Command</strong> — encapsular una petición como objeto (jobs, undo).</li>
+          <li><strong>Interpreter</strong> — gramáticas (poco común).</li>
+          <li><strong>Iterator</strong> — recorrer colecciones sin exponer su estructura (colo de DDD).</li>
+          <li><strong>Mediator</strong> — centralizar la interacción entre objetos (orquestador de un caso de uso).</li>
+          <li><strong>Memento</strong> — guardar/restaurar estado (snapshots).</li>
+          <li><strong>Observer</strong> — notificar cuando algo cambia (eventos de dominio, listeners).</li>
+          <li><strong>State</strong> — el comportamiento cambia según el estado interno (máquina de estados de un pedido).</li>
+          <li><strong>Strategy</strong> — familia de algoritmos intercambiables (tarifas de envío).</li>
+          <li><strong>Template Method</strong> — esqueleto fijo con pasos sobrescribibles.</li>
+          <li><strong>Visitor</strong> — operaciones sobre una estructura sin modificar sus clases (menos común).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="como-leer">Cómo leer el mapa</h2>
+        <p>No necesitas memorizar 23. Guarda la <strong>intención</strong> de cada familia y dos o tres ejemplos concretos por familia; el resto lo consultas cuando lo necesites. En este curso profundizaremos los que de verdad se usan en backend — los resaltados arriba con negrita son los protagonistas.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Encuentra en tu proyecto un caso «creacional», uno «estructural» y uno «de comportamiento».</li>
+          <li>Dime a qué patrón del catálogo pertenecería cada uno.</li>
+          <li>Anota los 5 patrones que más usas y su intención en una línea.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>23 patrones GoF en 3 familias: creacionales, estructurales, comportamiento.</li>
+          <li>Creacionales = a quién/cómo se crea; estructurales = cómo se compone; comportamiento = cómo se comunica.</li>
+          <li>Solo los marcados en negrita son protagonistas de backend.</li>
+          <li>Memoriza la intención, no la lista.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-un-patron.html">¿Qué es un patrón?</a>
+          <a class="related-lessons__link" href="../modulo-02/index.html">Módulo 2 · Creacionales</a>
+          <a class="related-lessons__link" href="../modulo-03/index.html">Módulo 3 · Estructurales</a>
+          <a class="related-lessons__link" href="../modulo-04/index.html">Módulo 4 · Comportamiento</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

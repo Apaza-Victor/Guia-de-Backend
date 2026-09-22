@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proteccion-de-la-cookie-de-sesion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protección de la cookie de sesión · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Asegura la cookie de sesión en PHP: HttpOnly, Secure, SameSite, rotación tras login y cómo protegerte de XSS, sniffing y CSRF desde la cookie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="proteccion-de-la-cookie-de-sesion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Protección de la cookie de sesión</span>
+        </nav>
+        <h1 class="lesson-title">Protección de la cookie de sesión</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Sesiones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que">La cookie como objetivo</h2>
+          <p>Quien copie la cookie de sesión «presta» la identidad de su dueño: es el ataque de <strong>session hijacking</strong>. La defensa es un conjunto de atributos y hábitos que dificultan copiarla, transmitirla y reutilizarla.</p>
+        </section>
+
+        <section>
+          <h2 id="atributos">Los tres escudos</h2>
+          <ul>
+            <li><strong>HttpOnly:</strong> el JavaScript del sitio no puede leerla. Sin esto, un XSS roba la sesión en un <code class="inline">document.cookie</code>.</li>
+            <li><strong>Secure:</strong> solo viaja por HTTPS. Evita el sniffing en redes abiertas o proxies.</li>
+            <li><strong>SameSite:</strong> restringe el envío en solicitudes cross-site. <code class="inline">Lax</code> mitiga la mayoría de CSRF; <code class="inline">Strict</code> es más rígido.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="php">Configurándolo en PHP</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Opcion A: en codigo, antes de session_start()
+session_set_cookie_params([
+    "httponly" =&gt; true,
+    "secure"   =&gt; true,
+    "samesite" =&gt; "Lax",
+    "path"     =&gt; "/",
+]);
+session_start();
+
+// Opcion B: php.ini
+// session.cookie_httponly = 1
+// session.cookie_secure   = 1
+// session.cookie_samesite = Lax
+
+// Rotar el id en eventos de privilegio
+session_regenerate_id(true); // tras login, cambios de rol, etc.</code></pre>
+            </div>
+          </figure>
+          <p>Además, considera añadir una capa extra: <strong>bind de sesión</strong> (por ejemplo, recordar la huella del user-agent o una sub-secret compartida) que invalide la sesión si cambia de forma brusca. Hazlo con cuidado para no expulsar a usuarios legítimos tras updates de navegador.</p>
+        </section>
+
+        <section>
+          <h2 id="rotacion">Cuándo rotar el id</h2>
+          <ul>
+            <li>Después del login (anti session fixation).</li>
+            <li>Al subir/bajar privilegios.</li>
+            <li>Al confirmar el correo o cambiar la contraseña.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Configura la cookie de sesión con los tres escudos y verifica con las DevTools que aparecen <code class="inline">, HttpOnly</code> y <code class="inline">SameSite=Lax</code>.</li>
+            <li>Comprueba que tras <code class="inline">session_regenerate_id(true)</code> el id de la cookie cambia.</li>
+            <li>Explica qué pasaría con una sesión sin <code class="inline">HttpOnly</code> en un sitio con XSS.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>HttpOnly bloquea el robo por XSS.</li>
+            <li>Secure exige HTTPS para la cookie.</li>
+            <li>SameSite=Lax mitiga CSRF desde la cookie.</li>
+            <li>Regenera el id en eventos de privilegio.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="sesiones-y-almacenamiento.html">Sesiones y almacenamiento</a>
+            <a class="related-lessons__link" href="../modulo-01/cookies-y-su-rol.html">Cookies y su rol en la web</a>
+            <a class="related-lessons__link" href="../modulo-04/almacenamiento-seguro-en-el-cliente.html">Almacenamiento seguro en el cliente</a>
+            <a class="related-lessons__link" href="cierre-de-sesion-y-revocacion.html">Cierre de sesión y revocación</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

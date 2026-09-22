@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-sdk-y-clientes">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDKs y clientes HTTP · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende cuándo usar el SDK oficial de un proveedor, cuándo conviene un cliente HTTP plano y cómo envolver cualquier cliente detrás de tu propia capa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-sdk-y-clientes"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">SDKs y clientes HTTP</span>
+      </nav>
+      <h1 class="lesson-title">SDKs y clientes HTTP</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Consumir una API externa se puede hacer de dos formas: usar el <strong>SDK oficial</strong> que mantiene el proveedor o hablar con la API directamente mediante un <strong>cliente HTTP</strong> (fetch, axios, requests). Ambas son válidas, pero elegir sin contexto conduce a problemas: el SDK te ahorra tiempo al principio y te puede costar caro después, y el cliente plano te da control total pero te obliga a escribir la firma, el retry y el contrato a mano.</p>
+      </section>
+
+      <section>
+        <h2 id="sdk">El SDK oficial</h2>
+        <p>El SDK oficial trae tipos, autenticación, reintentos e incluso manejo de webhooks ya resueltos. Es una elección razonable cuando el proveedor es maduro y su SDK está bien mantenido:</p>
+        <ul>
+          <li><strong>Ventajas:</strong> menos código tuyo, respuestas tipadas, helpers de verificación de firmas, actualizaciones al ritmo del proveedor.</li>
+          <li><strong>Desventajas:</strong> versiones que rompen contratos, dependencias pesadas en tu stack, comportamientos ocultos (retries por defecto) y APIs que no siempre encajan con tu estilo.</li>
+        </ul>
+        <p>Sea cual sea la opción, la regla no cambia: <strong>el SDK vive dentro de tu adaptador</strong>, nunca diseminado por el código de negocio.</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// El SDK se queda confinado en el adaptador de pagos
+export async function crearSesionDePago(pedido) {
+  return stripe.checkout.sessions.create({
+    line_items: [{ price: pedido.precioId, quantity: 1 }],
+    mode: 'payment',
+    success_url: 'https://mi-tienda.com/ok',
+    cancel_url: 'https://mi-tienda.com/cancel'
+  });
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cliente">El cliente HTTP plano</h2>
+        <p>Cuando el SDK no existe, está desactualizado o es más complejo que la API, un cliente HTTP simple es tu mejor amigo. Con él controlas timeouts, headers y body exactos:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import httpx
+from typing import Dict
+
+class ApiGeocodificacion:
+    BASE = "https://maps.example.com/v1"
+
+    def __init__(self, api_key: str):
+        self._cliente = httpx.Client(
+            base_url=self.BASE,
+            timeout=httpx.Timeout(connect=3.0, read=5.0),
+        )
+        self._api_key = api_key
+
+    def geocodificar(self, direccion: str) -> Dict[str, float]:
+        resp = self._cliente.get("/geocode", params={
+            "address": direccion,
+            "key": self._api_key,
+        })
+        resp.raise_for_status()
+        dato = resp.json()["results"][0]
+        return {"lat": dato["lat"], "lng": dato["lng"]}
+</code></pre>
+        <p>Fíjate en el <code>timeout</code> explícito: un cliente sin timeout convierte una caída del proveedor en un request colgado que agota los hilos de tu servidor.</p>
+      </section>
+
+      <section>
+        <h2 id="wrapping">Envolver al tercero</h2>
+        <p>Ambos caminos desembocan en lo mismo: una capa propia que los demás módulos consumen. El resto de tu aplicación nunca debería importar ni a Stripe ni a axios directamente. Eso convierte el futuro cambio de proveedor en un cambio de una sola clase:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "adaptador": "CorreoProveedorA",
+  "interfaz_interna": {
+    "enviar_transaccional": "CorreoAdapter.enviar()",
+    "consultar_entrega": "CorreoAdapter.estado()"
+  },
+  "clientes_permitidos": [
+    "server/src/integraciones/correo/*",
+    "server/src/adaptadores/*"
+  ],
+  "prohibido_en": "controladores, servicios de dominio"
+}</code></pre>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> antes de instalar un SDK nuevo, pregúntate «¿esto me ahorra lógica que de verdad importa o solo tengo un nuevo amigo con release schedule?». La respuesta decide entre SDK y cliente plano.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="versionado">Dependencias bajo control</h2>
+        <p>El SDK de un tercero es software de otro equipo dentro de tu artefacto. Puede romperte en cada <code>npm update</code>. Estrategias de contención:</p>
+        <ul>
+          <li>Fija la versión exacta en tu manifiesto y actualízala deliberadamente, con test y changelog leídos.</li>
+          <li>Verifica en CI que el contrato esperado sigue respondiendo (tests de integración contra sandbox).</li>
+          <li>Mantén el adaptador delgado: toda la lógica sensible sigue en tu código, no dentro del SDK.</li>
+        </ul>
+<pre class="code-block"><code class="language-bash" data-language="bash"># Congela la versión del SDK del proveedor en tu package.json
+npm install --save-exact stripe@17.2.1 @sendgrid/mail@8.1.4</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un proveedor que uses (o uno ficticio) y decide: ¿SDK o cliente plano? Argumenta en una frase.</li>
+          <li>Escribe un adaptador en Python o JavaScript con timeout y un solo método público.</li>
+          <li>Simula el cambio de proveedor: reescribe solo la implementación interna del adaptador y verifica que la interfaz no cambió.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El SDK oficial ahorra tiempo; el cliente plano da control total.</li>
+          <li>Ambos deben quedar confinados dentro del adaptador de integración.</li>
+          <li>Siempre define timeouts explícitos para no colgar tu servidor.</li>
+          <li>Fija versiones de SDKs y actualiza con tests que midan el contrato.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="patrones-de-integracion.html">Patrones de integración</a>
+          <a class="related-lessons__link" href="gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-03/env-vars-y-secrets.html">Configuración y secretos</a>
+          <a class="related-lessons__link" href="../modulo-03/pruebas-de-integracion.html">Pruebas de integración</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

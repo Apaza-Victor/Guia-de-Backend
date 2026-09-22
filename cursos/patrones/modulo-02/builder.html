@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Builder en backend: construcción paso a paso de objetos complejos con invariantes, con ejemplos PHP de pedidos y consultas SQL compuestas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Builder</span>
+      </nav>
+      <h1 class="lesson-title">Builder</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Creacionales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Builder</strong> permite construir un objeto complejo <strong>paso a paso</strong>, delega los pasos en un «maestro de obras» dedicado y construye un resultado final seguro e inmutable. Es ideal para pedidos con muchos campos e invariantes, y para consultas compuestas.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema: constructores que explotan</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (constructor todopoderoso)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">// 8 parámetros: olvidar uno crea invariantes rotas
+new Pedido(
+    $id, $clienteId, $items, $envio,
+    $descuento, $impuesto, $estado, $creadoEn
+);</code></pre>
+          </div>
+        </figure>
+        <p>Con demasiados campos, los llamadores no saben qué es obligatorio, qué es opcional, en qué orden. Las invariantes (por ejemplo «envio solo si hay items») se validan tarde o nunca.</p>
+      </section>
+
+      <section>
+        <h2 id="solucion">La solución: pasos encadenados con validación</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class Pedido
+{
+    private function __construct(
+        private string $id,
+        private array $items,
+        private ?string $envio,
+    ) {}
+
+    public static function idEstructura(): PedidoBuilder { return new PedidoBuilder(); }
+
+    public function items(): array { return $this-&gt;items; }
+}
+
+final class PedidoBuilder
+{
+    private array $items = [];
+    private ?string $envio = null;
+
+    public function agregarItem(string $sku, int $cantidad): self
+    {
+        if ($cantidad &lt;= 0) {
+            throw new \LogicException('Cantidad debe ser positiva');
+        }
+        $this-&gt;items[] = ['sku' =&gt; $sku, 'cantidad' =&gt; $cantidad];
+        return $this;
+    }
+
+    public function conEnvio(string $direccion): self
+    {
+        if ($this-&gt;items === []) {
+            throw new \LogicException('No se envía un pedido vacío');
+        }
+        $this-&gt;envio = $direccion;
+        return $this;
+    }
+
+    public function construir(): Pedido
+    {
+        if ($this-&gt;items === []) {
+            throw new \LogicException('Pedido sin ítems');
+        }
+        return new Pedido(uniqid('p_'), $this-&gt;items, $this-&gt;envio);
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="uso">El uso en el caso de uso</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$pedido = Pedido::idEstructura()
+    -&gt;agregarItem('camisa', 2)
+    -&gt;agregarItem('pantalon', 1)
+    -&gt;conEnvio('Av. Reforma 100')
+    -&gt;construir();</code></pre>
+          </div>
+        </figure>
+        <p>El orden puede variar de pregunta a pregunta, las validaciones ocurren en cada paso, y el resultado final es un <code>Pedido</code> válido o una excepción.</p>
+      </section>
+
+      <section>
+        <h2 id="otro">El Builder más famoso del backend</h2>
+        <p>En PHP, <strong>Eloquent Query Builder</strong> es un Builder gigante y con razón: construyes una consulta SQL pieza a pieza sin exponer SQL intermedio:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP (Eloquent)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$resultados = PedidoModel::query()
+    -&gt;where('estado', 'confirmado')
+    -&gt;whereBetween('total', [100, 500])
+    -&gt;orderBy('creado_en', 'desc')
+    -&gt;limit(10)
+    -&gt;get();</code></pre>
+          </div>
+        </figure>
+        <p>Cadena de pasos, código legible, sin lenguaje SQL crudo en el negocio.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo aplicar Builder</h2>
+        <ul>
+          <li>Objetos con >5 campos y varias combinaciones válidas.</li>
+          <li>Invariantes que dependen de la combinación de campos («si A, entonces B obligatorio»).</li>
+          <li>Construcción en pasos que quiera formatear o con efectos intermedios.</li>
+        </ul>
+        <p><strong>No lo fuerces en objetos simples o planos</strong>: 3 campos se construyen mejor con un constructor normal o named parameters.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Encuentra un objeto con constructor largo en tu proyecto.</li>
+          <li>Extrae un Builder con pasos encadenados y validaciones por paso.</li>
+          <li>Refactoriza dos llamadas al nuevo builder y prueba las invariantes.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Builder: construcción paso a paso con validación intermedia.</li>
+          <li>Resuelve constructores largos y combos de invariantes.</li>
+          <li>El Query Builder de Eloquent es el ejemplo más conocido.</li>
+          <li>No lo uses con objetos de pocos campos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="eligiendo-patron-creacional.html">Eligiendo el patrón creacional</a>
+          <a class="related-lessons__link" href="../modulo-05/repository-y-capa-de-datos.html">Repository y la capa de datos</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-03/service-layer.html">Service Layer</a>
+          <a class="related-lessons__link" href="factory-method.html">Factory Method</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

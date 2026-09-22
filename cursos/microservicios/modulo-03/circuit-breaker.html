@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="microservicios-circuit-breaker">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit breaker · Microservicios · Backend Academy</title>
+<meta name="description" content="El patrón circuit breaker en microservicios: estados cerrado, abierto y medio-abierto, umbrales de fallo, y cómo cortar la cascada de fallos en sistemas distribuidos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="microservicios" data-current="microservicios-circuit-breaker"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Microservicios</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Circuit breaker</span>
+      </nav>
+      <h1 class="lesson-title">Circuit breaker</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Microservicios</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Datos y resiliencia</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Cuando un servicio cae, los dependientes siguen llamándolo, acumulando timeouts y saturando sus propios recursos: es la <strong>cascada de fallos</strong>. El <strong>circuit breaker</strong> actúa como el interruptor de un circuito eléctrico: cuando la dependencia falla demasiado, <strong>abre el circuito</strong> y deja de llamarla durante un tiempo, permitiendo que se recupere.</p>
+      </section>
+
+      <section>
+        <h2 id="estados">Los tres estados</h2>
+        <ul>
+          <li><strong>Cerrado:</strong> todo normal; las llamadas fluyen y se miden los fallos.</li>
+          <li><strong>Abierto:</strong> la tasa de fallos superó el umbral; se rechazan llamadas al momento (sin tocar la red) y se falla rápido.</li>
+          <li><strong>Medio-abierto:</strong> tras el periodo de espera, se deja pasar un número reducido de pruebas; si aciertan, el circuito se cierra; si fallan, vuelve a abrirse.</li>
+        </ul>
+        <p>La clave es <strong>fallar rápido</strong>: mejor devolver un error en milisegundos que esperar segundos atascado y colapsándolo todo.</p>
+      </section>
+
+      <section>
+        <h2 id="implementacion">Una implementación sencilla</h2>
+        <p>El breaker mide una ventana de tiempo (por ejemplo, los últimos 10 segundos) y compara la tasa de fallos con el umbral (por ejemplo, 50%). Al abrirse, todas las llamadas devuelven de inmediato sin tocar la red hasta que pase el tiempo de espera:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+          <div class="code-block__body">
+            <pre data-lang="javascript"><code class="language-javascript" data-language="javascript">class CircuitBreaker {
+  constructor({ umbralFallo = 0.5, ventanaMs = 10000, esperaMs = 30000 } = {}) {
+    this.umbralFallo = umbralFallo;
+    this.ventanaMs = ventanaMs;
+    this.esperaMs = esperaMs;
+    this.estado = "cerrado";
+    this.fallos = 0;
+    this.total = 0;
+    this.abiertoDesde = 0;
+  }
+
+  permitir() {
+    if (this.estado === "abierto") {
+      if (Date.now() - this.abiertoDesde >= this.esperaMs) this.estado = "medioAbierto";
+      else return false;
+    }
+    return true;
+  }
+
+  registrar(exito) {
+    this.total++;
+    if (!exito) this.fallos++;
+    if (this.estado === "medioAbierto") {
+      this.estado = exito ? "cerrado" : "abierto";
+    }
+    const tasa = this.fallos / this.total;
+    if (this.estado === "cerrado" && tasa >= this.umbralFallo) {
+      this.estado = "abierto";
+      this.abiertoDesde = Date.now();
+      this.fallos = 0; this.total = 0;
+    }
+  }
+}
+
+const breaker = new CircuitBreaker();
+if (breaker.permitir()) {
+  try { await llamarServicio(); breaker.registrar(true); }
+  catch { breaker.registrar(false); }
+} else {
+  throw new Error("Circuito abierto: fallo rápido");
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="librerias">Usa tu implementación u una librería</h2>
+        <p>No hace falta reinventar: hay librerías maduras en casi todos los lenguajes.</p>
+        <ul>
+          <li><strong>Java:</strong> Resilience4j, Hystrix (legacy).</li>
+          <li><strong>Python:</strong> <code>pybreaker</code>.</li>
+          <li><strong>Node:</strong> <code>oposssum</code>, <code>cockatiel</code>.</li>
+          <li><strong>Plataformas:</strong> Istio y otros service meshes ofrecen circuit breaking en la malla, sin tocar el código.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="configuracion">Configuración práctica</h2>
+        <p>Elegir los umbrales requiere observación real: no queremos abrir el circuito por un error puntual, pero tampoco esperar a que se sature. Valores de partida razonables:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+          <div class="code-block__body">
+            <pre data-lang="yaml"><code class="language-yaml" data-language="yaml">circuit_breaker:
+  servicio-pagos:
+    failure_threshold: 0.5        # 50% de fallos en la ventana
+    window_duration: 10s
+    wait_duration_open: 30s       # tiempo que aguantará abierto
+    permitido_prueba: 3           # peticiones en medio-abierto</code></pre>
+          </div>
+        </figure>
+        <p>Usa el breaker con los bulkheads de la lección anterior: el breaker corta la ola, el bulkhead limita los recursos que la ola puede consumir mientras pasa.</p>
+      </section>
+
+      <section>
+        <h2 id="fallback">Fallbacks</h2>
+        <p>Cuando el circuito está abierto, la mejor respuesta no es siempre un error: puede servir un <strong>fallback</strong> (datos cacheados de la última vez, respuesta parcial, o un mensaje amable). El fallback convierte un fallo técnico en una experiencia degradada pero usable:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Python (fallback con caché)</span></div>
+          <div class="code-block__body">
+            <pre data-lang="python"><code class="language-python" data-language="python">@circuit_breaker(Fallback)
+def obtener_recomendaciones(usuario_id):
+    try:
+        datos = servicio_recomendaciones.consulta(usuario_id)
+        cache.set(f"recs:{usuario_id}", datos, ttl=600)
+        return datos
+    except CircuitoAbierto:
+        return cache.get(f"recs:{usuario_id}", default=[])
+        # devolvemos la última versión cacheada en vez de un error</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="queue-evitar">No abusar del breaker</h2>
+        <p>El circuit breaker no es para cualquier fallo: si la operación no es crítica o ya tienes colas, a veces basta con reintentos y timeouts. Añadir breakers en exceso añade configuración y complejidad sin beneficio real. Mide dónde ocurren las cascadas y protégelas ahí.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Describe qué ocurre en los tres estados cuando sube el tráfico de fallos de 10% a 70%.</li>
+          <li>Implementa el breaker con ventana móvil en tu lenguaje y pruebalo simulando fallos.</li>
+          <li>Combina breaker + fallback + bulkhead para un endpoint de catálogo y documenta el flujo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El circuit breaker evita la cascada de fallos cortando llamadas a una dependencia enferma.</li>
+          <li>Estados: cerrado → abierto (umbral de fallos) → medio-abierto (prueba) → cerrado.</li>
+          <li>Al abrirse hay fallo rápido: ya no se toca la red hasta que pase la espera.</li>
+          <li>Se combina con bulkheads y fallbacks para una degradación controlada.</li>
+          <li>No se usa en exceso: protege donde realmente ocurren las cascadas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="resiliencia-y-reintentos.html">Resiliencia y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-02/comunicacion-sincrona.html">Comunicación síncrona</a>
+          <a class="related-lessons__link" href="sagas-y-transacciones.html">Sagas y transacciones distribuidas</a>
+          <a class="related-lessons__link" href="../modulo-02/api-gateway.html">API Gateway</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
+          <li><a href="index.html">Módulo 3 · Datos y resiliencia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

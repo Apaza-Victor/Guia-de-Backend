@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="system-design-requisitos-y-restricciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requisitos y restricciones · System Design · Backend Academy</title>
+<meta name="description" content="Aprende a recopilar requisitos funcionales y no funcionales, restricciones y supuestos antes de diseñar un sistema a escala.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="system-design-requisitos-y-restricciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">System Design</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Requisitos y restricciones</span>
+      </nav>
+      <h1 class="lesson-title">Requisitos y restricciones</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Por qué empezar por los requisitos</h2>
+        <p>El error más caro en el diseño de sistemas es resolver el problema equivocado. Antes de elegir una base de datos, un broker o un patrón de caching, hay que responder dos preguntas en voz alta: <strong>¿qué debe hacer el sistema?</strong> y <strong>¿con qué garantías?</strong>.</p>
+        <p>En una entrevista o en un proyecto real, el primer bloque de la sesión se dedica a esto. Es la fase donde el diseñador deja de escuchar y confirma: fragmenta el problema, define el alcance y elimina suposiciones silenciosas.</p>
+        <p>Un buen ejercicio mental: si dos equipos leen el mismo enunciado y construyen sistemas distintos, la diferencia casi siempre nació en los requisitos que interpretaron de forma distinta.</p>
+      </section>
+
+      <section>
+        <h2 id="funcionales">Requisitos funcionales</h2>
+        <p>Los requisitos funcionales describen <strong>qué hace el sistema</strong>: las acciones que los usuarios pueden ejecutar y los resultados esperables. Son fáciles de escribir como casos de uso.</p>
+        <p>Tomemos como ejemplo un acortador de URLs:</p>
+        <ul>
+          <li>El usuario pega una URL larga y el sistema devuelve una corta.</li>
+          <li>Alguien abre la URL corta y es redirigido a la original.</li>
+          <li>El usuario opcionalmente define una clave personalizada.</li>
+          <li>La URL corta tiene una fecha de expiración (opcional).</li>
+          <li>Se registran métricas básicas del enlace (clics por día).</li>
+        </ul>
+        <p>Aquí es donde también se define qué <strong>no</strong> está en alcance: editar URLs, cuentas de usuario, análisis avanzado. Delimitar el universo evita que el diseño explote en complejidad.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from dataclasses import dataclass, field
+
+@dataclass
+class RequisitosFuncionales:
+    """Casos de uso mínimos del sistema. Nada que no esté aquí se diseña."""
+    crear_url_corta: bool = True
+    redirigir_por_url_corta: bool = True
+    clave_personalizada: bool = True
+    expiracion_opcional: bool = True
+    metricas_basicas_de_clics: bool = True
+    editar_urls: bool = False          # fuera de alcance
+    cuentas_de_usuario: bool = False   # fuera de alcance
+    analytics_avanzado: bool = False   # fuera de alcance
+
+    def en_alcance(self) -> list:
+        return [campo for campo, activo in self.__dict__.items() if activo]
+
+req = RequisitosFuncionales()
+print("En alcance:", req.en_alcance())</code></pre>
+      </section>
+
+      <section>
+        <h2 id="no-funcionales">Requisitos no funcionales (NFR)</h2>
+        <p>Los requisitos no funcionales describen <strong>cómo</strong> debe comportarse el sistema. Son los que empujan el diseño hacia la escala, la redundancia y el caching.</p>
+        <ul>
+          <li><strong>Latencia:</strong> p50 de la reescritura de una URL por debajo de 100 ms y p95 por debajo de 300 ms.</li>
+          <li><strong>Disponibilidad:</strong> objetivo del 99.9% (aproximadamente 8.7 horas de caída al año).</li>
+          <li><strong>Consistencia:</strong> después de crear una URL, ¿es aceptable que tarde unos segundos en verse en todas las regiones? Normalmente sí.</li>
+          <li><strong>Durabilidad:</strong> si un nodo se apaga, la URL no se pierde.</li>
+          <li><strong>Capacidad:</strong> soportar N usuarios y M peticiones por segundo en el pico.</li>
+          <li><strong>Seguridad y privacidad:</strong> cifrado en tránsito, protección de datos personales.</li>
+        </ul>
+        <p>Muchos NFR se cuantifican con SLOs (objetivos de nivel de servicio): la métrica, el umbral y la ventana de tiempo en que debe cumplirse. Así los vuelves verificables en producción:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml">objetivos:
+  - nombre: latencia_crear_url
+    metrica: porcentaje_p95
+    umbral_ms: 300
+    ventana: 30d
+    objetivo: 99.0
+  - nombre: disponibilidad_api
+    metrica: uptime
+    umbral: 99.9
+    ventana: 30d
+    objetivo: 99.9
+  - nombre: durabilidad_urls
+    metrica: registros_persistidos
+    umbral: 99.999
+    ventana: 1d
+    objetivo: 99.999</code></pre>
+        <p>Cuando un requisito no tiene número, no es un requisito: es una opinión. «El sistema debe ser rápido» no se diseña; «p95 de 300 ms» sí.</p>
+      </section>
+
+      <section>
+        <h2 id="restricciones">Restricciones y supuestos</h2>
+        <p>Las <strong>restricciones</strong> son límites duros que no podemos mover: presupuesto, capacitor de equipo, obligaciones legales, zonas geográficas, stack heredado. Los <strong>supuestos</strong> son estimaciones razonables que aceptamos como punto de partida y que luego verificamos con las estimaciones de capacidad.</p>
+        <p>Ejemplos de restricciones típicas:</p>
+        <ul>
+          <li>Debe correr en servidores propios en una región concreta.</li>
+          <li>Presupuesto de 4 nodos para producción.</li>
+          <li>El equipo ya opera PostgreSQL y no puede agregar otro motor el primer año.</li>
+          <li>Los datos de usuarios en Europa requieren residir en la UE (GDPR).</li>
+        </ul>
+        <p>Ejemplos de supuestos razonables:</p>
+        <ul>
+          <li>10 millones de usuarios registrados, 2 millones activos al día.</li>
+          <li>Cada usuario crea 1 URL por semana en promedio.</li>
+          <li>Cada URL recibe 10 visitas al día en promedio.</li>
+        </ul>
+        <p>Los supuestos se declaran explícitamente porque sobre ellos se construyen las estimaciones, y las estimaciones sobre las decisiones de capacidad. Si el supuesto cambia, el tamaño de las máquinas cambia con él.</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "restricciones": {
+    "regiones": ["us-east-1"],
+    "max_nodos": 4,
+    "motor_db": "postgresql",
+    "cumplimiento": "gdpr"
+  },
+  "supuestos": {
+    "usuarios_registrados": 10000000,
+    "usuarios_activos_diarios": 2000000,
+    "urls_por_usuario_semana": 1,
+    "visitas_por_url_dia": 10,
+    "ratio_lectura_escritura": "100:1"
+  }
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="decisiones">De requisitos a decisiones</h2>
+        <p>Una vez clavados los requisitos, cada decisión de diseño debería poder justificarse apuntando a uno: «aumento réplicas de la base para cumplir con el p95», «agrego caché para que las lecturas no toquen la base», «uso una cola para que el envío de correos no bloquee la respuesta». Si una decisión no responde a un requisito, probablemente es complejidad innecesaria.</p>
+        <p>También es momento de detectar <strong>conflictos</strong>: alta latencia y consistencia global fuerte se pelean; disponibilidad del 99.99% y presupuesto de 2 máquinas también. El diseñador no los elimina: los pone sobre la mesa y propone el equilibrio para que el dueño del producto decida.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un sistema conocido (una red social, un sistema de tickets, una pasarela de pagos) y escribe 5 requisitos funcionales y 5 no funcionales para él.</li>
+          <li>Convierte cada NFR en un objetivo comprobable con métrica, umbral y ventana (formato de los YAML de arriba).</li>
+          <li>Escribe 3 restricciones y 3 supuestos. Marca qué decisión de diseño podría cambiar si uno de tus supuestos se multiplicara por 10.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Los requisitos funcionales describen qué hace el sistema; los no funcionales, con qué garantías.</li>
+          <li>Un NFR sin número no es un requisito: hay que cuantificarlo y convertirlo en un objetivo verificable (SLO).</li>
+          <li>Las restricciones son límites duros; los supuestos son estimaciones que se declaran y luego se verifican.</li>
+          <li>Cada decisión de diseño debe poder justificarse apuntando a un requisito concreto.</li>
+          <li>Los conflictos entre NFR se resuelven explicitando trade-offs, no ocultándolos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="que-es-system-design.html">¿Qué es system design?</a>
+          <a class="related-lessons__link" href="estimaciones-de-capacidad.html">Estimaciones de capacidad</a>
+          <a class="related-lessons__link" href="bloques-de-construccion.html">Bloques de construcción</a>
+          <a class="related-lessons__link" href="modelado-de-datos.html">Modelado de datos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="que-es-system-design.html">
+        <span class="label">← Anterior</span>
+        <span class="title">¿Qué es system design?</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="estimaciones-de-capacidad.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Estimaciones de capacidad</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

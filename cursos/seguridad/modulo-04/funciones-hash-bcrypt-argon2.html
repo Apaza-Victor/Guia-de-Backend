@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="funciones-hash-bcrypt-argon2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funciones hash: bcrypt y argon2 · Seguridad en el Backend · Backend Academy</title>
+<meta name="description" content="Hashes para contraseñas: por qué MD5 no sirve, salt, cost factor y la API de password_hash con bcrypt y argon2id en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="seguridad" data-current="funciones-hash-bcrypt-argon2"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Seguridad en el Backend</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Funciones hash: bcrypt y argon2</span>
+        </nav>
+        <h1 class="lesson-title">Funciones hash: bcrypt y argon2</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Seguridad en el Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Criptografía</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="definicion">Hash: un sello de una sola vía</h2>
+          <p>Una función hash convierte una entrada en una secuencia de longitud fija. Es <strong>determinista</strong> (mismo dato, mismo hash), <strong>rápida</strong> de calcular e <strong>irreversible</strong> en la práctica: no existe "desencriptar" un hash. Por eso sirve para contraseñas: guardas el sello y, al loguear, comparas sellos.</p>
+        </section>
+
+        <section>
+          <h2 id="fracaso">Por qué MD5 y SHA1 fracasaron</h2>
+          <ul>
+            <li>Son <strong>instantáneas</strong>: un atacante prueba miles de millones por segundo.</li>
+            <li>Sin <em>salt</em>, contraseñas iguales producen hashes iguales: las tablas rainbow los quiebran.</li>
+            <li>MD5 y SHA-1 tienen colisiones demostradas.</li>
+          </ul>
+          <p>Nunca uses <code class="inline">md5()</code> o <code class="inline">sha1()</code> para contraseñas. Necesitamos un hash <em>lento a propósito</em> y con sal aleatoria.</p>
+        </section>
+
+        <section>
+          <h2 id="bcrypt">bcrypt con password_hash</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// bcrypt incorpora la sal automaticamente dentro del hash.
+
+function hash_contrasena(string $clave): string
+{
+    return password_hash($clave, PASSWORD_BCRYPT, ["cost" =&gt; 12]);
+}
+
+function verificar_contrasena(string $clave, string $hash): bool
+{
+    return password_verify($clave, $hash);
+    // el mismo hash guarda su sal y su cost: nada que configurar aparte
+}
+
+$hash = hash_contrasena("MiClaveSegura#2026");
+echo $hash, PHP_EOL;   // $2y$12$s18Ps3nIAO0IuqRqPB6eT.RVxvndorSdR6UjiVxRP2DPaF2x6bhlC
+
+var_dump(password_needs_rehash($hash, PASSWORD_BCRYPT, ["cost" =&gt; 12]));
+// regenere el hash cuando el sistema suba de "cost" sin molestar al usuario.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="argon2">argon2id con PHP 7.4+</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// argon2id: ademas del tiempo (cost), fuerza trabajo en MEMORIA.
+// Eso complica el ataque con GPUs y tiles especializadas.
+
+function hash_argon2(string $clave): string
+{
+    return password_hash($clave, PASSWORD_ARGON2ID, [
+        "memory_cost" =&gt; 65536,   // 64 MiB
+        "time_cost"   =&gt; 4,       // iteraciones
+        "threads"     =&gt; 2,       // paralelismo
+    ]);
+}
+
+$hash = hash_argon2("OtraClaveSupersecreta");
+echo $hash, PHP_EOL;   // $argon2id$v=19$m=65536,t=4,p=2$...
+
+// Verificar igual que bcrypt: password_verify() lo sabe por el prefijo.
+var_dump(password_verify("OtraClaveSupersecreta", $hash));
+var_dump(password_verify("incorrecta", $hash));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="bono">Errores que se ven en el código</h2>
+          <ul>
+            <li>Cifrar la contraseña con AES reversibles en vez de hash: no hay por qué poder leerlas.</li>
+            <li>Salt propia más hash general: <code class="inline">password_hash</code> ya aplica sal, no la dupliques.</li>
+            <li>Recortar el hash <code class="inline">substr()</code> para "ahorrar" columna: rompe la verificación.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Cambia el registro y login de tu app a <code class="inline">password_hash</code> / <code class="inline">password_verify</code>.</li>
+            <li>Prueba subir <code class="inline">cost</code> de 10 a 12 y mide el tiempo.</li>
+            <li>Verifica que el hash cambia al modificar la sal automática.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Nunca hashes rápidos (MD5/SHA1) para contraseñas.</li>
+            <li>bcrypt: salt propia + cost; argón: memoria + tiempo.</li>
+            <li>Usa <code class="inline">password_hash</code> y <code class="inline">password_verify</code>.</li>
+            <li>Sube el cost con el tiempo y regenere con <code class="inline">password_needs_rehash</code>.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="cifrado-simetrico-y-asimetrico.html">Cifrado simétrico y asimétrico</a>
+            <a class="related-lessons__link" href="firmas-digitales-y-hmac.html">Firmas digitales y HMAC</a>
+            <a class="related-lessons__link" href="../modulo-02/que-es-sql-injection.html">¿Qué es SQL Injection?</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Auditoría</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

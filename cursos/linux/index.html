@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux y Terminal para Backend · Backend Academy</title>
+<meta name="description" content="Curso de Linux y Terminal para Backend: filesystem, permisos, procesos, Bash, grep, curl, logs y administración básica del servidor Linux.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+</head>
+<body data-root=".">
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../../roadmap/index.html">Roadmap</a>
+      <a href="../../aprender/index.html">Aprender</a>
+      <a href="../../practica/index.html">Práctica</a>
+      <a href="../../proyectos/index.html">Proyectos</a>
+      <a href="../../recursos/index.html">Recursos</a>
+      <a href="../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside data-sidebar></aside>
+
+<main data-content>
+  <div class="container">
+    <article class="course" data-course-id="linux">
+
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Curso de Linux y Terminal para Backend</span>
+      </nav>
+
+      <header class="lesson-hero">
+        <p class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></p>
+        <h1 class="lesson-title">Linux y Terminal para Backend</h1>
+        <p class="section-subtitle">Muévete con confianza en el servidor: filesystem, permisos, procesos, Bash, grep, curl, logs y administración básica de Linux.</p>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 28 lecciones</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Linux · Bash · SSH · systemd</span>
+        </div>
+      </header>
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Casi todos los servidores de producción corren Linux, y un backend que no se siente cómodo en la terminal pierde autonomía. Este curso te enseña el sistema de archivos, los permisos, los procesos, la programación en Bash y las herramientas esenciales como grep y curl. Aprenderás a conectarte por SSH, leer logs y administrar los servicios (systemd) que mantienen viva tu aplicación en producción.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">💻 Básico</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">28</span></div>
+            <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🐧 Linux</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Navegar el sistema de archivos y gestionar archivos y permisos.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Escribir comandos y pequeños scripts en Bash.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Usar herramientas esenciales: grep, sed, curl y editores de terminal.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Gestionar procesos, servicios y logs con systemd.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Conectarte por SSH y desplegar tu primera aplicación.</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+            <li><strong>Ninguno.</strong> Funciona desde Windows, macOS o Linux (te indicamos cómo prepararlo).</li>
+            <li>Ganas de usar la terminal: es la herramienta de trabajo del backend.</li>
+            <li>Un proyecto pequeño para probar tu primer despliegue.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+            <span class="tag tag--tech">Linux</span>
+            <span class="tag tag--tech">Bash</span>
+            <span class="tag tag--tech">SSH</span>
+            <span class="tag tag--tech">systemd</span>
+            <span class="tag tag--tech">grep</span>
+            <span class="tag tag--tech">curl</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section>
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">Seis módulos que van de los primeros pasos en el sistema a operar un servidor real con SSH y nginx.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">1. Fundamentos de Linux</h3>
+            </div>
+            <p class="card__text">Qué es Linux, cómo se distribuye y la estructura del sistema de archivos.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 40 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>¿Qué es Linux y por qué en el backend?</li>
+              <li>Distribuciones: Ubuntu, Debian y más</li>
+              <li>El sistema de archivos y su jerarquía</li>
+              <li>Usuarios, grupos y superusuario</li>
+              <li>Gestionando software con APT</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">2. Navegación y archivos</h3>
+            </div>
+            <p class="card__text">Comandos esenciales: moverte, crear, leer, copiar y administrar archivos.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 45 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>ls, cd y pwd: orientándote</li>
+              <li>Creando archivos y directorios</li>
+              <li>Permisos: rwx y chmod</li>
+              <li>Propietarios y grupos con chown</li>
+              <li>Enlaces y wildcards</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">3. Terminal y Bash</h3>
+            </div>
+            <p class="card__text">Pipes, redirección y los primeros scripts que automatizan tu trabajo.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 48 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Pipes y redirección</li>
+              <li>Variables y expansión</li>
+              <li>Estructuras de control en Bash</li>
+              <li>Escribiendo tu primer script</li>
+              <li>Permisos de ejecución y shebang</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">4. Herramientas del backend</h3>
+            </div>
+            <p class="card__text">Grep, sed, curl y editores: el kit diario de un desarrollador en el servidor.</p>
+            <div class="card__meta">
+              <span>4 lecciones</span><span>≈ 40 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Buscando con grep</li>
+              <li>Procesando texto con sed y awk</li>
+              <li>Haciendo peticiones con curl</li>
+              <li>Editores de terminal: nano y vim</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">5. Procesos y servicios</h3>
+            </div>
+            <p class="card__text">Controla lo que corre en tu máquina: procesos, systemd y logs.</p>
+            <div class="card__meta">
+              <span>4 lecciones</span><span>≈ 42 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>Procesos y su administración</li>
+              <li>systemd y los servicios</li>
+              <li>Logs con journalctl</li>
+              <li>Monitoreo: top, htop y espacio en disco</li>
+            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top">
+              <h3 class="card__title">6. SSH y despliegue</h3>
+            </div>
+            <p class="card__text">Conecta a servidores remotos, copia archivos y publica tu primera app.</p>
+            <div class="card__meta">
+              <span>5 lecciones</span><span>≈ 50 min</span>
+            </div>
+            <ul class="module-lessons">
+              <li>SSH: conexión segura</li>
+              <li>Generando claves SSH</li>
+              <li>Enviando archivos con scp y rsync</li>
+              <li>Instalando nginx y sirviendo tu app</li>
+              <li>Firewall, actualizaciones y buenas prácticas</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer" data-footer>
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><span>Módulo 1 · Fundamentos de Linux</span></li>
+          <li><span>Módulo 2 · Navegación y archivos</span></li>
+          <li><span>Módulo 3 · Terminal y Bash</span></li>
+          <li><span>Módulo 4 · Herramientas del backend</span></li>
+          <li><span>Módulo 5 · Procesos y servicios</span></li>
+          <li><span>Módulo 6 · SSH y despliegue</span></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../acerca/index.html">Acerca de</a>
+        <a href="../../favoritos/index.html">Favoritos</a>
+        <a href="../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

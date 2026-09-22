@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="mensajeria-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consumidor resiliente · Mensajería Backend · Backend Academy</title>
+<meta name="description" content="Construye consumidores de RabbitMQ a prueba de fallos: ack/nack, requeue, dead-letter queues, reintentos con backoff, poison messages y monitorización de colas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="mensajeria-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Mensajería Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Consumidor resiliente</span>
+      </nav>
+      <h1 class="lesson-title">Consumidor resiliente</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · RabbitMQ y colas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El mundo real no procesa tareas sin fallar: hay payloads corruptos, dependencias caídas, timeouts y datos que nadie puede interpretar. Un consumidor <strong>resiliente</strong> no es el que nunca falla, sino el que falla con elegancia: confirma lo bueno, reintenta lo transitorio y aparta lo irrecuperable sin bloquear la cola.</p>
+        <p>Tres mecánicas hacen esto posible:</p>
+        <ul>
+          <li><strong>ACK y NACK:</strong> confirmar éxito o rechazar un mensaje de forma explícita.</li>
+          <li><strong>Dead-letter queue (DLQ):</strong> el «buzón de lo irrecuperable».</li>
+          <li><strong>Reintentos con backoff:</strong> gg control: reintentar sin saturar ni emitir mil intentos instantáneos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="ack-nack">Ack, nack y requeue</h2>
+        <p>Recordando la lección de garantías: sin confirmación, RabbitMQ reenvía. Pero RabbitMQ da más control que el simple ACK:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const amqp = require('amqplib');
+
+async function consumidorResiliente() {
+  const conn = await amqp.connect('amqp://localhost');
+  const ch = await conn.createChannel();
+  const q = await ch.assertQueue('pagos', { durable: true });
+  ch.prefetch(1);
+
+  ch.consume(q.queue, async (msg) => {
+    let data;
+    try {
+      data = JSON.parse(msg.content.toString());
+    } catch (e) {
+      // Payload corrupto: NUNCA reintentar, es veneno puro.
+      console.error('Mensaje corrupto:', msg.content.toString());
+      return ch.nack(msg, false, false); // requeue = false -> DLQ
+    }
+
+    try {
+      await cobrar(data);
+      ch.ack(msg);                      // éxito
+    } catch (err) {
+      if (esTransitorio(err)) {
+        console.warn('Reintentando:', data.id);
+        return ch.nack(msg, false, true); // requeue = true -> reintento
+      }
+      // Falla permanente: apartarlo
+      return ch.nack(msg, false, false);
+    }
+  }, { noAck: false });
+}
+
+function esTransitorio(err) {
+  return ['TIMEOUT', 'CONN_REFUSED', 'UNAVAILABLE'].includes(err.code);
+}</code></pre>
+        <p>La decisión clave está en <code>nack(msg, allUpTo, requeue)</code>: el tercer argumento decide si el mensaje vuelve a la cola (reintento inmediato) o se descarta de ella.</p>
+        <div class="callout">
+          <p><strong>Reintentos a ciegas = loop infinito:</strong> un <code>nack(requeue: true)</code> sin límite reencola el mismo mensaje una y otra vez, consumiendo CPU y multiplicándose en logs. La DLQ es quien rompe círculos viciosos.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="dlq">La dead-letter queue</h2>
+        <p>Una cola se declara con un argumento <code>x-dead-letter-exchange</code>: los mensajes que se rechacen con <code>requeue: false</code> (o expiren, o superen el límite de intentos) terminan ahí. El worker de la DLQ los inspecciona, alerta y, si el bug se arregla, los reenvía a la cola limpia.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import pika
+
+canal = pika.BlockingConnection(pika.ConnectionParameters('localhost')).channel()
+
+# Exchange 'errores' + cola DLQ donde aterrizan los mensajes malos
+canal.exchange_declare(exchange='errores', exchange_type='fanout', durable=True)
+canal.queue_declare(queue='pagos.dlq', durable=True)
+canal.queue_bind(queue='pagos.dlq', exchange='errores', routing_key='')
+
+# Cola principal con DLQ configurada
+canal.queue_declare(
+    queue='pagos', durable=True,
+    arguments={
+        'x-dead-letter-exchange': 'errores'
+    }
+)
+
+# El trabajador de la DLQ: alerta, repara o descarta
+def inspeccionar_dlq(ch, method, properties, body):
+    print(f'ALERTA: mensaje a DLQ -> {body.decode()}')
+
+    # Tras revisar, se puede renviar a 'pagos' si se corrigió el payload
+    canal.basic_publish(exchange='', routing_key='pagos', body=body,
+                        properties=pika.BasicProperties(delivery_mode=2))
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+canal.basic_consume(queue='pagos.dlq', on_message_callback=inspeccionar_dlq)
+canal.start_consuming()</code></pre>
+      </section>
+
+      <section>
+        <h2 id="retries">Reintentos con backoff: el patrón delayed retry</h2>
+        <p>Reintentar al instante es tan malo como no reintentar: la dependencia caída probablemente siga caída. La solución es esperar (backoff) por intervalos crecientes. Sin plugins, se simula con <strong>colas intermedias + TTL</strong>: el mensaje fallido se publica a una cola de «espera» con un TTL de, digamos, 30 s; al expirar, Rabbit lo reenvía (o lo redirige por DLX) a la cola original.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import pika, time
+
+canal = pika.BlockingConnection(pika.ConnectionParameters('localhost')).channel()
+
+# Cola de espera que manda a 'pagos' tras 30 segundos
+canal.queue_declare(
+    queue='pagos.retry',
+    arguments={
+        'x-message-ttl': 30000,          # expira a los 30 s
+        'x-dead-letter-exchange': '',    # exchange default
+        'x-dead-letter-routing-key': 'pagos'  # vuelve a la cola real
+    },
+    durable=True
+)
+
+# Encolar a RETRY (realmente se publica a la cola pagos.retry directamente)
+def reprogramar(mensaje, segundos):
+    canal.queue_declare(queue='pagos.retry',
+        arguments={'x-message-ttl': segundos * 1000,
+                   'x-dead-letter-exchange': '',
+                   'x-dead-letter-routing-key': 'pagos'})
+    canal.basic_publish(exchange='', routing_key='pagos.retry', body=mensaje,
+                        properties=pika.BasicProperties(delivery_mode=2))
+
+# En el consumidor: ante un fallo transitorio
+reprogramar(json.dumps(datos_pago), 30)  # segunda oportunidad en 30 s</code></pre>
+        <p>Puedes encadenar retry → retry2 → DLQ para escaleras de 30 s → 60 s → 2 min → DLQ.</p>
+      </section>
+
+      <section>
+        <h2 id="monitoreo">Monitoriza la cola antes de que reviente</h2>
+        <p>La resiliencia también es observar. Tres métricas que no deben pasar desapercibidas en el panel o tu sistema de monitorización:</p>
+        <ul>
+          <li><strong>Ready count:</strong> mensajes listos por procesar. Si crece sin parar, los workers no dan abasto.</li>
+          <li><strong>Unacknowledged:</strong> mensajes en vuelo. Si se acumula, el worker se ha colgado (no ACK-nada).</li>
+          <li><strong>DLQ size:</strong> mensajes caídos. Cada entrada aquí es un bug o un dato irrecuperable.</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># vía API de gestión de RabbitMQ
+curl -s -u guest:guest http://localhost:15672/api/queues/%2F/pagos |
+  jq '{ready: .messages_ready, unacked: .messages_unacknowledged,
+       total: .messages}'
+
+# Salida de ejemplo:
+# { "ready": 1240, "unacked": 3, "total": 1243 }  <- cuidado, ready alto!</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un consumidor que distinga tres casos: éxito (ack), error transitorio (nack requeue) y error permanente (nack sin requeue a la DLQ).</li>
+          <li>Configura una cola <code>envio-email</code> con DLQ y publica un payload intencionalmente malformado. Verifica que aparece en la DLQ y no vuelve a la cola principal.</li>
+          <li>Implementa la escalera de reintentos 30s→60s→veneno con colas TTL y explica qué ocurre si el TTL se configura más pequeño que el tiempo real de procesamiento.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Talgo: ACK si funcionó, NACK con requeue si es transitorio, NACK sin requeue si es permanente.</li>
+          <li>La DLQ aísla lo irrecuperable y evita loops infinitos de reintentos.</li>
+          <li>El reintento con backoff (colas TTL / plugin delayed) espera antes de insistir.</li>
+          <li>Monitoriza ready, unacknowledged y DLQ: son los tres semáforos de la salud.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="workers-y-prefetch.html">Workers y prefetch</a>
+          <a class="related-lessons__link" href="../modulo-01/garantias-de-entrega.html">Garantías de entrega</a>
+          <a class="related-lessons__link" href="colas-prioritarias.html">Colas prioritarias y TTL</a>
+          <a class="related-lessons__link" href="../modulo-03/productores-y-consumidores.html">Productores y consumidores</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

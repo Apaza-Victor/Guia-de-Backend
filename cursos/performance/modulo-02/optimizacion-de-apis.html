@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="performance-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optimizar APIs · Performance Backend · Backend Academy</title>
+<meta name="description" content="Aprende a optimizar APIs: paginación, operaciones por lotes (batch), compresión gzip/brotli y payloads mínimos para recortar latencia y ancho de banda.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="performance-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Performance Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Optimizar APIs</span>
+      </nav>
+      <h1 class="lesson-title">Optimizar APIs</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Optimización</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La API que sirves es donde el usuario siente el rendimiento. Hay una mala noticia: devolver una lista de 10 000 productos con sus 200 campos en cada respuesta ni es útil ni es rápido; y una buena noticia: los arreglos son mecánicos y medibles. Esta lección aplica tres palancas: <strong>menos datos</strong> (paginación y payload mínimo), <strong>menos llamadas</strong> (batch) y <strong>menos bytes en la red</strong> (compresión).</p>
+      </section>
+
+      <section>
+        <h2 id="paginacion">Paginación con cursores</h2>
+        <p>Devolver todo de golpe es el anti-patrón de rendimiento: la lista crece, la memoria de cada nodo se va con ella, la BD escanea más y el cliente espera más para nada. La paginación por <strong>cursor</strong> (parámetro que indica el último elemento visto) escala mejor que <code>page/limit</code> basado en offset, porque el offset obliga a la BD a contar y descartar filas antes de la página.</p>
+        <p>La respuesta típica de lista paginada y cómo encadenarla:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "data": [
+    { "id": 101, "nombre": "Balón de fútbol", "precio": 12.5 },
+    { "id": 102, "nombre": "Camiseta local", "precio": 25.0 }
+  ],
+  "paginacion": {
+    "limite": 50,
+    "proximo_cursor": "eyJpZCI6MTAyfQ==",
+    "anterior_cursor": null
+  },
+  "total_estimado": 3200
+}</code></pre>
+        <p>El cursor suele ser el <code>id</code> de la última fila (base64 → id + filtros). La clave: es una consulta «mayor que el cursor, ordenado por id, limit N» que usa el índice de orden y no se degrada con la página 100.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">app.get('/productos', async (req, res) => {
+  const { cursor, limite = 50 } = req.query;
+
+  // Decodificar: el cursor guarda el último id visto + los filtros activos
+  const ultimoId = cursor ? JSON.parse(Buffer.from(cursor, 'base64')).id : 0;
+
+  // Consulta con "mayor que" en vez de OFFSET: usa el índice de id
+  const filas = await db.query(
+    `SELECT id, nombre, precio FROM productos
+     WHERE id > $1 AND activo = true
+     ORDER BY id
+     LIMIT $2`,
+    [ultimoId, limite]
+  );
+
+  const siguiente = filas.length === limite
+    ? Buffer.from(JSON.stringify({ id: filas.at(-1).id })).toString('base64')
+    : null;
+
+  res.json({ data: filas, paginacion: { limite, proximo_cursor: siguiente } });
+});</code></pre>
+      </section>
+
+      <section>
+        <h2 id="payload">Devolver solo lo necesario</h2>
+        <p>Cuánto más ancho es cada <code>JSON</code>, más lento es todo: más CPU en serialización, más bytes de red, más milisegundos de TTFB. Dos técnicas baratas:</p>
+        <ul>
+          <li><strong>SELECT solo las columnas que la respuesta usa</strong>: «SELECT *» es el germen de payloads de megas.</li>
+          <li><strong>Filtrar campos en la serialización</strong> (proyección): ignora <code>activo</code>, <code>roles</code>, <code>notas_internas</code>, etc. del JSON de salida.</li>
+        </ul>
+        <p>Ejemplo de recorte con proyección explícita en Node:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// En vez de devolver el objeto completo al cliente...
+const usuarioCompleto = await db.query(
+  'SELECT * FROM usuarios WHERE id = $1', [req.params.id]
+);
+
+// ...devuelve solo la proyección pública, sin notas internas ni hash
+function proyeccionPublica(u) {
+  return {
+    id: u.id,
+    nombre: u.nombre,
+    email: u.email,
+    avatar_url: u.avatar_url
+  };
+}
+
+app.get('/usuarios/:id/datos-publicos', async (req, res) => {
+  const u = await db.query('SELECT id, nombre, email, avatar_url FROM usuarios WHERE id = $1', [req.params.id]);
+  res.json({ datos: proyeccionPublica(u) });
+});</code></pre>
+        <p>Mismo patrón del lado cliente (<code>fields=nombre,precio</code>) si tus clientes tienen necesidades variadas. Menos datos = menos latencia, sin tocar nada más del sistema.</p>
+      </section>
+
+      <section>
+        <h2 id="batch">Operaciones por lotes</h2>
+        <p>Si el cliente necesita información de 20 recursos distintos, obligarle a hacer 20 peticiones multiplica por 20 el tiempo de ida y vuelta (RTT), el handshake y el trabajo. La API <strong>por lotes</strong> recibe una lista y devuelve las respuestas en un solo round-trip:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># En vez de 20 peticiones HTTP, una petición batch con N ids
+curl -X POST https://api.mi-servicio.com/productos/importar/consultar \
+  -H "Content-Type: application/json" \
+  -d '{"ids": [1001, 1002, 1003, 1004]}'
+
+# Respuesta: un objeto clave->producto, un solo round-trip
+# {
+#   "1001": { "id": 1001, "nombre": "Balón" },
+#   "1002": { "id": 1002, "nombre": "Camiseta" }
+# }</code></pre>
+        <p>En el backend, una consulta <code>WHERE id IN (...)</code> resuelve el lote entero (verifica el tamaño máximo, típico 100, para no abusar):</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+MAX_LOTE = 100
+
+@app.post("/productos/lote")
+def producto_por_lote(ids: list[int]):
+    if len(ids) > MAX_LOTE:
+        raise HTTPException(status_code=413, detail="Lote maximo 100 ids")
+
+    # Un solo query para todos los ids
+    filas = repositorio.buscar_por_ids(ids)   # WHERE id IN (...)
+    return {fila.id: fila.model_dump() for fila in filas}</code></pre>
+        <p>El resultado: el caso «pedir 20 recursos» pasa de ~20 RTTs a 1. En una red con 50 ms de RTT, son 1000 ms ahorrados de golpe.</p>
+      </section>
+
+      <section>
+        <h2 id="compresion">Compresión gzip y brotli</h2>
+        <p>El JSON es muy comprimible: los textos repiten claves y valores. Comprimiendo con gzip o brotli, un payload de 200 KB pasa a 20-30 KB. El coste es CPU para comprimir/descomprimir (pequeño) y el beneficio es ancho de banda y TTFB. Siempre que el cliente lo anuncie con <code>Accept-Encoding</code>.</p>
+        <p>Para probarlo a mano, la diferencia se ve al instante:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Sin compresión
+curl -s -H "Accept-Encoding: identity" -o /dev/null -w "tamano: %{size_download}B tiempo: %{time_total}s\n" \
+  https://api.mi-servicio.com/productos/lista
+
+# Con gzip
+curl -s -H "Accept-Encoding: gzip" -o /dev/null -w "tamano: %{size_download}B tiempo: %{time_total}s\n" \
+  https://api.mi-servicio.com/productos/lista
+
+# Con brotli (mejor ratio para texto)
+curl -s -H "Accept-Encoding: br" -o /dev/null -w "tamano: %{size_download}B tiempo: %{time_total}s\n" \
+  https://api.mi-servicio.com/productos/lista</code></pre>
+        <p>En Express, activar la compresión es instalar y configurar (el nivel 6 de gzip o brotli se negocia por <code>Accept-Encoding</code>):</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">const express = require('express');
+const compression = require('compression');
+
+const app = express();
+app.use(compression()); // comprime JSON/HTML > ~1 KB según Accept-Encoding
+
+// brotli se activa igual con el middleware correspondiente:
+// app.use(compression({ brotli: { enabled: true, quality: 4 } }));
+app.get('/productos/lista', async (req, res) => { /* ... */ });</code></pre>
+        <p>Una pausa importante: la compresión <strong>no</strong> sustituye a la proyección. Comprimir 2 MB sigue enviando una respuesta pesada que el cliente descomprime; la combinación ganadora es menos datos <em>y</em> comprimidos.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Audita tu endpoint de listas más usado: ¿devuelve todo el objeto? ¿tiene paginación por offset? Aplícale la paginación por cursor y la proyección mínima.</li>
+          <li>Mide el payload de tu mayor endpoint con los tres <code>Accept-Encoding</code> de arriba y anota la reducción en bytes y en tiempo.</li>
+          <li>Identifica un caso donde el cliente hace N peticiones para una pantalla; sustitúyelo por un endpoint batch y mide el tiempo total antes y después.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Paginación por cursor: «id > cursor» en vez de OFFSET; no se degrada con la página.</li>
+          <li>Payload mínimo: SELECT solo las columnas usadas y proyecta el JSON de salida.</li>
+          <li>Batch: una petición por lote (IN ...) sustituye a N round-trips.</li>
+          <li>gzip/brotli recortan el ancho de banda y el TTFB; negocia por Accept-Encoding.</li>
+          <li>Menos datos + compresión ganan juntos; la compresión no perdona los payloads hinchados.</li>
+          <li>Todas son mejoras medibles con <code>curl -w</code> o tu prueba de carga.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="caching-estrategias.html">Caching y estrategias</a>
+          <a class="related-lessons__link" href="optimizacion-de-io.html">Optimizar I/O</a>
+          <a class="related-lessons__link" href="../modulo-03/cdny-edge-caching.html">CDN y edge caching</a>
+          <a class="related-lessons__link" href="../modulo-01/slo-y-presupuesto-de-rendimiento.html">SLO y presupuesto de rendimiento</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

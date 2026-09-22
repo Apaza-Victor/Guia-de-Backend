@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-code-review-y-colaboracion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code review y colaboración · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a hacer code review efectivo en backend: pull requests bien armados, criterios de revisión, pair programming y estándares que el equipo se compromete a cumplir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-code-review-y-colaboracion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Code review y colaboración</span>
+      </nav>
+      <h1 class="lesson-title">Code review y colaboración</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Comunicación y entrega</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="por-que">El code review no es una inspección</h2>
+        <p>El <strong>code review</strong> —la revisión de modificaciones de código por otro miembro del equipo antes de integrarlas— es la práctica de colaboración con mejor relación costo/beneficio del backend. Su función real no es cazar errores (aunque atrape algunos): es <strong>aumentar el conocimiento compartido</strong>, impedir que las decisiones muertas en el head y que el código reciba cuarto aviso.</p>
+        <p>Cuando se hace bien, cada PR que sale de tu equipo se vuelve un acuerdo revisado por ojos frescos: «esto encaja con el sistema, tiene tests honestos y no añade deuda». Cuando se hace mal, es un trámite que nadie quiere firmar y todos quieren saltar.</p>
+      </section>
+
+      <section>
+        <h2 id="pr-bien-armado">El PR bien armado</h2>
+        <p>Un pull request es la unidad de revisión. Si el PR es un monstruo de 3000 líneas que toca 20 archivos, la revisión es imposible de hacer bien. La preparación del PR es el 50% de la revisión:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Extracto de plantilla de PR backend
+# Titulo: [ORQ-230] Idempotencia en el endpoint de cargos
+#
+# Qué cambia
+# - Endpoint POST /v1/cargos acepta header Idempotency-Key
+# - Clave validada contra Redis (TTL 24h) antes de crear el cargo
+# - Test de integración para el caso de reintento con misma clave
+#
+# Cómo se probó
+# - npx jest tests/integracion/cargos-idempotencia.test.js
+# - Cargo con clave repetida devuelve el MISMO cargo, sin duplicar
+#
+# Riesgos
+# - Si Redis cae se rechaza con 503 (fail-closed) — ver ADR-9
+
+git checkout -b feat/ORQ-230-idempotencia
+# ...commits pequeños y con mensajes que cuentan historia...
+git push -u origin feat/ORQ-230-idempotencia</code></pre>
+        <p>La regla práctica: <strong>si el PR tarda más de 30-45 minutos en revisarse, está demasiado grande</strong>. Se parte en PRs más pequeños y desplegables, o se escalona.</p>
+      </section>
+
+      <section>
+        <h2 id="criterios">Qué revisar (y qué no)</h2>
+        <p>Un buen checklist de revisión de backend, en orden de prioridad:</p>
+        <ol>
+          <li><strong>Comportamiento y contrato:</strong> ¿la API respeta el contrato? ¿qué pasa con el request inválido, el retry, el caso vacío?</li>
+          <li><strong>Datos:</strong> ¿la migración es reversible? ¿hay índices para las consultas nuevas? ¿qué pasa si el worker muere a mitad?</li>
+          <li><strong>Seguridad:</strong> ¿entrada validada? ¿escapado? ¿no hay secretos hardcodeados</li>
+          <li><strong>Tests:</strong> ¿cubren el flujo crítico y los casos de fallo, no solo el feliz?</li>
+          <li><strong>Estilo y deuda:</strong> ¿sigue los estándares? ¿añade duplicación innecesaria?</li>
+        </ol>
+        <p>En cambio, <strong>no</strong> se discute en el PR lo que el linter ya decide (esa conversación la gana el lint), ni se usa el comentario para imponer gustos personales sin justificación.</p>
+        <p>Los comentarios se categorizan para que el autor sepa qué le están pidiendo:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Convención de comentarios de review
+# [bloqueante]  -> no se mergea hasta resolver (defecto, datos, seguridad)
+# [sugerencia]  -> opcional, el autor decide
+# [pregunta]    -> no entiendo, explícame (no es una exigencia)
+# [nit]         -> detalle menor, se puede arreglar en el futuro
+
+git commit -m "fix(ORQ-230): rechazo 409 si la clave ya fue usada [bloqueante]"</code></pre>
+      </section>
+
+      <section>
+        <h2 id="pair-programming">Pair programming y mobbing</h2>
+        <p>El <strong>pair programming</strong> (dos personas, un problema) es quizá la práctica de colaboración más desprestigiada por los mitos y la más útil en backend:</p>
+        <ul>
+          <li><strong>Disminuye el conocimiento concentrado:</strong> dos cabezas saben el flujo de pagos, no una.</li>
+          <li><strong>Reduce el feedback ossificado de la review:</strong> las decisiones y correcciones se toman en el momento, no 3 días después.</li>
+          <li><strong>Mejora la calidad del momento:</strong> con alguien mirando, es difícil pasar por alto el caso borde.</li>
+        </ul>
+        <p>No es obligatorio programar todo en parejas; funciona como herramienta puntual: complejidad alta, componente nuevo, onboarding, o deuda que da miedo tocar.</p>
+      </section>
+
+      <section>
+        <h2 id="estandares">Estándares de equipo, no señores del código</h2>
+        <p>La pieza final es tener <strong>estándares escritos</strong> — guías que el equipo aceptó, no impuestas por una sola voz. Sin estándares, cada review es una pelea de religión; con ellos, el PR se revisa contra un checklist, no contra el humor del revisor.</p>
+        <p>El estándar mínimo de un backend moderno:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "git": {
+    "branch": "feat/<ticket>-<slug>",
+    "commits": "conventional: fix, feat, docs, refactor...",
+    "pr": "máximo ~400 líneas, mensaje con template"
+  },
+  "calidad": ["lint automático en CI", "tests unitarios + integración", "al menos 1 aprobación"],
+  "datos": ["migraciones reversibles", "índices revisados por el equipo", "sin SELECT * en código"],
+  "revision": ["redactado a la solución, no a la persona", "comentarios con etiqueta", "merge cuando CI verde"]
+}</code></pre>
+        <p>Los estándares se revisan en las retrospectivas: si el equipo ya no cree en uno, se cambia, pero mientras está vigente se cumple — ese respeto al acuerdo es lo que evita que el review se vuelva ruido.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Toma un PR reciente de tu equipo y asígnale las etiquetas [bloqueante]/[sugerencia]/[pregunta]/[nit] a sus comentarios.</li>
+          <li>Escribe una plantilla de PR con qué cambia, cómo se probó y riesgos, enfocada en datos y contrato.</li>
+          <li>Propón una sesión de pair programming para el componente de mayor riesgo de tu proyecto y explica en 3 líneas por qué.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El code review multiplica conocimiento compartido y protege contra el conocimiento concentrado.</li>
+          <li>Un PR revisable es pequeño, con commits que cuentan historia y una plantilla que explica qué, cómo y riesgos.</li>
+          <li>Se revisa contrato, datos, seguridad y tests; el estilo lo decide el lint y la discusión técnica vive en el PR.</li>
+          <li>El pair programming es una herramienta puntual poderosísima, y los estándares escritos evitan reviews de religión.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="comunicacion-en-el-equipo.html">Comunicación en el equipo</a>
+          <a class="related-lessons__link" href="calidad-y-verificacion.html">Calidad y verificación</a>
+          <a class="related-lessons__link" href="../modulo-02/gestion-de-tareas.html">Gestión de tareas</a>
+          <a class="related-lessons__link" href="../modulo-02/deuda-tecnica.html">Deuda técnica</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="comunicacion-en-el-equipo.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Comunicación en el equipo</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="calidad-y-verificacion.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Calidad y verificación</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="promise-all-y-promise-race">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promise.all y Promise.race · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Componer operaciones concurrentes: Promise.all espera todas, Promise.race deja ganar a la primera y sus variantes allSettled y any.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="promise-all-y-promise-race"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Promise.all y Promise.race</span>
+        </nav>
+        <h1 class="lesson-title">Promise.all y Promise.race</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Asincronía avanzada</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="all">Promise.all: todas a la vez</h2>
+          <p>Lanzas varias promesas en paralelo y esperas <strong>todas</strong>. Devuelve un array con los resultados en el mismo orden que las lanzaste, y si alguna se rechaza, la promesa compuesta se rechaza al instante (fail-fast).</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const fs = require("node:fs/promises");
+
+async function leerTres() {
+  const [a, b, c] = await Promise.all([
+    fs.readFile("a.txt", "utf8"),
+    fs.readFile("b.txt", "utf8"),
+    fs.readFile("c.txt", "utf8"),
+  ]);
+
+  console.log(a.trim(), b.trim(), c.trim());
+}
+
+leerTres().catch((err) =&gt; console.error("Fallo:", err.message));</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="all-uso-comun">El caso clásico: fan-out</h2>
+          <p>Un patrón diario en backend: recibes decenas de IDs y debes consultarlos o enriquecerlos sin esperar de uno en uno.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">function consultarUsuario(id) {
+  return new Promise((resolve) =&gt; {
+    setTimeout(() =&gt; resolve({ id, nombre: `Usuario ${id}` }), 100);
+  });
+}
+
+async function cargarUsuarios(ids) {
+  const promesas = ids.map((id) =&gt; consultarUsuario(id));
+  return Promise.all(promesas);
+}
+
+cargarUsuarios([1, 2, 3, 4])
+  .then((usuarios) =&gt; console.log(usuarios.length, "usuarios cargados"))
+  .catch((err) =&gt; console.error(err.message));</code></pre>
+            </div>
+          </figure>
+          <p>Cuidado con el esperar parcial: si una falla, <code class="inline">Promise.all</code> descarta el resto aunque estén a punto de resolver. Para tolerar fallos parciales existe <code class="inline">Promise.allSettled</code>.</p>
+        </section>
+
+        <section>
+          <h2 id="race">Promise.race y sus hermanos</h2>
+          <p><code class="inline">Promise.race</code> se cumple con la <strong>primera</strong> promesa que resuelva o rechace. Es la base para timeouts: si un servicio tarda demasiado, gana el timeout y abandonas.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const sleep = (ms) =&gt; new Promise((r) =&gt; setTimeout(r, ms));
+
+function conTimeout(promesa, ms) {
+  const timeout = sleep(ms).then(() =&gt; {
+    throw new Error("Tiempo de espera agotado");
+  });
+
+  return Promise.race([promesa, timeout]);
+}
+
+// Simula un servicio que responde a los 300 ms
+const lento = sleep(400).then(() =&gt; "respuesta del servicio");
+
+conTimeout(lento, 200)
+  .then((r) =&gt; console.log(r))
+  .catch((err) =&gt; console.error("ERROR:", err.message));</code></pre>
+            </div>
+          </figure>
+          <p>Las otras variantes útiles:</p>
+          <ul>
+            <li><code class="inline">Promise.allSettled</code>: espera todas y reporta cuáles cumplieron y cuáles fallaron.</li>
+            <li><code class="inline">Promise.any</code>: se cumple con la primera que resuelva (ignora rechazos previos).</li>
+          </ul>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const resultados = await Promise.allSettled([
+  Promise.resolve("ok A"),
+  Promise.reject(new Error("falla B")),
+  Promise.resolve("ok C"),
+]);
+
+for (const r of resultados) {
+  if (r.status === "fulfilled") {
+    console.log("Valor:", r.value);
+  } else {
+    console.error("Razón:", r.reason.message);
+  }
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea <code class="inline">cargarUsuarios</code> con 5 IDs y mide cuánto tarda.</li>
+            <li>Construye <code class="inline">conTimeout</code> y prueba un servicio que responde antes y después del límite.</li>
+            <li>Reemplaza un servicio por uno que falla y observa el fail-fast de all versus allSettled.</li>
+            <li>Explica el caso en que usarías Promise.any en lugar de all.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li><code class="inline">Promise.all</code> espera todas y falla al instante si una falla.</li>
+            <li>Ideales para fan-out: map sobre IDs + all.</li>
+            <li><code class="inline">Promise.race</code> gana con la primera promesa en terminarse.</li>
+            <li><code class="inline">allSettled</code> reporta éxitos y fracasos; <code class="inline">any</code> gana con la primera exitosa.</li>
+            <li>Los timeouts asíncronos se construyen con race.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

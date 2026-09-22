@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m2-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura en capas · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende la arquitectura en capas: presentación, aplicación, dominio e infraestructura, con sus reglas de dependencia y un ejemplo práctico en PHP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m2-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Arquitectura en capas</span>
+      </nav>
+      <h1 class="lesson-title">Arquitectura en capas</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Estilos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>arquitectura en capas (layered architecture)</strong> organiza el sistema en niveles con responsabilidades distintas: cada capa usa los servicios de la capa inmediatamente inferior y no salta niveles ni invierte el flujo. Es el estilo más enseñado y más usado en el backend por su simplicidad.</p>
+        <p>Las capas clásicas del backend son: <strong>presentación</strong> (controladores HTTP), <strong>aplicación</strong> (servicios y casos de uso), <strong>dominio</strong> (reglas de negocio) e <strong>infraestructura</strong> (base de datos, mailer, archivos).</p>
+      </section>
+
+      <section>
+        <h2 id="capas">Las 4 capas clásicas</h2>
+        <dl class="definition-list">
+          <dt>Presentación</dt><dd>Recibe y responde peticiones HTTP: rutas, controladores, serialización JSON. No contiene reglas de negocio.</dd>
+          <dt>Aplicación (service layer)</dt><dd>Coordina casos de uso: orquesta repositorios, aplica transacciones y traduce entre el mundo externo y el dominio.</dd>
+          <dt>Dominio</dt><dd>El corazón: entidades, value objects y reglas de negocio puras, sin depender de frameworks.</dd>
+          <dt>Infraestructura</dt><dd>Implementaciones concretas: PDO/ORM, clientes HTTP, envío de correos, almacenamiento.</dd>
+        </dl>
+        <p>La regla de oro: <strong>las dependencias apuntan hacia abajo</strong>. La presentación conoce a la aplicación, la aplicación al dominio, y la infraestructura implementa contratos definidos en el interior.</p>
+      </section>
+
+      <section>
+        <h2 id="fallas">Cuando falla el estilo</h2>
+        <p>El error típico es <em>cross-layer</em>: el controlador llama directo al repositorio o escribe SQL. Resultado: la lógica se duplica en cada entrada y el sistema se vuelve frágil. Otro síntoma: un dominio que depende del framework (el ORM colándose en las entidades).</p>
+        <p>Si corriges solo dos cosas, corrige estas: <strong>el controlador solo orquesta</strong> (nada de SQL) y <strong>el dominio no importa frameworks</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo en PHP</h2>
+        <p>Un flujo en capas bien armado: el controlador pide al servicio, el servicio usa un repositorio y la entidad aplica su regla.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">&lt;?php
+
+// Capa de presentación: solo ordena
+final class OrderController
+{
+    public function __construct(private CheckoutService $service) {}
+
+    public function store(Request $request): JsonResponse
+    {
+        $order = $this-&gt;service-&gt;placeOrder($request-&gt;input('cartId'));
+        return response()-&gt;json(['order_id' =&gt; $order-&gt;id()]);
+    }
+}
+
+// Capa de aplicación: coordina
+final class CheckoutService
+{
+    public function __construct(private OrderRepository $repo) {}
+
+    public function placeOrder(int $cartId): Order
+    {
+        $cart = $this-&gt;repo-&gt;findCart($cartId);
+        $order = Order::fromCart($cart); // regla en el dominio
+        $this-&gt;repo-&gt;save($order);
+        return $order;
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>La lógica de «crear una orden a partir del carrito» vive en <code class="inline">Order::fromCart</code> (dominio), no en el controlador ni en el servicio. Así cada pieza cambia de forma independiente.</p>
+      </section>
+
+      <section>
+        <h2 id="limites">Límites del estilo</h2>
+        <ul>
+          <li><strong>Silo de transición:</strong> con varias capas, los cambios «atraviesan» muchas clases.</li>
+          <li><strong>Dominios anchos:</strong> si una capa sirve a dominios distintos, el acoplamiento crece.</li>
+          <li><strong>Presentación engordada:</strong> con el tiempo los controladores tienden a acumular lógica si no se vigila.</li>
+        </ul>
+        <p>Por eso en los módulos siguientes verás patrones que refinan esta separación (Service Layer, Repository, Clean Architecture).</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Clasifica cada archivo de tu proyecto en una de las 4 capas y anota las violaciones que encuentres.</li>
+          <li>Refactoriza un controlador que hace SQL directo: muévelo a un repositorio y un servicio.</li>
+          <li>Explica con tus palabras por qué el dominio no debería depender de un framework.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Las capas clásicas: presentación, aplicación, dominio e infraestructura.</li>
+          <li>Las dependencias apuntan hacia abajo; el controlador no escribe SQL.</li>
+          <li>El dominio queda libre de frameworks y contiene las reglas de negocio.</li>
+          <li>El estilo es simple; su límite aparece con dominios muy anchos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-03/service-layer.html">Service Layer</a>
+          <a class="related-lessons__link" href="../modulo-03/repository-y-acceso-a-datos.html">Repository y acceso a datos</a>
+          <a class="related-lessons__link" href="../modulo-03/mvc-en-la-practica.html">MVC en la práctica</a>
+          <a class="related-lessons__link" href="../modulo-05/capas-de-clean-architecture.html">Las capas de Clean Architecture</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

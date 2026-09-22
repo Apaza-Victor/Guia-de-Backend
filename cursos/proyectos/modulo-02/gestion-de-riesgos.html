@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-gestion-de-riesgos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de riesgos · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a gestionar riesgos de un proyecto backend: identificarlos temprano, puntuar probabilidad e impacto y elegir la mitigación correcta antes de que se conviertan en problemas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-gestion-de-riesgos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Gestión de riesgos</span>
+      </nav>
+      <h1 class="lesson-title">Gestión de riesgos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Planificación y seguimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="riesgo-vs-problema">Riesgos: lo que todavía no pasó</h2>
+        <p>Un <strong>riesgo</strong> es un evento futuro con probabilidad de ocurrir y un impacto si ocurre. Cuando ya ocurrió, deja de ser riesgo y pasa a ser <strong>problema</strong> — y los problemas siempre cuestan más que las mitigaciones. La gestión de riesgos es el arte de pagar barato por anticipado en vez de caro después.</p>
+        <p>Dominar esta lección es serio en el backend porque aquí los riesgos son <em>silenciosos</em>: una consulta lenta que esperó al Black Friday, una dependencia con licencia prohibida, un proveedor sin SLA. Nadie lo ve hasta que explota en producción.</p>
+      </section>
+
+      <section>
+        <h2 id="tipos">Tipos de riesgo en un proyecto backend</h2>
+        <ul>
+          <li><strong>Técnico:</strong> la arquitectura elegida no escala, la tecnología no resuelve el caso, las migraciones son reversibles a medias.</li>
+          <li><strong>De integración:</strong> el proveedor externo cambia su contrato, su SDK falla, sus tiempos de respuesta no cumplen lo pactado.</li>
+          <li><strong>De cronograma:</strong> dependencias entre riesgos, estimaciones optimistas, releases que compiten por el mismo slot.</li>
+          <li><strong>De datos:</strong> pérdida, inconsistencia o fuga de información; el más caro y el más evitado.</li>
+          <li><strong>De personal:</strong> conocimiento concentrado en una persona («el único que entiende el sistema de pagos»).</li>
+          <li><strong>Externo:</strong> cambios de regulación, tarifas de pasarelas, fin de soporte de la base de datos.</li>
+        </ul>
+        <p>El ejercicio de listarlos se llama <strong>registro de riesgos</strong>, y su versión ligera cabe el cualquier tablero o documento del sprint.</p>
+      </section>
+
+      <section>
+        <h2 id="puntuacion">Puntuar probabilidad e impacto</h2>
+        <p>Cada riesgo se puntúa (1-5) en probabilidad y en impacto. El producto de ambos da la <strong>exposición</strong>; los que superan un umbral (p. ej. 12) merecen mitigación activa esta semana, no "para cuando tengamos tiempo":</p>
+        <pre class="code-block"><code class="language-python" data-language="python">riesgos = [
+    {"nombre": "SDK de pagos cambia contrato sin aviso", "prob": 4, "impacto": 5},
+    {"nombre": "Fuga de datos PII por permisos mal seteados", "prob": 2, "impacto": 5},
+    {"nombre": "Retraso del DBA climatizado para índices", "prob": 3, "impacto": 3},
+    {"nombre": "Solo Ana sabe migrar la base de usuarios", "prob": 3, "impacto": 2},
+]
+
+def exposicion(r, umbral=12):
+    e = r["prob"] * r["impacto"]
+    accion = "MITIGAR AHORA" if e >= umbral else "vigilar"
+    print(f"{r['nombre']:45s} {e:3d} -> {accion}")
+
+for r in riesgos:
+    exposicion(r)</code></pre>
+        <p>La forma más común de mentirse es inflar probabilidades medias. Puntúa con la evidencia disponible (¿cuántas veces <em>ya</em> pasó?) y revisa el registro cada semana: los riesgos no son estáticos, se obsolescen con los avances.</p>
+      </section>
+
+      <section>
+        <h2 id="estrategias">Las cuatro estrategias de respuesta</h2>
+        <p>Para cada riesgo puntuado se elige una estrategia:</p>
+        <ol>
+          <li><strong>Mitigar:</strong> reducir probabilidad o impacto. Ejemplo: feature flags para desactivar una integración lava.</li>
+          <li><strong>Transferir:</strong> mover el impacto a otra parte. Ejemplo: red de seguridad de proveedor, SLA firmado, seguro de interrupción.</li>
+          <li><strong>Aceptar:</strong> asumirlo conscientemente porque mitigarlo cuesta más que el impacto esperado. Se declara, no se ignora.</li>
+          <li><strong>Eliminar:</strong> quitar la causa. Ejemplo: no conectar con ese proveedor, elegir otra vía de pago.</li>
+        </ol>
+        <p>El error de gestión más frecuente es confundir "aceptar" con "olvidar": un riesgo aceptado se re-evalúa con fecha.</p>
+      </section>
+
+      <section>
+        <h2 id="mitigaciones-tecnicas">Mitigaciones concretas que ya conoces</h2>
+        <p>El backend tiene herramientas propias para mitigar casi todos los riesgos anteriores. Unas cuantas, con su riesgo objetivo:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Riesgo: integración externa lava -> circuito + timeout + retry acotado
+# (en tu código, con la librería que uses)
+openssl s_client -connect api.proveedor.com:443 -brief   # ¿el proveedor responde?
+
+# Riesgo: datos - pérdida en migración -> backup antes de tocar producción
+pg_dump -h db-prod "users" > /backups/users_$(date +%F).sql
+
+# Riesgo: personal - conocimiento concentrado -> documentar el runbook
+cat > docs/runbook-migracion.md <<'EOF'
+1. Crear respaldo
+2. Aplicar migración en staging
+3. Ejecutar script de verificación (por debajo)
+4. Promover a producción con flag
+EOF
+
+git add docs/runbook-migracion.md && git commit -m "docs: runbook de migración de usuarios"</code></pre>
+        <p>Obsérvalo: cada mitigación es una acción <em>pequeña y repetible</em> que se puede asignar al sprint como una tarea más. Si una mitigación no cabe en tu tablero, no es mitigación: es un propósito.</p>
+      </section>
+
+      <section>
+        <h2 id="gestion-continua">Gestión continua, no evento anual</h2>
+        <p>La gestión de riesgos muere cuando se convierte en un documento relleno en una planificación inicial y jamás se revisa. El patrón que funciona en proyectos ágiles:</p>
+        <ol>
+          <li>En el refinamiento se revisan los riesgos nuevos («¿cambió algo en el proveedor?»).</li>
+          <li>En el planning, los riesgos altos se convierten en tareas de mitigación con WIP real.</li>
+          <li>En la retrospectiva se revisan los riesgos que se materializaron: ¿por qué no los vimos? ¿qué señal dejamos pasar?</li>
+        </ol>
+        <p>Con este hábito quincenal, el registro de riesgos deja de ser papel viejo y se vuelve parte del radar del día a día del equipo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe un registro con 5 riesgos de tu proyecto actual (uno de cada tipo que aplica) y púntualos en probabilidad e impacto.</li>
+          <li>Para cada riesgo con exposición ≥ 12, elige una estrategia y redacta la tarea de mitigación concreta.</li>
+          <li>Marca cuáles de tus riesgos son técnicos y agrega la mitigación en forma de comando de terminal que podrías ejecutar hoy.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un riesgo es un evento futuro con probabilidad e impacto; cuando ocurre, ya es un problema más caro.</li>
+          <li>Los riesgos backend típicos son técnicos, de integración, de cronograma, de datos, de personal y externos.</li>
+          <li>Se puntúan probabilidad × impacto y los altos reciben mitigación activa en el sprint.</li>
+          <li>Las estrategias son mitigar, transferir, aceptar o eliminar; aceptar sin fecha no es aceptar.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="seguimiento-y-medicion.html">Seguimiento y medición</a>
+          <a class="related-lessons__link" href="deuda-tecnica.html">Deuda técnica</a>
+          <a class="related-lessons__link" href="../modulo-01/requisitos-y-aclaraciones.html">Requerimientos y aclaraciones</a>
+          <a class="related-lessons__link" href="../modulo-03/lanzamiento-y-postmortem.html">Lanzamientos y postmortem</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="seguimiento-y-medicion.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Seguimiento y medición</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="deuda-tecnica.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">Deuda técnica</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="tipos-de-datos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipos de datos en Redis · Redis para Backend · Backend Academy</title>
+<meta name="description" content="Strings, hashes, lists, sets y sorted sets de Redis: comandos y cuándo elegir cada estructura en tu Backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="tipos-de-datos"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Redis para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Tipos de datos</span>
+      </nav>
+      <h1 class="lesson-title">Tipos de datos</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="mapa">Elegir la estructura correcta</h2>
+        <p>Cada problema Backend tiene su tipo de dato en Redis. El acierto no es memorizar comandos: es saber cuál usar y por qué.</p>
+      </section>
+
+      <section>
+        <h2 id="strings">Strings (el todoterreno)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">SET cache:perfil:42 '{"nombre":"Ana","plan":"pro"}'
+GET cache:perfil:42
+
+# contadores y bits: el poder escondido
+INCR contador:visitas          # +1 atómico
+APPEND log:tmp "."
+STRLEN cache:perfil:42</code></pre>
+          </div>
+        </figure>
+        <p><strong>Uso típico:</strong> caché de fragmentos, contadores, tokens, sesiones simples. Es la única pieza que admite operaciones numéricas atómicas.</p>
+      </section>
+
+      <section>
+        <h2 id="hashes">Hashes (objetos)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">HSET usuario:7 nombre Ana plan pro city Madrid
+HGET usuario:7 plan          # "pro"
+HGETALL usuario:7
+HINCRBY usuario:7 puntos 10  # actualizar un campo sin traer todo
+
+# actualizar un campo sin sobrescribir los demás
+HSET usuario:7 city Bilbao</code></pre>
+          </div>
+        </figure>
+        <p><strong>Uso típico:</strong> modelar un objeto con varios campos: perfil, carrito, sesión con metadata. Evita reenviar el JSON entero para tocar un campo.</p>
+      </section>
+
+      <section>
+        <h2 id="lists">Lists (colas y feed)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">RPUSH cola:emails "enviar-bienvenida-42"
+RPUSH cola:emails "enviar-reactivacion-77"
+LPOP cola:emails             # saca el primero → cola FIFO simple
+
+LPUSH noticias:app "Titular de HOY"
+LRANGE noticias:app 0 4      # feed con los 5 últimos
+LLEN noticias:app</code></pre>
+          </div>
+        </figure>
+        <div class="callout">
+          <p><strong>Cola segura:</strong> para consumo seguro usa <code class="inline">BRPOP</code> (bloqueante), inmediato con el patrón de <em>delivery-timeout</em> si el worker puede fallar.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="sets">Sets (pertenencia y dedupe)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">SADD admins u1 u2 u3
+SISMEMBER admins u2            # 1 → ¿es admin? (pertenencia O(1))
+SCARD admins                   # 3 integrantes
+
+# operaciones de conjuntos: quién cumple ambas condiciones
+SADD tags:python u1 u2
+SINTER tags:python admins      # admins que les gusta Python
+
+# dedupe de un evento: SADD es idempotente
+SADD vistos:evento-9 u42</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="zsets">Sorted sets (rankings con peso)</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">ZADD ranking:quiz 1200 u7 900 u3 1500 u9
+ZINCRBY ranking:quiz 50 u7            # el "score" sube sin re-leer
+ZREVRANGE ranking:quiz 0 2 WITHSCORES # top 3
+ZRANK ranking:quiz u7                 # posición de un jugador
+ZADD tareas:cola 1700000000 job:42    # cola ordenada por timestamp</code></pre>
+          </div>
+        </figure>
+        <p><strong>Uso típico:</strong> rankings, colas priorizadas por fecha/score, rate limiting por ventana de tiempo.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Modela un perfil de usuario con <code class="inline">HASH</code> y actualízalo con <code class="inline">HINCRBY</code>.</li>
+          <li>Arma un feed con <code class="inline">LPUSH</code> y léelo con <code class="inline">LRANGE</code>.</li>
+          <li>Crea un ranking con <code class="inline">ZADD</code> y muéstralo con <code class="inline">ZREVRANGE</code>.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>String para caché/contadores; Hash para objetos; List para feeds y colas.</li>
+          <li>Set para pertenencia y dedupe; Sorted set para rankings y colas priorizadas.</li>
+          <li>La atómicidad (INCR, HINCRBY, ZINCRBY) evita lecturas-en-escritura.</li>
+          <li>Elige por el <em>patrón de acceso</em>, no por la comodidad del serializado.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

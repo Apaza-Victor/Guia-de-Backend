@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="variables-de-entorno">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables de entorno en producción · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Configura una API en producción con variables de entorno: buenas prácticas, perfiles .env y gestión segura de secretos en el despliegue.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="variables-de-entorno"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 5</a><span class="sep">/</span>
+        <span class="current">Variables de entorno en producción</span>
+      </nav>
+      <h1 class="lesson-title">Variables de entorno en producción</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Despliegue Continuo</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Por qué configuración ≠ código</h2>
+        <p>Una API debe correr igual en dev, staging y producción cambiando solo su <strong>configuración</strong>. Las variables de entorno logran esto: valores inyectados desde fuera del proceso, sin tocar el código ni the repo. Así la misma imagen o el mismo commit se despliega en cualquier entorno con seguridad.</p>
+      </section>
+
+      <section>
+        <h2 id="env">Qué se considera variable de entorno</h2>
+        <ul>
+          <li><strong>No secretas:</strong> puerto, nivel de log, URL pública, feature flags.</li>
+          <li><strong>Secretas:</strong> claves de base de datos, tokens de APIs, llaves de firma JWT.</li>
+        </ul>
+        <p>La regla: si el valor puede cambiar entre entornos → variable. Si es secreto → nunca en el repo, siempre por un gestor seguro.</p>
+      </section>
+
+      <section>
+        <h2 id="dotenv">El patrón .env</h2>
+        <p>En desarrollo, un archivo <code class="inline">.env</code> con valores locales hace la vida fácil. En producción el archivo se genera en el servidor y nunca se sube al repositorio.</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">env</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># .env.example  (se COMMITEA)
+PORT=8000
+DATABASE_URL=postgres://usuario:pass@localhost:5432/app
+JWT_SECRET=cambia-me-en-produccion
+LOG_LEVEL=info
+
+# .env (NO se commitea; se genera en el servidor)
+DATABASE_URL=postgres://produser:hunter2@db.prod:5432/app
+JWT_SECRET=Zx9!kL... (clave real de 32+ caracteres)</code></pre>
+          </div>
+        </figure>
+        <p>El truco fundamental: <code class="inline">.env.example</code> con valores vacíos se incluye en el repo (documenta qué configurar), mientras <code class="inline">.env</code> está en <code class="inline">.gitignore</code>. En Python se carga con <code class="inline">python-dotenv</code>:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">python</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-python">from dotenv import load_dotenv
+from os import environ
+
+load_dotenv()  # lee .env solo si existe
+
+PORT = int(environ.get("PORT", 8000))
+DATABASE_URL = environ["DATABASE_URL"]
+JWT_SECRET = environ["JWT_SECRET"]</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="produccion">Inyección real en producción</h2>
+        <p>En un servidor con systemd se declaran dentro de la unidad; en contenedores, por flags de <code class="inline">docker run</code> o variables en el orquestador:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">ini</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-ini"># /etc/systemd/system/api.service
+[Service]
+EnvironmentFile=/etc/api/api.env
+ExecStart=/usr/bin/gunicorn app:app --bind 0.0.0.0:8000</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">docker run -d --name api \
+  --env-file /etc/api/api.env \
+  -p 8000:8000 mi-registro/app:1.3.0</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="seguridad">Gestión segura de secretos</h2>
+        <ul>
+          <li>Nunca subir <code class="inline">.env</code>, nunca loguear variables, nunca imprimir su valor en el healthcheck.</li>
+          <li>Rotar los secretos periódicamente y al sospechar filtración.</li>
+          <li>En equipos grandes usa un gestor: GitHub Secrets, AWS Secrets Manager, Vault, o al menos <code class="inline">--env-file</code> con permisos restrictivos.</li>
+          <li>Usa valores de <strong>respaldo por defecto</strong> solo para desarrollo; en producción exige la variable y falla rápido si falta.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea un <code class="inline">.env.example</code> para tu API con al menos 4 variables y comitéalo.</li>
+          <li>Asegúrate de que tu <code class="inline">.env</code> real está en <code class="inline">.gitignore</code> y verifícalo con <code class="inline">git status</code>.</li>
+          <li>Configura la API con <code class="inline">EnvironmentFile</code> o <code class="inline">--env-file</code> en tu servidor de pruebas y confirma que arranca.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La configuración viaja por variables de entorno, no por el código.</li>
+          <li><code class="inline">.env.example</code> documenta; <code class="inline">.env</code> no se commitea.</li>
+          <li>En producción las variables se inyectan con systemd, Docker u orquestadores.</li>
+          <li>Los secretos viven fuera del repo y se gestionan con herramientas dedicadas.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

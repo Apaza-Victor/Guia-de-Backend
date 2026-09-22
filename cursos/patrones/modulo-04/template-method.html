@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m4-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template Method · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Template Method: fijar el esqueleto de un algoritmo en la base y dejar que subclases llenen los pasos, con ejemplos PHP de procesamiento de pagos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m4-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 4</a><span class="sep">/</span>
+        <span class="current">Template Method</span>
+      </nav>
+      <h1 class="lesson-title">Template Method</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Comportamiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Template Method</strong> define el <strong>esqueleto de un algoritmo</strong> en un método de la clase base y deja que las subclases llenen los pasos variables. El «qué y en qué orden» vive una vez; el «cómo» se personaliza.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">Pasos repetidos, detalles diferentes</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto del problema</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Procesar un pago con cualquier pasarela sigue SIEMPRE este orden:
+  1. Validar monto
+  2. Cobrar con la pasarela   <- cambia: Stripe / PayPal / local
+  3. Registrar el movimiento
+  4. Notificar al cliente
+
+Sin un esqueleto, cada pasarela reescribe el orden 1-2-3-4
+(y una se le ocurre cobrar antes de validar).</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="solucion">El esqueleto y los ganchos</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">abstract class ProcesadorPago
+{
+    // Template Method: fija el orden y los pasos
+    final public function procesar(Pago $pago): string
+    {
+        $this-&gt;validar($pago);
+        $referencia = $this-&gt;cobrar($pago);      // paso abstracto
+        $this-&gt;registrar($pago, $referencia);
+        $this-&gt;notificar($pago);                 // paso con default
+        return $referencia;
+    }
+
+    abstract protected function cobrar(Pago $pago): string;
+
+    protected function validar(Pago $pago): void
+    {
+        if ($pago-&gt;monto &lt;= 0) {
+            throw new \DomainException('monto inválido');
+        }
+    }
+
+    protected function notificar(Pago $pago): void
+    {
+        log("[pago] hecho para {$pago-&gt;cliente}");
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p><code>procesar()</code> es <code>final</code>: nadie puede reordenar los pasos. Las subclases solo llenan los abstractos.</p>
+      </section>
+
+      <section>
+        <h2 id="subclases">Las subclases solo llenan lo suyo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class PagoStripe extends ProcesadorPago
+{
+    public function __construct(private StripeCliente $stripe) {}
+    protected function cobrar(Pago $pago): string { return $this-&gt;stripe-&gt;charge($pago); }
+}
+
+final class PagoLocal extends ProcesadorPago
+{
+    protected function cobrar(Pago $pago): string { return 'LOCAL-' . $pago-&gt;id; }
+}
+
+// CaS de uso: misma llamada, flujo garantizado
+(new PagoStripe($stripe))-&gt;procesar($pago);</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="vs-strategy">Template Method vs. Strategy</h2>
+        <ul>
+          <li><strong>Template Method</strong> usa <em>herencia</em>: el esqueleto vive en la base; las subclases rellenan huecos.</li>
+          <li><strong>Strategy</strong> usa <em>composición</em>: el algoritmo completo viaja como objeto intercambiable.</li>
+          <li>Regla: si el algoritmo es uno con pasos y solo cambia un paso → Template. Si hay algoritmos completos alternativos → Strategy.</li>
+          <li>Limitación del Template: enlazas al jerarquía; si no quieres herencia, prefiere Strategy/adiós al enganche.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="backend">Dónde vive en backend</h2>
+        <ul>
+          <li><strong>Procesamiento de pagos / proveedores</strong> con orden de pasos fijo.</li>
+          <li><strong>Import/export de archivos</strong> (CSV, XML, JSON): validación, parseo, persistencia.</li>
+          <li><strong>Jobs del sistema</strong>: verificar → ejecutar → registrar → fin.</li>
+          <li><strong>Conectores de email/SMS</strong> con pasos de auditoría comunes.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Elige un proceso que se repita con un orden fijo (import, pago, export).</li>
+          <li>Escribe la clase base con el template method final y los hooks abstractos.</li>
+          <li>Crea dos implementaciones y verifica que ambas cumplen el orden.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Template Method fija el esqueleto; subclases llenan pasos.</li>
+          <li>Con <code>final</code> proteges el orden del algoritmo.</li>
+          <li>Bibliotecas de herencia; compara con Strategy si prefieres composición.</li>
+          <li>Ideal para procesos con pasos repetidos y detalles variables.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="strategy.html">Strategy</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-04/solid-principios.html">Principios SOLID</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-03/modulos-paquetes-y-boundaries.html" title="Ver módulos y límites">Módulos, paquetes y límites</a>
+          <a class="related-lessons__link" href="../modulo-05/unit-of-work-y-transacciones.html">Unit of Work y transacciones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

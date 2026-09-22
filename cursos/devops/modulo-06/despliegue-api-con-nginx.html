@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="despliegue-api-con-nginx">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Despliegue completo: API con Nginx · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Reúne todo lo aprendido: Gunicorn, systemd, Nginx como reverse proxy y HTTPS para desplegar una API Backend completa en producción.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="despliegue-api-con-nginx"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 6</a><span class="sep">/</span>
+        <span class="current">Despliegue completo: API con Nginx</span>
+      </nav>
+      <h1 class="lesson-title">Despliegue completo: API con Nginx</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 16 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · DevOps en el Backend</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">La receta completa</h2>
+        <p>Este tutorial final une todas las piezas del módulo en un despliegue de una API real (Flask + Gunicorn + Nginx + systemd + HTTPS). Es el flujo que usarás en cualquier proyecto que mire a producción.</p>
+      </section>
+
+      <section>
+        <h2 id="estructura">Estructura del servidor</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">┌─────────────────────────────────────────────┐
+│  Internet │ usuarios                        │
+└──────────────┬──────────────────────────────┘
+               ▼  443 (HTTPS)
+        ┌─────────────────┐
+        │    Nginx        │  reverse proxy + TLS
+        └────────┬────────┘
+                 ▼  127.0.0.1:8000
+        ┌─────────────────┐
+        │   Gunicorn      │  WSGI server (4 workers)
+        └────────┬────────┘
+                 ▼
+        ┌─────────────────┐
+        │  Flask app      │  tu código
+        └─────────────────┘</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="gunicorn">1. Gunicorn como servidor WSGI</h2>
+        <p>Flask solo sirve en desarrollo; para producción se usa un servidor WSGI real (Gunicorn para Python, Uvicorn para FastAPI). Instálalo y configura workers según CPU:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">ini</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-ini"># /etc/api/gunicorn.conf.py
+bind = "127.0.0.1:8000"
+workers = 4                    # 2×CPU + 1
+worker_class = "gthread"
+threads = 4
+timeout = 60
+graceful_timeout = 30
+accesslog = "/var/log/gunicorn/access.log"
+errorlog = "/var/log/gunicorn/error.log"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="systemd">2. Un servicio systemd que lo mantiene vivo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">ini</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-ini"># /etc/systemd/system/api.service
+[Unit]
+Description=API Backend
+After=network.target postgresql.service
+
+[Service]
+User=deployer
+WorkingDirectory=/srv/api/current
+EnvironmentFile=/etc/api/api.env
+ExecStart=/srv/api/venv/bin/gunicorn -c /etc/api/gunicorn.conf.py app:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+          </div>
+        </figure>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable --now api
+sudo systemctl status api --no-pager</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="nginx">3. Nginx recibe el tráfico</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">nginx</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-nginx"># /etc/nginx/sites-available/api
+server {
+    listen 80;
+    server_name api.tudominio.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name api.tudominio.com;
+
+    ssl_certificate /etc/letsencrypt/live/api.tudominio.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.tudominio.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 25m;
+    }
+
+    location = /healthz {
+        access_log off;
+        return 200 'ok';
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>Activa el site y prueba configuración: <code class="inline">sudo ln -s ... &amp;&amp; sudo nginx -t &amp;&amp; sudo nginx -s reload</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="https">4. Certificado y verificación final</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># Emitir el certificado (ya hay server block activo)
+sudo certbot --nginx -d api.tudominio.com
+
+# Verificación en cadena
+curl --fail https://api.tudominio.com/healthz   # 200 ok
+curl -I http://api.tudominio.com/healthz        # 301 a HTTPS
+sudo systemctl is-active api                     # active
+sudo certbot renew --dry-run                     # renovar funcionará
+
+# Métricas y logs
+curl http://127.0.0.1:8000/metrics
+journalctl -u api -n 20 --no-pager</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="checklist">Checklist de producción</h2>
+        <ul>
+          <li>✔ La API escucha solo en 127.0.0.1; Nginx (público) es la única puerta.</li>
+          <li>✔ HTTPS activo con redirección 301 desde HTTP.</li>
+          <li>✔ systemd reinicia la API si muere.</li>
+          <li>✔ Variables de entorno desde <code class="inline">EnvironmentFile</code>, sin secrets en el repo.</li>
+          <li>✔ Logs estructurados y rotados; healthcheck y métricas expuestos.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Despliega una API tuya con Gunicorn + systemd + Nginx siguiendo esta receta.</li>
+          <li>Comprueba que la API no es accesible por el puerto 8000 desde afuera (firewall/escucha local).</li>
+          <li>Rompe deliberadamente la app y verifica que systemd la reinicia y Nginx reintenta.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Gunicorn sirve WSGI con varios workers; Flask solo no sirve en producción.</li>
+          <li>systemd mantiene la API viva y la levanta al arrancar.</li>
+          <li>Nginx + TLS + 301 forman la entrada pública segura.</li>
+          <li>Healthcheck, métricas y logs completan el despliegue definitivo.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

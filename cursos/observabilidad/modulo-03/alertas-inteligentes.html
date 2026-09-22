@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m3-l2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alertas inteligentes · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende a diseñar alertas efectivas: alertar sobre síntomas, evitar alert fatigue, controlar cardinalidad y escribir reglas PromQL con umbrales útiles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m3-l2"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Alertas inteligentes</span>
+      </nav>
+      <h1 class="lesson-title">Alertas inteligentes</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Alertas y dashboards</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="fatiga">El problema: alert fatigue</h2>
+        <p>Una alerta que suena por todo pierde su único valor: <strong>decirte cuándo actuar</strong>. Cuando el pager suena 30 veces al día y 28 no requieren nada, el cerebro aprende a ignorarlo, y la página que sí importa se pierde. El objetivo no es «tener muchas alertas», es <em>que cada página requiera una acción humana</em>.</p>
+        <p>Tres filtros para domesticar el ruido: alertar sobre síntomas (no causas), con el tiempo mínimo necesario para saltar (<code class="inline">for</code>), y con cardinalidad baja (no una alerta por instancia).</p>
+      </section>
+
+      <section>
+        <h2 id="sintomas">Síntomas, no causas</h2>
+        <p>Alerta sobre lo que el usuario percibe: errores, latencia, falta de trabajo procesado. No alertes «el contenedor se reinició» — puedes correlacionarlo después, y a veces un reinicio es la recuperación, no el problema.</p>
+        <ul>
+          <li><strong>Página correcta:</strong> «la API de checkout devuelve 5xx en más del 5 % del tráfico».</li>
+          <li><strong>Ruido típico:</strong> «el proceso checkout-api se detuvo», «el host disk-02 está al 90 %», «hubo un pico de CPU de 5 segundos».</li>
+        </ul>
+        <p>La regla: si la acción al recibirla es «esperar a ver si se arregla», no es una página; es un ticket o un dashboard. Umbrales con <code class="inline">for</code> separan el chispazo del incendio real.</p>
+      </section>
+
+      <section>
+        <h2 id="promql">Escribir la regla PromQL</h2>
+        <p>Alertar sobre <em>ratios</em> (no sobre números absolutos) es la primera línea de defensa: un pico de errores es nada al 0,1 % y crítico al 20 %. Con <code class="inline">for: 10m</code> evitamos el flapping de picos de un minuto:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">groups:
+  - name: checkout.alerts
+    rules:
+
+      - alert: CheckoutTasa5xx
+        expr: |
+          (sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[5m])))
+          / (sum(rate(http_requests_total{job="checkout-api"}[5m]))) > 0.05
+        for: 10m
+        labels:
+          severity: page
+          team: pagos
+        annotations:
+          summary: "Checkout con más del 5% de errores 5xx."
+          description: "Tasa actual: {{ $value | humanizePercentage }}."
+          runbook: "https://runbooks.internal/checkout-5xx"
+
+      - alert: Checkoutp99Lento
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket{job="checkout-api"}[5m])) by (le)) > 1.5
+        for: 15m
+        labels: { severity: ticket }
+        annotations:
+          summary: "p99 de checkout por encima de 1.5s."
+          runbook: "https://runbooks.internal/checkout-latencia"</code></pre>
+          </div>
+        </figure>
+        <p>Fíjate en la severidad: <code class="inline">page</code> (página, reclama en horario on-call) solo para lo que rompe el SLO; <code class="inline">ticket</code> para degradaciones de un umbral menor que se revisan en horario laboral.</p>
+      </section>
+
+      <section>
+        <h2 id="cardinalidad">Cardinalidad: el asesino silencioso</h2>
+        <p>Cada combinación de etiquetas es una serie distinta. Una alerta sobre una etiqueta de alta cardinalidad (instancia, pod, proceso) dispara una página por cada combinación — decenas de páginas simultáneas para un solo incidente:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">promql</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-promql" data-language="promql"># MAL: alerta por instancia, multiplica páginas de un mismo incidente
+count_over_time(up{job="checkout-api"}[10m])
+  {instance="checkout-api-7f9d2c8a"} &lt; 3
+
+# BIEN: el job como conjunto (una sola serie, una sola página)
+(1 - sum(up{job="checkout-api"}) / count(up{job="checkout-api"})) > 0.5</code></pre>
+          </div>
+        </figure>
+        <p>Controla también las etiquetas que creas en los exporters: rutas con IDs dinámicos (<code class="inline">/orders/93812</code>) o user_id en etiquetas explotan la cardinalidad de todo tu Prometheus.</p>
+      </section>
+
+      <section>
+        <h2 id="fusion">Fusión y deduplicación con Alertmanager</h2>
+        <p>Cuando el incidente es uno, la página debe ser una. Alertmanager agrupa por etiquetas, espera para confirmar y limita las repeticiones:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">route:
+  group_by: ["alertname", "service", "env"]
+  group_wait: 30s      # acumula alertas del mismo grupo
+  group_interval: 5m
+  repeat_interval: 4h  # no repitas la misma página cada minuto
+  routes:
+    - matchers: [severity="page"]
+      receiver: "pager"
+    - matchers: [severity="ticket"]
+      receiver: "equipo-ops"
+
+receivers:
+  - name: "pager"
+    pagerduty_configs:
+      - service_key: "{{ pagerduty_key }}"
+  - name: "equipo-ops"
+    slack_configs:
+      - channel: "#ops-incidentes"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="burn-rate">La alternativa SRE: alertas por burn rate</h2>
+        <p>En vez de umbrales inventados, alerta sobre la velocidad con que se quema el error budget del SLO. Una multi-window usa dos ventanas (por ejemplo 1 h y 5 min): la larga detecta degradaciones sostenidas, la corta detecta explosiones, y el <code class="inline">for</code> bajo evita correos falsos:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">groups:
+  - name: error-budget.alerts
+    rules:
+      - alert: BurnRate1h
+        expr: |
+          (1 - sum(rate(http_requests_total{job="checkout-api", status!~"5.."}[1h]))
+                / sum(rate(http_requests_total{job="checkout-api"}[1h])))
+          > 14.4 * (1 - 0.999)
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "El error budget de checkout se gastaría en menos de ~2 días."</code></pre>
+          </div>
+        </figure>
+        <p>El multiplicador <code class="inline">14.4</code> viene del error budget: con un SLO que tolera 0,1 % de fallos, gastar el presupuesto 14,4 veces más rápido de lo permitido agotaría los 30 días del objetivo en ~2 días (30 ÷ 14,4). La alerta no dice «está cayéndose»: dice «te quedas sin error budget». Esa página sí exige frenar lanzamientos e investigar.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe 2 reglas de alerta para tu servicio: una de tasa de 5xx y otra de p99 de latencia, con severidad y runbook.</li>
+          <li>Revisa tus alertas actuales y clasifícalas en «síntoma de usuario» vs «ruido»; elimina 3 de la segunda clase.</li>
+          <li>Configura Alertmanager con grouping por alertname/service/env y repeat_interval de 4 h.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Una buena página requiere acción humana; lo demás son tickets o dashboards.</li>
+          <li>Alerta sobre síntomas (tasa de error, latencia), con for para evitar flapping.</li>
+          <li>Ratios sobre agregaciones por job, nunca series por instancia.</li>
+          <li>Alertmanager fusiona grupos: un incidente, una página.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="slos-y-slis.html">SLOs, SLIs y SRE</a>
+          <a class="related-lessons__link" href="on-call-y-incidentes.html">On-call y manejo de incidentes</a>
+          <a class="related-lessons__link" href="../modulo-02/prometheus.html">Prometheus</a>
+          <a class="related-lessons__link" href="../modulo-02/grafana.html">Grafana</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

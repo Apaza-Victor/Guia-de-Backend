@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="funciones-texto-fecha-numericas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funciones de texto, fecha y numéricas · SQL · Backend Academy</title>
+<meta name="description" content="Aprende las funciones SQL más usadas: strings (CONCAT, UPPER, SUBSTRING), fechas (CURRENT_DATE, DATE_FORMAT, DATEDIFF) y numéricas (ROUND, CEIL, FLOOR).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="funciones-texto-fecha-numericas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2 · Consultas avanzadas</a><span class="sep">/</span>
+          <span class="current">Funciones de texto, fecha y numéricas</span>
+        </nav>
+        <h1 class="lesson-title">Funciones de texto, fecha y numéricas</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Consultas avanzadas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Los datos llegan sucios: nombres con mayúsculas raras, fechas en texto, decimales sin redondeo. Las funciones de escalar te permiten limpiar, transformar y presentar en el SELECT. Aquí van las que se usan todos los días.</p>
+        </section>
+
+        <section>
+          <h2 id="texto">Texto</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT
+  UPPER(nombre)  AS mayus,
+  LOWER(nombre)  AS minus,
+  CONCAT(nombre, ' - ', categoria) AS etiqueta,
+  LENGTH(nombre) AS tamano,
+  LEFT(nombre, 3) AS iniciales,
+  TRIM(' x ' )   AS limpio          -- quita espacios
+FROM productos;</code></pre>
+            </div>
+          </figure>
+          <p>En PostgreSQL la función es <code class="inline">LENGTH</code> igual, pero <code class="inline">CONCAT</code> hereda la coma; MySQL también la acepta. La sintaxis «equivalente» casi nunca es idéntica: lo importante es el concepto, y el motor concreto decide el matiz.</p>
+        </section>
+
+        <section>
+          <h2 id="fechas">Fechas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT
+  CURRENT_DATE AS hoy,
+  NOW()        AS ahora,
+  YEAR(pedido_fecha)  AS anio,     -- MySQL
+  DATE_FORMAT(pedido_fecha, '%Y-%m') AS mes,  -- MySQL
+  DATEDIFF(CURRENT_DATE, pedido_fecha) AS dias
+FROM pedidos;
+
+-- PostgreSQL usa EXTRACT y TO_CHAR
+-- EXTRACT(YEAR FROM pedido_fecha), TO_CHAR(pedido_fecha, 'YYYY-MM')</code></pre>
+            </div>
+          </figure>
+          <p>Patrón de reporte habitual: agrupar por <code class="inline">DATE_FORMAT(fecha, '%Y-%m')</code> para «ventas por mes». La fecha truncada a mes crea el grupo natural.</p>
+        </section>
+
+        <section>
+          <h2 id="numeros">Numéricas</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">SELECT
+  ROUND(precio, 2) AS redondeado,
+  CEIL(precio)     AS redondea_arriba,
+  FLOOR(precio)    AS redondea_abajo,
+  ABS(precio * -1) AS sin_signo,
+  MOD(precio, 10)  AS resto,
+  POWER(precio, 2) AS cuadrado
+FROM productos;
+
+-- MySQL: sustituir por CAST para muchas transformaciones
+CAST('123' AS SIGNED) AS numero;      -- texto → número
+CAST(precio AS CHAR) AS texto_precio; -- número → texto</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="cookbook">Kit de transformación aplicado</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">-- Limpiar emails en minúsculas y quitar espacios
+SELECT LOWER(TRIM(email)) AS email_limpio FROM clientes;
+
+-- Resumen por año con la función de fecha
+SELECT YEAR(fecha) AS anio, SUM(total) AS facturado
+FROM pedidos
+GROUP BY anio
+ORDER BY anio DESC;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Limpia un campo de nombres a mayúsculas iniciales con UPPER/LOWER.</li>
+            <li>Agrupa tus pedidos por mes con DATE_FORMAT o TO_CHAR.</li>
+            <li>Presenta el precio de tus productos redondeado a 2 decimales.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Texto: UPPER, LOWER, CONCAT, LEFT, TRIM, LENGTH.</li>
+            <li>Fechas: CURRENT_DATE, YEAR, DATE_FORMAT/TO_CHAR, DATEDIFF.</li>
+            <li>Números: ROUND, CEIL, FLOOR, ABS, MOD.</li>
+            <li>CAST convierte entre tipos.</li>
+            <li>La sintaxis varía levemente entre MySQL y PostgreSQL.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="group-by.html">Agrupando con GROUP BY</a>
+            <a class="related-lessons__link" href="having.html">Filtrando grupos con HAVING</a>
+            <a class="related-lessons__link" href="../modulo-01/select-basico.html">SELECT básico</a>
+            <a class="related-lessons__link" href="../modulo-06/optimizando-consultas-lentas.html">Optimizando consultas lentas</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

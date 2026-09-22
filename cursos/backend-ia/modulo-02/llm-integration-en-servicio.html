@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-llm-integration-en-servicio">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrar LLMs en un servicio · Backend para IA · Backend Academy</title>
+<meta name="description" content="Aprende a integrar un LLM dentro de un servicio backend robusto: cliente dedicado, retries con backoff, timeouts y pruebas con mocks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-llm-integration-en-servicio"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Backend para IA</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Integrar LLMs en un servicio</span>
+      </nav>
+      <h1 class="lesson-title">Integrar LLMs en un servicio</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Features con IA</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Llamar a un LLM desde una ruta de Express o FastAPI «a pelo» funciona el primer día y explota el segundo: la configuración está dispersa, no hay reintentos, un proveedor caído cuelga tu request y no puedes probar nada sin pagar tokens.</p>
+        <p>La solución es el mismo patrón de siempre en backend: <strong>una capa de cliente dedicada</strong>. Todo lo que sabe cómo hablar con el modelo vive en un módulo propio, y el resto de tu aplicación depende de una interfaz sencilla y estable.</p>
+      </section>
+
+      <section>
+        <h2 id="cliente-llm">Un cliente LLM reutilizable</h2>
+        <p>Encapsula modelo, endpoint y configuración en una clase. Los detalles del proveedor quedan dentro; fuera solo queda un método que recibe mensajes y devuelve texto.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">class LlmClient {
+  constructor({ apiKey, model = null, baseUrl = 'https://api.openai.com/v1/chat/completions' }) {
+    this.apiKey = apiKey;
+    this.model = model;
+    this.baseUrl = baseUrl;
+  }
+
+  async completar(mensajes, { temperature = 0.3, maxTokens = 2048 } = {}) {
+    const res = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: mensajes,
+        temperature,
+        max_tokens: maxTokens
+      })
+    });
+
+    if (!res.ok) {
+      const detalle = await res.text();
+      throw Object.assign(new Error(`LLM ${res.status}: ${detalle}`), { status: res.status });
+    }
+
+    const data = await res.json();
+    return data.choices[0].message.content;
+  }
+}
+
+export const llm = new LlmClient({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: process.env.LLM_MODEL || 'gpt-4o-mini'
+});</code></pre>
+        <p>Fíjate en el <code>model</code>: se lee de entorno con un valor por defecto. Ese único cambio te permite usar el mismo código contra distintos modelos o versiones sin tocar nada más.</p>
+      </section>
+
+      <section>
+        <h2 id="retries">Retries con backoff y jitter</h2>
+        <p>El proveedor de IA es la parte menos confiable de tu sistema: experimenta caídas y rate limits propios. La capa de cliente debe reintentar de forma segura para evitar que un fallo temporal rompa tu API.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import asyncio, random
+
+backoff = {1: 1, 2: 2, 3: 4}  # segundos por intento
+
+async def completar_con_reintentos(fn, intentos_restantes=3):
+    try:
+        return await fn()
+    except _EsReintentable as e:
+        if intentos_restantes &lt;= 1:
+            raise
+        espera = backoff.get(intentos_restantes, 4) * (1 + random.random() * 0.5)
+        await asyncio.sleep(espera)
+        return await completar_con_reintentos(fn, intentos_restantes - 1)
+
+class _EsReintentable(Exception):
+    pass</code></pre>
+        <p>El <strong>jitter</strong> (multiplicar la espera por un valor aleatorio) evita el efecto avalancha: cuando el proveedor se recupera, todos los reintentos no llegan a la vez. Solo reintentas errores transitorios — <code>429</code>, <code>5xx</code>, timeout de red — nunca <code>400</code> ni <code>401</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="timeouts">Timeouts: la IA no puede colgarte</h2>
+        <p>Una llamada al modelo puede tardar decenas de segundos. Tu API no puede esperar indefinidamente: define un límite y degrada con elegancia cuando se supera.</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">async function completarConTimeout(promesa, ms) {
+  const controller = new AbortController();
+  const temporizador = setTimeout(() => controller.abort(), ms);
+
+  try {
+    const res = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.apiKey}` },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    return await res.json();
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
+try {
+  const data = await completarConTimeout(payload, 30_000);
+} catch (err) {
+  if (err.name === 'AbortError') {
+    return { ok: false, error: 'El modelo tardó demasiado; reintenta o usa un modelo menor.' };
+  }
+  throw err;
+}</code></pre>
+        <p>El timeout no es un lujo: es la diferencia entre un pico de tráfico y un outage. Procesos más lentos pueden responder <code>202</code> con una cola (lo cubres con workers), pero una request síncrona debe tener cota dura.</p>
+      </section>
+
+      <section>
+        <h2 id="testing">Probar sin gastar tokens</h2>
+        <p>Una capa de cliente bien aislada se prueba con <strong>mocks</strong> del <code>fetch</code> o del HTTP, sin llamar jamás a la API real en tus tests:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Ejecuta los tests apuntando a un mock local
+export LLM_BASE_URL="http://localhost:8081/mock-llm"
+node --test test/llm-client.test.js
+
+# El mock responde de forma determinista y sin coste:
+# POST /mock-llm -> {"choices":[{"message":{"content":"hola desde el mock"}}]}</code></pre>
+        <p>Prueba al menos: respuesta feliz, <code>429</code> (verifica un reintento), <code>500</code> (verifica backoff) y timeout (verifica el error controlado). Con esto tu feature de IA es tan testeable como cualquier otra integración.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Crea una clase <code>LlmClient</code> con método <code>completar()</code> que lea key, modelo y endpoint de variables de entorno.</li>
+          <li>Añade reintentos con backoff + jitter para <code>429</code> y <code>5xx</code>, y un timeout con <code>AbortController</code>.</li>
+          <li>Escribe un test con un mock de fetch que devuelva 429 dos veces y éxito a la tercera, y verifica que el cliente lo resuelve sin fallar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La integración del LLM vive en un cliente dedicado, no en las rutas de tu API.</li>
+          <li>El modelo se configura por entorno para poder cambiar de versión sin tocar código.</li>
+          <li>Reintenta con backoff exponencial y jitter solo ante errores transitorios.</li>
+          <li>Fija timeouts: una llamada lenta debe degradar, no congelar el servicio.</li>
+          <li>Aísla el cliente para poder probar con mocks sin gastar tokens.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="streaming-de-respuestas.html">Streaming de respuestas</a>
+          <a class="related-lessons__link" href="../modulo-01/apis-de-ia.html">APIs de IA</a>
+          <a class="related-lessons__link" href="../modulo-03/gestion-de-costos.html">Gestión de costos</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="index.html">
+        <span class="label">← Módulo 2</span>
+        <span class="title">Features con IA</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="rag-basico.html">
+        <span class="label">Siguiente →</span>
+        <span class="title">RAG básico</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

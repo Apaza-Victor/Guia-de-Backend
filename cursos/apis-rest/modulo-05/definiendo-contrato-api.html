@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="definiendo-contrato-api">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Definiendo el contrato de la API · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a definir el contrato de una API REST en OpenAPI: paths, métodos, parámetros, schemas, ejemplos y respuestas de error.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="definiendo-contrato-api"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 5 · Documentación</a><span class="sep">/</span>
+          <span class="current">Definiendo el contrato de la API</span>
+        </nav>
+        <h1 class="lesson-title">Definiendo el contrato de la API</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Documentación</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="casa">Estructura de tu openapi.yaml</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-yaml">openapi: 3.0.3
+info: { title, version, description, contact }
+servers:
+  - url: https://api.tienda.test/api/v1
+paths:      # operaciones
+components: # schemas, parameters, securitySchemes</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="paths">paths: las rutas y sus verbos</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-yaml">paths:
+  /productos:
+    get:
+      summary: Lista los productos
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Producto" }
+                  meta:
+                    type: object
+        "422":
+          $ref: "#/components/responses/ErrorValidacion"
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductoInput" }
+      responses:
+        "201":
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Producto" }</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="schemas">schemas: las piezas de representación</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-yaml">components:
+  schemas:
+    Producto:
+      type: object
+      required: [id, nombre, precio]
+      properties:
+        id:      { type: integer, example: 42 }
+        nombre:  { type: string, minLength: 3, example: "Café" }
+        precio:  { type: number, format: float, example: 9.95 }
+        creado_el: { type: string, format: date-time }
+    ProductoInput:
+      allOf:
+        - type: object
+          required: [nombre, precio]
+          properties:
+            nombre:  { type: string, minLength: 3 }
+            precio:  { type: number, minimum: 0 }</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li>Reutiliza: define una vez, refiere con <code>$ref</code> mil veces.</li>
+            <li>Declara <code>required</code>: tu validación «de verdad» y tu spec deben bailar la misma danza.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="errores">Respuestas y errores documentados</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-yaml">components:
+  responses:
+    ErrorValidacion:
+      description: Datos inválidos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string, example: VALIDACION_FALLIDA }
+                  message: { type: string }
+                  status: { type: integer, example: 422 }
+                  errors: { type: object, additionalProperties: { type: array, items: { type: string } } }</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="modos">Spec-first vs code-first</h2>
+          <ul>
+            <li><strong>Spec-first:</strong> escribes YAML; el código se adapta. Perfecto para equipos frontend/backend/laterales.</li>
+            <li><strong>Code-first:</strong> el código genera spec (anotaciones, decorators). Rápido pero puedes «olvidar» documentar.</li>
+            <li>La disciplina es más importante que la dirección: un spec desactualizado es basura.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Creación tu primer <code>openapi.yaml</code> con un path CRUD completo.</li>
+            <li>Define los schemas Producto y ProductoInput con required.</li>
+            <li>Documenta la respuesta de error 422 usando components.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>openapi + info + servers + paths + components.</li>
+            <li>Spec = contrato vivo entre máquinas y humanos.</li>
+            <li>$ref + required + schemas reutilizables + errores estándar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="swagger-ui-exploracion.html">Swagger UI: exploración</a>
+            <a class="related-lessons__link" href="ejemplos-errores-sdks-generados.html">Ejemplos, errores y SDKs</a>
+            <a class="related-lessons__link" href="que-es-openapi.html">¿Qué es OpenAPI?</a>
+            <a class="related-lessons__link" href="../modulo-04/validacion-entrada-reglas.html">Validación de entrada</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

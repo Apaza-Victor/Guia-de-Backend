@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="recursos-representaciones-json">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursos y representaciones con JSON · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende a modelar recursos REST y sus representaciones: identificadores únicos, formatos JSON, relaciones y buenas prácticas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="recursos-representaciones-json"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 1 · Fundamentos de APIs</a><span class="sep">/</span>
+          <span class="current">Recursos y representaciones con JSON</span>
+        </nav>
+        <h1 class="lesson-title">Recursos y representaciones con JSON</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="recurso">Recurso: el sustantivo de tu API</h2>
+          <p>Un <strong>recurso</strong> es cualquier cosa que tu sistema expone: un producto, un usuario, un pedido. No es «datos» ni «tabla»; es el <strong>concepto</strong> con su identidad. El recurso vive en el servidor; lo que viaja es su <strong>representación</strong>.</p>
+          <p>Identificador único: cada recurso tiene su URL canónica.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">URL identificadora</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">https://api.tienda.test/api/v1/productos/42
+https://api.tienda.test/api/v1/productos/42/reviews
+https://api.tienda.test/api/v1/usuarios/7</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="representacion">Representación ≠ datos</h2>
+          <p>La representación es una <strong>foto</strong> del recurso en un formato acordado. El mismo recurso se puede representar en JSON, XML o CSV; el cliente elige cuál quiere (negociación de contenido, módulo 2). En REST práctico, JSON es el rey:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "id": 42,
+  "nombre": "Auriculares inalámbricos",
+  "precio": 129.95,
+  "moneda": "EUR",
+  "stock": true,
+  "categorias": ["audio", "portatiles"],
+  "creado_el": "2026-03-14T10:22:30Z",
+  "links": {
+    "self": "https://api.tienda.test/api/v1/productos/42"
+  }
+}</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="convenciones">Convenciones de formato</h2>
+          <ul>
+            <li><strong>snake_case</strong> en JSON es común en REST (camelCase en otras casas: elige una y mantente firme).</li>
+            <li><strong>Fechas ISO‑8601</strong> con zona horaria: <code>2026-03-14T10:22:30Z</code>. Nunca marcas locales ni manuscritas.</li>
+            <li><strong>IDs explícitos</strong> cuando sean relevantes entre sistemas.<br>Ojo: en APIs orientadas a uso externo se prefieren <em>slugs</em> o UUIDs a las claves de base de datos.</li>
+            <li><strong>Envolturas opcionales</strong>: <code>data</code> y <code>meta</code> (paginación). Lo importante es ser predecible.</li>
+            <li><strong>null</strong> para “sin valor”, no campos desaparecidos… salvo decisión documentada.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relaciones">Relaciones entre recursos</h2>
+          <p>Hay dos formas de representar “el producto pertenece a un fabricante”:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON anidado</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "id": 42,
+  "fabricante": {
+    "id": 9,
+    "nombre": "Sonora Audio"
+  }
+}</code></pre>
+            </div>
+          </figure>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JSON con referencia (link)</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-json">{
+  "id": 42,
+  "fabricante_id": 9,
+  "links": {
+    "fabricante": "https://api.tienda.test/api/v1/fabricantes/9"
+  }
+}</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Anidar</strong>: cómodo para lecturas en una sola petición, pero duplica datos y complica actualizar.</li>
+            <li><strong>Referenciar con link</strong>: magro, navegable, fácil de cachear por separado.</li>
+            <li>Regla práctica: anida cuando la relación <em>es parte de</em> el recurso (una línea de pedido dentro del pedido); referencia cuando es independiente.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="idempotencia">Recursos vs acciones</h2>
+          <p>REST modela <strong>sustantivos</strong>, no verbos. «Enviar email», «activar promoción», «publicar» suelen camuflarse. Cuando no queda otra, una acción se vuelve un sub‑recurso:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">POST /api/v1/pedidos/8421/enviar
+POST /api/v1/promociones/3/activar</code></pre>
+            </div>
+          </figure>
+          <p>Es aceptable si está documentado y nombre sustantivo (no <code>postSendOrder</code>). Pero <strong>primero intenta</strong> modelarlo como recurso: enviar es, igualmente, “crear un evento de envío”.</p>
+        </section>
+
+        <section>
+          <h2 id="catálogo">Identificar recursos desde tu dominio</h2>
+          <ol>
+            <li>Enumera los sustantivos del negocio (usuario, pedido, factura).</li>
+            <li>Marca los que tienen ciclo de vida propio: esos son recursos.</li>
+            <li>Marca las relaciones que deben viajar en la misma respuesta.</li>
+            <li>Revisa los verbos: cada verbo es un no‑recurso que quizá se pueda desvanecer.</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Elige 3 sustantivos de un dominio real y define sus URLs.</li>
+            <li>Escribe la representación JSON de uno con al menos 5 campos.</li>
+            <li>Representa una relación entre dos de esos recursos anidada y por link.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Recurso = sustantivo con identidad; representación = su foto en un formato.</li>
+            <li>JSON convencional: snake_case, ISO‑8601, IDs claros.</li>
+            <li>Relaciones: anida si es parte; referencia con link si es independiente.</li>
+            <li>Modela sustantivos; respalda acciones como sub‑recursos solo si es justo.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="estilo-rest-historia.html">El estilo REST y su historia</a>
+            <a class="related-lessons__link" href="../modulo-04/serializacion-respuestas-consistentes.html">Serialización y respuestas consistentes</a>
+            <a class="related-lessons__link" href="../modulo-02/cabeceras-peticion-respuesta.html">Cabeceras HTTP</a>
+            <a class="related-lessons__link" href="../modulo-03/nombrando-recursos-plural.html">Nombrando recursos</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

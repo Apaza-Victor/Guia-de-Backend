@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="cierre-de-sesion-y-revocacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cierre de sesión y revocación · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Cierre de sesión correcto en PHP: limpiar datos, borrar la cookie, revocar la sesión y el patrón 'cerrar sesión en todos los dispositivos'.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="cierre-de-sesion-y-revocacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Cierre de sesión y revocación</span>
+        </nav>
+        <h1 class="lesson-title">Cierre de sesión y revocación</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Sesiones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="logout">Cerrar sesión de verdad</h2>
+          <p>Un logout que solo redirige al home no cierra nada: el servidor sigue reconociendo la cookie. Cerrar sesión exige <strong>destruir el estado en el servidor</strong> y borrar el identificador del navegador.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+session_start();
+
+// 1. Vaciar los datos de sesion
+$_SESSION = [];
+
+// 2. Borrar la cookie de sesion del cliente
+if (ini_get("session.use_cookies")) {
+    $p = session_get_cookie_params();
+    setcookie(
+        session_name(),
+        "",
+        time() - 42000,
+        $p["path"], $p["domain"], $p["secure"], $p["httponly"]
+    );
+}
+
+// 3. Destruir el almacen en el servidor
+session_destroy();
+
+// 4. Si usas BD o Redis: borrar la fila/clave del id revocado
+// DELETE FROM sesiones WHERE id = ?</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="server-side">Método HTTP y CSRF</h2>
+          <p>El logout es una acción con efectos: debe ser <code class="inline">POST</code>, no <code class="inline">GET</code>, para no dispararse con un enlace o una imagen. Además, si usas tokens CSRF, el logout también debe validarlos.</p>
+        </section>
+
+        <section>
+          <h2 id="all-devices">Cerrar en todos los dispositivos</h2>
+          <p>«¿Cerrar sesión en todos los dispositivos?» exige conocer todas las sesiones de un usuario. Con BD/Redis, añade un índice por <code class="inline">usuario_id</code> y borra por usuario:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+// Revocar la sesion actual
+// DELETE FROM sesiones WHERE id = $sesion_actual_id;
+
+// Revocar todas (menos la actual)
+$db-&gt;prepare("DELETE FROM sesiones WHERE usuario_id = ? AND id &lt;&gt; ?")
+   -&gt;execute([$usuarioId, $sesionActualId]);
+
+// En Redis:
+// $redis-&gt;keys("PHPREDIS_SESSION:*") -&gt; filter; o mantener un SET por usuario
+// redis-cli --scan --pattern '*' para borrar; expira por TTL</code></pre>
+            </div>
+          </figure>
+          <p>Patrón equivalente con sesiones en archivos: guardar internamente el <code class="inline">usuario_id</code> no ayuda a listar archivos; en ese caso conviene migrar el almacén a BD/Redis antes de ofrecer esta función.</p>
+        </section>
+
+        <section>
+          <h2 id="contextos">Cuándo revocar</h2>
+          <ul>
+            <li>Logout explícito del usuario.</li>
+            <li>Cambio o restablecimiento de contraseña.</li>
+            <li>Cuenta comprometida o desactivada por un admin.</li>
+            <li>Detección de actividad anómala (nueva IP, nuevo dispositivo).</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Completa el logout y verifica con dos pestañas que revocas ambas.</li>
+            <li>Implementa «cerrar sesión en todos los dispositivos» con tu almacén.</li>
+            <li>Explica por qué el logout no debe ser un GET.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Vaciar datos + borrar cookie + destruir almacén = logout real.</li>
+            <li>El logout es POST y valida CSRF.</li>
+            <li>«Cerrar todo» requiere conocer las sesiones por usuario.</li>
+            <li>Revoca sesiones también al cambiar la contraseña.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="expiracion-y-renovacion.html">Expiración y renovación</a>
+            <a class="related-lessons__link" href="sesiones-en-bd-y-redis.html">Sesiones en Bases de Datos y Redis</a>
+            <a class="related-lessons__link" href="../modulo-04/refresh-tokens-y-rotacion.html">Refresh tokens y rotación</a>
+            <a class="related-lessons__link" href="../modulo-02/restablecimiento-de-contrasena.html">Restablecimiento de contraseña</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

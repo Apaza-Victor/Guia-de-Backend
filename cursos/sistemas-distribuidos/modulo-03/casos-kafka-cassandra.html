@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-casos-kafka-cassandra">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casos: Kafka, Cassandra, Redis cluster · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Análisis de cómo Kafka, Cassandra y Redis Cluster resuelven replicación, particionado y consistencia: líderes por partición, quórums y slots con hash.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-casos-kafka-cassandra"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Casos: Kafka, Cassandra, Redis cluster</span>
+      </nav>
+      <h1 class="lesson-title">Casos: Kafka, Cassandra, Redis cluster</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y casos reales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Tres sistemas reales que ya resolvieron —a su manera— replicación, particionado y consistencia. Estudiarlos es la mejor forma de traducir la teoría: Kafka (log replicado con líder por partición), Cassandra (quórums sin líder) y Redis Cluster (slots de hash con failover propio).</p>
+      </section>
+
+      <section>
+        <h2 id="kafka">Kafka: particiones con líder</h2>
+        <p>Kafka organiza los mensajes en <strong>topics</strong> ➝ <strong>particiones</strong>. Cada partición tiene un <strong>líder</strong> y varias réplicas en brokers distintos. Los productores escriben al líder; los consumidores leen ordenadamente de cada partición.</p>
+        <ul>
+          <li>El factor de replicación indica cuántas copias de cada partición se mantienen.</li>
+          <li>El <code>min.insync.replicas</code> controla cuántas deben confirmar antes de aceptar la escritura (la arista C/P del CAP).</li>
+          <li>La partición se elige por clave: la misma clave siempre al mismo broker, garantizando <em>orden por clave</em>.</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Crear topic con 6 particiones y 3 réplicas por partición
+kafka-topics.sh --create \
+  --topic pedidos \
+  --partitions 6 \
+  --replication-factor 3 \
+  --config min.insync.replicas=2 \
+  --bootstrap-server kafka-1:9092
+
+# Ver el estado de los líderes y la distribución de réplicas
+kafka-topics.sh --describe \
+  --topic pedidos \
+  --bootstrap-server kafka-1:9092
+</code></pre>
+        <p>Toda la «alta disponibilidad» de Kafka viene de elegir un nuevo líder de partición cuando el actual muere (KRaft en versiones modernas). El consumidor en el otro extremo con <code>enable.auto.commit=false</code> decide cuándo dar un mensaje por procesado, para no perderlo ni duplicar:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">from kafka import KafkaConsumer
+
+consumer = KafkaConsumer(
+    "pedidos",
+    bootstrap_servers=["kafka-1:9092"],
+    group_id="procesador-pedidos",
+    enable_auto_commit=False,        # nosotros decidimos el offset
+    auto_offset_reset="earliest",
+)
+
+for mensaje in consumer:
+    procesar(mensaje.value)
+    # confirmamos solo tras procesar: si el worker muere,
+    # el mensaje se re-entrega (at-least-once)
+    consumer.commit()
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cassandra">Cassandra: quórum sin líder</h2>
+        <p>Cassandra es puro modelo <strong>leaderless</strong>: cualquier nodo acepta lecturas y escrituras, y el nodo «coordinador» espera las confirmaciones de un <strong>quórum</strong>. Los datos se replican por <strong>keyspace</strong> con un factor de replicación, usando hash consistente sobre un anillo.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Createspace con factor de replicación N=3 (una clave vive en 3 nodos)
+cqlsh -e "
+CREATE KEYSPACE app
+  WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+USE app;
+
+# Lecturas/escrituras con nivel de consistencia por sentencia
+CONSISTENCY QUORUM;   # W=quórum (2 de 3 con N=3)
+SELECT * FROM usuarios WHERE id = 42;
+"
+</code></pre>
+        <p>Cuando un nodo se cae, el coordinador guarda un <strong>hint</strong> y entrega las escrituras atrasadas cuando el nodo regresa (<em>hinted handoff</em>). Y con las lecturas quórum ejecuta <strong>read repair</strong> sobre réplicas desactualizadas, que vimos en la lección de quórums.</p>
+      </section>
+
+      <section>
+        <h2 id="redis">Redis Cluster: 16384 slots</h2>
+        <p>Redis Cluster divide el espacio de claves en <strong>16 384 slots</strong>, repartidos entre los nodos maestro. Cada slot pertenece a un maestro, y cada maestro tiene una o más réplicas.</p>
+        <ul>
+          <li>La clave va al slot <code>CRC16(clave) mod 16384</code>.</li>
+          <li>Si una escritura llega al nodo equivocado, devuelve <code>MOVED</code> con el slot correcto y el cliente reenruta.</li>
+          <li>Los master-slots se reasignan durante el rebalanceo migrando slots (hash consistente en la práctica).</li>
+        </ul>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Crear un clúster de 3 maestros x 1 réplica (6 nodos)
+redis-cli --cluster create \
+  redis-1:6379 redis-2:6379 redis-3:6379 \
+  redis-1r:6379 redis-2r:6379 redis-3r:6379 \
+  --cluster-replicas 1
+
+# Forzar la elección de una réplica cuando su maestro muere
+redis-cli -p 6379 CLUSTER FAILOVER
+</code></pre>
+        <p>La respuesta <code>MOVED</code> es el mecanismo de coordinación «a la antigua»: no hay una tabla central en la red; el cliente inteligente cachea el mapa de slots.</p>
+      </section>
+
+      <section>
+        <h2 id="comparativa">Comparativa rápida</h2>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "sistemas": {
+    "kafka": {
+      "particion": "por partición de topic",
+      "replicacion": "log en N brokers (leader + followers)",
+      "consistencia": "escrituras acks con min.insync.replicas",
+      "modelo_cap": "CP por partición con replicación"
+    },
+    "cassandra": {
+      "particion": "hash consistente sobre anillo",
+      "replicacion": "leaderless, factor de replicación por keyspace",
+      "consistencia": "niveles ONE / LOCAL_QUORUM / QUORUM por operación",
+      "modelo_cap": "AP por defecto, ajustable a CP"
+    },
+    "redis_cluster": {
+      "particion": "16384 slots por CRC16 de la clave",
+      "replicacion": "1 maestro + N réplicas por slot",
+      "consistencia": "fuerte para el nodo, lecturas réplica opcionales",
+      "modelo_cap": "CP con failover automático"
+    }
+  }
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="leccion">La lección común</h2>
+        <p>Los tres combinan particionado + replicación + un mecanismo de coordinación, y cada uno elige un punto distinto del CAP:</p>
+        <ul>
+          <li><strong>Kafka</strong> garantiza orden y tolera perder tráfico de escrituras solo si aceptas <code>acks=1</code>; para no perder datos usas <code>min.insync.replicas</code> y aceptas la espera.</li>
+          <li><strong>Cassandra</strong> maximiza disponibilidad y te deja subir la consistencia por operación al precio que quieras pagar.</li>
+          <li><strong>Redis Cluster</strong> da consistencia fuerte dentro de un nodo maestro con failover, pero la coordinación de slots añade complejidad al cliente.</li>
+        </ul>
+        <p>Si entiendes por qué cada uno eligió distinto, entiendes el tema completo del curso: <strong>no hay solución ganadora, hay trade-offs</strong>.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Explica qué elegirías para un log de eventos de auditoría (Kafka, Cassandra o Redis) y por qué, citando el modelo de consistencia.</li>
+          <li>Con Kafka y <code>replication.factor=3</code>, ¿cuántos brokers pueden caer sin perder la disponibilidad de escritura con <code>min.insync.replicas=2</code>?</li>
+          <li>En Redis Cluster, ¿qué devuelve un nodo cuando recibe una clave que pertenece a otro slot? Investiga el comando que el cliente usa para aprender el mapa.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Kafka: log replicado con líder por partición y confirmaciones configurable.</li>
+          <li>Cassandra: modelo leaderless con quórums, hinted handoff y read repair.</li>
+          <li>Redis Cluster: 16384 slots, hash de la clave y redirección MOVED al cliente.</li>
+          <li>Los tres demuestran que particionado + replicación + coordinación = trade-off del CAP.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-02/replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="../modulo-02/quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="sharding-y-particionamiento.html">Sharding y particionamiento</a>
+          <a class="related-lessons__link" href="diseñar-un-sistema-distribuido.html">Diseñar un sistema distribuido</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

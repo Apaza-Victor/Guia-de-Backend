@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-m1-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decisiones y trade-offs · Arquitectura de Software · Backend Academy</title>
+<meta name="description" content="Aprende a razonar trade-offs de arquitectura: consistencia vs disponibilidad, simplicidad vs escalabilidad y cómo tomar decisiones técnicas con argumentos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="arquitectura" data-current="arquitectura-m1-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Arquitectura de Software</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Decisiones y trade-offs</span>
+      </nav>
+      <h1 class="lesson-title">Decisiones y trade-offs</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Arquitectura de Software</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>En ingeniería de software <strong>no hay balas de plata</strong>: cada solución resuelve un problema y crea otro. Elegir una tecnología no es encontrar «la mejor»; es elegir <em>cuáles problemas prefieres tener</em>. A eso se le llama <strong>trade-off</strong>, y pensar en trade-offs es la habilidad central del arquitecto.</p>
+        <p>Esta lección se enfoca en los trade-offs más comunes del backend y en cómo razonarlos de forma estructurada.</p>
+      </section>
+
+      <section>
+        <h2 id="clasicos">Trade-offs clásicos</h2>
+        <dl class="definition-list">
+          <dt>Consistencia vs disponibilidad</dt><dd>El teorema CAP dice que ante una partición de red eliges entre ambos. ¿Respondes siempre aunque haya datos viejos (disponibilidad) o fallas para no dar datos incorrectos (consistencia)?</dd>
+          <dt>Simplicidad vs escalabilidad</dt><dd>Un monolito con una base relacional es simple y suficiente al inicio; microservicios escalan pero multiplican la complejidad operativa.</dd>
+          <dt>Latencias vs consistencia</dt><dd>La caché acelera lecturas a costa de datos posiblemente desactualizados; hay que definir la política de invalidación.</dd>
+          <dt>Rigor vs velocidad</dt><dd>Más tests, reviews y controles generan calidad, pero reducen la rapidez de entrega. El equilibrio correcto depende del dominio.</dd>
+          <dt>Tecnología nueva vs madura</dt><dd>Lo nuevo aporta features, lo maduro aporta estabilidad, soporte y talento disponible.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2 id="metodo">Un método para decidir</h2>
+        <p>Ante una decisión importante, sigue estos pasos:</p>
+        <ol>
+          <li><strong>Define el problema y el contexto:</strong> qué se quiere resolver y con qué restricciones (tiempo, equipo, presupuesto).</li>
+          <li><strong>Lista 2 o 3 opciones reales:</strong> descarta las imposibles y compara solo las viables.</li>
+          <li><strong>Evalúa el impacto en atributos de calidad:</strong> rendimiento, mantenibilidad, seguridad, coste.</li>
+          <li><strong>Identifica riesgos y su coste de reversión:</strong> ¿cuánto cuesta volver atrás si falla?</li>
+          <li><strong>Elige y documenta:</strong> deja constancia del contexto, las opciones descartadas y el motivo.</li>
+        </ol>
+        <p>El punto 4 es el más importante: <strong>las decisiones reversibles pueden tomarse rápido</strong>; las casi-irreversibles merecen estudio. A veces la decisión correcta es «usar lo más simple ahora y posponer».</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo-code">Ejemplo: tabla de decisión</h2>
+        <p>Supón que necesitas persistir datos de sesión. Compara dos opciones reales:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Tabla de decisión</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Criterio            PostgreSQL        Redis
+---------------     -----------       --------
+Consistencia        Fuerte (ACID)     Eventual/tunable
+Rendimiento p95     2-5 ms            &lt; 1 ms (en memoria)
+Complejidad         Un sistema menos  Servicio adicional
+Persistencia        Total             Configurable (RDB)
+Escala lectura      Buena            Excelente
+Coste inversión     Alto             Alto si se abusa
+
+Decisión: sesión volátil y frecuente -&gt; Redis.
+Datos que nunca se pierden -&gt; PostgreSQL.</code></pre>
+          </div>
+        </figure>
+        <p>Ambas respuestas son correctas; dependen del caso. Eso es un trade-off bien gestionado.</p>
+      </section>
+
+      <section>
+        <h2 id="errores">Errores comunes</h2>
+        <ul>
+          <li><strong>FOMO tecnológico:</strong> elegir por moda, sin medir el problema real.</li>
+          <li><strong>Decidir sin datos:</strong> no medir latencia, coste ni esfuerzo antes de evaluar.</li>
+          <li><strong>Buscar la "mejor" solución:</strong> no existe; existe la adecuada al contexto.</li>
+          <li><strong>No documentar:</strong> semanas después nadie recuerda por qué se eligió, y se reinventa la rueda mal.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe una tabla de decisión comparando guardar los logs de tu API en un archivo local vs enviarlos a un servicio externo.</li>
+          <li>Identifica en tu último proyecto una decisión que se tomó sin documentar. Reconstruye cuál era el contexto y las opciones.</li>
+          <li>Responde: para la sesión de usuario de tu app, ¿usarías Redis o PostgreSQL? Justifica con los criterios de esta lección.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Todo trade-off implica elegir qué problemas prefieres tener.</li>
+          <li>Consistencia, disponibilidad, simplicidad y escalabilidad suelen competir entre sí.</li>
+          <li>Evalúa opciones con atributos de calidad, riesgos y coste de reversión.</li>
+          <li>Las decisiones reversibles se toman rápido; las irreversibles, con método.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="atributos-de-calidad.html">Requisitos y atributos de calidad</a>
+          <a class="related-lessons__link" href="adr-documentando-decisiones.html">Documentando decisiones con ADRs</a>
+          <a class="related-lessons__link" href="../modulo-02/monolito-vs-microservicios.html">Monolito vs microservicios</a>
+          <a class="related-lessons__link" href="../modulo-07/estrategias-de-evolucion.html">Estrategias de evolución</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estilos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Principios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Clean Architecture</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Hexagonal y DDD</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · En la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

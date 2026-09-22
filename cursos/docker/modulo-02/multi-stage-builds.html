@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="docker-m2-l4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-stage builds · Docker para Backend · Backend Academy</title>
+<meta name="description" content="Compilar en una imagen de build y correr en otra mínima: el multi-stage build que deja tu API de Node impecable y pequeña.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="docker-m2-l4"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Docker para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Multi-stage builds</span>
+      </nav>
+      <h1 class="lesson-title">Multi-stage builds</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Imágenes y Dockerfile</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="problema">El problema de una sola etapa</h2>
+        <p>Si compilas e instalas deps en la misma imagen, te quedas con el compilador, las deps de desarrollo, los cache de apt/npm y decenas de MB inútiles en producción.</p>
+      </section>
+
+      <section>
+        <h2 id="solucion">La idea: dos (o tres) etapa</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">STAGE 1 (build)                     STAGE 2 (runtime)
+─────────────────────────────      ─────────────────────────
+node:20 + compilador                node:20-alpine (puro)
++ deps dev + code                    + SOLO lo que corre
+        ↓ compile / build ────►      # COPY --from=build ...
+                                     # imagen final: pequeña y limpia</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="node">Multi-stage para una API Node</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Dockerfile</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-dockerfile"># ────── Stage 1: instalar dependencias ──────
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# ────── Stage 2: compilar (si haces TS/build) ──────
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules node_modules
+COPY . .
+RUN npm run build
+
+# ────── Stage 3: runtime mínimo ──────
+FROM node:20-alpine AS runtime
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /app/node_modules node_modules   # prod-only
+COPY --from=build /app/dist dist
+COPY --from=build /app/package.json .
+USER node
+EXPOSE 3000
+CMD ["node", "dist/server.js"]</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="copy-from">Herramientas de la técnica</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">AS <nombre>      → le das nombre a la etapa
+COPY --from=nombre /ruta   → traes archivos de una etapa anterior
+COPY --from=nginx:alpine /usr/share/nginx/html /srv/www
+                 → ¡o de una imagen externa!
+
+--target=etapa   en el build:
+docker build --target=build -t mi-api:build .   # debug de esa etapa</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo usarlo</h2>
+        <ul>
+          <li><strong>Node/Python/Go/Rust:</strong> separa build de runtime.</li>
+          <li><strong>Compilación de assets</strong> (frontend servido por nginx).</li>
+          <li><strong>Todo lo que necesite herramientas que la app final no necesita.</strong></li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Convierte tu Dockerfile de una sola etapa a 3 etapas.</li>
+          <li>Compara <code>docker images</code> antes y después del cambio.</li>
+          <li>Corre la imagen final y verifica que la app funciona igual.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Compila en una etapa, corre en la mínima.</li>
+          <li><code>COPY --from=</code> pasa solo lo necesario.</li>
+          <li>Imagen final: sin compiladores, sin deps dev, sin cache.</li>
+          <li><code>--target</code> te deja construir una etapa suelta.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="optimizando-imagenes.html">Optimizando imágenes</a>
+          <a class="related-lessons__link" href="capas-de-imagen.html">Las capas de la imagen</a>
+          <a class="related-lessons__link" href="dockerignore.html">Build context y .dockerignore</a>
+          <a class="related-lessons__link" href="index.html">Módulo 2 · Índice</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
+          <li><a href="index.html">Módulo 2 · Imágenes</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Proyecto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

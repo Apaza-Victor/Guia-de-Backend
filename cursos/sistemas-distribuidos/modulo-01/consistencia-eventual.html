@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-consistencia-eventual">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consistencia eventual · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende qué es la consistencia eventual: convergencia entre réplicas, lecturas desactualizadas, quórums y el modelo BASE de las bases de datos modernas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-consistencia-eventual"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">Consistencia eventual</span>
+      </nav>
+      <h1 class="lesson-title">Consistencia eventual</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>La <strong>consistencia eventual</strong> es el modelo que eligen la mayoría de las bases de datos «NoSQL» modernas: las réplicas pueden divergir temporalmente, pero <em>eventualmente</em> (sin límite de tiempo fijo) convergen al mismo valor. Es la letra «E» de <strong>BASE</strong> vs <strong>ACID</strong>.</p>
+        <p>En lugar de bloquear el sistema para que todos vean lo mismo (como ACID), aceptamos ventanas de divergencia y diseñamos para que el estado final sea correcto.</p>
+      </section>
+
+      <section>
+        <h2 id="que-significa">Qué significa «eventual»</h2>
+        <p>Formalmente: si dejas de escribir al sistema, todas las réplicas convergerán al mismo valor <em>en algún momento futuro</em>. No se promete un tiempo; solo que la divergencia no es permanente.</p>
+        <ul>
+          <li>Una <strong>lectura desactualizada</strong> (stale read) es aceptable: puedes leer un valor viejo que se corregirá.</li>
+          <li>La <strong>propagación es asíncrona</strong>: las escrituras se aplican primero en una réplica y se difunden al resto con retraso.</li>
+          <li>Hay <strong>monotonicidad borrosa</strong>: no se garantiza que veas siempre el valor más nuevo al instante, pero sí que no «viajas» atrás en el tiempo de forma arbitraria.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Ejemplo cotidiano:</strong> cuando marcas «me gusta», la app te responde al instante aunque el contador global tarde unos segundos en actualizarse. Persiste, converge.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="replicas">Réplicas y quórum</h2>
+        <p>La convergencia se apoya en la <strong>replicación</strong>: cada dato vive en varias máquinas. Al leer y escribir con <em>quórums</em> (un número mínimo de réplicas que deben confirmar), controlas la probabilidad de lecturas desactualizadas.</p>
+        <p>Con 3 réplicas y la regla <strong>W + R &gt; N</strong> —donde N es el número total de réplicas, W los acuses de escritura y R los de lectura— siempre leerás al menos de una réplica que tenga la última escritura. Es la base de la lección sobre quórums del módulo 2.</p>
+      </section>
+
+      <section>
+        <h2 id="ejemplo-simulacion">Ejemplo: un contador que converge</h2>
+        <p>Este pequeño simulador muestra cómo dos réplicas sincronizan su estado tras divergir durante una caída de red:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">class Replica:
+    def __init__(self, nombre):
+        self.nombre = nombre
+        self.valor = 0
+        self.pendiente = []
+
+    def aplicar(self, delta):
+        self.valor += delta
+        self.pendiente.append(("write", delta))
+
+    def sincronizar(self, otras):
+        # Propaga las escrituras que la otra réplica aún no conoce
+        for evento in self.pendiente:
+            for otra in otras:
+                if evento not in otra.pendiente:
+                    otra.valor += evento[1]
+                    otra.pendiente.append(evento)
+        self.pendiente = []
+
+a = Replica("A")
+b = Replica("B")
+
+a.aplicar(5)   # A=5, B=0  -> divergen
+b.aplicar(3)   # A=5, B=3
+a.sincronizar([b])  # B recibe +5 -> B=8
+b.sincronizar([a])  # A recibe +3 -> A=8
+assert a.valor == b.valor == 8  # convergieron
+</code></pre>
+        <p>En la vida real, la propagación no reenvía «eventos» lineales como este; usa versiones de objetos completos y resuelve conflictos (ver la lección de <em>relojes vectoriales</em>).</p>
+      </section>
+
+      <section>
+        <h2 id="racion-visibilidad">La lectura desactualizada en acción</h2>
+        <p>Observa cómo un consumidor puede leer un valor viejo mientras la escritura viaja. Esta es la firma de un sistema eventual:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Escritura llega a la réplica 1 (líder de zona A)
+curl -X PUT localhost:9101/usuarios/42 \
+     -H 'Content-Type: application/json' \
+     -d '{"estado": "premium"}'
+
+# Lectura a la réplica 2 (zona B): aún no se propagó, devuelve el viejo
+curl localhost:9102/usuarios/42
+# { "estado": "gratis" }   <- stale read aceptado
+
+# Segundos después, la misma lectura devuelve el valor convergido
+curl localhost:9102/usuarios/42
+# { "estado": "premium" }
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="base">BASE: el modelo que lo sustenta</h2>
+        <p><strong>BASE</strong> es el acrónimo que describe a estos sistemas, en contraste con ACID:</p>
+        <ul>
+          <li><strong>Básicamente disponible</strong> (Basically Available): todo nodo responde casi siempre, aunque sea con datos viejos.</li>
+          <li><strong>Estado suave</strong> (Soft state): el estado cambia con el tiempo incluso sin entradas nuevas (durante la propagación).</li>
+          <li><strong>Eventualmente consistente</strong> (Eventually consistent): convergen cuando termina la divergencia.</li>
+        </ul>
+        <p>Bases como Cassandra, DynamoDB, CouchDB y MongoDB (en ciertas configuraciones) siguen este espíritu, y el desarrollador elige por operación el punto entre C y A del CAP. Esa elección se declara por operación en la configuración de tu cliente:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "cliente": "catalogo-reader",
+  "operaciones": {
+    "consultar_precio":      { "consistencia": "LOCAL_QUORUM", "acepta_stale": false },
+    "recomendados":          { "consistencia": "ONE",          "acepta_stale": true },
+    "auditoria_contador":    { "consistencia": "ANY",          "acepta_stale": true }
+  },
+  "regla": "los datos críticos leen con quórum; el resto tolera replicación eventual"
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="cuando-no">Cuándo NO usar consistencia eventual</h2>
+        <ul>
+          <li>Pagos y saldos donde una lectura vieja produce pérdida real.</li>
+          <li>Inventario con reglas invariantes estrictas («no vender más existencias de las que hay»).</li>
+          <li>Cualquier caso donde la reconciliación de conflictos no tenga una regla clara.</li>
+        </ul>
+        <p>Para esos casos, el siguiente módulo explorará consistencia fuerte con quórums, relojes y consenso.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Describe un caso de tu aplicación donde una lectura desactualizada de 5 segundos sea irrelevante y otro donde sea inaceptable.</li>
+          <li>Con 3 réplicas, ¿qué valores de W y R elegirías para forzar consistencia fuerte en lecturas de inventario? Justifícalo.</li>
+          <li>Implementa el simulador de réplicas de esta lección y añade un tercer nodo que se caiga a mitad de la sincronización. ¿Qué pasa con los pendientes?</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La consistencia eventual permite divergencia temporal entre réplicas que converge sin tiempo garantizado.</li>
+          <li>La regla W + R &gt; N controla la probabilidad de lecturas desactualizadas.</li>
+          <li>BASE (básicamente disponible, estado suave, eventual) es la contracara de ACID.</li>
+          <li>Conviene cuando la disponibilidad vale más que la lectura al instante; es inadecuada con invariantes estrictas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="teorema-cap.html">Teorema CAP</a>
+          <a class="related-lessons__link" href="../modulo-02/replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="../modulo-02/quorum-y-recuperacion.html">Quorum y recuperación</a>
+          <a class="related-lessons__link" href="../modulo-02/relojes-vectoriales.html">Relojes vectoriales y versiones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="ctes-with">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTEs con WITH · SQL · Backend Academy</title>
+<meta name="description" content="Aprende CTEs (Common Table Expressions) en SQL: consultas con WITH, aliases, encadenado y cómo convertir un monstruo en pasos legibles.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sql" data-current="ctes-with"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">SQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4 · Subconsultas y CTEs</a><span class="sep">/</span>
+          <span class="current">CTEs con WITH</span>
+        </nav>
+        <h1 class="lesson-title">CTEs con WITH</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> SQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Subconsultas y CTEs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Una <strong>CTE</strong> (Common Table Expression) es un «SELECT con nombre» declarado con <code class="inline">WITH</code> y usado después en la consulta principal. Es como crear una tabla temporal en memoria, sin ensuciar la base, para leer el problema por etapas.</p>
+        </section>
+
+        <section>
+          <h2 id="sintaxis">Primera CTE</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">WITH facturada AS (
+    SELECT cliente_id, SUM(total) AS total_cliente
+    FROM pedidos
+    WHERE estado = 'pagado'
+    GROUP BY cliente_id
+)
+SELECT c.nombre, f.total_cliente
+FROM clientes c
+INNER JOIN facturada f ON f.cliente_id = c.id;
+
+-- Estructura: WITH nombre AS (SELECT...) [, otrafila AS (...)]
+-- después la consulta principal, que la llama como una tabla.</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="cadena">Varias CTEs encadenadas</h2>
+          <p>Cada CTE puede usar a las anteriores. Así un problema con 4 pasos se convierte en 4 CTEs con nombres claros:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">WITH pagado   AS (SELECT * FROM pedidos WHERE estado='pagado'),
+     por_cli  AS (
+         SELECT cliente_id, SUM(total) AS total
+         FROM pagado GROUP BY cliente_id
+     ),
+     ranking  AS (
+         SELECT *, RANK() OVER (ORDER BY total DESC) AS pos
+         FROM por_cli
+     )
+SELECT c.nombre, r.total, r.pos
+FROM clientes c
+INNER JOIN ranking r ON r.cliente_id = c.id
+WHERE r.pos &lt;= 10;</code></pre>
+            </div>
+          </figure>
+          <p>Cada bloque usa al anterior: una «tubería» de transformación que se lee de arriba a abajo.</p>
+        </section>
+
+        <section>
+          <h2 id="cte-vs-subconsulta">CTE vs subconsulta en FROM</h2>
+          <p>La subconsulta en el FROM hace lo mismo, pero anida paréntesis. Con tres niveles de profundidad se vuelve ilegible. El CTE «aplana» el código y además permite <strong>reutilizar</strong> el mismo SELECT varias veces dentro de la consulta:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">WITH activos AS (SELECT * FROM productos WHERE activo = TRUE)
+SELECT 'A' AS grupo, COUNT(*) FROM activos
+UNION ALL
+SELECT 'B', COUNT(*) FROM activos WHERE precio &lt; 50;
+
+-- activos se usa dos veces: algo imposible con una subconsulta (tendrías que escribirla dos veces).</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="pitfalls">Trampas habituales</h2>
+          <ul>
+            <li>Olvidar que una CTE no crea un índice propio: si es enorme, úsala con red o considera una vista materializada.</li>
+            <li>No recuadrar el SELECT principal tras el bloque WHERE final: todo debe quedar dentro del statement.</li>
+            <li>Usar un nombre repetido (nombre de tabla real): el CTE lo oculta; califica o renombra.</li>
+          </ul>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Escribe un reporte de 3 pasos con WITH: pagados → por cliente → ranking.</li>
+            <li>Refactoriza una consulta con subconsultas anidadas a CTEs.</li>
+            <li>Reutiliza la misma CTE dos veces y valida el resultado.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>WITH crea SELECT con nombre, reutilizable dentro de la consulta.</li>
+            <li>Encadena CTEs para convertir monstruos en pasos legibles.</li>
+            <li>Es «aplanamiento» de subconsultas, no una tabla física.</li>
+            <li>Perfectas para reportes de varias etapas.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="ctes-recursivas.html">CTEs recursivas</a>
+            <a class="related-lessons__link" href="subconsultas-correlacionadas.html">Subconsultas correlacionadas</a>
+            <a class="related-lessons__link" href="../modulo-03/joins-multiples-tablas.html">JOINs con múltiples tablas</a>
+            <a class="related-lessons__link" href="../modulo-07/orms.html">ORM y consultas desde el backend</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de SQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Consultas avanzadas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · JOINs</a></li>
+          <li><a href="index.html">Módulo 4 · Subconsultas y CTEs</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Funciones de ventana</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Optimización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · SQL en el backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

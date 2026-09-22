@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-monitoreo-de-integraciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoreo de integraciones · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a observar integraciones en producción: logs estructurados con traceId, métricas de latencia y error, presupuestos de SLA y alertas accionables.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-monitoreo-de-integraciones"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Monitoreo de integraciones</span>
+      </nav>
+      <h1 class="lesson-title">Monitoreo de integraciones</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Robustez</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Tu integración puede funcionar en desarrollo y romperse en producción sin que tu código cambie: el proveedor degradó su API, tu clave alcanzó la cuota, un webhook dejó de llegar. Sin observabilidad no puedes saber si el problema está en tu código, en el proveedor o en la red. Monitorear integraciones es registrar <strong>cómo se comporta cada proveedor</strong> desde tu punto de vista: logs con contexto, métricas de latencia y error, y presupuestos de disponibilidad por servicio.</p>
+      </section>
+
+      <section>
+        <h2 id="logs">Logs estructurados por integración</h2>
+        <p>Cada llamada a un proveedor debe poder reconstruirse a posteriori. Un log estructurado (JSON) con el proveedor, el endpoint, el status y la duración responde en segundos «¿qué pasó con Stripe a las 14:03?»:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "timestamp": "2026-09-22T14:03:12.100Z",
+  "nivel": "error",
+  "evento": "integracion.llamada_fallida",
+  "proveedor": "stripe",
+  "servicio": "pagos",
+  "endpoint": "POST /v1/checkout/sessions",
+  "http_status": 503,
+  "duration_ms": 842,
+  "reintento": 2,
+  "trace_id": "abc123f"
+}</code></pre>
+        <p>En producción jamás loguees el cuerpo completo de una respuesta si puede contener tokens o datos sensibles: registra status, duración e id, no secretos.</p>
+      </section>
+
+      <section>
+        <h2 id="metricas">Métricas: lo que se mide, se arregla</h2>
+        <p>Las métricas dicen « qué tan bien está el conjunto». Para una integración las imprescindibles son: latencia (p50/p95/p99), tasa de error y consumo de cuota. Se etiquetan con <code>proveedor</code>, <code>servicio</code> y <code>endpoint</code> para poder agrupar:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import time
+from prometheus_client import Histogram, Counter, Gauge
+
+LATENCIA = Histogram("integracion_latencia_ms", "Latencia de llamadas a proveedores",
+                     labelnames=["proveedor", "endpoint"], buckets=[50, 200, 1000, 5000])
+ERRORES = Counter("integracion_errores", "Errores de integración",
+                  labelnames=["proveedor", "endpoint", "codigo"])
+CUOTA = Gauge("integracion_cuota_restante", "Cuota restante del proveedor",
+              labelnames=["proveedor"])
+
+def llamada_tiempo(proveedor, endpoint):
+    def deco(fn):
+        def wrapper(*args, **kwargs):
+            inicio = time.time()
+            try:
+                return fn(*args, **kwargs)
+            except Exception as err:
+                ERRORES.labels(proveedor, endpoint, getattr(err, "status", "net")).inc()
+                raise
+            finally:
+                LATENCIA.labels(proveedor, endpoint).observe((time.time() - inicio) * 1000)
+        return wrapper
+    return deco
+</code></pre>
+        <p>Con latencia y errores segmentados por proveedor, un dashboard te dice de un vistazo «el lento/averiado hoy es el geocoder, no SMS».</p>
+      </section>
+
+      <section>
+        <h2 id="sla">SLA y presupuesto de error</h2>
+        <p>Los proveedores publican disponibilidad de <strong>99.9%</strong>; tu integración vive por debajo. Define un presupuesto realista por servicio (por ejemplo, reprograma webhooks con <strong>&gt;1%</strong> de errores 5xx) y así las alertas solo suenan cuando importa:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "sla_integraciones": {
+    "stripe_pagos":     { "disponibilidad_objetivo": "99.95%", "error_budget_ms": 2628000 },
+    "correo_transaccional": { "disponibilidad_objetivo": "99.90%" },
+    "geocoder":         { "disponibilidad_objetivo": "99.00%" }
+  },
+  "ventana": "30 días"
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="alertas">Alertas accionables</h2>
+        <p>Si tu alerta no dice qué hacer, el turno solo se estresa. Una buena alerta de integración incluye proveedor, servicio, síntoma, y el primer paso del runbook. Además de la tasa de error, alerta sobre:</p>
+        <ul>
+          <li><strong>P95 de latencia</strong> por encima del umbral sostenido (el proveedor está lento para todos).</li>
+          <li><strong>Webhooks que dejan de llegar:</strong> sin eventos firmados durante X minutos, probablemente el proveedor no está entregando. Un healthcheck o un contador de eventos por hora lo captura.</li>
+          <li><strong>Cuota agotándose:</strong> al 80% de consumo, avisa antes de fallar en seco.</li>
+          <li><strong>Dead letter creciente:</strong> tareas que agotan reintentos; si crece, algo se rompió de verdad.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> la mínima observabilidad de una integración son 3 métricas por proveedor (latencia, error, cuota) + 1 contador de eventos que diga «sigue llegando tráfico».</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Instrumenta una integración propia con las 3 mediciones (latencia, errores, cuota) y etiqueta el proveedor.</li>
+          <li>Diseña las alertas para un webhook que deja de llegar y para una cuota al 80%.</li>
+          <li>Escribe el runbook de 5 pasos para «la cola muerta crece»: qué revisar primero y quién es el responsable.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Logs estructurados con proveedor, endpoint, status y traceId reconstruyen cualquier llamada.</li>
+          <li>Latencia, error y cuota por proveedor son las métricas base de toda integración.</li>
+          <li>Un presupuesto de error realista evita alertas por cualquier bache del proveedor.</li>
+          <li>Las buenas alertas incluyen proveedor, síntoma y el primer paso del runbook.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="manejo-de-errores-reintentos.html">Errores y reintentos</a>
+          <a class="related-lessons__link" href="../modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="colas-para-tareas-lentas.html">Colas para tareas lentas</a>
+          <a class="related-lessons__link" href="env-vars-y-secrets.html">Configuración y secretos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

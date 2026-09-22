@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="proyectos-deuda-tecnica">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deuda técnica · Gestión de Proyectos Backend · Backend Academy</title>
+<meta name="description" content="Aprende a clasificar y gestionar la deuda técnica: tipos, cuándo conviene asumirla deliberadamente y cómo pagarla con refactors seguros.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="proyectos" data-current="proyectos-deuda-tecnica"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Gestión de Proyectos Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Deuda técnica</span>
+      </nav>
+      <h1 class="lesson-title">Deuda técnica</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Gestión de Proyectos Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Planificación y seguimiento</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="deuda">Qué es la deuda técnica</h2>
+        <p>La <strong>deuda técnica</strong> es la distancia entre cómo está hecho el código y cómo debería estar hecho. Ward Cunningham, quien la nombró, usó la analogía financiera porque el comportamiento es igual: <strong>atraes fuerza de trabajo a cambio de una obligación futura</strong>. El problema no es tener deuda — todos los proyectos la tienen—, es no conocer su tamaño, su interés y su vencimiento.</p>
+        <p>La trampa mental más común es demonizarla («deuda = mala práctica») o ignorarla («ya lo refactorizamos cuando haya tiempo»). La verdad está en el medio: hay deuda <strong>tomada deliberadamente</strong> (una decisión consciente con fecha de pago) y deuda <strong>acumulada sin darse cuenta</strong> (la que mata proyectos).</p>
+      </section>
+
+      <section>
+        <h2 id="tipos">Los cuatro tipos clásicos</h2>
+        <ul>
+          <li><strong>Deuda de código:</strong> acoplamientos, duplicación, parches. La más visible y la más tentadora de arreglar.</li>
+          <li><strong>Deuda de diseño:</strong> la arquitectura no soporta el siguiente paso (escalar, añadir tenant, cambiar de modelo de datos). La más cara en impacto.</li>
+          <li><strong>Deuda de proceso:</strong> falta CI, tests frágiles, despliegues manuales, reviews que no se hacen. Vive en el flujo, no en los archivos.</li>
+          <li><strong>Deuda de documentación/contexto:</strong> nadie sabe por qué se tomó la decisión X; se heredan hábitos por miedo a romperlo.</li>
+        </ul>
+        <p>Clasificar es el primer acto de gestión: cada tipo se paga distinto (un refactor táctico no corrige deuda de diseño, y viceversa).</p>
+      </section>
+
+      <section>
+        <h2 id="diferida-o-deliberada">Deuda diferida vs deuda deliberada</h2>
+        <p>Hay una diferencia moral y operativa importante:</p>
+        <pre class="code-block"><code class="language-json" data-language="json">[
+  {
+    "tipo": "diferida",
+    "como_se_contrae": "Por prisa o por omisión, sin registrar la decisión",
+    "senal_tipica": "No se puede tocar el controlador de cobros 'por si acaso'",
+    "interes": "Crece: cada feature nueva se apoya en la anterior"
+  },
+  {
+    "tipo": "deliberada",
+    "como_se_contrae": "Yendo a producción más rápido a cambio de una fecha de pago",
+    "senal_tipica": "Un ADR o ticket: 'aceptamos deuda: login v2 sin 2FA, se paga en Q3'",
+    "interes": "Controlado: se declara, se presupuesta y se monitorea"
+  }
+]</code></pre>
+        <p>La regla operativa: <strong>toda deuda deliberada entra al backlog como ticket con dueño y fecha</strong>. Si no entra al tablero, no existe — y por lo tanto es deuda diferida con otro nombre.</p>
+      </section>
+
+      <section>
+        <h2 id="cuando-asumir">Cuándo conviene asumir deuda (y cuándo no)</h2>
+        <p>Asumir deuda tiene sentido cuando el interés no gana a la velocidad de tu desarrollo. Señales razonables para endeudarse:</p>
+        <ul>
+          <li>Validar un producto antes de invertir en su arquitectura definitiva (MVP con fecha de replanteo).</li>
+          <li>Desbloquear un hito de negocio con fecha dura, con la promesa de pagar en el trimestre siguiente.</li>
+          <li>Conservar compatibilidad con un tercero que está por morir (y tiene fecha de reemplazo).</li>
+        </ul>
+        <p>Señales de que no deberías endeudarte:</p>
+        <ul>
+          <li>Lo que revela es datos o seguridad (una fuga de PII no es MVP, es un escándalo).</li>
+          <li>La deuda está en el área por la que pasará <em>todo</em> el futuro trabajo (el modelo de datos central).</li>
+          <li>No hay fecha de pago: si «después» no tiene calendario, es deuda infinita.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="pagar-refactor">Pagar deuda: el refactor con red</h2>
+        <p>Pagar deuda no es reescribir la aplicación desde cero (el pecado mortal del refactoring). Es pagarla <strong>en tramos, con red de seguridad</strong>, y con el repositorio diciendo la verdad en cada paso:</p>
+        <ol>
+          <li>Primero tests que blinden el comportamiento actual (characterization tests si no existen).</li>
+          <li>Refactor en pasos pequeños y desplegables en verde: cada commit CI-verde.</li>
+          <li>Además del mismo comportamiento: migraciones dot-dot para bases, flag para feature, dashboard de métricas antes-después.</li>
+          <li>Revisión por pares y release gradual para limitar el alcance de un paso fallido.</li>
+        </ol>
+        <p>La regla del boy-scout aplicada al sprint: <em>dejar el código un poco mejor de lo que estaba</em>, sin apartar el sprint completo para una «gran limpieza» que nunca llega.</p>
+      </section>
+
+      <section>
+        <h2 id="medir">Medir la deuda para gestionarla</h2>
+        <p>Hay métricas que convierten la deuda en decisión — no para culpar, sino para presupuestar:</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Mapa rápido de deuda
+git log --format='%ae' --since=12.months | sort | uniq -c   # ¿conocimiento concentrado?
+find src -name '*.py' | xargs wc -l | tail -1                # ¿archivos monstruosos?
+
+# Tiempo para modificar algo
+time npx jest tests/integracion/cobros.test.js                # si tarda 4 min, la base tiembla
+
+# Deuda de proceso en el tablero
+gh pr list --state open --limit 100 | wc -l                  # PRs sin revisar = cola de pago</code></pre>
+        <p>Ideal del presupuesto: reservar todos los sprints un 10-20% del sprint para deuda. Eso se llama «capacidad de pago» y convierte la deuda en algo <em>presupuestado</em>, educado y previsible.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe 4 ejemplos reales de deuda de tu proyecto, uno por tipo (código, diseño, proceso, documentación), con el signo que los delata.</li>
+          <li>Clasifica cada uno como <em>diferida</em> o <em>deliberada</em> y conviértelo en ticket con dueño y fecha si es deliberada.</li>
+          <li>Elige uno pagable en ≤ 8 horas y dibuja el plan del refactor con red: tests primero, pasos pequeños, criterio de terminado.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>La deuda técnica es la brecha entre cómo está y cómo debería estar el código; tiene interés y vencimiento.</li>
+          <li>Se clasifica en código, diseño, proceso y documentación, y cada tipo se paga distinto.</li>
+          <li>La deuda deliberada se registra con fecha y dueño; la diferida es la que no se ve.</li>
+          <li>Se paga en tramos con red: tests, CI verde, migraciones y release gradual, reservando una porción fija del sprint.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="gestion-de-riesgos.html">Gestión de riesgos</a>
+          <a class="related-lessons__link" href="seguimiento-y-medicion.html">Seguimiento y medición</a>
+          <a class="related-lessons__link" href="../modulo-03/calidad-y-verificacion.html">Calidad y verificación</a>
+          <a class="related-lessons__link" href="../modulo-03/code-review-y-colaboracion.html">Code review y colaboración</a>
+        </div>
+      </section>
+    </div>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
+      <a class="lesson-prevnext__link" href="gestion-de-riesgos.html">
+        <span class="label">← Anterior</span>
+        <span class="title">Gestión de riesgos</span>
+      </a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
+        <span class="label">Siguiente módulo →</span>
+        <span class="title">Comunicación y entrega</span>
+      </a>
+    </nav>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de gestión</a></li>
+          <li><a href="index.html">Módulo 2 · Planificación y seguimiento</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Comunicación y entrega</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

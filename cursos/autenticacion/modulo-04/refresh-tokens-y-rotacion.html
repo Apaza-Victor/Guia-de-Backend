@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="refresh-tokens-y-rotacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refresh tokens y rotación · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Refresh tokens revocables con rotación en PHP: emitir, renovar access tokens, invalidar el refresh usado y detectar su reutilización.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="refresh-tokens-y-rotacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Refresh tokens y rotación</span>
+        </nav>
+        <h1 class="lesson-title">Refresh tokens y rotación</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · JWT</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="por-que">Por qué un refresh token</h2>
+          <p>Un access token corto fuerza al cliente a autenticarse de nuevo cada 15 minutos, mala experiencia. El <strong>refresh token</strong> es una credencial de larga duración (días/semanas), <strong>revocable</strong>, que solo se usa para pedir nuevos access tokens. Contraste clave: el access es stateless; el refresh se guarda en una tabla con su estado.</p>
+        </section>
+
+        <section>
+          <h2 id="tabla">Modelo en BD</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-sql">CREATE TABLE refresh_tokens (
+    id         BINARY(16) PRIMARY KEY,      -- token opaco
+    usuario_id INT NOT NULL,
+    familia_id BINARY(16) NOT NULL,         -- agrupa rotaciones
+    expira_en  DATETIME NOT NULL,
+    revocado   TINYINT NOT NULL DEFAULT 0,
+    creada_en  DATETIME NOT NULL,
+    INDEX (familia_id),
+    INDEX (usuario_id)
+);</code></pre>
+            </div>
+          </figure>
+          <p>El refresh suele ser <strong>opaco</strong> (un aleatorio binario), no un JWT: no necesita claims, solo referencia a la fila.</p>
+        </section>
+
+        <section>
+          <h2 id="rotacion">Rotación y detección de reuso</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function renovarTokens(PDO $db, string $refreshEnviado): array
+{
+    // 1. Buscar la fila
+    $q = $db-&gt;prepare("SELECT * FROM refresh_tokens WHERE id = ?");
+    $q-&gt;execute([$refreshEnviado]);
+    $r = $q-&gt;fetch();
+
+    if (!$r || $r["revocado"] || strtotime($r["expira_en"]) &lt; time()) {
+        http_response_code(401);
+        echo json_encode(["error" =&gt; "refresh_invalido"]);
+        exit;
+    }
+
+    // 2. ROTACION: el refresh usado muere y nace otro de la misma familia
+    $nuevoId = random_bytes(16);
+    $db-&gt;prepare("UPDATE refresh_tokens SET revocado = 1 WHERE id = ?")
+       -&gt;execute([$refreshEnviado]);
+
+    $db-&gt;prepare(
+        "INSERT INTO refresh_tokens (id, usuario_id, familia_id, expira_en)
+         VALUES (?, ?, ?, ?)"
+    )-&gt;execute([$nuevoId, $r["usuario_id"], $r["familia_id"], date("Y-m-d H:i:s", time()+30*86400)]);
+
+    // 3. Nuevo access token
+    $access = firmar_hs256([
+        "sub" =&gt; $r["usuario_id"],
+        "iat" =&gt; time(),
+        "exp" =&gt; time() + 900
+    ], $_ENV["JWT_SECRET"]);
+
+    return ["access_token" =&gt; $access, "refresh_token" =&gt; bin2hex($nuevoId)];
+}
+
+// Si un cliente reutiliza un refresh ya revocado,
+// significa ROBO: revoca toda la familia.
+// UPDATE refresh_tokens SET revocado = 1
+//  WHERE familia_id = ?</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="flujo">Flujo completo</h2>
+          <ol>
+            <li>Login → devolver <code class="inline">access_token</code> + <code class="inline">refresh_token</code>.</li>
+            <li>El cliente guarda el refresh en el servidor de confianza (no en JS).</li>
+            <li>Access caduca → <code class="inline">POST /oauth/token</code> con el refresh → renovación.</li>
+            <li>Refresh usado → revocado y reemplazado (rotación).</li>
+            <li>Reuso detectado → revoca la familia completa (posible robo).</li>
+          </ol>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Implementa el endpoint de renovación con rotación.</li>
+            <li>Envía un refresh ya usado y verifica que se revoca la familia.</li>
+            <li>Decide la vida del refresh para una app móvil y una web.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Refresh: largo, opaco, revocable y con rotación.</li>
+            <li>Tabla con familia_id para agrupar rotaciones.</li>
+            <li>Cada uso revoca el anterior y emite uno nuevo.</li>
+            <li>Reutilización = señal de robo → revocar la familia.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="access-tokens-y-expiracion.html">Access tokens y expiración</a>
+            <a class="related-lessons__link" href="almacenamiento-seguro-en-el-cliente.html">Almacenamiento seguro en el cliente</a>
+            <a class="related-lessons__link" href="../modulo-03/cierre-de-sesion-y-revocacion.html">Cierre de sesión y revocación</a>
+            <a class="related-lessons__link" href="../modulo-03/sesiones-en-bd-y-redis.html">Sesiones en Bases de Datos y Redis</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

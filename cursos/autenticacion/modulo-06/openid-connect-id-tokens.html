@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="openid-connect-id-tokens">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenID Connect e id tokens · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="OpenID Connect: la capa de identidad sobre OAuth 2.0, el flujo con scope openid, el id_token y su validación con claves públicas jwks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="openid-connect-id-tokens"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">OpenID Connect e id tokens</span>
+        </nav>
+        <h1 class="lesson-title">OpenID Connect e id tokens</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · OAuth 2.0 y OIDC</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="oidc">OAuth frente a OIDC</h2>
+          <p>OAuth 2.0 <strong>autoriza</strong> (accesos a recursos) pero no estandariza <em>quién</em> es el usuario. <strong>OpenID Connect (OIDC)</strong> es una capa sobre OAuth que añade <strong>autenticación</strong> e identidad: si pides el scope <code class="inline">openid</code>, el proveedor emite además un <strong>id_token</strong> con quién es el usuario y cuándo se autenticó.</p>
+        </section>
+
+        <section>
+          <h2 id="idt">El id_token</h2>
+          <p>Es un <strong>JWT</strong> con claims de identidad: <code class="inline">sub</code> (identificador único del usuario), <code class="inline">email</code>, <code class="inline">name</code>, <code class="inline">iss</code>, <code class="inline">aud</code>, <code class="inline">exp</code>, <code class="inline">iat</code>, <code class="inline">auth_time</code> y un <code class="inline">nonce</code> que vincula la petición con el usuario (anti-replay). El access_token sigue siendo el que da acceso; el id_token solo demuestra identidad.</p>
+        </section>
+
+        <section>
+          <h2 id="jwks">Validar con claves públicas</h2>
+          <p>Los proveedores publican sus claves de firma en <code class="inline">/.well-known/jwks.json</code>. La validación del id_token:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+function validarIdToken(string $idToken): array
+{
+    // 1. Traer las claves publicas (jwks) del proveedor y elegir por 'kid'
+    // 2. Verificar firma con RS256 (modulo 4)
+    // 3. Comprobar iss == "https://acme.auth"
+    // 4. Comprobar aud == client_id
+    // 5. Comprobar exp &gt; ahora, nbf &lt; ahora
+    // 6. Comprobar nonce == el guardado en la sesion (modulo 6.1)
+
+    // Con una libreria como lcobucci/jwt esto se reduce a:
+    // jwt-&gt;headers()-&gt;get('kid') -&gt; clave publica -&gt; verify(signature)
+    // y a comparaciones de iss, aud, exp, nonce.
+    return $claimsValidos;
+}
+
+$claims = validarIdToken($tokens["id_token"]);
+// ["sub" =&gt; "113...", "email" =&gt; "ana@correo.com", "name" =&gt; "Ana"]</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="userinfo">El endpoint UserInfo</h2>
+          <p>Los datos frescos del perfil se piden al endpoint <code class="inline">/userinfo</code> con el access token. Así, si el usuario actualizó su correo, recibes el nuevo dato, mientras que el id_token reproduce el estado del momento de autenticación.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Pide <code class="inline">openid profile email</code> y decodifica el id_token.</li>
+            <li>Valida iss, aud, exp y nonce con tu implementación del módulo 4.</li>
+            <li>Llama a <code class="inline">/userinfo</code> y compara con los claims del token.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>OIDC = OAuth + identidad estandarizada.</li>
+            <li>Scope <code class="inline">openid</code> dispara el id_token.</li>
+            <li>El id_token se valida con las jwks públicas del proveedor.</li>
+            <li>Datos frescos en <code class="inline">/userinfo</code>; nonce anti-replay.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="integrando-un-proveedor-externo.html">Integrando un proveedor externo</a>
+            <a class="related-lessons__link" href="authorization-code-flow.html">Authorization code flow</a>
+            <a class="related-lessons__link" href="../modulo-04/firmando-tokens-hs256-rs256.html">Firmando tokens: HS256 y RS256</a>
+            <a class="related-lessons__link" href="scopes-y-consentimiento.html">Scopes y consentimiento</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

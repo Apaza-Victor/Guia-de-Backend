@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="observabilidad-m3-l3">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>On-call y manejo de incidentes · Observabilidad Backend · Backend Academy</title>
+<meta name="description" content="Aprende a organizar on-call, escribir runbooks, escalar incidentes por severidad y hacer postmortems blameless que mejoren el sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="observabilidad-m3-l3"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Observabilidad Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">On-call y manejo de incidentes</span>
+      </nav>
+      <h1 class="lesson-title">On-call y manejo de incidentes</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Alertas y dashboards</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="rotacion">On-call: quién responde y cómo</h2>
+        <p>La observabilidad termina el día en que la página llega a una persona que sabe qué hacer. El <strong>on-call</strong> es la rotación del equipo responsable de responder a las páginas. Las bases que evitan burnout y desorden:</p>
+        <ul>
+          <li><strong>Rotación previsible:</strong> una semana por persona, con handoff documentado y calendario a la vista.</li>
+          <li><strong>Fuera de horario, solo lo crítico:</strong> de madrugada solo suena <code class="inline">severity=page</code>, nunca tickets.</li>
+          <li><strong>Recarga limitada:</strong> nadie debería estar de guardia más de una semana seguida de forma habitual.</li>
+          <li><strong>Escalamiento definido:</strong> si no resuelves en X minutos, salta el siguiente en la cadena.</li>
+        </ul>
+        <p>Una política de severidades mínima, gestionada en el sistema de alertas:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml" data-language="yaml">rotacion:
+  equipo: pagos
+  ritmo: 1 semana
+  horario_diurno: "08:00–20:00"
+  horario_nocturno_solo_pages: true
+
+severidades:
+  - id: sev1
+    nombre: "Servicio de pagos caído"
+    respuesta: 15 min
+    ejemplo: "100% de los cobros fallando."
+  - id: sev2
+    nombre: "Degradación de checkout"
+    respuesta: 1 h
+    ejemplo: "p95 de latencia ×10 sin romper el SLO."
+  - id: sev3
+    nombre: "No urgente"
+    respuesta: ticket en 24 h
+    ejemplo: "alerta de disco al 85% con plan de crecimiento."</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="runbook">Runbooks: el botiquín</h2>
+        <p>Un runbook describe, para cada alerta: síntomas, diagnóstico paso a paso y mitigaciones. En una madrugada, el cerebro funciona peor: el runbook lo compensa. Formato mínimo en Markdown dentro del repo:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">markdown</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-markdown" data-language="markdown"># Runbook: CheckoutTasa5xx
+
+## Síntoma
+Alerta `5xx > 5%` durante 10 min en checkout-api.
+
+## Diagnóstico en 3 pasos
+1. Tasa global vs por ruta:
+   `sum by (route) (rate(http_requests_total{job="checkout-api", status=~"5.."}[5m]))`
+2. ¿Es un proveedor de pagos? Agrupa por `payments_provider` en logs.
+3. ¿Es un release reciente? Compara el deploy de las últimas 2 horas.
+
+## Mitigación rápida
+- Rollback: `kubectl rollout undo deployment/checkout-api`
+- Si es el proveedor: activar fallback con el proveedor secundario.
+
+## Escalamiento
+- 15 min sin resolver: on-call de infra #infra-oncall, SEV1.</code></pre>
+          </div>
+        </figure>
+        <p>Todo runbook apunta a comandos copy-paste: rollback, feature flag, degradación. Si la mitigación requiere reinventar pasos cada vez, el runbook no está cumpliendo su trabajo.</p>
+      </section>
+
+      <section>
+        <h2 id="fases">Las fases de un incidente</h2>
+        <ol>
+          <li><strong>Detección:</strong> la alerta (o un usuario que lo nota antes, mala señal).</li>
+          <li><strong>Triage:</strong> ¿es real? ¿qué severidad? ¿quién lidera?</li>
+          <li><strong>Mitigación:</strong> el objetivo es recuperar el servicio, no entender la causa. Rollback primero; investigación después.</li>
+          <li><strong>Resolución:</strong> la métrica vuelve a rango y el sistema se estabiliza.</li>
+          <li><strong>Postmortem:</strong> se aprende en privado, se comparte en público.</li>
+        </ol>
+        <p>La línea de tiempo es el documento vivo del incidente: se rellena mientras ocurre (channel dedicado), no de memoria.</p>
+      </section>
+
+      <section>
+        <h2 id="timeline">Timeline y postmortem</h2>
+        <p>El postmortem <strong>blameless</strong> describe qué pasó y qué va a cambiar. Ni culpables ni castigos: sistemas, procesos y próxima mejor. Plantilla real:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">markdown</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-markdown" data-language="markdown"># Postmortem: 5xx en checkout por timeout de pasarela
+
+## Resumen
+Durante 42 min el 8% de los cobros fallaron tras un cambio en el
+proveedor; los usuarios vieron «no pudimos procesar su pago».
+
+## Línea de tiempo (UTC)
+- 09:31 — alerta CheckoutTasa5xx (severity page).
+- 09:33 — on-call confirma; canal #incidente abierto.
+- 09:40 — se identifica el deploy v1.4.2 (cambió el timeout del proveedor).
+- 09:52 — rollback a v1.4.1; tráfico normal 10 min después.
+
+## Causa raíz
+El cliente del proveedor nuevo no tenía timeout de lectura; quedó
+bloqueado en conexiones agotando el pool a los 15 min de tráfico.
+
+## Lecciones
+- Los clientes HTTP externos necesitan timeout y retry configurables.
+- Los cambios de proveedor deben pasar por canary con 5% de tráfico.
+- La alerta de 5xx funcionó como diseño: 5 min de detección.
+
+## Acciones (dueño · fecha)
+- [ ] Añadir timeout/retry al cliente de pagos — @ana · +2 días
+- [ ] Configurar review de integraciones externas — @luis · +1 sprint
+- [ ] Alertar sobre `pool_size_saturated` — @pedro · +5 días</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="mejorar">Mejorar con cada incidente</h2>
+        <ul>
+          <li><strong>Time to detect / to mitigate:</strong> mide y busca reducirlos con alertas más claras y runbooks más cortos.</li>
+          <li><strong>Automatiza lo repetitivo:</strong> si el rollback fue manual dos veces, es candidato a un botón/script.</li>
+          <li><strong>Prueba el on-call:</strong> game days y chaos experiments revelan fallas en runbooks y escalamientos cuando el fuego es ficticio.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Filosofía:</strong> si el postmortem termina sin acciones con dueño y fecha, el incidente volverá. El objetivo no es «encontrar al culpable», es «derrotar la recurrencia».</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Escribe el runbook de tu alerta más importante (los 3 pasos de diagnóstico y 1 mitigación copy-paste).</li>
+          <li>Define la política de severidades de tu equipo y qué respuesta tiene cada una.</li>
+          <li>Redacta un postmortem de un incidente que hayas vivido (o inventado) con 3 acciones con dueño.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El on-call se organiza con rotación, severidades, tiempos de respuesta y escalamiento.</li>
+          <li>Un runbook reduce la reacción a pasos concretos y copy-paste.</li>
+          <li>El incidente vive en su timeline; la mitigación va antes del análisis.</li>
+          <li>El postmortem blameless convierte cada susto en mejoras con dueño y fecha.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="alertas-inteligentes.html">Alertas inteligentes</a>
+          <a class="related-lessons__link" href="slos-y-slis.html">SLOs, SLIs y SRE</a>
+          <a class="related-lessons__link" href="dashboards-efectivos.html">Dashboards efectivos</a>
+          <a class="related-lessons__link" href="../modulo-03/profiling-de-produccion.html">Profiling y correlación</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="index.html">Módulo 3 · Alertas y dashboards</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

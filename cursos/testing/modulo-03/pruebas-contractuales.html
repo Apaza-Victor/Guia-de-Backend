@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="testing-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas contractuales · Testing Backend · Backend Academy</title>
+<meta name="description" content="Pruebas contractuales entre consumidor y proveedor de API: contrato OpenAPI, matchers y cómo vertebrar equipos que no se hablan suficiente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="testing" data-current="testing-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Testing Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Pruebas contractuales</span>
+      </nav>
+      <h1 class="lesson-title">Pruebas contractuales</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Testing Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Integración</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="que-es">Qué es un contrato de API</h2>
+        <p>El <strong>contrato</strong> es el acuerdo tácito entre quien produce una API y quien la consume: <em>qué estructura, qué campos, qué códigos, qué errores</em>. Las pruebas contractuales <strong>hacen ejecutable ese acuerdo</strong>, para que un cambio de un lado no rompa en silencio al otro.</p>
+      </section>
+
+      <section>
+        <h2 id="openapi">El contrato: OpenAPI primero</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">YAML · openapi.yml (extracto)</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">paths:
+  /api/usuarios/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                required: [id, email, rol]
+                properties:
+                  id:    { type: integer }
+                  email: { type: string, format: email }
+                  rol:   { enum: [admin, cliente] }</code></pre>
+          </div>
+        </figure>
+        <p>Si tu especificación está versionada, es el «test más importante» que tienes: define qué es válido para siempre.</p>
+      </section>
+
+      <section>
+        <h2 id="matchers">Matchers: no valores, SÍ estructura</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP · validación de contrato</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">final class ContratoUsuarioTest extends \PHPUnit\Framework\TestCase
+{
+    public function test_respuesta_cumple_el_contrato(): void
+    {
+        $respuesta = json_decode($this-&gt;obtenerUsuario(1), true);
+
+        self::assertIsInt($respuesta['id']);
+        self::assertMatchesRegularExpression('/.+@.+/', $respuesta['email']);
+        self::assertContains($respuesta['rol'], ['admin', 'cliente']);
+        self::assertSame(
+            ['id', 'email', 'rol'],
+            array_keys($respuesta),   // sin campos extra sorpresa
+        );
+    }
+}</code></pre>
+          </div>
+        </figure>
+        <p>La idea: los tests contractuales verifican <strong>forma</strong> (tipos, requeridos, rangos), no datos concretos que cambian con cada inventario.</p>
+      </section>
+
+      <section>
+        <h2 id="consumidor">El lado consumidor</h2>
+        <p>El consumidor es quien más sufre el cambio no avisado. Su prueba contractual ideal:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">public function test_el_dominio_acepta_lo_que_da_el_proveedor(): void
+{
+    // respuestas FIJAS según el contrato publicado
+    $proveedor = new StubProveedor([
+        '/api/usuarios/1' =&gt; ['id'=&gt;1, 'email'=&gt;'ana@x.com', 'rol'=&gt;'cliente'],
+    ]);
+
+    $usuario = (new ImportarUsuarios($proveedor))-&gt;uno(1);
+
+    self::assertSame('ana@x.com', $usuario-&gt;email);
+    self::assertTrue($usuario-&gt;esCliente());
+}</code></pre>
+          </div>
+        </figure>
+        <p>Si el proveedor añade campos, el consumidor <strong>no se rompe</strong> (usa lo que usa). Si cambia tipos u omite requeridos, el stub del contrato falla y se negocia antes de romper producción.</p>
+      </section>
+
+      <section>
+        <h2 id="herramientas">Herramientas: Pact y más</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Pact   → el rey: consumidor genera pacto; proveedor lo verifica
+Behat + user-defined steps → Gherkin como contrato ejecutable
+OpenAPI validators → la spec como fuente de verdad
+Visiblee / Dredd → Dredd valida que la app cumpla la spec
+
+En casa: ContratoUsuarioTest (el de arriba) + validación
+OpenAPI en el test de rutas = 90% del beneficio.</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="cuando">Cuándo vale la pena</h2>
+        <ul>
+          <li>Cuando dos equipos (o microservicios) se comunican sin llamarse.</li>
+          <li>Cuando un tercero (SAAS, partner) define la API que tú consumes.</li>
+          <li>Cuando produces una API pública: el contrato ES tu doc.</li>
+          <li>Regla: más vale un contrato escrito hace 3 meses que una conversación de pasillo.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Define un <code>openapi.yml</code> mínimo para un endpoint tuyo.</li>
+          <li>Escribe un test de contrato con matchers de estructura.</li>
+          <li>Cambia un tipo en el endpoint y observa el fallo del test.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El contrato es el acuerdo; los tests lo hacen ejecutable.</li>
+          <li>OpenAPI versionado = spec como fuente de verdad.</li>
+          <li>Matchers de forma, no valores concretos.</li>
+          <li>El consumidor protege su mundo con stubs del contrato.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="testing-http-y-servicios-externos.html">Testing HTTP y servicios externos</a>
+          <a class="related-lessons__link" href="../modulo-04/supertest-api.html">Supertest para tu API</a>
+          <a class="related-lessons__link" href="../modulo-04/flujos-completos-api.html">Flujos completos de API</a>
+          <a class="related-lessons__link" href="../modulo-06/detectando-regresiones.html">Detectando regresiones</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
+          <li><a href="index.html">Módulo 3 · Integración</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · E2E</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · TDD</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Métricas y CI/CD</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-que-es-un-sistema-distribuido">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es un sistema distribuido? · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende qué es un sistema distribuido, por qué las fallas parciales y la ausencia de reloj global cambian las reglas del juego, y dónde aparecen en el backend real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-que-es-un-sistema-distribuido"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 1</a><span class="sep">/</span>
+        <span class="current">¿Qué es un sistema distribuido?</span>
+      </nav>
+      <h1 class="lesson-title">¿Qué es un sistema distribuido?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Casi cualquier Backend que sirva tráfico real es, hoy, un sistema distribuido: varios servidores detrás de un balanceador, una base con réplicas, un clúster de caché y una cola de mensajes. El problema es que, cuando tienes más de una máquina, <strong>las reglas del juego cambian</strong>. Lo que en un solo proceso era obvio —una variable, un reloj, un fallo— deja de serlo.</p>
+        <p>Un <strong>sistema distribuido</strong> es un conjunto de computadoras (nodos) que colaboran entre sí por red y que se presentan al usuario como un único sistema coherente. La palabra clave es <em>coherente</em>: la coordinación es lo difícil, porque cada nodo ve el mundo por su propia ventana.</p>
+      </section>
+
+      <section>
+        <h2 id="definicion">Definición y características</h2>
+        <p>La definición clásica de Leslie Lamport —«un sistema en el que el fallo de una computadora de la que no sabes siquiera que existe puede impedir que tu sistema funcione»— sigue vigente. Las características que definen a estos sistemas:</p>
+        <ul>
+          <li><strong>Concurrencia:</strong> varios nodos ejecutan al mismo tiempo y compiten por recursos.</li>
+          <li><strong>Ausencia de reloj global:</strong> cada máquina tiene su propio reloj y no puedes sincronizarlos perfectamente.</li>
+          <li><strong>Fallas independientes:</strong> un nodo puede caerse, ralentizarse o corromperse sin avisar y sin afectar a los demás.</li>
+          <li><strong>Comunicación solo por red:</strong> los nodos no comparten memoria; todo intercambio es un mensaje que puede perderse.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Idea clave:</strong> en un sistema distribuido asumimos que podemos <em>agregar más máquinas</em> para ganar rendimiento y disponibilidad, pero cada máquina nueva añade incertidumbre: más red, más relojes, más fallos posibles.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="fallas-parciales">Fallas parciales</h2>
+        <p>En un programa normal, cuando algo falla, falla todo el proceso y lo sabes: la excepción está en la misma máquina. En un sistema distribuido, el escenario típico es la <strong>falla parcial</strong>: un nodo deja de responder, pero el resto del sistema sigue vivo. El problema es que no sabes <em>por qué</em> no responde:</p>
+        <ul>
+          <li>El nodo se cayó (process crash).</li>
+          <li>El nodo está vivo pero la red perdió el paquete.</li>
+          <li>El nodo está tan lento que parece muerto (falso positivo).</li>
+          <li>El nodo procesó tu mensaje, respondió, y la respuesta se perdió.</li>
+        </ul>
+        <p>Operar bajo incertidumbre es el arte del backend distribuido: <strong>no puedes distinguir un nodo caído de un nodo inalcanzable</strong>.</p>
+      </section>
+
+      <section>
+        <h2 id="no-reloj-global">No hay un reloj global</h2>
+        <p>Si dos nodos guardan una marca de tiempo cada uno, ¿cuál ocurrió antes? Depende de en qué reloj confíes. Los relojes físicos se desvían (el problema de NTP) y, aunque se sincronicen a la mañana, pueden recalibrarse a mitad del día. Por eso en sistemas distribuidos hablamos de <strong>relojes lógicos</strong> (contadores, relojes vectoriales) para ordenar eventos, tema que verás en el módulo 2.</p>
+      </section>
+
+      <section>
+        <h2 id="en-el-backend">Dónde aparecen en el backend</h2>
+        <p>Cuando escalas cualquiera de estas piezas, ya estás en territorio distribuido:</p>
+        <ul>
+          <li><strong>Load balancer + N servidores:</strong> varios procesos sirven la misma API.</li>
+          <li><strong>Base de datos con réplicas:</strong> escrituras al líder, lecturas a réplicas.</li>
+          <li><strong>Redis Cluster o Kafka:</strong> datos particionados entre varias máquinas.</li>
+          <li><strong>Workers:</strong> N procesos consumen la misma cola.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="ejemplo">Ejemplo: una API replicada</h2>
+        <p>Imagina que despliegas dos instancias del mismo servicio detrás de un balanceador. En un solo nodo, contar los «me gusta» es trivial; con dos, cada nodo puede tener una copia distinta:</p>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Nodo A: recibe una petición y suma 1
+contadorA += 1; // contadorA = 100
+guardar(contadorA);
+
+// Nodo B: recibe otra petición y suma 1 también
+contadorB += 1; // contadorB = 100 (obsoleto: le faltan las escrituras de A)
+
+// Resultado: el cliente ve 100 en A y 100 en B,
+// pero el valor "correcto" pudo haber sido 101.
+</code></pre>
+        <p>La solución pasa por <strong>replicar</strong> (módulo 2): elegir un nodo como líder, propagar las escrituras y decidir qué leen los clientes.</p>
+        <p>Un despliegue típico con Docker Compose ya es un mini-sistema distribuido. Observa cómo declaramos replicas:</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml">services:
+  api:
+    image: mi-api:1.0
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:
+</code></pre>
+        <p>Con tres réplicas de la API tienes más capacidad, pero también tres puntos donde las cosas pueden fallar de forma <em>distinta</em>. Y si el balanceador reenvía la misma petición dos veces, ¿qué pasa con el pago del usuario? La clave está en la <strong>idempotencia</strong>, que verás en la lección de comunicación entre nodos.</p>
+      </section>
+
+      <section>
+        <h2 id="detectar-nodo">Detectar un nodo caído</h2>
+        <p>La detección de fallos se hace habitualmente con <em>heartbeats</em>: cada nodo envía una señal periódica y, si no llega dentro del timeout, se le declara inalcanzable. La incertidumbre es inevitable: un timeout demasiado corto y marcas nodos sanos como caídos; demasiado largo y tardas en reaccionar.</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import asyncio
+
+TIEMPO_ESPERA = 30  # segundos sin latido -&gt; nodo sospechoso
+
+async def vigilar(nodo, id_ultimo_latido):
+    # Cada latido recibe un número de secuencia para diferenciar "vivo"
+    # de "la red reenvió un paquete viejo".
+    while True:
+        await asyncio.sleep(1)
+        antiguo = await nodo.ultimo_latido()
+        if id_ultimo_latido.get(nodo.id, -1) &lt; antiguo:
+            id_ultimo_latido[nodo.id] = antiguo
+            print(f"{nodo.id}: vivo")
+        elif (ultima_marca &gt;= TIEMPO_ESPERA):
+            marcar_como_sospechoso(nodo.id)
+</code></pre>
+        <div class="callout">
+          <p><strong>Recuerda:</strong> un nodo «caído» a menudo no lo está; solo es un nodo cuyo mensaje no conseguimos recibir a tiempo. Diseña siempre para la incertidumbre.</p>
+        </div>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Lista tres servicios de tu proyecto actual (o de uno conocido) que formen parte de un sistema distribuido y explica qué nodos participan.</li>
+          <li>Elige una petición concreta (crear un pedido, registrar un pago) y enumera todos los puntos donde puede producirse una <em>falla parcial</em>.</li>
+          <li>Responde: ¿qué le pasa a tu base de datos si dos instancias de la API escriben al mismo tiempo sin coordinación? Escribe el escenario con tus palabras.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Un sistema distribuido es un conjunto de nodos que colaboran por red y se presentan como un todo.</li>
+          <li>La falla parcial es la regla: puedes distinguir nodo caído, inalcanzable o lento.</li>
+          <li>No existe un reloj global: el orden debe derivarse con relojes lógicos.</li>
+          <li>Detectar nodos caídos requiere heartbeats con timeout, siempre con incertidumbre.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="modelos-de-fallos.html">Modelos de fallo</a>
+          <a class="related-lessons__link" href="bases-de-la-comunicacion.html">Comunicación entre nodos</a>
+          <a class="related-lessons__link" href="../modulo-02/replicacion.html">Replicación de datos</a>
+          <a class="related-lessons__link" href="../modulo-03/manejo-de-fallos-graceful.html">Manejo de fallos graceful</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

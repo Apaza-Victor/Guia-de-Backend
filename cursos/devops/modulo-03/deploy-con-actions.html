@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="deploy-con-actions">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Despliegue con Actions · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Despliega una API Backend a un servidor remoto desde GitHub Actions usando SSH, rsync y systemd, con salud y rollback incluidos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="deploy-con-actions"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">DevOps para Backend</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Despliegue con Actions</span>
+      </nav>
+      <h1 class="lesson-title">Despliegue con Actions</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · GitHub Actions</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Una vez que tu CI da verde, el siguiente paso del ciclo es el <strong>despliegue</strong>: mover el artefacto ya probado a producción. Aquí verás cómo GitHub Actions puede conectar por SSH a un VPS, copiar el código con <code class="inline">rsync</code> y reiniciar el servicio con <code class="inline">systemctl</code>.</p>
+      </section>
+
+      <section>
+        <h2 id="preparativos">Preparativos en el servidor</h2>
+        <p>Antes del pipeline necesitas credenciales SSH para el runner. Lo más fácil: crear un usuario sin shell para despliegues y una llave SSH dedicada (nunca tu llave personal, nunca tu contraseña).</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-bash"># En TU máquina (una sola vez)
+ssh-keygen -t ed25519 -C "deploy-github-actions" -f ~/.ssh/ci_deploy
+
+# En el SERVIDOR
+sudo useradd --create-home --shell /bin/bash deployer
+sudo mkdir -p /home/deployer/.ssh
+sudo tee -a /home/deployer/.ssh/authorized_keys \
+  &lt; ~/.ssh/ci_deploy.pub
+sudo chmod 700 /home/deployer/.ssh
+sudo chmod 600 /home/deployer/.ssh/authorized_keys</code></pre>
+          </div>
+        </figure>
+        <p>Después, en GitHub (Settings → Secrets and variables → Actions) guarda la llave <strong>privada</strong> como <code class="inline">SSH_PRIVATE_KEY</code>, y el host/usuario como variables o secrets.</p>
+      </section>
+
+      <section>
+        <h2 id="workflow">El workflow de despliegue</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">name: Deploy a producción
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar llave SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" &gt; ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan ${{ vars.SERVIDOR_HOST }} &gt;&gt; ~/.ssh/known_hosts
+
+      - name: Copiar el código
+        run: |
+          rsync -avz --delete \
+            --exclude ".git" \
+            ./ ${{ vars.USUARIO }}@${{ vars.SERVIDOR_HOST }}:/srv/api/
+
+      - name: Instalar y reiniciar
+        run: |
+          ssh ${{ vars.USUARIO }}@${{ vars.SERVIDOR_HOST }} \
+            "cd /srv/api && \
+             pip install -r requirements.txt && \
+             sudo systemctl restart api.service"</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="salud">Comprobar que el deploy funcionó</h2>
+        <p>Desplegar no termina cuando el comando sale con ceros: hay que <strong>verificar</strong>. Añade un paso que consulte el servidor después de reiniciar:</p>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">yaml</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-yaml">- name: Healthcheck
+  run: |
+    curl --fail --silent --show-error \
+      https://api.tudominio.com/health
+    echo "La API responde ok"</code></pre>
+          </div>
+        </figure>
+        <p>Si el healthcheck falla, el job se marca en rojo y puedes actuar: revisar logs, corregir o volver a la versión anterior (tema del módulo 5).</p>
+      </section>
+
+      <section>
+        <h2 id="seguridad">Seguridad en el deploy</h2>
+        <ul>
+          <li>La llave privada vive <strong>solo como secret</strong>, nunca en el repo.</li>
+          <li>Restringe acciones de despliegue a <code class="inline">main</code> y hazlas manuales con <code class="inline">workflow_dispatch</code> cuando quieras mayor control.</li>
+          <li>Usa un usuario dedicado y revoca su llave si el repositorio deja de usarse.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Prepara un usuario <code class="inline">deployer</code> y la llave SSH en tu servidor de pruebas.</li>
+          <li>Escribe un workflow que sincronice el código y reinicie el servicio con <code class="inline">systemctl</code>.</li>
+          <li>Añade un healthcheck que falle a propósito (renombra el endpoint) y verifica que el job se marque en rojo.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El despliegue por SSH usa una llave dedicada almacenada como secret.</li>
+          <li><code class="inline">rsync</code> copia los cambios y <code class="inline">systemctl restart</code> activa el servicio.</li>
+          <li>El pipeline termina con un healthcheck que valida el resultado.</li>
+          <li>Cualquier secret en el repo es una vulnerabilidad: todo a GitHub Secrets.</li>
+        </ul>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en Backend</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

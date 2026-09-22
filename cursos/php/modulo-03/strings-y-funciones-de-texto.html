@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="strings-y-funciones-de-texto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strings: funciones de texto y expresiones · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Aprende a manipular cadenas en PHP: strtoupper, trim, str_replace, substr, preg_match y el formato de texto que usa el backend real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="php" data-current="strings-y-funciones-de-texto"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Strings: funciones de texto y expresiones</span>
+        </nav>
+        <h1 class="lesson-title">Strings: funciones de texto y expresiones</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Arrays y estructuras de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="normalizar">Normalizar texto: case y espacios</h2>
+          <p>El backend recibe texto de formularios y APIs, y casi siempre hay que normalizarlo antes de guardarlo o compararlo: convertir a mayúsculas, recortar espacios o limpiar etiquetas.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$email = "  ANA@EJEMPLO.COM ";
+
+$emailLimpio = strtolower(trim($email));   // aña@ejemplo.com
+$primeraMayus = ucfirst("backend academy"); // Backend academy
+$titulo = ucwords("desarrollo backend en php"); // Desarrollo Backend En Php
+
+// En español, usa las variantes mb_* para acentos
+$texto = "Árbol";
+echo strtoupper($texto) . PHP_EOL;    // ÁRBOL
+echo mb_strtoupper("café") . PHP_EOL; // CAFÉ (correcto con mb_)
+
+echo $emailLimpio . PHP_EOL;
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>Regla de oro: trabaja con <strong>UTF-8</strong> y usa las funciones <code class="inline">mb_*</code> (<code class="inline">mb_strtolower</code>, <code class="inline">mb_strlen</code>) cuando el texto pueda contener acentos o caracteres especiales.</p>
+        </section>
+
+        <section>
+          <h2 id="buscar">Buscar, extraer y reemplazar</h2>
+          <p>Conocer si un texto contiene otro, extraer una parte o sustituir palabras es el día a día de validaciones y de responders de APIs.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$slug = "mi-primer-post";
+
+// ¿Contiene "primer"?
+var_dump(str_contains($slug, "primer"));   // true
+
+// ¿Empieza / termina con...?
+var_dump(str_starts_with($slug, "mi-"));   // true
+var_dump(str_ends_with($slug, "-post"));   // true
+
+// Extraer una subcadena: desde la posición 3, 5 caracteres
+echo substr($slug, 3, 5) . PHP_EOL;        // prime
+
+// Reemplazar todas las apariciones
+$leible = str_replace("-", " ", $slug);    // mi primer post
+echo ucwords($leible) . PHP_EOL;           // Mi Primer Post
+
+// Desglosar por un separador
+$partes = explode("-", $slug);
+var_dump($partes);
+
+// Longitud (con mb_* para UTF-8)
+echo mb_strlen("café") . PHP_EOL;          // 4
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section>
+          <h2 id="expresiones-regulares">Expresiones regulares</h2>
+          <p>Para patrones potentes, PHP tiene <code class="inline">preg_match</code>, <code class="inline">preg_match_all</code> y <code class="inline">preg_replace</code>. Es la manera estándar de validar formatos como emails, teléfonos o URLs.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$telefonos = ["+34 612 345 678", "12345", "900 100 200"];
+
+foreach ($telefonos as $telefono) {
+    $valido = preg_match('/^\+\d{2}\s\d{3}\s\d{3}\s\d{3}$/', $telefono);
+    echo ($valido ? "OK " : "NO ") . $telefono . PHP_EOL;
+}
+
+// Extraer todos los números de un texto
+$texto = "Precios: 12.5, 3.99 y 40";
+preg_match_all('/\d+(\.\d+)?/', $texto, $coincidencias);
+var_dump($coincidencias[0]);
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+          <p>La <em>guía rápida</em> de los símbolos: <code class="inline">^</code> ancla al inicio, <code class="inline">$</code> al final, <code class="inline">\d</code> dígito, <code class="inline">{n}</code> repetición exacta, <code class="inline">+</code> una o más, <code class="inline">*</code> cero o más.</p>
+        </section>
+
+        <section>
+          <h2 id="formatear">Formatear números y fechas</h2>
+          <p>Un backend que muestra totales debe formatearlos bien: miles, decimales, moneda y fechas legibles.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-php">&lt;?php
+
+$total = 1234567.891;
+
+echo number_format($total, 2, ",", ".") . PHP_EOL; // 1.234.567,89
+
+// Fechas: de timestamp a formato legible
+echo date("d/m/Y H:i", strtotime("2026-09-19 14:30")) . PHP_EOL;
+echo date("Y-m-d", strtotime("+1 week")) . PHP_EOL; // dentro de una semana
+
+// str_pad: rellenar con ceros (útil en IDs de pedido)
+echo str_pad("42", 6, "0", STR_PAD_LEFT) . PHP_EOL; // 000042
+
+?&gt;</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Recibe un email con espacios y mayúsculas por una variable y normalízalo con <code class="inline">trim</code> + <code class="inline">strtolower</code>.</li>
+            <li>Comprueba con <code class="inline">str_contains</code> si una frase contiene la palabra «error» y muestra el resultado.</li>
+            <li>Con <code class="inline">str_replace</code>, convierte espacios en guiones para crear un slug de ejemplo.</li>
+            <li>Usa <code class="inline">preg_match</code> para validar que una cadena tenga entre 8 y 16 caracteres alfanuméricos.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Normaliza texto con <code class="inline">trim</code>, <code class="inline">strtolower</code> y las versiones <code class="inline">mb_*</code>.</li>
+            <li>Busca con <code class="inline">str_contains</code>, <code class="inline">str_starts_with</code> y <code class="inline">str_ends_with</code>.</li>
+            <li>Extrae con <code class="inline">substr</code>, sustituye con <code class="inline">str_replace</code> y desglosa con <code class="inline">explode</code>.</li>
+            <li>Los patrones avanzados van con <code class="inline">preg_match</code> y expresiones regulares.</li>
+            <li>Formatea dinero y fechas con <code class="inline">number_format</code> y <code class="inline">date</code>.</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

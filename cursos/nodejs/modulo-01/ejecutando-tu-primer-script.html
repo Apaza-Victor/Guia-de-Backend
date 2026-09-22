@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="ejecutando-tu-primer-script">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ejecutando tu primer script · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Escribe y ejecuta tu primer script de Node.js, aprende las diferencias con el navegador y los globales clave como process y console.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" aria-label="Módulos del curso" data-sidebar="course" data-course="nodejs" data-current="ejecutando-tu-primer-script"></aside>
+
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1</a><span class="sep">/</span>
+          <span class="current">Ejecutando tu primer script</span>
+        </nav>
+        <h1 class="lesson-title">Ejecutando tu primer script</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Introducción a Node.js</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="primer-script">Tu primer script</h2>
+          <p>Crea un archivo llamado <code class="inline">hola.js</code> con este contenido y ejecútalo con <code class="inline">node hola.js</code>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">console.log("Hola desde Node.js");
+
+const hora = new Date().toLocaleTimeString("es-ES");
+console.log("La hora del servidor es:", hora);</code></pre>
+            </div>
+          </figure>
+          <p>En el navegador, <code class="inline">console.log</code> escribe en las DevTools. En Node, escribe en la <strong>terminal</strong>: no hay pantalla, ni DOM, ni ventanas. El mismo lenguaje, un entorno completamente distinto.</p>
+        </section>
+
+        <section>
+          <h2 id="node-vs-navegador">Node.js vs navegador</h2>
+          <p>JavaScript nació en el navegador, pero Node lo sacó de allí. Las diferencias esenciales que debes interiorizar:</p>
+          <ul>
+            <li><strong>Sin DOM:</strong> no existen <code class="inline">document</code>, <code class="inline">window</code> ni <code class="inline">alert</code>.</li>
+            <li><strong>Con acceso al sistema:</strong> Node puede leer archivos, escuchar puertos y lanzar procesos.</li>
+            <li><strong>Globales propias:</strong> <code class="inline">process</code> describe el proceso actual; <code class="inline">require</code> y <code class="inline">module</code> montan el sistema de módulos.</li>
+            <li><strong>Mismo lenguaje:</strong> funciones, objetos, promesas y async/await funcionan igual.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="process">El global process</h2>
+          <p><code class="inline">process</code> es la ventana de tu programa hacia el sistema operativo: versión de Node, argumentos, variables de entorno y salida del proceso.</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const args = process.argv.slice(2);
+const nombre = args[0] || "invisible";
+
+console.log("Versión de Node:", process.version);
+console.log("Plataforma:", process.platform);
+console.log("Hola,", nombre);
+
+// Salir con un código de error (0 = ok, 1 = error)
+if (!args.length) {
+  process.exit(1);
+}</code></pre>
+            </div>
+          </figure>
+          <p>Prueba a ejecutarlo así: <code class="inline">node hola.js Ana</code>. Verás que los argumentos llegan a <code class="inline">process.argv</code>: las dos primeras posiciones son siempre la ruta de Node y la del script.</p>
+        </section>
+
+        <section>
+          <h2 id="leer-procesos">Leer la entrada de teclado</h2>
+          <p>Los scripts de consola suelen necesitar interactuar con quien los ejecuta. <code class="inline">process.stdin</code> lee de la entrada estándar:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">JavaScript</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-js">const readline = require("node:readline");
+const { stdin: input, stdout: output } = require("node:process");
+
+const rl = readline.createInterface({ input, output });
+
+rl.question("¿Cuál es tu ciudad? ", (ciudad) => {
+  console.log("Bienvenido,", ciudad);
+  rl.close();
+});</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Crea <code class="inline">hola.js</code> que imprima tu nombre y la fecha actual.</li>
+            <li>Añade al script la lectura de <code class="inline">process.platform</code> e imprímela.</li>
+            <li>Ejecuta el script pasando tu nombre como argumento y haz que lo salude.</li>
+            <li>Responde por escrito: ¿qué ocurre si intentas usar <code class="inline">document</code> en Node?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Node ejecuta JavaScript fuera del navegador: no hay DOM ni window.</li>
+            <li>Los scripts se ejecutan con <code class="inline">node archivo.js</code>.</li>
+            <li><code class="inline">process</code> expone versión, plataforma, argumentos y variables de entorno.</li>
+            <li><code class="inline">process.stdin</code> y el módulo readline permiten leer la entrada del usuario.</li>
+            <li>El código de salida determina si el proceso terminó bien (0) o con error (1).</li>
+          </ul>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

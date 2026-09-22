@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="sistemas-distribuidos-manejo-de-fallos-graceful">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manejo de fallos graceful · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Aprende a manejar fallos de forma elegante: failover, reintentos con backoff, degradación progresiva, timeouts y chaos engineering en sistemas distribuidos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="sistemas-distribuidos-manejo-de-fallos-graceful"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Manejo de fallos graceful</span>
+      </nav>
+      <h1 class="lesson-title">Manejo de fallos graceful</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Escalabilidad y casos reales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Un sistema tolerante a fallos no es el que nunca falla: es el que <strong>decaen de forma controlada y se recupera</strong>. La traducción de «manejo de fallos graceful» es precisamente eso: ante un nodo muerto o una red rota, el usuario apenas nota nada porque hay respaldo, reintento o una funcionalidad degradada.</p>
+      </section>
+
+      <section>
+        <h2 id="timeouts">El fundamento: timeouts</h2>
+        <p>Todo empieza por decidir cuánto esperamos antes de dar la llamada por fallida. Un timeout ausente convierte una lentitud en un montón de peticiones colgadas (y en threads agotados). Las buenas prácticas:</p>
+        <ul>
+          <li>Ajustar el timeout por capa: conectarse, responder, leer.</li>
+          <li>Aplicar <strong>timeouts decrecientes en cascada</strong>: si el servicio lento es lejano, no reinventes; corta pronto.</li>
+          <li>Separar «no responde» (lento) de «refusó» (423, 503): el reintento no es la misma política.</li>
+        </ul>
+        <pre class="code-block"><code class="language-javascript" data-language="javascript">// Timeouts por fase en Node.js (fetch)
+function llamarFinanzas(datos) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 1200); // todo el viaje: 1.2s
+  return fetch("https://finanzas.internal/v1/debito", {
+    method: "POST",
+    body: JSON.stringify(datos),
+    signal: c.signal,
+  }).finally(() => clearTimeout(t));
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="retries">Reintentos con backoff y jitter</h2>
+        <p>Tras un fallo transitorio, reintentar ayuda; reintentar a ciegas y al instante derrumba al servicio ya estresado (el <strong>thundering herd</strong>). Se usa <strong>backoff exponencial</strong> —cada espera dobla— y <strong>jitter</strong> —un poco de azar— para que los reintentos no colisionen entre sí:</p>
+        <pre class="code-block"><code class="language-python" data-language="python">import random
+
+def espera_backoff(intento, base_s=0.2, max_s=8.0):
+    exp = min(base_s * (2 ** intento), max_s)
+    return random.uniform(0, exp)   # jitter full: evita sincronización
+
+for intento in range(5):
+    try:
+        return servicio.llamar()
+    except FalloTransitorio:
+        time.sleep(espera_backoff(intento))
+raise FalloPermanente("agotados los reintentos")
+</code></pre>
+        <p>Eso sí: reintenta solo operaciones <strong>idempotentes</strong> (recuerda la lección de comunicación). Un cargo de tarjeta re-reintentado sin clave de idempotencia cobra dos veces.</p>
+      </section>
+
+      <section>
+        <h2 id="failover">Failover y degradación</h2>
+        <p>Cuando el nodo primario muere, el tráfico se conmuta (<em>failover</em>) a un nodo sano: réplica promovida, zona de disponibilidad vecina, o el cluster de respaldo. En paralelo, se usa la <strong>degradación</strong> como cortafuegos:</p>
+        <ul>
+          <li>Sirve una versión cacheada si el origen cae.</li>
+          <li>Desactiva funciones no esenciales (recomendaciones, analytics) para proteger el núcleo.</li>
+          <li>Devuelve 503 temprano antes que iniciar una avalancha de retries.</li>
+        </ul>
+        <pre class="code-block"><code class="language-json" data-language="json">{
+  "estado": "degradado-parcial",
+  "causa": "origen de catálogo caido",
+  "modulos": {
+    "detalle-producto": { "fuente": "cache-vieja-30m", "aviso": "datos pueden estar desactualizados" },
+    "recomendados": { "fuente": "off", "aviso": "funcionalidad desactivada" },
+    "checkout": { "fuente": "activo", "aviso": null }
+  }
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="circuit-breaker">Circuit breaker o fusible</h2>
+        <p>Cuando un nodo falla repetidamente, dejamos de llamarlo durante un tiempo (<em>open</em>), probamos poco a poco (<em>half-open</em>) y, si se recupera, volvemos a la normalidad (<em>closed</em>). Es el «fusible del software» que protege a los nodos sanos de los dañados.</p>
+        <pre class="code-block"><code class="language-yaml" data-language="yaml"># Configuración típica de un fusible (p.ej. resilience4j)
+cb:
+  registro:
+    nombre: "mongodb-principal"
+    failure_rate_threshold: 60        # 60% de fallos -> abre
+    sliding_window_size: 20           # evalúa las últimas 20 llamadas
+    wait_duration_in_open_state: 15s  # reabrir después de 15s
+    permitted_number_of_calls_in_half_open: 3
+</code></pre>
+      </section>
+
+      <section>
+        <h2 id="chaos">Chaos engineering</h2>
+        <p>La única forma de saber si tu sistema se recupera solo es <strong>romperlo a propósito</strong>. El chaos engineering introduce fallos controlados en producción (mata nodos, inyecta latencia, particiona la red) para verificar que el failover y el retry se comportan.</p>
+        <pre class="code-block"><code class="language-bash" data-language="bash"># Chaos Monkey (o su equivalente local): mata una réplica al azar
+aws ec2 stop-instances --instance-ids $(elegir_worker_al_azar)
+
+# Simular latencia o pérdida de paquetes en una región
+tc qdisc add dev eth0 root netem delay 400ms loss 10%
+# (el cluster debería seguir sirviendo con quórum)
+</code></pre>
+        <p>La regla: solo se hacen experimentos de caos cuando ya existe una red de seguridad (monitoreo, runbooks, rollback) para no convertir un ejercicio en un incidente real.</p>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Revisa una llamada a un servicio externo de tu código: ¿qué timeout tiene, cuántos reintentos, y es idempotente? Señala tres mejoras.</li>
+          <li>Diseña el estado de un fusible de 3 estados (cerrado/abierto/semiabierto) para el endpoint de pagos y describe cuándo se pasa de uno a otro.</li>
+          <li>Propón un experimento de chaos seguro para probar el failover de tu base: qué matas, qué mides y cuándo decides abortar.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>El manejo graceful combina timeouts, reintentos con backoff+jitter, y degradación.</li>
+          <li>El failover conmuta a un nodo sano y protege el núcleo con funcionalidad degradada.</li>
+          <li>El circuit breaker aísla nodos que fallan de forma sostenida.</li>
+          <li>El chaos engineering prueba el sistema rompiéndolo controladamente.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/modelos-de-fallos.html">Modelos de fallo</a>
+          <a class="related-lessons__link" href="../modulo-01/bases-de-la-comunicacion.html">Comunicación entre nodos</a>
+          <a class="related-lessons__link" href="clusteres-y-bloques.html">Clústeres y coordinación</a>
+          <a class="related-lessons__link" href="diseñar-un-sistema-distribuido.html">Diseñar un sistema distribuido</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

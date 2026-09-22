@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de SQL: SELECT, WHERE, ORDER y GROUP BY, JOINs, subconsultas, CTEs, funciones de agregación, transacciones, índices y EXPLAIN con ejemplos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/reset.css">
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/global.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/header.css">
+<link rel="stylesheet" href="../assets/css/sidebar.css">
+<link rel="stylesheet" href="../assets/css/footer.css">
+<link rel="stylesheet" href="../assets/css/cards.css">
+<link rel="stylesheet" href="../assets/css/lesson.css">
+<link rel="stylesheet" href="../assets/css/code.css">
+<link rel="stylesheet" href="../assets/css/forms.css">
+<link rel="stylesheet" href="../assets/css/roadmap.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="stylesheet" href="../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">SQL</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🗄️ SQL</h1>
+          <p class="section-subtitle">El lenguaje universal de las bases relacionales: leer, filtrar, combinar y resumir datos. Esta hoja cubre SELECT hasta EXPLAIN, pasando por JOINs, CTEs y transacciones.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Bases de datos</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="select">SELECT</h2>
+              <p>El orden lógico de evaluación SQL no coincide con el orden de escritura: <code class="inline">FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</code>.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">-- Seleccionar columnas
+SELECT id, nombre, email FROM usuarios;
+
+-- Todas las columnas
+SELECT * FROM usuarios;
+
+-- Alias (renombrar columnas)
+SELECT
+  nombre        AS nombre_usuario,
+  precio * 1.21 AS precio_con_iva
+FROM productos;
+
+-- Valores distintos
+SELECT DISTINCT pais FROM usuarios;
+
+-- Literales y columnas calculadas
+SELECT 'usuario: ' || nombre FROM usuarios;   -- PostgreSQL
+SELECT CONCAT('usuario: ', nombre) FROM usuarios; -- MySQL</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="where">WHERE y operadores</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Operador</th><th>Ejemplo</th><th>Descripción</th></tr></thead>
+                  <tbody>
+                    <tr><td>Comparación</td><td><code class="inline">edad &gt;= 18</code></td><td>=, !=, &lt;, &gt;, &lt;=, &gt;=</td></tr>
+                    <tr><td>Lógicos</td><td><code class="inline">edad &gt;= 18 AND activo = TRUE</code></td><td>AND, OR, NOT</td></tr>
+                    <tr><td>Rango</td><td><code class="inline">edad BETWEEN 18 AND 30</code></td><td>Límites inclusivos</td></tr>
+                    <tr><td>Conjunto</td><td><code class="inline">pais IN ('MX', 'ES')</code></td><td>En una lista</td></tr>
+                    <tr><td>Similitud</td><td><code class="inline">nombre LIKE 'Ad%'</code></td><td>% muchos, _ uno</td></tr>
+                    <tr><td>Nulos</td><td><code class="inline">email IS NULL</code></td><td>No usar = NULL</td></tr>
+                    <tr><td>Exp. regular</td><td><code class="inline">nombre ~ '^Ad'</code></td><td>PostgreSQL / MySQL</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">SELECT * FROM usuarios
+WHERE activo = TRUE
+  AND (pais IN ('MX', 'CO') OR rol = 'admin')
+  AND email IS NOT NULL;
+
+SELECT * FROM productos
+WHERE nombre ILIKE '%tapas%'    -- ilike ignora mayúsculas
+  AND stock &gt; 0
+ORDER BY precio DESC
+LIMIT 10;</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="order-group">ORDER BY y GROUP BY</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">-- Orden ascendente (por defecto) y descendente
+SELECT nombre, precio FROM productos
+ORDER BY precio DESC, nombre ASC;
+
+-- Agrupación: cada grupo colapsa a una fila
+SELECT pais, COUNT(*) AS usuarios, AVG(edad) AS edad_promedio
+FROM usuarios
+GROUP BY pais
+HAVING COUNT(*) &gt; 10;
+
+-- Diferencia clave: WHERE filtra filas, HAVING filtra grupos
+SELECT rol, COUNT(*)
+FROM usuarios
+WHERE activo = TRUE        -- antes de agrupar
+GROUP BY rol
+HAVING COUNT(*) &gt; 1;       -- después de agrupar</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="joins">JOINs</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Devuelve</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">INNER JOIN</code></td><td>Solo coincidencias en ambas tablas.</td></tr>
+                    <tr><td><code class="inline">LEFT JOIN</code></td><td>Todas las filas de la izquierda + coincidencias.</td></tr>
+                    <tr><td><code class="inline">RIGHT JOIN</code></td><td>Todas las de la derecha + coincidencias.</td></tr>
+                    <tr><td><code class="inline">FULL OUTER JOIN</code></td><td>Todas de ambas, con NULL donde no coincida.</td></tr>
+                    <tr><td><code class="inline">CROSS JOIN</code></td><td>Producto cartesiano (todas las combinaciones).</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">-- usuarios (id, nombre)  pedidos (id, usuario_id, total)
+
+SELECT u.nombre, p.total
+FROM usuarios u
+INNER JOIN pedidos p ON p.usuario_id = u.id;
+
+-- Usuarios SIN pedidos (LEFT JOIN + IS NULL)
+SELECT u.nombre
+FROM usuarios u
+LEFT JOIN pedidos p ON p.usuario_id = u.id
+WHERE p.id IS NULL;
+
+-- Contamos pedidos por usuario (multiplicidad 1:N)
+SELECT u.nombre, COUNT(p.id) AS total_pedidos
+FROM usuarios u
+LEFT JOIN pedidos p ON p.usuario_id = u.id
+GROUP BY u.id, u.nombre
+ORDER BY total_pedidos DESC;</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="agregacion">Funciones de agregación</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Función</th><th>Devuelve</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">COUNT(*)</code></td><td>Número de filas.</td></tr>
+                    <tr><td><code class="inline">COUNT(columna)</code></td><td>Filas con valor no NULL.</td></tr>
+                    <tr><td><code class="inline">SUM(columna)</code></td><td>Suma.</td></tr>
+                    <tr><td><code class="inline">AVG(columna)</code></td><td>Promedio.</td></tr>
+                    <tr><td><code class="inline">MIN(columna)</code> / <code class="inline">MAX(columna)</code></td><td>Mínimo / máximo.</td></tr>
+                    <tr><td><code class="inline">COALESCE(a, b)</code></td><td>Primer valor no nulo.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">SELECT
+  COUNT(*)              AS total,
+  COUNT(DISTINCT pais)  AS paises,
+  SUM(ventas)           AS facturacion,
+  AVG(ventas)           AS ticket_promedio,
+  MIN(ventas)           AS venta_minima,
+  MAX(ventas)           AS venta_maxima
+FROM pedidos;
+
+-- Números por tipo de cliente
+SELECT tipo_cliente, SUM(total) AS facturacion
+FROM pedidos
+GROUP BY tipo_cliente;</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="subconsultas">Subconsultas</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">-- Subconsulta escalar (una sola fila/columna)
+SELECT nombre
+FROM usuarios
+WHERE edad = (SELECT MAX(edad) FROM usuarios);
+
+-- Subconsulta con IN
+SELECT nombre
+FROM usuarios
+WHERE id IN (SELECT usuario_id FROM pedidos WHERE total &gt; 1000);
+
+-- Subconsulta correlacionada en el SELECT
+SELECT
+  u.nombre,
+  (SELECT COUNT(*) FROM pedidos p WHERE p.usuario_id = u.id) AS pedidos
+FROM usuarios u;
+
+-- Comparación con ANY / ALL
+SELECT nombre FROM productos
+WHERE precio &gt; ANY (SELECT precio FROM productos WHERE activo = TRUE);</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="cte">CTEs (WITH)</h2>
+              <p>La forma más legible de componer consultas: define bloques nombrados que se reutilizan en la consulta principal.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">WITH clientes_vip AS (
+  SELECT usuario_id, SUM(total) AS gastado
+  FROM pedidos
+  GROUP BY usuario_id
+  HAVING SUM(total) &gt; 5000
+)
+SELECT u.nombre, c.gastado
+FROM usuarios u
+INNER JOIN clientes_vip c ON c.usuario_id = u.id
+ORDER BY c.gastado DESC;
+
+-- CTE recursiva: árbol de categorías
+WITH RECURSIVE arbol AS (
+  SELECT id, nombre, padre_id, 1 AS nivel
+  FROM categorias WHERE padre_id IS NULL
+  UNION ALL
+  SELECT c.id, c.nombre, c.padre_id, a.nivel + 1
+  FROM categorias c INNER JOIN arbol a ON a.id = c.padre_id
+)
+SELECT nombre, nivel FROM arbol;</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="transacciones">Transacciones</h2>
+              <p>Agrupan operaciones que deben ocurrir <em>todas o ninguna</em>. Garantizan atomicidad, consistencia, aislamiento y durabilidad (ACID).</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">BEGIN;
+
+UPDATE cuentas SET saldo = saldo - 100 WHERE id = 1;
+UPDATE cuentas SET saldo = saldo + 100 WHERE id = 2;
+
+-- Si algo falla aquí, todo se revierte
+COMMIT;
+
+-- Cancelar manualmente
+BEGIN;
+DELETE FROM pedidos_pendientes;
+ROLLBACK;
+
+-- Aislamiento / bloqueos
+BEGIN;
+SELECT * FROM ventas WHERE id = 10 FOR UPDATE;
+-- bloquea la fila hasta COMMIT/ROLLBACK</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="indices">Índices</h2>
+              <p>Los índices aceleran la lectura a cambio de espacio y escritura más lenta. Se crean sobre columnas que se usan en <code class="inline">WHERE</code>, <code class="inline">JOIN</code> y <code class="inline">ORDER BY</code>.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE UNIQUE INDEX idx_email_unico ON usuarios(email);
+CREATE INDEX idx_pedidos_usuario ON pedidos(usuario_id);
+
+-- Compuesto: respeta el orden de las columnas
+CREATE INDEX idx_pedidos_fecha_estado ON pedidos(fecha, estado);
+
+DROP INDEX idx_usuarios_email;
+
+-- Lentes de uso frecuente
+-- 1. UNIQUE sobre emails/usuarios (integridad + índice gratis)
+-- 2. Índice en la columna de la FK de cada JOIN</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="explain">EXPLAIN</h2>
+              <p>Diagnostica cómo ejecutaría el motor tu consulta. Busca <code class="inline">Seq Scan</code> (escaneo completo) y conviértelo en <code class="inline">Index Scan</code> creando el índice correcto.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">SQL</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-sql">EXPLAIN SELECT * FROM usuarios WHERE email = 'ada@dev.io';
+-- Con ANALYZE (PostgreSQL) se ejecuta y muestra tiempos reales
+EXPLAIN ANALYZE SELECT * FROM usuarios WHERE email = 'ada@dev.io';
+
+-- PostgreSQL: buscar "Seq Scan" vs "Index Scan"
+EXPLAIN ANALYZE
+SELECT u.nombre, COUNT(p.id)
+FROM usuarios u
+LEFT JOIN pedidos p ON p.usuario_id = u.id
+GROUP BY u.id;</code></pre>
+                </div>
+              </div>
+              <p>Lo que interesa del plan: <code class="inline">Seq Scan</code> o <code class="inline">ALL</code> significa que recorre toda la tabla buscando índice; <code class="inline">Index Scan</code> / <code class="inline">eq_ref</code> indica que usa un índice. La columna <code class="inline">rows</code> estima cuántas filas examina.</p>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Escribe SQL en mayúsculas y usa alias cortos y consistentes (<code class="inline">u</code>, <code class="inline">p</code>).</li>
+                <li>Nunca construyas consultas concatenando texto del usuario: usa prepared statements.</li>
+                <li>Filtra lo máximo posible con <code class="inline">WHERE</code> antes de agregar con <code class="inline">GROUP BY</code>.</li>
+                <li>Evita <code class="inline">SELECT *</code> en la lógica de la aplicación; pide solo lo que usas.</li>
+                <li>Crea índices medidos con <code class="inline">EXPLAIN</code>, no a ciegas.</li>
+                <li>Usa transacciones para operaciones que deben ser atómicas.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="mysql.html">Siguiente: MySQL <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/js/helpers.js"></script>
+<script src="../assets/js/storage.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/sidebar.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

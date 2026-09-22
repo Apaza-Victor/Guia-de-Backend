@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-mapa-y-geolocalizacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapas y geolocalización · Integraciones y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Aprende a integrar mapas y geolocalización: geocoding, reverse geocoding, costes y cuotas, y dónde usar la API de mapas en el servidor o el cliente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body data-root="../../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-mapa-y-geolocalizacion"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Integraciones y Servicios Externos</a><span class="sep">/</span>
+        <a href="index.html">Módulo 2</a><span class="sep">/</span>
+        <span class="current">Mapas y geolocalización</span>
+      </nav>
+      <h1 class="lesson-title">Mapas y geolocalización</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integraciones y Servicios Externos</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Integraciones prácticas</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>Todo lo que tiene que ver con «dónde» se resume en dos operaciones: traducir una dirección a coordenadas (<strong>geocoding</strong>) y traducir coordenadas a una dirección (<strong>reverse geocoding</strong>). Google Maps Platform, Mapbox y alternativas libres exponen estas APIs por HTTP, con esquemas de cobro por petición, límites por minuto y la eterna pregunta: ¿esto lo llamo desde el servidor o desde el cliente?</p>
+      </section>
+
+      <section>
+        <h2 id="geocoding">Geocoding desde el backend</h2>
+        <p>Tu backend geocodifica cuando necesita coordenadas para calcular distancias: ¿a cuánto llega el repartidor? ¿qué tiendas están en un radio? El patrón es idéntico al de cualquier API externa: clave, timeout y parseo de la respuesta:</p>
+<pre class="code-block"><code class="language-python" data-language="python">import httpx
+
+GOOGLE_API_KEY = os.environ["GOOGLE_MAPS_API_KEY"]
+
+def geocodificar(direccion: str) -> dict | None:
+    resp = httpx.get(
+        "https://maps.googleapis.com/maps/api/geocode/json",
+        params={"address": direccion, "key": GOOGLE_API_KEY},
+        timeout=5.0,
+    )
+    resp.raise_for_status()
+    resultado = resp.json()
+    if resultado["status"] != "OK":
+        return None
+    ubicacion = resultado["results"][0]["geometry"]["location"]
+    return {"lat": ubicacion["lat"], "lng": ubicacion["lng"]}
+</code></pre>
+        <p>La dirección es entrada de usuario y a menudo contiene tildes y espacios; deja que la URL se codifique con los params del cliente, no concatene direcciones a mano.</p>
+      </section>
+
+      <section>
+        <h2 id="response">Estructura de la respuesta</h2>
+        <p>El servicio devuelve varios candidatos ordenados por exactitud. Nunca asumas que el primero es correcto; al menos revisa <code>status</code> y el <code>formatted_address</code> antes de confiar:</p>
+<pre class="code-block"><code class="language-json" data-language="json">{
+  "status": "OK",
+  "results": [
+    {
+      "formatted_address": "Av. Siempre Viva 742, Ciudad de México",
+      "geometry": {
+        "location": { "lat": 19.4326, "lng": -99.1332 },
+        "location_type": "ROOFTOP"
+      },
+      "place_id": "ChIJdeTu..."
+    }
+  ]
+}</code></pre>
+      </section>
+
+      <section>
+        <h2 id="coste">Costes, cuotas y buenas prácticas</h2>
+        <ul>
+          <li><strong>Cada petición cuesta:</strong> geocodificar a la hora punta multiplica tu factura. Hazlo una sola vez y guarda las coordenadas junto al registro.</li>
+          <li><strong>Cachea por dirección normalizada:</strong> «Av. Siempre Viva 742» y «av siempre viva 742» deberían dar la misma coordenada.</li>
+          <li><strong>Respeta <code>Rate Limit</code> por minuto:</strong> ante <code>OVER_QUERY_LIMIT</code> espera unos segundos y reintenta.</li>
+          <li><strong>Guarda el <code>place_id</code></strong>: es el identificador estable del lugar y sirve para consultas posteriores (detalles, fotos).</li>
+        </ul>
+        <p>El precio del geocoding por request hace que la cola para procesar en lotes sea casi obligatoria: datos de miles de direcciones se procesan de a poco, sin disparar la factura.</p>
+      </section>
+
+      <section>
+        <h2 id="servidor-vs-cliente">Servidor vs cliente</h2>
+        <p>La regla es simple: <strong>la clave nunca viaja al navegador</strong>. Si el mapa interactivo necesita geocodificar o buscar lugares, el backend debe intermediar:</p>
+<pre class="code-block"><code class="language-javascript" data-language="javascript">// El frontend pide a NUESTRA API; la clave de Google queda en el servidor
+const resp = await fetch('/api/lugares?q=' + encodeURIComponent(texto));
+const lugares = await resp.json();
+// -> [{placeId, nombre, lat, lng}]</code></pre>
+        <p>Además de proteger la clave, tu API puede aplicar tus propias reglas: límites por usuario, caché de autocompletados frecuentes y filtrado de resultados. Para renderizar el mapa, se usa una key del lado cliente restringida por dominios y con cuotas pequeñas, separada de la del backend.</p>
+        <div class="callout">
+          <p><strong>Regla práctica:</strong> la lógica de ubicación vive en el backend. El cliente solo le pide a tu API; ninguna clave de proveedor debe vivir en tu JavaScript público.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="distancia">Cálculo de distancias y rutas</h2>
+        <p>Con las coordenadas guardadas, el backend puede calcular distancias sin llamar a ningún proveedor para lo simple (fórmula del haversine en línea recta) y solo pedir <strong>Distance Matrix</strong> o <strong>Directions</strong> cuando necesita distancia real por carretera o tiempos ETA con tráfico:</p>
+<pre class="code-block"><code class="language-bash" data-language="bash">curl "https://maps.googleapis.com/maps/api/distancematrix/json?origins=19.4326,-99.1332&destinations=20.6668,-103.3518&mode=driving&key=$GOOGLE_MAPS_API_KEY"</code></pre>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Geocodifica tres direcciones de tu ciudad y guarda las coordenadas en tu base.</li>
+          <li>Implementa una caché local que evite geocodificar dos veces la misma dirección normalizada.</li>
+          <li>Crea un endpoint propio <code>/api/lugares</code> que consuma la API de Places con la clave solo del lado servidor.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Geocoding traduce direcciones a coordenadas; reverse geocoding lo invierte.</li>
+          <li>Cada petición cuesta: cachea y geocodifica en lotes fuera del horario pico.</li>
+          <li>La clave del proveedor vive en el backend; el cliente solo consume tu API.</li>
+          <li>Guarda <code>place_id</code> y coordenadas junto al registro para no repetir llamadas.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="../modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a>
+          <a class="related-lessons__link" href="../modulo-01/patrones-de-integracion.html">Patrones de integración</a>
+          <a class="related-lessons__link" href="../modulo-03/colas-para-tareas-lentas.html">Colas para tareas lentas</a>
+          <a class="related-lessons__link" href="../modulo-03/env-vars-y-secrets.html">Configuración y secretos</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/favorites.js"></script>
+<script src="../../../assets/js/history.js"></script>
+<script src="../../../assets/js/search.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

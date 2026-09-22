@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="cabeceras-peticion-respuesta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabeceras de petición y de respuesta · APIs REST · Backend Academy</title>
+<meta name="description" content="Aprende qué son las cabeceras HTTP de petición y respuesta, cuáles importan en REST y cómo usarlas bien.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="apis-rest" data-current="cabeceras-peticion-respuesta"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../index.html">APIs REST</a><span class="sep">/</span>
+          <a href="index.html">Módulo 2 · HTTP aplicado a REST</a><span class="sep">/</span>
+          <span class="current">Cabeceras de petición y de respuesta</span>
+        </nav>
+        <h1 class="lesson-title">Cabeceras de petición y de respuesta</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> APIs REST</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · HTTP</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="que-son">Metadatos del mensaje</h2>
+          <p>Las <strong>cabeceras HTTP</strong> son pares <code>clave: valor</code> que viajan antes del cuerpo: describen el mensaje, al remitente, el idioma, la caché, la autorización… El cuerpo es el contenido; las cabeceras, su ficha técnica.</p>
+        </section>
+
+        <section>
+          <h2 id="peticion">Cabeceras de petición importantes</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP request</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">GET /api/v1/productos/42 HTTP/1.1
+Host: api.tienda.test
+Accept: application/json
+Accept-Language: es-ES, es;q=0.9, en;q=0.4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+Content-Length: 27
+User-Agent: TiendaApp/2.4</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Host:</strong> obligatorio, el servidor destino (gran soporte de múltiples APIs en un solo IP).</li>
+            <li><strong>Accept / Accept-Language:</strong> qué formatos e idiomas toleras.</li>
+            <li><strong>Authorization:</strong> credenciales (Bearer, Basic, API key).</li>
+            <li><strong>Content-Type:</strong> formato del cuerpo cuando envías datos.</li>
+            <li><strong>User-Agent:</strong> quién pregunta; útil para analítica y bloqueos.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="respuesta">Cabeceras de respuesta importantes</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">HTTP response</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-http">HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Location: https://api.tienda.test/api/v1/productos/42
+Cache-Control: no-store
+X-Request-Id: 9f2c1a-77e1-4a
+Retry-After: 120</code></pre>
+            </div>
+          </figure>
+          <ul>
+            <li><strong>Location:</strong> URL del recurso creado (o del destino de una redirección).</li>
+            <li><strong>Content-Type:</strong> formato real devuelto.</li>
+            <li><strong>Cache-Control:</strong> instrucciones de caché para clientes y proxies.</li>
+            <li><strong>X‑Request‑Id / X‑Correlation‑Id:</strong> correlación para diagnosticar.</li>
+            <li><strong>Retry-After:</strong> cuántos segundos esperar antes de reintentar (429 y 503).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="convenciones">Nombres de cabeceras propias</h2>
+          <ul>
+            <li>Prefijos estándar: <code>X-*</code> desincentivado por IETF; hoy se anima <code>RateLimit-Remaining</code>, <code>Idempotency-Key</code>, <code>Traceparent</code>.</li>
+            <li>Las claves son <strong>case-insensitive</strong>: <code>Content-Type</code> = <code>content-type</code>.</li>
+            <li>No pongas datos sensibles en cabeceras: van encriptadas en HTTPS, pero evita guardarlas en logs.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="ver">Verlas en vivo</h2>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">bash</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-bash">curl -i "https://api.github.com/repos/anthropics/sonnet"
+# imprimes cabeceras y cuerpo: fíjate en Content-Type,
+# ETag, x-ratelimit-limit/remaining, Vary…</code></pre>
+            </div>
+          </figure>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Ejecuta un <code>curl -i</code> y anota 5 cabeceras de respuesta.</li>
+            <li>Explica qué comunica cada una que el cuerpo no dice.</li>
+            <li>Diseña la cabecera de correlación que tu equipo usará en logs.</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Cabeceras = ficha técnica del mensaje; cuerpo = contenido.</li>
+            <li>Petición: Accept, Authorization, Content-Type, User-Agent.</li>
+            <li>Respuesta: Content-Type, Location, Cache-Control, X-Request-Id.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="content-type-content-disposition.html">Content-Type y Content-Disposition</a>
+            <a class="related-lessons__link" href="metodos-http.html">Métodos HTTP</a>
+            <a class="related-lessons__link" href="../modulo-04/autenticacion-basica-api-keys.html">Autenticación y API keys</a>
+            <a class="related-lessons__link" href="../modulo-03/cache-etag-cache-control.html">Caché con ETag y Cache-Control</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de APIs</a></li>
+          <li><a href="index.html">Módulo 2 · HTTP aplicado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño REST</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Implementación</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Documentación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Calidad y seguridad</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

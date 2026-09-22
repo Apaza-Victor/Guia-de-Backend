@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="que-es-una-base-de-datos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Qué es una base de datos? · Bases de Datos · Backend Academy</title>
+<meta name="description" content="Aprende qué es una base de datos, en qué se diferencia de una hoja de cálculo, qué tipos existen y cómo se ven los datos en forma de tabla.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="bases-datos" data-current="que-es-una-base-de-datos"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Bases de Datos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 1 · Fundamentos</a><span class="sep">/</span>
+          <span class="current">¿Qué es una base de datos?</span>
+        </nav>
+        <h1 class="lesson-title">¿Qué es una base de datos?</h1>
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 8 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Bases de Datos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 1 · Fundamentos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section>
+          <h2 id="introduccion">Introducción</h2>
+          <p>Piensa en un aeropuerto. Todos los vuelos, pasajeros, puertas de embarque y horarios están registrados en algún lugar. Si esa información viviera solo en la mente de una persona, el aeropuerto se paralizaría en cuanto esa persona pidiera un día libre. En las aplicaciones ocurre igual: cada «me gusta», cada pedido, cada mensaje necesita guardarse en un lugar donde <strong>se pueda leer, actualizar y eliminar de forma ordenada y segura</strong>. Ese lugar es una <strong>base de datos</strong>.</p>
+          <p>Una base de datos es una <strong>colección organizada de información relacionada</strong>, almacenada de forma persistente (no se pierde al apagar el servidor) y diseñada para ser consultada de manera eficiente por muchos usuarios a la vez.</p>
+        </section>
+
+        <section>
+          <h2 id="problema">El problema que resuelve</h2>
+          <p>Sin una base de datos, guardarías los datos en archivos de texto o en memoria dentro del proceso del servidor. Eso funcionaría hasta que:</p>
+          <ul>
+            <li>El servidor se reinicie y pierda todo lo que estaba en memoria.</li>
+            <li>Dos usuarios escriban el mismo archivo a la vez y se pisen los cambios.</li>
+            <li>Necesites buscar el pedido número 4.000.000 entre miles de archivos.</li>
+            <li>Quieras responder en milisegundos con datos que relacionan usuarios y pedidos.</li>
+          </ul>
+          <p>Una base de datos resuelve estos cuatro problemas: persistencia, concurrencia, búsqueda rápida y relaciones.</p>
+        </section>
+
+        <section>
+          <h2 id="base-vs-hoja">Base de datos vs hoja de cálculo</h2>
+          <p>La forma más fácil de imaginar una base de datos relacional es pensar en una hoja de cálculo con varias pestañas. Cada pestaña es una <strong>tabla</strong>, cada fila es un <strong>registro</strong> y cada columna es un <strong>campo</strong>. Por ejemplo, la pestaña <em>clientes</em>:</p>
+          <figure class="code-block">
+            <div class="code-block__header"><span class="code-block__lang">Ejemplo hipotético</span></div>
+            <div class="code-block__body">
+              <pre><code class="language-text">id  | nombre          | email                  | ciudad
+--- | --------------- | ----------------------- | -----------
+1   | Ana Martínez    | ana@example.com         | Lima
+2   | Luis Rojas      | luis@example.com        | Bogotá
+3   | Carla Fernández | carla@example.com       | Madrid</code></pre>
+            </div>
+          </figure>
+          <p>La diferencia clave frente a Excel: una base de datos <strong>controla la estructura y las reglas</strong>. No puedes poner un texto donde debía haber una fecha, no puedes repetir dos veces la misma identificación, y miles de personas pueden trabajar sobre los mismos datos al mismo tiempo sin romper nada.</p>
+        </section>
+
+        <section>
+          <h2 id="tipos">¿Un solo tipo de base de datos?</h2>
+          <p>Existen dos grandes familias:</p>
+          <ul>
+            <li><strong>Relacionales (SQL):</strong> organizan los datos en tablas conectadas entre sí por claves. Ejemplos: MySQL, PostgreSQL, SQLite. Son el estándar cuando los datos tienen relaciones claras, como clientes, pedidos y productos.</li>
+            <li><strong>NoSQL:</strong> guardan los datos en documentos, pares clave-valor o grafos, pensados para flexibilidad o escala masiva. Ejemplos: MongoDB, Redis, Cassandra. Los verás en el módulo 7.</li>
+          </ul>
+          <p>La gran mayoría de aplicaciones backend del mundo usan bases relacionales, por eso el curso empieza por ellas.</p>
+        </section>
+
+        <section class="exercise" id="ejercicio">
+          <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+          <ol>
+            <li>Elige una aplicación que uses a diario (banco, red social, delivery) y escribe <strong>3 ejemplos</strong> de datos que tenga que guardar en una base de datos.</li>
+            <li>Para uno de esos ejemplos, arma en papel una tabla con 5 filas y 4 columnas tal y como se vería guardada.</li>
+            <li>Responde: ¿qué pasaría con tu carrito de compras si la tienda guardara sus datos solo en la memoria del servidor y este se reiniciara?</li>
+          </ol>
+        </section>
+
+        <section class="summary" id="resumen">
+          <h2>Resumen</h2>
+          <ul>
+            <li>Una base de datos es una colección organizada y persistente de información relacionada.</li>
+            <li>Resuelve persistencia, concurrencia, búsqueda rápida y relaciones entre datos.</li>
+            <li>En una base relacional, los datos se organizan en tablas, registros y columnas.</li>
+            <li>Las familias principales son SQL (relacional) y NoSQL.</li>
+            <li>Es la memoria de largo plazo de cualquier aplicación.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="relacionadas">Lecciones relacionadas</h2>
+          <div class="related-lessons">
+            <a class="related-lessons__link" href="sgbd.html">SGBD: sistemas de gestión de bases de datos</a>
+            <a class="related-lessons__link" href="tablas-registros-columnas.html">Tablas, registros y columnas</a>
+            <a class="related-lessons__link" href="papel-de-la-base-de-datos.html">El papel de la base de datos en una aplicación</a>
+            <a class="related-lessons__link" href="../modulo-03/select-where.html">Consultas SELECT y filtros WHERE</a>
+          </div>
+        </section>
+      </div>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Modelado</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · SQL básico</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Relaciones</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Transacciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · MySQL y PostgreSQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · NoSQL</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

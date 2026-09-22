@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patrones-m3-l5">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Composite · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="El patrón Composite: tratar partes y todo por igual en estructuras jerárquicas, con ejemplos PHP de menús, árboles de categorías y permisos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../roadmap/index.html">Roadmap</a>
+      <a href="../../../aprender/index.html">Aprender</a>
+      <a href="../../../practica/index.html">Práctica</a>
+      <a href="../../../proyectos/index.html">Proyectos</a>
+      <a href="../../../recursos/index.html">Recursos</a>
+      <a href="../../../buscador/index.html">Buscar</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patrones-m3-l5"></aside>
+  <main class="lesson-main"><article class="lesson-article">
+    <header class="lesson-hero">
+      <nav class="lesson-crumbs" aria-label="Miga de pan">
+        <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+        <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
+        <a href="../index.html">Patrones de Diseño</a><span class="sep">/</span>
+        <a href="index.html">Módulo 3</a><span class="sep">/</span>
+        <span class="current">Composite</span>
+      </nav>
+      <h1 class="lesson-title">Composite</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+        <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Estructurales</span>
+      </div>
+    </header>
+
+    <div class="lesson-content" id="contenido">
+      <section>
+        <h2 id="introduccion">Introducción</h2>
+        <p>El <strong>Composite</strong> permite tratar un objeto simple y una <strong>composición</strong> de objetos de la misma manera: ambos implementan la misma interfaz, y el compuesto delega a sus hijos. Perfecto para <strong>árboles</strong>: categorías, permisos, allowed menu, expresiones.</p>
+      </section>
+
+      <section>
+        <h2 id="problema">El problema de los árboles</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">Texto del problema</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-text">Menú de la app:
+  - "Electrónica" (categoría con hijos)
+      - "Laptops" (con hijos)
+          - "Ultrabooks" (hoja)
+      - "Audífonos" (hoja)
+
+Operación: "imprimir el menú" debe funcionar
+igual para una hoja que para el árbol completo.</code></pre>
+          </div>
+        </figure>
+        <p>Sin Composite, el código llena de <code>if esHoja() / si tieneHijos()</code> por todos lados.</p>
+      </section>
+
+      <section>
+        <h2 id="codigo">La interfaz compartida y las dos caras</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">interface MenuNodo
+{
+    public function nombre(): string;
+    public function imprimir(int $nivel = 0): string;
+}
+
+// Hoja: termina la recursión
+final class ItemMenu implements MenuNodo
+{
+    public function __construct(private string $nombre) {}
+    public function nombre(): string { return $this-&gt;nombre; }
+    public function imprimir(int $nivel = 0): string
+    {
+        return str_repeat('  ', $nivel) . '- ' . $this-&gt;nombre . "\n";
+    }
+}
+
+// Compuesto: mantiene hijos y delega en ellos
+final class CategoriaMenu implements MenuNodo
+{
+    /** @var MenuNodo[] */
+    private array $hijos = [];
+
+    public function __construct(private string $nombre) {}
+
+    public function nombre(): string { return $this-&gt;nombre; }
+
+    public function agregar(MenuNodo $hijo): void { $this-&gt;hijos[] = $hijo; }
+
+    public function imprimir(int $nivel = 0): string
+    {
+        $salida = str_repeat('  ', $nivel) . "&gt; " . $this-&gt;nombre . "\n";
+        foreach ($this-&gt;hijos as $hijo) {
+            $salida .= $hijo-&gt;imprimir($nivel + 1); // recursión
+        }
+        return $salida;
+    }
+}</code></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section>
+        <h2 id="uso">El uso: mismo llamado para todo</h2>
+        <figure class="code-block">
+          <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+          <div class="code-block__body">
+            <pre><code class="language-php">$electronica = new CategoriaMenu('Electrónica');
+$laptops = (new CategoriaMenu('Laptops'))
+    -&gt;agregar(new ItemMenu('Ultrabooks'));
+$electronica
+    -&gt;agregar($laptops)
+    -&gt;agregar(new ItemMenu('Audífonos'));
+
+// Una sola llamada, sin importar hoja o árbol
+echo $electronica-&gt;imprimir();</code></pre>
+          </div>
+        </figure>
+        <p>Quien consume el menú no sabe (ni le importa) si un nodo es hoja o compuesto: la interfaz lo esconde.</p>
+      </section>
+
+      <section>
+        <h2 id="mas">Más allá de menús: Composite en backend</h2>
+        <ul>
+          <li><strong>Árbol de permisos:</strong> un grupo con otros grupos; «tiene permiso» se resuelve recursivamente.</li>
+          <li><strong>Validaciones compuestas:</strong> un validador que agrega validadores y falla si alguno falla.</li>
+          <li><strong>Expresiones de negocio:</strong> condiciones AND/OR anidadas como árbol de nodos.</li>
+          <li><strong>Import-export de árboles:</strong> producto varía con sus variantes, delegando el JSON a hijos.</li>
+        </ul>
+      </section>
+
+      <section class="exercise" id="ejercicio">
+        <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
+        <ol>
+          <li>Encuentra una estructura jerárquica en tu dominio (categorías, permisos, menús).</li>
+          <li>Define la interfaz común (hoja y compuesto).</li>
+          <li>Escribe el compuesto con agregar() y una operación recursiva.</li>
+        </ol>
+      </section>
+
+      <section class="summary" id="resumen">
+        <h2>Resumen</h2>
+        <ul>
+          <li>Composite: partes y todo con la misma interfaz.</li>
+          <li>La hoja termina la recursión; el compuesto delega a hijos.</li>
+          <li>Mata los «if esHoja» del código que recorre árboles.</li>
+          <li>Muy bueno para permisos, validaciones y menús jerárquicos.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 id="relacionadas">Lecciones relacionadas</h2>
+        <div class="related-lessons">
+          <a class="related-lessons__link" href="decorator.html">Decorator</a>
+          <a class="related-lessons__link" href="../modulo-04/observer-y-eventos.html">Observer y eventos</a>
+          <a class="related-lessons__link" href="../../arquitectura/modulo-06/ddd-modelado-tactico.html">DDD: modelado táctico</a>
+          <a class="related-lessons__link" href="../modulo-02/builder.html">Builder</a>
+        </div>
+      </section>
+    </div>
+
+    <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+    <div data-prev-next></div>
+  </article></main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
+          <li><a href="index.html">Módulo 3 · Estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>
