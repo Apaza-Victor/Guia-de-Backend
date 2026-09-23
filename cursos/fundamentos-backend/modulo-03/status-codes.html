@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cache-Control · Fundamentos de Backend · Backend Academy</title>
-<meta name="description" content="Qué es Cache-Control, directivas clave y cómo el backend decide qué reutilizan los navegadores y las CDN.">
+<title>Códigos de Estado HTTP · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="Las 5 familias de status codes, los códigos que más usarás en APIs y buenas prácticas para responder errores de forma consistente.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -26,7 +26,6 @@
 <link rel="stylesheet" href="../../../assets/css/toc.css">
 </head>
 <body>
-
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -49,9 +48,8 @@
     </div>
   </div>
 </header>
-
 <div class="lesson-layout" id="top">
-  <aside class="sidebar" aria-label="Índice del curso">
+<aside class="sidebar" aria-label="Índice del curso">
     <p class="sidebar__title">Fundamentos de Backend</p>
     <section class="sidebar__module sidebar__group is-open">
       <button class="sidebar__group-title" type="button" aria-expanded="true">
@@ -111,9 +109,9 @@
         <li><a class="sidebar__link" href="query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
         <li><a class="sidebar__link" href="path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
         <li><a class="sidebar__link" href="cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link is-active" href="cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
         <li><a class="sidebar__link" href="content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
+        <li><a class="sidebar__link is-active" href="status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
       </ul>
     </section>
     <section class="sidebar__module sidebar__group is-open">
@@ -163,12 +161,12 @@
           <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
           <a href="../index.html">Fundamentos de Backend</a><span class="sep">/</span>
           <a href="index.html">Módulo 3</a><span class="sep">/</span>
-          <span class="current">Cache-Control</span>
+          <span class="current">Códigos de Estado HTTP</span>
         </nav>
-        <h1 class="lesson-title">Cache-Control</h1>
+        <h1 class="lesson-title">Códigos de Estado HTTP</h1>
         <div class="lesson-meta">
-          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
           <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Fundamentos de Backend</span>
           <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · HTTP</span>
         </div>
@@ -176,103 +174,104 @@
 
       <div class="lesson-content" id="contenido">
         <section>
-          <h2 id="introduccion">Introducción</h2>
-          <p><strong>Cache-Control</strong> es el header con el que el backend le dice a navegadores y CDN <em>si</em> pueden reutilizar una respuesta y <em>por cuánto tiempo</em>. Es una de las palancas de rendimiento más potentes de la web.</p>
-          <p>Cachear bien equivale a que tus usuarios reciban contenido sin que tu servidor trabaje de más. Cachear mal equivale a que vean datos viejos… o a servir cada byte dos veces innecesariamente.</p>
-        </section>
-
-        <section>
-          <h2 id="conceptos-clave">Directivas principales</h2>
-          <ul>
-            <li><code class="inline">public</code>: cualquier caché puede guardarlo (navegadores + CDN).</li>
-            <li><code class="inline">private</code>: solo el navegador del usuario (nada de CDN): típico en HTML generado por login.</li>
-            <li><code class="inline">no-store</code>: no guardar nada (datos sensibles, APIs con sesión).</li>
-            <li><code class="inline">no-cache</code>: se puede guardar pero hay que volver a validarlo antes de usarlo.</li>
-            <li><code class="inline">max-age=N</code>: cuántos segundos es válida la copia.</li>
-            <li><code class="inline">s-maxage=N</code>: lo mismo pero para CDN/proxies compartidos.</li>
-          </ul>
-          <p>Ejemplo típico: <code class="inline">Cache-Control: public, max-age=86400</code> → imágenes válidas un día en cualquier caché.</p>
-        </section>
-
-        <section>
-          <h2 id="ejemplo">Ejemplo: la nevera del navegador</h2>
-          <p>Pides el logo (imagen). El servidor dice «guárdatelo 1 día (public, max-age=86400)». Hoy, 10.000 usuarios piden esa imagen… y tu servidor solo trabaja la primera vez: las 9.999 siguientes se sirven desde caché local. Tu VPS respira.</p>
-        </section>
-
-        <section>
-          <h2 id="codigo">Código: aplicar cabeceras por tipo de recurso</h2>
+          <h2 id="que-es">¿Qué son los códigos de estado?</h2>
+          <p>La <strong>respuesta HTTP</strong> siempre lleva un código de 3 dígitos que resume cómo terminó la petición: <strong>200</strong> todo bien, <strong>404</strong> no existe, <strong>500</strong> falló el servidor... Son la primera pista que tiene un cliente para saber si su llamada funcionó y por qué.</p>
           <figure class="code-block">
-            <div class="code-block__header"><span class="code-block__lang">Node.js (Express)</span></div>
+            <div class="code-block__header"><span class="code-block__lang">Respuesta</span></div>
             <div class="code-block__body">
-              <pre><code class="language-javascript">const express = require("express");
-const app = express();
+              <pre><code>HTTP/1.1 404 Not Found
+Content-Type: application/json
 
-// Estáticos: reutilizables por cualquiera, 7 días
-app.use("/assets", express.static("public", {
-  maxAge: "7d",
-  immutable: true
-}));
-
-// Respuesta de API con datos del usuario: NUNCA almacenar en CDN
-app.get("/usuario/datos", (req, res) => {
-  res.set("Cache-Control", "private, no-store");
-  res.json({ nombre: "ana" });
-});
-
-// Página pública: cacheable una hora
-app.get("/", (req, res) => {
-  res.set("Cache-Control", "public, max-age=3600");
-  res.send("<h1>Bienvenido</h1>");
-});</code></pre>
+{ "error": "usuario_no_encontrado" }</code></pre>
             </div>
           </figure>
+          <p>Se organizan en 5 familias según el primer dígito, y esa agrupación ya te dice de qué va el problema antes de mirar el número.</p>
+        </section>
+
+        <section>
+          <h2 id="familias">Las cinco familias</h2>
+          <ul>
+            <li><strong>1xx · Informativas:</strong> la conexión sigue en curso (100 Continue).</li>
+            <li><strong>2xx · Éxito:</strong> la petición llegó y se procesó bien.</li>
+            <li><strong>3xx · Redirección:</strong> hay que ir a otra URL (301, 302, 304).</li>
+            <li><strong>4xx · Error del cliente:</strong> la petición era inválida o no autorizada; el cliente debe corregir algo.</li>
+            <li><strong>5xx · Error del servidor:</strong> el servidor falló al cumplir una petición válida.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="mas-comunes">Los más comunes en APIs</h2>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">200 OK</span><span class="info-item__value">Éxito genérico. GET que devuelve datos, PUT exitoso, etc.</span></div>
+            <div class="info-item"><span class="info-item__label">201 Created</span><span class="info-item__value">Se creó un recurso (POST). Ideal acompañarlo de la URL del nuevo recurso.</span></div>
+            <div class="info-item"><span class="info-item__label">204 No Content</span><span class="info-item__value">Operación correcta sin body que devolver (borrado exitoso).</span></div>
+            <div class="info-item"><span class="info-item__label">301 / 302</span><span class="info-item__value">Redirección permanente / temporal a otra URL.</span></div>
+            <div class="info-item"><span class="info-item__label">304 Not Modified</span><span class="info-item__value">La copia en caché sigue siendo válida; reutiliza la local.</span></div>
+            <div class="info-item"><span class="info-item__label">400 Bad Request</span><span class="info-item__value">Petición mal formada o body que no cumple el contrato.</span></div>
+            <div class="info-item"><span class="info-item__label">401 Unauthorized</span><span class="info-item__value">No estás autenticado: falta token o es inválido.</span></div>
+            <div class="info-item"><span class="info-item__label">403 Forbidden</span><span class="info-item__value">Autenticado pero sin permiso para esa acción o recurso.</span></div>
+            <div class="info-item"><span class="info-item__label">404 Not Found</span><span class="info-item__value">El recurso no existe (o se oculta para no filtrar datos).</span></div>
+            <div class="info-item"><span class="info-item__label">409 Conflict</span><span class="info-item__value">El estado actual choca con la operación (email ya registrado).</span></div>
+            <div class="info-item"><span class="info-item__label">422 Unprocessable Entity</span><span class="info-item__value">Sintaxis OK pero validación de negocio falló (campos requeridos).</span></div>
+            <div class="info-item"><span class="info-item__label">429 Too Many Requests</span><span class="info-item__value">Superaste el límite de peticiones; espera al header Retry-After.</span></div>
+            <div class="info-item"><span class="info-item__label">500 Internal Server Error</span><span class="info-item__value">Error inesperado del servidor. No dejes que el cliente vea el detalle.</span></div>
+            <div class="info-item"><span class="info-item__label">502 / 503 / 504</span><span class="info-item__value">El proxy/gateway no obtuvo respuesta (502), servicio no disponible (503) o timeout (504).</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="buenas-practicas">Buenas prácticas</h2>
+          <ul>
+            <li>Usa el código <strong>correcto</strong>, no el 200 siempre: ayuda a depurar y a clientes automáticos.</li>
+            <li>Envía un <strong>body descriptivo</strong> junto al error con un identificador del problema.</li>
+            <li>Nunca expongas trazas o SQL en el cuerpo de un 500.</li>
+            <li>Mantén consistencia: define un formato de error común en toda tu API.</li>
+          </ul>
         </section>
 
         <section class="exercise" id="ejercicio">
           <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
           <ol>
-            <li>Inspecciona en F12 → Red el valor de Cache-Control de una imagen y de una página de login.</li>
-            <li>Explica por qué una API con datos personales debe llevar no-store o private.</li>
-            <li>Pon Cache-Control «ideal» a: logo, página de inicio, perfil del usuario.</li>
+            <li>Asignale el status code a cada caso: login con contraseña falsa, recurso borrado, datos inválidos, token caducado.</li>
+            <li>En tu API, define una respuesta de error uniforme (claves, formato) y aplícala en 3 endpoints.</li>
+            <li>Consulta las DevTools de una web que conozcas y anota 3 códigos distintos que observes.</li>
           </ol>
         </section>
 
         <section class="summary" id="resumen">
           <h2>Resumen</h2>
           <ul>
-            <li>Cache-Control dicta qué y cuánto se reutiliza de una respuesta.</li>
-            <li>public/private/no-store deciden quién puede cachear.</li>
-            <li>max-age y s-maxage fijan cuánto tiempo es válido.</li>
-            <li>Cachear bien = menos carga para tu backend y más velocidad.</li>
+            <li>Los status codes resumen el resultado de cada respuesta HTTP.</li>
+            <li>El primer dígito indica la familia: 1xx info, 2xx éxito, 3xx redirección, 4xx error del cliente, 5xx error del servidor.</li>
+            <li>En APIs dominan 200, 201, 400, 401, 403, 404, 409, 422, 429 y 500.</li>
+            <li>Usa códigos precisos y responde errores con un body consistente y sin detalles internos.</li>
           </ul>
         </section>
 
         <section>
           <h2 id="relacionadas">Lecciones relacionadas</h2>
           <div class="related-lessons">
-            <a class="related-lessons__link" href="headers-http.html">Headers HTTP</a>
-            <a class="related-lessons__link" href="../modulo-04/index.html">Cache</a>
-            <a class="related-lessons__link" href="../modulo-02/cdn.html">CDN</a>
             <a class="related-lessons__link" href="respuesta-http.html">Response HTTP</a>
+            <a class="related-lessons__link" href="content-type.html">Content-Type</a>
+            <a class="related-lessons__link" href="headers-http.html">Headers HTTP</a>
+            <a class="related-lessons__link" href="../modulo-04/que-es-una-api.html">API</a>
           </div>
         </section>
       </div>
 
       <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
-        <a class="lesson-prevnext__link" href="cookies.html">
+        <a class="lesson-prevnext__link" href="content-type.html">
           <span class="label">← Anterior</span>
-          <span class="title">Cookies</span>
-        </a>
-        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="content-type.html">
-          <span class="label">Siguiente →</span>
           <span class="title">Content-Type</span>
+        </a>
+        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html">
+          <span class="label">Módulo siguiente →</span>
+          <span class="title">Módulo 4 · Arquitectura Web</span>
         </a>
       </nav>
     </article>
   </main>
-</div>
-
-<footer class="site-footer">
+</div><footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -318,7 +317,6 @@ app.get("/", (req, res) => {
     </div>
   </div>
 </footer>
-
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

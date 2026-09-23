@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cache-Control · Fundamentos de Backend · Backend Academy</title>
-<meta name="description" content="Qué es Cache-Control, directivas clave y cómo el backend decide qué reutilizan los navegadores y las CDN.">
+<title>Arquitectura Cliente-Servidor · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="El modelo que divide el software en clientes y servidores: cómo fluye una petición y por qué es la base de toda la web.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -26,7 +26,6 @@
 <link rel="stylesheet" href="../../../assets/css/toc.css">
 </head>
 <body>
-
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -49,9 +48,8 @@
     </div>
   </div>
 </header>
-
 <div class="lesson-layout" id="top">
-  <aside class="sidebar" aria-label="Índice del curso">
+<aside class="sidebar" aria-label="Índice del curso">
     <p class="sidebar__title">Fundamentos de Backend</p>
     <section class="sidebar__module sidebar__group is-open">
       <button class="sidebar__group-title" type="button" aria-expanded="true">
@@ -102,18 +100,18 @@
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
       <ul class="sidebar__links">
-        <li><a class="sidebar__link" href="que-es-http.html"><span class="check"></span>HTTP<span class="sidebar__dur">10 min</span></a></li>
-        <li><a class="sidebar__link" href="http-vs-https.html"><span class="check"></span>HTTPS<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="peticion-http.html"><span class="check"></span>Request HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="respuesta-http.html"><span class="check"></span>Response HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="headers-http.html"><span class="check"></span>Headers HTTP<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="body-http.html"><span class="check"></span>Body HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link is-active" href="cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/que-es-http.html"><span class="check"></span>HTTP<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/http-vs-https.html"><span class="check"></span>HTTPS<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/peticion-http.html"><span class="check"></span>Request HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/respuesta-http.html"><span class="check"></span>Response HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/headers-http.html"><span class="check"></span>Headers HTTP<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/body-http.html"><span class="check"></span>Body HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
       </ul>
     </section>
     <section class="sidebar__module sidebar__group is-open">
@@ -122,16 +120,16 @@
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
       <ul class="sidebar__links">
-        <li><a class="sidebar__link" href="../modulo-04/monolito.html"><span class="check"></span>Monolito<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/arquitectura-cliente-servidor.html"><span class="check"></span>Arquitectura Cliente-Servidor<span class="sidebar__dur">10 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/arquitectura-en-capas.html"><span class="check"></span>Arquitectura en Capas<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/mvc.html"><span class="check"></span>MVC<span class="sidebar__dur">11 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/que-es-una-api.html"><span class="check"></span>API<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/que-es-el-backend.html"><span class="check"></span>El Backend<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/base-de-datos.html"><span class="check"></span>Base de Datos<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/cache.html"><span class="check"></span>Cache<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/reverse-proxy.html"><span class="check"></span>Reverse Proxy<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-04/load-balancer.html"><span class="check"></span>Load Balancer<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="monolito.html"><span class="check"></span>Monolito<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link is-active" href="arquitectura-cliente-servidor.html"><span class="check"></span>Arquitectura Cliente-Servidor<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="arquitectura-en-capas.html"><span class="check"></span>Arquitectura en Capas<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="mvc.html"><span class="check"></span>MVC<span class="sidebar__dur">11 min</span></a></li>
+        <li><a class="sidebar__link" href="que-es-una-api.html"><span class="check"></span>API<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="que-es-el-backend.html"><span class="check"></span>El Backend<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="base-de-datos.html"><span class="check"></span>Base de Datos<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="cache.html"><span class="check"></span>Cache<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="reverse-proxy.html"><span class="check"></span>Reverse Proxy<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="load-balancer.html"><span class="check"></span>Load Balancer<span class="sidebar__dur">10 min</span></a></li>
       </ul>
     </section>
     <section class="sidebar__module sidebar__group is-open">
@@ -162,117 +160,117 @@
           <a href="../../../index.html">Inicio</a><span class="sep">/</span>
           <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
           <a href="../index.html">Fundamentos de Backend</a><span class="sep">/</span>
-          <a href="index.html">Módulo 3</a><span class="sep">/</span>
-          <span class="current">Cache-Control</span>
+          <a href="index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Arquitectura Cliente-Servidor</span>
         </nav>
-        <h1 class="lesson-title">Cache-Control</h1>
+        <h1 class="lesson-title">Arquitectura Cliente-Servidor</h1>
         <div class="lesson-meta">
-          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
           <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Fundamentos de Backend</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · HTTP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Arquitectura Web</span>
         </div>
       </header>
 
       <div class="lesson-content" id="contenido">
         <section>
-          <h2 id="introduccion">Introducción</h2>
-          <p><strong>Cache-Control</strong> es el header con el que el backend le dice a navegadores y CDN <em>si</em> pueden reutilizar una respuesta y <em>por cuánto tiempo</em>. Es una de las palancas de rendimiento más potentes de la web.</p>
-          <p>Cachear bien equivale a que tus usuarios reciban contenido sin que tu servidor trabaje de más. Cachear mal equivale a que vean datos viejos… o a servir cada byte dos veces innecesariamente.</p>
-        </section>
-
-        <section>
-          <h2 id="conceptos-clave">Directivas principales</h2>
+          <h2 id="que-es">¿Qué es la arquitectura Cliente-Servidor?</h2>
+          <p>La arquitectura <strong>Cliente-Servidor</strong> divide cualquier sistema en dos roles bien diferenciados:</p>
           <ul>
-            <li><code class="inline">public</code>: cualquier caché puede guardarlo (navegadores + CDN).</li>
-            <li><code class="inline">private</code>: solo el navegador del usuario (nada de CDN): típico en HTML generado por login.</li>
-            <li><code class="inline">no-store</code>: no guardar nada (datos sensibles, APIs con sesión).</li>
-            <li><code class="inline">no-cache</code>: se puede guardar pero hay que volver a validarlo antes de usarlo.</li>
-            <li><code class="inline">max-age=N</code>: cuántos segundos es válida la copia.</li>
-            <li><code class="inline">s-maxage=N</code>: lo mismo pero para CDN/proxies compartidos.</li>
+            <li><strong>Cliente:</strong> quien solicita. Es la parte que interactúa con el usuario o emite peticiones (navegador, app móvil, script, otro servidor).</li>
+            <li><strong>Servidor:</strong> quien responde. Espera peticiones, las procesa y devuelve recursos o datos.</li>
           </ul>
-          <p>Ejemplo típico: <code class="inline">Cache-Control: public, max-age=86400</code> → imágenes válidas un día en cualquier caché.</p>
+          <p>Es el modelo base de toda la web: cuando abres <code>https://github.com</code>, tu navegador (cliente) envía un <em>request HTTP</em> y el servidor de GitHub responde con el HTML de la página.</p>
         </section>
 
         <section>
-          <h2 id="ejemplo">Ejemplo: la nevera del navegador</h2>
-          <p>Pides el logo (imagen). El servidor dice «guárdatelo 1 día (public, max-age=86400)». Hoy, 10.000 usuarios piden esa imagen… y tu servidor solo trabaja la primera vez: las 9.999 siguientes se sirven desde caché local. Tu VPS respira.</p>
-        </section>
-
-        <section>
-          <h2 id="codigo">Código: aplicar cabeceras por tipo de recurso</h2>
+          <h2 id="como-funciona">Cómo funciona la comunicación</h2>
           <figure class="code-block">
-            <div class="code-block__header"><span class="code-block__lang">Node.js (Express)</span></div>
+            <div class="code-block__header"><span class="code-block__lang">Flujo</span></div>
             <div class="code-block__body">
-              <pre><code class="language-javascript">const express = require("express");
-const app = express();
+              <pre><code>Cliente --Peticion HTTP--> Servidor
+Cliente <--Respuesta HTTP-- Servidor
 
-// Estáticos: reutilizables por cualquiera, 7 días
-app.use("/assets", express.static("public", {
-  maxAge: "7d",
-  immutable: true
-}));
-
-// Respuesta de API con datos del usuario: NUNCA almacenar en CDN
-app.get("/usuario/datos", (req, res) => {
-  res.set("Cache-Control", "private, no-store");
-  res.json({ nombre: "ana" });
-});
-
-// Página pública: cacheable una hora
-app.get("/", (req, res) => {
-  res.set("Cache-Control", "public, max-age=3600");
-  res.send("<h1>Bienvenido</h1>");
-});</code></pre>
+1. El cliente resuelve el dominio (DNS).
+2. Abre una conexion (TCP/TLS) con el servidor.
+3. Envia un request (metodo, URL, headers, body).
+4. El servidor procesa y responde (status + body).
+5. El cliente cierra o reutiliza la conexion.</code></pre>
             </div>
           </figure>
+          <p>Una misma petición puede pasar por varios <strong>intermediarios</strong> (DNS, CDN, balanceadores, proxies) sin que cambie el modelo: siempre hay un lado que pide y otro que entrega.</p>
+        </section>
+
+        <section>
+          <h2 id="caracteristicas">Características clave</h2>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Centralización</span><span class="info-item__value">Los datos y la lógica viven en el servidor; el cliente solo presenta y gestiona la interacción.</span></div>
+            <div class="info-item"><span class="info-item__label">Escalabilidad</span><span class="info-item__value">Puedes tener muchos clientes contra pocos servidores, o escalar servidores sin tocar a los clientes.</span></div>
+            <div class="info-item"><span class="info-item__label">Independencia</span><span class="info-item__value">Cliente y servidor evolucionan por separado mientras mantengan el contrato (API) acordado.</span></div>
+            <div class="info-item"><span class="info-item__label">Punto único</span><span class="info-item__value">El servidor concentra la responsabilidad: si cae, todos los clientes lo notan.</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="variaciones">Variaciones del modelo</h2>
+          <p>No siempre es un navegador contra un servidor. Algunas variantes habituales:</p>
+          <ul>
+            <li><strong>Multi-cliente:</strong> web + móvil + API pública consumiendo el mismo backend.</li>
+            <li><strong>Servidor a servidor:</strong> un microservicio pide datos a otro (también es cliente-servidor).</li>
+            <li><strong>Cliente enriquecido:</strong> el frontend hace gran parte del trabajo y la API solo expone datos (SPA).</li>
+            <li><strong>Arquitectura de 3 capas:</strong> presentación (cliente) + lógica (backend) + datos (base de datos).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 id="limites">Cuándo usar esta arquitectura</h2>
+          <p>Es la opción natural para cualquier sistema con múltiples usuarios y un punto de verdad central. Los límites aparecen cuando el servidor se convierte en cuello de botella: ahí entran en juego el <strong>cache</strong>, los <strong>reverse proxies</strong> y los <strong>load balancers</strong> que verás en este módulo.</p>
         </section>
 
         <section class="exercise" id="ejercicio">
           <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
           <ol>
-            <li>Inspecciona en F12 → Red el valor de Cache-Control de una imagen y de una página de login.</li>
-            <li>Explica por qué una API con datos personales debe llevar no-store o private.</li>
-            <li>Pon Cache-Control «ideal» a: logo, página de inicio, perfil del usuario.</li>
+            <li>Dibuja el flujo de una petición contra <code>tu-api.local/users/1</code> indicando quién es el cliente y quién el servidor.</li>
+            <li>Añade al dibujo un único intermediario (CDN o proxy) y explica qué hace en la cadena.</li>
+            <li>Identifica una situación de tu día a día donde un cliente consuma a un servidor "sin querer" (IoT, telemetría, webhooks).</li>
           </ol>
         </section>
 
         <section class="summary" id="resumen">
           <h2>Resumen</h2>
           <ul>
-            <li>Cache-Control dicta qué y cuánto se reutiliza de una respuesta.</li>
-            <li>public/private/no-store deciden quién puede cachear.</li>
-            <li>max-age y s-maxage fijan cuánto tiempo es válido.</li>
-            <li>Cachear bien = menos carga para tu backend y más velocidad.</li>
+            <li>Cliente-Servidor separa el que pide del que entrega.</li>
+            <li>La web completa se apoya en este modelo con requests y responses HTTP.</li>
+            <li>El servidor es el punto central de datos y lógica.</li>
+            <li>Permite muchos clientes, escalar de forma independiente y evolucionar ambos lados por separado.</li>
+            <li>Sus puntos débiles (cuellos de botella) se resuelven con cache y proxies.</li>
           </ul>
         </section>
 
         <section>
           <h2 id="relacionadas">Lecciones relacionadas</h2>
           <div class="related-lessons">
-            <a class="related-lessons__link" href="headers-http.html">Headers HTTP</a>
-            <a class="related-lessons__link" href="../modulo-04/index.html">Cache</a>
-            <a class="related-lessons__link" href="../modulo-02/cdn.html">CDN</a>
-            <a class="related-lessons__link" href="respuesta-http.html">Response HTTP</a>
+            <a class="related-lessons__link" href="monolito.html">Monolito</a>
+            <a class="related-lessons__link" href="arquitectura-en-capas.html">Arquitectura en Capas</a>
+            <a class="related-lessons__link" href="mvc.html">MVC</a>
+            <a class="related-lessons__link" href="reverse-proxy.html">Reverse Proxy</a>
           </div>
         </section>
       </div>
 
       <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
-        <a class="lesson-prevnext__link" href="cookies.html">
+        <a class="lesson-prevnext__link" href="monolito.html">
           <span class="label">← Anterior</span>
-          <span class="title">Cookies</span>
+          <span class="title">Monolito</span>
         </a>
-        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="content-type.html">
+        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="arquitectura-en-capas.html">
           <span class="label">Siguiente →</span>
-          <span class="title">Content-Type</span>
+          <span class="title">Arquitectura en Capas</span>
         </a>
       </nav>
     </article>
   </main>
-</div>
-
-<footer class="site-footer">
+</div><footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -318,7 +316,6 @@ app.get("/", (req, res) => {
     </div>
   </div>
 </footer>
-
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

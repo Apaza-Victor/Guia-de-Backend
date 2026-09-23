@@ -73,7 +73,7 @@ const courses = [
     category: "backend",
     techs: ["Backend", "Web", "HTTP"],
     duration: "6 semanas",
-    lessons: 24,
+    lessons: 55,
     icon: "🌱",
     description:
       "Aprende qué es el Backend, cómo funciona Internet, HTTP, la arquitectura web y los fundamentos que todo desarrollador Backend debe dominar desde el primer día.",
@@ -93,12 +93,19 @@ const courses = [
         title: "Introducción al Backend",
         path: "cursos/fundamentos-backend/modulo-01/index.html",
         lessons: [
-          { id: "que-es-backend", title: "¿Qué es Backend?", path: "cursos/fundamentos-backend/modulo-01/que-es-backend.html", duration: "8 min", level: "principiante", tags: ["backend","concepto"] },
-          { id: "backend-vs-frontend", title: "Backend vs Frontend", path: "cursos/fundamentos-backend/modulo-01/backend-vs-frontend.html", duration: "10 min", level: "principiante", tags: ["backend","frontend","concepto"] },
-          { id: "que-hace-backend", title: "¿Qué hace un desarrollador Backend?", path: "cursos/fundamentos-backend/modulo-01/que-hace-un-desarrollador-backend.html", duration: "8 min", level: "principiante", tags: ["backend","rol"] },
-          { id: "cliente-servidor", title: "Cliente-Servidor", path: "cursos/fundamentos-backend/modulo-01/cliente-servidor.html", duration: "12 min", level: "principiante", tags: ["backend","arquitectura","concepto"] },
-          { id: "request-response", title: "Request y Response", path: "cursos/fundamentos-backend/modulo-01/request-response.html", duration: "10 min", level: "principiante", tags: ["backend","http","request","response"] },
-          { id: "fullstack", title: "Full Stack", path: "cursos/fundamentos-backend/modulo-01/fullstack.html", duration: "8 min", level: "principiante", tags: ["backend","fullstack"] }
+          { id: "que-es-backend", title: "¿Qué es Backend?", path: "cursos/fundamentos-backend/modulo-01/que-es-backend.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "que-hace-backend", title: "¿Qué hace un desarrollador Backend?", path: "cursos/fundamentos-backend/modulo-01/que-hace-un-desarrollador-backend.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "backend-vs-frontend", title: "Backend vs Frontend", path: "cursos/fundamentos-backend/modulo-01/backend-vs-frontend.html", duration: "10 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "fullstack", title: "Full Stack", path: "cursos/fundamentos-backend/modulo-01/fullstack.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "que-es-cliente", title: "Cliente", path: "cursos/fundamentos-backend/modulo-01/que-es-cliente.html", duration: "7 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "que-es-servidor", title: "Servidor", path: "cursos/fundamentos-backend/modulo-01/que-es-servidor.html", duration: "7 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "cliente-servidor", title: "Cliente-Servidor", path: "cursos/fundamentos-backend/modulo-01/cliente-servidor.html", duration: "12 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "que-es-request", title: "Request", path: "cursos/fundamentos-backend/modulo-01/que-es-request.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "que-es-response", title: "Response", path: "cursos/fundamentos-backend/modulo-01/que-es-response.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "request-response", title: "Request y Response", path: "cursos/fundamentos-backend/modulo-01/request-response.html", duration: "10 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "aplicaciones-web", title: "Aplicaciones Web", path: "cursos/fundamentos-backend/modulo-01/aplicaciones-web.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "aplicaciones-moviles-backend", title: "Aplicaciones Móviles y Backend", path: "cursos/fundamentos-backend/modulo-01/aplicaciones-moviles-backend.html", duration: "8 min", level: "principiante", tags: ["backend", "concepto"] },
+          { id: "arquitectura-basica", title: "Arquitectura Básica", path: "cursos/fundamentos-backend/modulo-01/arquitectura-basica.html", duration: "10 min", level: "principiante", tags: ["backend", "concepto"] },
         ]
       },
       {
@@ -106,9 +113,71 @@ const courses = [
         title: "Internet y la Web",
         path: "cursos/fundamentos-backend/modulo-02/index.html",
         lessons: [
-          { id: "como-funciona-internet", title: "¿Cómo funciona Internet?", path: "cursos/fundamentos-backend/modulo-02/como-funciona-internet.html", duration: "12 min", level: "principiante", tags: ["internet","red"] }
+          { id: "como-funciona-internet", title: "¿Cómo funciona Internet?", path: "cursos/fundamentos-backend/modulo-02/como-funciona-internet.html", duration: "12 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "que-es-la-web", title: "La Web", path: "cursos/fundamentos-backend/modulo-02/que-es-la-web.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "que-es-un-navegador", title: "El Navegador", path: "cursos/fundamentos-backend/modulo-02/que-es-un-navegador.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "servidores", title: "Servidores", path: "cursos/fundamentos-backend/modulo-02/servidores.html", duration: "9 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "que-es-un-isp", title: "ISP", path: "cursos/fundamentos-backend/modulo-02/que-es-un-isp.html", duration: "7 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "que-es-una-ip", title: "Direcciones IP", path: "cursos/fundamentos-backend/modulo-02/que-es-una-ip.html", duration: "9 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "ipv4", title: "IPv4", path: "cursos/fundamentos-backend/modulo-02/ipv4.html", duration: "7 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "ipv6", title: "IPv6", path: "cursos/fundamentos-backend/modulo-02/ipv6.html", duration: "7 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "puertos", title: "Puertos", path: "cursos/fundamentos-backend/modulo-02/puertos.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "dns", title: "DNS", path: "cursos/fundamentos-backend/modulo-02/dns.html", duration: "9 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "dominio", title: "Dominios", path: "cursos/fundamentos-backend/modulo-02/dominio.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "hosting", title: "Hosting", path: "cursos/fundamentos-backend/modulo-02/hosting.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "vps", title: "VPS", path: "cursos/fundamentos-backend/modulo-02/vps.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
+          { id: "cdn", title: "CDN", path: "cursos/fundamentos-backend/modulo-02/cdn.html", duration: "8 min", level: "principiante", tags: ["internet", "web", "red"] },
         ]
-      }
+      },
+      {
+        id: "modulo-03",
+        title: "HTTP",
+        path: "cursos/fundamentos-backend/modulo-03/index.html",
+        lessons: [
+          { id: "que-es-http", title: "HTTP", path: "cursos/fundamentos-backend/modulo-03/que-es-http.html", duration: "10 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "http-vs-https", title: "HTTPS", path: "cursos/fundamentos-backend/modulo-03/http-vs-https.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "peticion-http", title: "Request HTTP", path: "cursos/fundamentos-backend/modulo-03/peticion-http.html", duration: "8 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "respuesta-http", title: "Response HTTP", path: "cursos/fundamentos-backend/modulo-03/respuesta-http.html", duration: "8 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "headers-http", title: "Headers HTTP", path: "cursos/fundamentos-backend/modulo-03/headers-http.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "body-http", title: "Body HTTP", path: "cursos/fundamentos-backend/modulo-03/body-http.html", duration: "8 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "query-parameters", title: "Query Parameters", path: "cursos/fundamentos-backend/modulo-03/query-parameters.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "path-parameters", title: "Path Parameters", path: "cursos/fundamentos-backend/modulo-03/path-parameters.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "cookies", title: "Cookies", path: "cursos/fundamentos-backend/modulo-03/cookies.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "cache-control", title: "Cache-Control", path: "cursos/fundamentos-backend/modulo-03/cache-control.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "content-type", title: "Content-Type", path: "cursos/fundamentos-backend/modulo-03/content-type.html", duration: "9 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+          { id: "status-codes", title: "Códigos de Estado HTTP", path: "cursos/fundamentos-backend/modulo-03/status-codes.html", duration: "12 min", level: "principiante", tags: ["http", "protocolo", "request"] },
+        ]
+      },
+      {
+        id: "modulo-04",
+        title: "Arquitectura Web",
+        path: "cursos/fundamentos-backend/modulo-04/index.html",
+        lessons: [
+          { id: "monolito", title: "Monolito", path: "cursos/fundamentos-backend/modulo-04/monolito.html", duration: "8 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "arquitectura-cliente-servidor", title: "Arquitectura Cliente-Servidor", path: "cursos/fundamentos-backend/modulo-04/arquitectura-cliente-servidor.html", duration: "10 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "arquitectura-en-capas", title: "Arquitectura en Capas", path: "cursos/fundamentos-backend/modulo-04/arquitectura-en-capas.html", duration: "9 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "mvc", title: "MVC", path: "cursos/fundamentos-backend/modulo-04/mvc.html", duration: "11 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "que-es-una-api", title: "API", path: "cursos/fundamentos-backend/modulo-04/que-es-una-api.html", duration: "9 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "que-es-el-backend", title: "El Backend", path: "cursos/fundamentos-backend/modulo-04/que-es-el-backend.html", duration: "8 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "base-de-datos", title: "Base de Datos", path: "cursos/fundamentos-backend/modulo-04/base-de-datos.html", duration: "9 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "cache", title: "Cache", path: "cursos/fundamentos-backend/modulo-04/cache.html", duration: "9 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "reverse-proxy", title: "Reverse Proxy", path: "cursos/fundamentos-backend/modulo-04/reverse-proxy.html", duration: "9 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+          { id: "load-balancer", title: "Load Balancer", path: "cursos/fundamentos-backend/modulo-04/load-balancer.html", duration: "10 min", level: "basico", tags: ["arquitectura", "backend", "escalabilidad"] },
+        ]
+      },
+      {
+        id: "modulo-05",
+        title: "Formatos y Comunicación",
+        path: "cursos/fundamentos-backend/modulo-05/index.html",
+        lessons: [
+          { id: "json", title: "JSON", path: "cursos/fundamentos-backend/modulo-05/json.html", duration: "10 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+          { id: "xml", title: "XML", path: "cursos/fundamentos-backend/modulo-05/xml.html", duration: "9 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+          { id: "form-data", title: "Form Data", path: "cursos/fundamentos-backend/modulo-05/form-data.html", duration: "8 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+          { id: "multipart", title: "Multipart", path: "cursos/fundamentos-backend/modulo-05/multipart.html", duration: "9 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+          { id: "websockets", title: "WebSockets", path: "cursos/fundamentos-backend/modulo-05/websockets.html", duration: "10 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+          { id: "sse", title: "Server-Sent Events", path: "cursos/fundamentos-backend/modulo-05/sse.html", duration: "9 min", level: "intermedio", tags: ["formatos", "comunicacion", "datos"] },
+        ]
+      },
     ]
   },
   {

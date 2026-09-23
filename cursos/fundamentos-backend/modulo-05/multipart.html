@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cache-Control · Fundamentos de Backend · Backend Academy</title>
-<meta name="description" content="Qué es Cache-Control, directivas clave y cómo el backend decide qué reutilizan los navegadores y las CDN.">
+<title>Multipart · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="El formato que combina texto y archivos en una petición HTTP: el boundary, cómo lo lee el backend y cuándo usarlo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -26,7 +26,6 @@
 <link rel="stylesheet" href="../../../assets/css/toc.css">
 </head>
 <body>
-
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -49,9 +48,8 @@
     </div>
   </div>
 </header>
-
 <div class="lesson-layout" id="top">
-  <aside class="sidebar" aria-label="Índice del curso">
+<aside class="sidebar" aria-label="Índice del curso">
     <p class="sidebar__title">Fundamentos de Backend</p>
     <section class="sidebar__module sidebar__group is-open">
       <button class="sidebar__group-title" type="button" aria-expanded="true">
@@ -102,18 +100,18 @@
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
       <ul class="sidebar__links">
-        <li><a class="sidebar__link" href="que-es-http.html"><span class="check"></span>HTTP<span class="sidebar__dur">10 min</span></a></li>
-        <li><a class="sidebar__link" href="http-vs-https.html"><span class="check"></span>HTTPS<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="peticion-http.html"><span class="check"></span>Request HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="respuesta-http.html"><span class="check"></span>Response HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="headers-http.html"><span class="check"></span>Headers HTTP<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="body-http.html"><span class="check"></span>Body HTTP<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link is-active" href="cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/que-es-http.html"><span class="check"></span>HTTP<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/http-vs-https.html"><span class="check"></span>HTTPS<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/peticion-http.html"><span class="check"></span>Request HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/respuesta-http.html"><span class="check"></span>Response HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/headers-http.html"><span class="check"></span>Headers HTTP<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/body-http.html"><span class="check"></span>Body HTTP<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/query-parameters.html"><span class="check"></span>Query Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/path-parameters.html"><span class="check"></span>Path Parameters<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/cookies.html"><span class="check"></span>Cookies<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/cache-control.html"><span class="check"></span>Cache-Control<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/content-type.html"><span class="check"></span>Content-Type<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="../modulo-03/status-codes.html"><span class="check"></span>Códigos de Estado HTTP<span class="sidebar__dur">12 min</span></a></li>
       </ul>
     </section>
     <section class="sidebar__module sidebar__group is-open">
@@ -140,12 +138,12 @@
         <i class="fa-solid fa-chevron-right chev" aria-hidden="true"></i>
       </button>
       <ul class="sidebar__links">
-        <li><a class="sidebar__link" href="../modulo-05/json.html"><span class="check"></span>JSON<span class="sidebar__dur">10 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-05/xml.html"><span class="check"></span>XML<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-05/form-data.html"><span class="check"></span>Form Data<span class="sidebar__dur">8 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-05/multipart.html"><span class="check"></span>Multipart<span class="sidebar__dur">9 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-05/websockets.html"><span class="check"></span>WebSockets<span class="sidebar__dur">10 min</span></a></li>
-        <li><a class="sidebar__link" href="../modulo-05/sse.html"><span class="check"></span>Server-Sent Events<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="json.html"><span class="check"></span>JSON<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="xml.html"><span class="check"></span>XML<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="form-data.html"><span class="check"></span>Form Data<span class="sidebar__dur">8 min</span></a></li>
+        <li><a class="sidebar__link is-active" href="multipart.html"><span class="check"></span>Multipart<span class="sidebar__dur">9 min</span></a></li>
+        <li><a class="sidebar__link" href="websockets.html"><span class="check"></span>WebSockets<span class="sidebar__dur">10 min</span></a></li>
+        <li><a class="sidebar__link" href="sse.html"><span class="check"></span>Server-Sent Events<span class="sidebar__dur">9 min</span></a></li>
       </ul>
     </section>
     <div class="sidebar-footer">
@@ -162,117 +160,111 @@
           <a href="../../../index.html">Inicio</a><span class="sep">/</span>
           <a href="../../../cursos/index.html">Cursos</a><span class="sep">/</span>
           <a href="../index.html">Fundamentos de Backend</a><span class="sep">/</span>
-          <a href="index.html">Módulo 3</a><span class="sep">/</span>
-          <span class="current">Cache-Control</span>
+          <a href="index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Multipart</span>
         </nav>
-        <h1 class="lesson-title">Cache-Control</h1>
+        <h1 class="lesson-title">Multipart</h1>
         <div class="lesson-meta">
-          <span class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></span>
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
           <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
           <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Fundamentos de Backend</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · HTTP</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Formatos y Comunicación</span>
         </div>
       </header>
 
       <div class="lesson-content" id="contenido">
         <section>
-          <h2 id="introduccion">Introducción</h2>
-          <p><strong>Cache-Control</strong> es el header con el que el backend le dice a navegadores y CDN <em>si</em> pueden reutilizar una respuesta y <em>por cuánto tiempo</em>. Es una de las palancas de rendimiento más potentes de la web.</p>
-          <p>Cachear bien equivale a que tus usuarios reciban contenido sin que tu servidor trabaje de más. Cachear mal equivale a que vean datos viejos… o a servir cada byte dos veces innecesariamente.</p>
-        </section>
-
-        <section>
-          <h2 id="conceptos-clave">Directivas principales</h2>
-          <ul>
-            <li><code class="inline">public</code>: cualquier caché puede guardarlo (navegadores + CDN).</li>
-            <li><code class="inline">private</code>: solo el navegador del usuario (nada de CDN): típico en HTML generado por login.</li>
-            <li><code class="inline">no-store</code>: no guardar nada (datos sensibles, APIs con sesión).</li>
-            <li><code class="inline">no-cache</code>: se puede guardar pero hay que volver a validarlo antes de usarlo.</li>
-            <li><code class="inline">max-age=N</code>: cuántos segundos es válida la copia.</li>
-            <li><code class="inline">s-maxage=N</code>: lo mismo pero para CDN/proxies compartidos.</li>
-          </ul>
-          <p>Ejemplo típico: <code class="inline">Cache-Control: public, max-age=86400</code> → imágenes válidas un día en cualquier caché.</p>
-        </section>
-
-        <section>
-          <h2 id="ejemplo">Ejemplo: la nevera del navegador</h2>
-          <p>Pides el logo (imagen). El servidor dice «guárdatelo 1 día (public, max-age=86400)». Hoy, 10.000 usuarios piden esa imagen… y tu servidor solo trabaja la primera vez: las 9.999 siguientes se sirven desde caché local. Tu VPS respira.</p>
-        </section>
-
-        <section>
-          <h2 id="codigo">Código: aplicar cabeceras por tipo de recurso</h2>
+          <h2 id="que-es">¿Qué es multipart?</h2>
+          <p><strong>Multipart</strong> es el formato de cuerpos HTTP que permite combinar varios bloques, normalmente texto <strong>y archivos binarios</strong>, en una misma petición. Su header es <code>Content-Type: multipart/form-data; boundary=----marco</code>.</p>
           <figure class="code-block">
-            <div class="code-block__header"><span class="code-block__lang">Node.js (Express)</span></div>
+            <div class="code-block__header"><span class="code-block__lang">Ejemplo</span></div>
             <div class="code-block__body">
-              <pre><code class="language-javascript">const express = require("express");
-const app = express();
+              <pre><code>POST /api/avatar HTTP/1.1
+Content-Type: multipart/form-data; boundary=marco
 
-// Estáticos: reutilizables por cualquiera, 7 días
-app.use("/assets", express.static("public", {
-  maxAge: "7d",
-  immutable: true
-}));
+--marco
+Content-Disposition: form-data; name="usuario"
 
-// Respuesta de API con datos del usuario: NUNCA almacenar en CDN
-app.get("/usuario/datos", (req, res) => {
-  res.set("Cache-Control", "private, no-store");
-  res.json({ nombre: "ana" });
-});
+ana
+--marco
+Content-Disposition: form-data; name="avatar"; filename="foto.jpg"
+Content-Type: image/jpeg
 
-// Página pública: cacheable una hora
-app.get("/", (req, res) => {
-  res.set("Cache-Control", "public, max-age=3600");
-  res.send("<h1>Bienvenido</h1>");
-});</code></pre>
+(byte 0 ... byte N del archivo)
+--marco--</code></pre>
             </div>
           </figure>
+        </section>
+
+        <section>
+          <h2 id="el-boundary">El role del boundary</h2>
+          <p>El <strong>boundary</strong> es un separador único que elige el cliente y que el servidor debe conocer: llega en el propio header <code>Content-Type</code>. Cada bloque empieza con <code>--boundary</code> e incluye su propio <code>Content-Disposition</code> (nombre de campo, y si es archivo, el nombre de archivo). El cuerpo termina con <code>--boundary--</code>.</p>
+          <p>Por eso urlencoded no vale para archivos: los binarios no se escapan bien en un texto clave-valor; multipart los envía en crudo, parte por parte.</p>
+        </section>
+
+        <section>
+          <h2 id="backend">Cómo lo maneja el backend</h2>
+          <ul>
+            <li>Express: middleware <code>multer</code> (o <code>formidable</code>).</li>
+            <li>Django: <code>request.FILES</code> para archivos y <code>request.POST</code> para el resto.</li>
+            <li>FastAPI: recibir un parámetro de tipo <code>UploadFile</code>.</li>
+            <li>PHP: <code>$_FILES</code>.</li>
+          </ul>
+          <p>Los frameworks separan los campos de texto de los archivos y guardan estos últimos en disco, en un bucket o en memoria (con cuidado del tamaño). Aviso: valida <strong>tipo, tamaño y extensión</strong>; nunca confíes en el nombre que envía el cliente.</p>
+        </section>
+
+        <section>
+          <h2 id="cuando">Cuándo usar multipart</h2>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Sí</span><span class="info-item__value">Subida de imágenes, documentos, vídeos o cualquier binario junto a metadatos.</span></div>
+            <div class="info-item"><span class="info-item__label">No</span><span class="info-item__value">Datos anidados puros (usa JSON) o formularios de texto simple (urlencoded es más ligero).</span></div>
+          </div>
+          <p>Con multitud de archivos grandes se suele separar del flujo normal de la API: primero se sube el archivo (a un storage dedicado) y luego se envía su referencia por JSON.</p>
         </section>
 
         <section class="exercise" id="ejercicio">
           <div class="exercise__head"><h3><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h3></div>
           <ol>
-            <li>Inspecciona en F12 → Red el valor de Cache-Control de una imagen y de una página de login.</li>
-            <li>Explica por qué una API con datos personales debe llevar no-store o private.</li>
-            <li>Pon Cache-Control «ideal» a: logo, página de inicio, perfil del usuario.</li>
+            <li>Crea un formulario que suba una foto con su descripción y envía por POST.</li>
+            <li>En DevTools, inspecciona el body multipart: boundary, bloques y headers por archivo.</li>
+            <li>En tu backend, guarda la imagen en disco o nube y valida tipo y tamaño.</li>
           </ol>
         </section>
 
         <section class="summary" id="resumen">
           <h2>Resumen</h2>
           <ul>
-            <li>Cache-Control dicta qué y cuánto se reutiliza de una respuesta.</li>
-            <li>public/private/no-store deciden quién puede cachear.</li>
-            <li>max-age y s-maxage fijan cuánto tiempo es válido.</li>
-            <li>Cachear bien = menos carga para tu backend y más velocidad.</li>
+            <li>Multipart envía varios bloques (texto + binarios) en una petición.</li>
+            <li>El boundary, viajando en el Content-Type, delimita cada bloque.</li>
+            <li>Los frameworks separan campos y archivos (multer, FILES, UploadFile...).</li>
+            <li>Valida siempre tipo, tamaño y nombre de archivo en el servidor.</li>
           </ul>
         </section>
 
         <section>
           <h2 id="relacionadas">Lecciones relacionadas</h2>
           <div class="related-lessons">
-            <a class="related-lessons__link" href="headers-http.html">Headers HTTP</a>
-            <a class="related-lessons__link" href="../modulo-04/index.html">Cache</a>
-            <a class="related-lessons__link" href="../modulo-02/cdn.html">CDN</a>
-            <a class="related-lessons__link" href="respuesta-http.html">Response HTTP</a>
+            <a class="related-lessons__link" href="form-data.html">Form Data</a>
+            <a class="related-lessons__link" href="json.html">JSON</a>
+            <a class="related-lessons__link" href="../modulo-03/content-type.html">Content-Type</a>
+            <a class="related-lessons__link" href="../modulo-03/body-http.html">Body HTTP</a>
           </div>
         </section>
       </div>
 
       <nav class="lesson-prevnext" aria-label="Navegación entre lecciones">
-        <a class="lesson-prevnext__link" href="cookies.html">
+        <a class="lesson-prevnext__link" href="form-data.html">
           <span class="label">← Anterior</span>
-          <span class="title">Cookies</span>
+          <span class="title">Form Data</span>
         </a>
-        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="content-type.html">
+        <a class="lesson-prevnext__link lesson-prevnext__link--next" href="websockets.html">
           <span class="label">Siguiente →</span>
-          <span class="title">Content-Type</span>
+          <span class="title">WebSockets</span>
         </a>
       </nav>
     </article>
   </main>
-</div>
-
-<footer class="site-footer">
+</div><footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -318,7 +310,6 @@ app.get("/", (req, res) => {
     </div>
   </div>
 </footer>
-
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>
