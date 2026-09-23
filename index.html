@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="assets/css/dashboard.css">
 <link rel="stylesheet" href="assets/css/components.css">
 <link rel="stylesheet" href="assets/css/toc.css">
+<link rel="stylesheet" href="assets/css/home.css">
 </head>
 <body>
 
@@ -40,7 +41,7 @@
       <a href="practica/index.html">Práctica</a>
       <a href="proyectos/index.html">Proyectos</a>
       <a href="recursos/index.html">Recursos</a>
-      <a href="buscador/index.html">Buscar</a>
+      <a href="buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -51,48 +52,125 @@
 </header>
 
 <main class="main-content">
-  <div class="container">
+  <section class="hero hero--home">
+    <div class="hero__inner">
+        <div class="hero__content" data-reveal>
+          <p class="hero__eyebrow">⚙️ Backend Academy · La escuela gratuita del Backend</p>
+          <h1 class="hero__title">Aprende Backend de <span class="grad">cero a experto</span></h1>
+          <p class="hero__subtitle">Un camino claro con roadmap, 30 cursos, ejercicios, retos y proyectos reales. De no saber nada de servidores a diseñar sistemas distribuidos en producción. Todo en español, gratis y sin registro.</p>
+          <div class="row hero__actions">
+            <a class="btn btn--primary btn--lg" href="roadmap/index.html">Ver el roadmap <i class="fa-solid fa-map" aria-hidden="true"></i></a>
+            <a class="btn btn--accent btn--lg" href="aprender/index.html">Empezar a aprender <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+          </div>
+          <ul class="hero__facts">
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> 30 cursos completos</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Roadmap en 5 etapas</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Gratis y sin registro</li>
+          </ul>
+        </div>
+        <div class="hero__visual" data-reveal aria-hidden="true">
+          <div class="terminal-card">
+            <div class="terminal-card__bar">
+              <span></span><span></span><span></span>
+              <small>server.js</small>
+            </div>
+            <pre class="terminal-card__body"><code>$ node --version
+v20.9.0
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item" aria-current="page">Inicio</span>
-    </nav>
+$ npm run dev
 
-    <section class="hero hero--home">
-      <p class="tag tag--cat">⚙️ Backend Academy · La escuela gratuita del Backend</p>
-      <h1 class="hero__title">Aprende Backend de <span class="grad">cero a experto</span></h1>
-      <p class="hero__subtitle">Un camino claro con roadmap, 30 cursos, ejercicios, retos y proyectos reales. De no saber nada de servidores a diseñar sistemas distribuidos en producción. Todo en español, gratis y sin registro.</p>
-      <div class="row">
-        <a class="btn btn--primary btn--lg" href="roadmap/index.html">Ver el roadmap <i class="fa-solid fa-map" aria-hidden="true"></i></a>
-        <a class="btn btn--accent btn--lg" href="aprender/index.html">Empezar a aprender <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+&gt; backend-academy@1.0.0 dev
+&gt; node server.js
+
+Server listening on http://localhost:3000
+GET  /api/cursos       200  12ms
+GET  /api/cursos/42    200   4ms
+GET  /api/usuarios     200   9ms</code></pre>
+            <div class="terminal-card__glow"></div>
+          </div>
+          <div class="floating-chip floating-chip--top">🔥 +600 lecciones</div>
+          <div class="floating-chip floating-chip--bottom">🗄️ Bases de datos incluidas</div>
+        </div>
       </div>
     </section>
 
-    <section>
-      <h2 class="section-title">La plataforma en cifras</h2>
-      <p class="section-subtitle">Una sola plataforma con todo lo que necesitas para llegar de principiante a profesional del Backend.</p>
+    <div class="container">
+
+    <section class="home-section" data-reveal>
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">La plataforma en cifras</h2>
+          <p class="section-subtitle">Una sola plataforma con todo lo que necesitas para llegar de principiante a profesional del Backend.</p>
+        </div>
+      </div>
       <div class="section-grid">
-        <div class="stat-card">
-          <span class="stat-card__value">30</span>
-          <span class="stat-card__label"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Cursos completos</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__value">5</span>
-          <span class="stat-card__label"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Niveles del roadmap</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__value">100%</span>
-          <span class="stat-card__label"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Gratuito</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__value">0</span>
-          <span class="stat-card__label"><i class="fa-solid fa-user-check" aria-hidden="true"></i> Cobros ni registro</span>
-        </div>
+        <article class="stat-card">
+          <span class="stat-card__icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+          <span class="stat-card__value" data-count="30">0</span>
+          <span class="stat-card__label">Cursos completos</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+          <span class="stat-card__value" data-count="611">0</span>
+          <span class="stat-card__label">Lecciones prácticas</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card__icon"><i class="fa-solid fa-route" aria-hidden="true"></i></span>
+          <span class="stat-card__value" data-count="5">0</span>
+          <span class="stat-card__label">Niveles del roadmap</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card__icon"><i class="fa-solid fa-gift" aria-hidden="true"></i></span>
+          <span class="stat-card__value" data-count="100" data-suffix="%">0</span>
+          <span class="stat-card__label">Gratis y sin registro</span>
+        </article>
       </div>
     </section>
 
-    <hr class="divider">
+    <hr class="divider" data-reveal>
 
-    <section>
+    <section class="home-section home-section--alt" data-reveal>
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">¿Por qué Backend Academy?</h2>
+          <p class="section-subtitle">Pensada para que aprendas de verdad: teoría clara, práctica constante y un orden que funciona.</p>
+        </div>
+      </div>
+      <div class="features-grid">
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-map" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Roadmap guiado</h3>
+          <p class="feature-card__text">Un camino en 5 etapas que te dice qué estudiar y en qué orden, sin perderte en el camino.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">100% gratuito</h3>
+          <p class="feature-card__text">Todo el contenido es libre y de acceso abierto. Sin planes de pago ni letra pequeña.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-earth-americas" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Hecho en español</h3>
+          <p class="feature-card__text">Explicado en español claro y con ejemplos reales, desde lo más simple hasta lo avanzado.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-user-shield" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Sin registro</h3>
+          <p class="feature-card__text">No necesitas cuenta ni correo. Tu progreso, favoritos e historial se guardan en tu navegador.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Práctica real</h3>
+          <p class="feature-card__text">Ejercicios, retos y proyectos para llevar cada concepto al teclado desde el primer módulo.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Referencias útiles</h3>
+          <p class="feature-card__text">Cheatsheets, glosario y buscador global para consultar lo que necesites al instante.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="home-section" data-reveal>
       <h2 class="section-title">Tu progreso global</h2>
       <p class="section-subtitle">Cada lección que marcas como completada se guarda en tu navegador. Esta barra muestra tu avance total en la plataforma.</p>
       <div class="progress" data-progress="" aria-label="Progreso global">
@@ -101,15 +179,20 @@
       </div>
     </section>
 
-    <hr class="divider">
+    <hr class="divider" data-reveal>
 
-    <section>
-      <h2 class="section-title">Explora las secciones</h2>
-      <p class="section-subtitle">Todo el contenido de la plataforma organizado en secciones: aprende teoría, sigue el orden sugerido, practica y consulta referencias.</p>
+    <section class="home-section" data-reveal>
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Explora las secciones</h2>
+          <p class="section-subtitle">Todo el contenido de la plataforma organizado en secciones: aprende teoría, sigue el orden sugerido, practica y consulta referencias.</p>
+        </div>
+      </div>
       <div class="section-grid">
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">📘 Aprender</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+            <h3 class="card__title">Aprender</h3>
           </div>
           <p class="card__text">El catálogo completo de los 30 cursos con filtros por nivel y categoría: de Fundamentos de Backend hasta Proyectos Reales.</p>
           <div class="card__meta"><span>30 cursos</span><span>5 niveles</span></div>
@@ -117,8 +200,9 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">🗺️ Roadmap</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i></span>
+            <h3 class="card__title">Roadmap</h3>
           </div>
           <p class="card__text">El orden sugerido de aprendizaje en 5 etapas: Principiante, Básico, Intermedio, Avanzado y Experto.</p>
           <div class="card__meta"><span>5 etapas</span><span>~12 meses</span></div>
@@ -126,8 +210,9 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">🧪 Práctica</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-flask-vial" aria-hidden="true"></i></span>
+            <h3 class="card__title">Práctica</h3>
           </div>
           <p class="card__text">Ejercicios paso a paso, retos semanales y proyectos progresivos para llevar la teoría al teclado.</p>
           <div class="card__meta"><span>12 ejercicios</span><span>8 retos · 6 proyectos</span></div>
@@ -135,8 +220,9 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">📚 Recursos</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-folder-open" aria-hidden="true"></i></span>
+            <h3 class="card__title">Recursos</h3>
           </div>
           <p class="card__text">Enlaces oficiales, documentación y referencias bibliográficas reales usadas a lo largo de todos los cursos.</p>
           <div class="card__meta"><span>Referencias reales</span><span>Actualizado 2026</span></div>
@@ -144,8 +230,9 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">⚡ Cheatsheets</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-file-code" aria-hidden="true"></i></span>
+            <h3 class="card__title">Cheatsheets</h3>
           </div>
           <p class="card__text">Hojas de referencia rápida con la sintaxis y los comandos esenciales de cada tecnología del Backend.</p>
           <div class="card__meta"><span>Referencia rápida</span><span>Imprimibles</span></div>
@@ -153,8 +240,9 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">🔤 Glosario</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-spell-check" aria-hidden="true"></i></span>
+            <h3 class="card__title">Glosario</h3>
           </div>
           <p class="card__text">Términos del Backend explicados en palabras simples: de API y servidor a microservicios y observabilidad.</p>
           <div class="card__meta"><span>Definiciones</span><span>Alfabético</span></div>
@@ -162,68 +250,79 @@
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">🔎 Buscar</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <h3 class="card__title">Buscar</h3>
           </div>
           <p class="card__text">Encuentra cualquier lección, curso o concepto de la plataforma con el buscador global en tiempo real.</p>
           <div class="card__meta"><span>Búsqueda global</span><span>En tiempo real</span></div>
-          <a class="btn btn--primary btn--sm" href="buscador/index.html">Buscar <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+          <a class="btn btn--primary btn--sm" href="buscador/index.html">Buscar <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
-            <h3 class="card__title">📊 Dashboard, Favoritos e Historial</h3>
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+            <h3 class="card__title">Dashboard, Favoritos e Historial</h3>
           </div>
           <p class="card__text">Sigue tu avance en el dashboard, guarda lecciones en favoritos y consulta tu historial de navegación.</p>
           <div class="card__meta">
             <a href="dashboard/index.html">Dashboard</a> · <a href="favoritos/index.html">Favoritos</a> · <a href="historial/index.html">Historial</a>
           </div>
-          <a class="btn btn--primary btn--sm" href="dashboard/index.html">Abrir Dashboard <i class="fa-solid fa-chart-line" aria-hidden="true"></i></a>
+          <a class="btn btn--primary btn--sm" href="dashboard/index.html">Abrir Dashboard <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
       </div>
     </section>
 
-    <hr class="divider">
+    <hr class="divider" data-reveal>
 
-    <section>
-      <h2 class="section-title">Últimos cursos</h2>
-      <p class="section-subtitle">Una muestra de los cursos más visitados de la plataforma. Consulta el <a href="aprender/index.html">catálogo completo</a> para ver los 30.</p>
+    <section class="home-section" data-reveal>
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Últimos cursos</h2>
+          <p class="section-subtitle">Una muestra de los cursos más visitados de la plataforma. Consulta el <a href="aprender/index.html">catálogo completo</a> para ver los 30.</p>
+        </div>
+        <a class="btn btn--ghost btn--sm" href="aprender/index.html">Ver todos <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
       <div class="section-grid">
         <article class="card card--module">
-          <div class="card__top">
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
             <h3 class="card__title">Fundamentos de Backend</h3>
-            <span class="badge badge--level badge--level-principiante">🌱 Principiante</span>
           </div>
+          <span class="badge badge--level badge--level-principiante">🌱 Principiante</span>
           <p class="card__text">Qué es el Backend, cómo funciona Internet y el protocolo HTTP. El punto de partida de todo el roadmap.</p>
           <div class="card__meta"><span>6 semanas</span><span>5 módulos</span></div>
           <a class="btn btn--primary btn--sm" href="cursos/fundamentos-backend/index.html">Ver curso <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
             <h3 class="card__title">Programación para Backend</h3>
-            <span class="badge badge--level badge--level-principiante">🌱 Principiante</span>
           </div>
+          <span class="badge badge--level badge--level-principiante">🌱 Principiante</span>
           <p class="card__text">Lógica, estructuras de datos y algoritmos aplicados a la construcción de servidores y APIs.</p>
           <div class="card__meta"><span>5 semanas</span><span>6 módulos</span></div>
           <a class="btn btn--primary btn--sm" href="cursos/programacion/index.html">Ver curso <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
             <h3 class="card__title">SQL</h3>
-            <span class="badge badge--level badge--level-basico">🚀 Básico</span>
           </div>
+          <span class="badge badge--level badge--level-basico">🚀 Básico</span>
           <p class="card__text">Consultas, joins, transacciones y optimización con el lenguaje de las bases relacionales.</p>
           <div class="card__meta"><span>8 semanas</span><span>7 módulos · 33 lecciones</span></div>
           <a class="btn btn--primary btn--sm" href="cursos/sql/index.html">Ver curso <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </article>
 
         <article class="card card--module">
-          <div class="card__top">
+          <div class="card__top card__top--with-icon">
+            <span class="card__icon"><i class="fa-brands fa-php" aria-hidden="true"></i></span>
             <h3 class="card__title">PHP</h3>
-            <span class="badge badge--level badge--level-basico">🚀 Básico</span>
           </div>
+          <span class="badge badge--level badge--level-basico">🚀 Básico</span>
           <p class="card__text">El lenguaje web por excelencia: sintaxis, entornos de ejecución y frameworks modernos como Laravel.</p>
           <div class="card__meta"><span>6 semanas</span><span>Sintaxis · Frameworks</span></div>
           <a class="btn btn--primary btn--sm" href="cursos/php/index.html">Ver curso <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
@@ -232,6 +331,17 @@
     </section>
 
   </div>
+
+  <section class="home-section home-section--cta" data-reveal>
+    <div class="cta-band">
+      <h2 class="cta-band__title">¿Listo para construir tu primer backend?</h2>
+      <p class="cta-band__text">Empieza hoy por el camino correcto. No necesitas experiencia previa, solo un navegador y ganas de aprender.</p>
+      <div class="cta-band__actions">
+        <a class="btn btn--primary btn--lg" href="roadmap/index.html"><i class="fa-solid fa-map" aria-hidden="true"></i> Ver el roadmap</a>
+        <a class="btn btn--accent btn--lg" href="aprender/index.html">Empezar ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer class="site-footer">
@@ -290,6 +400,58 @@
 <script src="assets/js/sidebar.js"></script>
 <script src="assets/js/toc.js"></script>
 <script src="assets/js/code.js"></script>
+<script src="assets/js/favorites.js"></script>
+<script src="assets/js/history.js"></script>
+<script src="assets/js/search.js"></script>
 <script src="assets/js/main.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var revealEls = document.querySelectorAll("[data-reveal]");
+  var hasIO = "IntersectionObserver" in window;
+
+  if (reduce || !hasIO) {
+    revealEls.forEach(function (el) { el.classList.add("is-visible"); });
+    document.querySelectorAll("[data-count]").forEach(function (el) {
+      el.textContent = el.getAttribute("data-count") + (el.getAttribute("data-suffix") || "");
+    });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+  var animateCount = function (el) {
+    var target = parseInt(el.getAttribute("data-count"), 10);
+    var suffix = el.getAttribute("data-suffix") || "";
+    var dur = parseInt(el.getAttribute("data-duration") || "1400", 10);
+    var start = performance.now();
+    var tick = function (now) {
+      var t = Math.min((now - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  var cIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        animateCount(entry.target);
+        cIo.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll("[data-count]").forEach(function (el) { cIo.observe(el); });
+});
+</script>
 </body>
 </html>
