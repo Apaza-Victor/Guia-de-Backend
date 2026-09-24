@@ -97,8 +97,10 @@
   <div class="code-block__body"><pre><code class="language-bash"># min  hour  dom  mon  dow  comando
 30 2 * * * /usr/bin/docker compose -f /srv/api/compose.yml exec db pg_dump -U app app &gt; /backups/api.sql</code></pre></div>
 </figure>
-<pre><code class="language-text">Cada día a las 02:30 se genera la copia de la base de datos</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">Cada día a las 02:30 se genera la copia de la base de datos</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Un crontab real combina el backup diario, la rotación de logs semanal y la limpieza de temporales. Cada tarea redirige su log a un archivo con fecha.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">INI</span><span class="code-block__caption">Crontab con backups y mantenimiento</span></figcaption>

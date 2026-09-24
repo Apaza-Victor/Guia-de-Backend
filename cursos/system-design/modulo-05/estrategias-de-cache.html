@@ -106,8 +106,10 @@ def get_profile(user_id):
     CACHE.setex(key, TTL, json.dumps(rows[0]))
     return rows[0]</code></pre></div>
 </figure>
-<pre><code class="language-text">Miss → BBDD, rellena con TTL; hit siguiente → directo de Redis.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">Miss → BBDD, rellena con TTL; hit siguiente → directo de Redis.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>La actualización consistente (write-through): la escritura actualiza el origen y luego (o en paralelo) la caché, evitando que la caché devuelva el valor anterior.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">write-through</span></figcaption>

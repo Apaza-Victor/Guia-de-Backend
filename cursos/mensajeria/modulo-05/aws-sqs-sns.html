@@ -105,8 +105,10 @@ msg = resp.get('Messages', [None])[0]
 sqs.delete_message(QueueUrl=cola,
                     ReceiptHandle=msg['ReceiptHandle'])</code></pre></div>
 </figure>
-<pre><code class="language-text">El mensaje viaja a la cola, se recibe tras la espera larga y se elimina al procesar.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">El mensaje viaja a la cola, se recibe tras la espera larga y se elimina al procesar.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Publica un evento en SNS y deja que un fanout lo entregue a dos colas SQS distintas.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Fanout SNS a varias colas</span></figcaption>

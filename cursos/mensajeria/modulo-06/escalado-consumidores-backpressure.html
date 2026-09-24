@@ -101,8 +101,10 @@ def on_cargo(ch, method, props, body):
     llamar_api_pagos(body)        # tarda ~1s
     ch.basic_ack(delivery_tag=method.delivery_tag)</code></pre></div>
 </figure>
-<pre><code class="language-text">El número de llamadas simultáneas a la API de pagos queda limitado por el prefetch.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">El número de llamadas simultáneas a la API de pagos queda limitado por el prefetch.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El escalado por métrica conecta el backlog de la cola con la autoscaling del grupo de consumidores.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Autoscaling por backlog</span></figcaption>

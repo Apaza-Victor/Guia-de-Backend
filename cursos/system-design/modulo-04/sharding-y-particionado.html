@@ -108,8 +108,10 @@ def read(key: str) -&gt; str | None:
     s = shard_for(key)
     return conn(s).get(f&quot;{key}&quot;)</code></pre></div>
 </figure>
-<pre><code class="language-text">user_id → shard; mismo usuario siempre al mismo shard.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">user_id → shard; mismo usuario siempre al mismo shard.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Para evitarte re-hash cuando crezcan los shards, usa hash consistente: la reasignación solo mueve una fracción de las llaves.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">hash consistente</span></figcaption>

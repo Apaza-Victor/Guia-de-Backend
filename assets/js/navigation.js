@@ -99,6 +99,37 @@ const AppNav = (() => {
   }
 
   /* ================= Menú móvil ================= */
+  function ensureMobileMenu() {
+    const headerInner = qs(".site-header__inner");
+    const nav = qs(".nav-main");
+    if (!headerInner || !nav || qs("[data-menu-toggle]")) return;
+
+    nav.dataset.drawer = "";
+    nav.classList.add("nav-main--drawer");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "menu-toggle btn btn--icon btn--ghost";
+    btn.dataset.menuToggle = "";
+    btn.setAttribute("aria-label", "Abrir menú de navegación");
+    btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-controls", "drawer");
+    btn.innerHTML =
+      '<span class="menu-toggle__bars" aria-hidden="true">' +
+      '<span class="menu-toggle__bar"></span>' +
+      '<span class="menu-toggle__bar"></span>' +
+      '<span class="menu-toggle__bar"></span>' +
+      "</span>";
+    headerInner.insertBefore(btn, nav);
+
+    if (!qs("[data-menu-overlay]")) {
+      const overlay = document.createElement("div");
+      overlay.className = "nav-overlay";
+      overlay.dataset.menuOverlay = "";
+      document.body.appendChild(overlay);
+    }
+  }
+
   function mobileMenu() {
     const btn = qs("[data-menu-toggle]");
     const overlay = qs("[data-menu-overlay]");
@@ -173,7 +204,10 @@ const AppNav = (() => {
         : '<span class="pn pn--next is-empty"><span class="pn__tag">Siguiente →</span></span>');
   }
 
+  let inited = false;
   function init() {
+    if (inited) return;
+    inited = true;
     buildBreadcrumb();
     const headings = buildToc();
     scrollSpy(headings);

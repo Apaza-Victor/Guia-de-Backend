@@ -104,8 +104,10 @@ subscriber = pubsub_v1.SubscriberClient()
 sub_path = subscriber.subscription_path('mi-proyecto', 'factura-sub')
 subscriber.pull(request={'subscription': sub_path, 'max_messages': 10})</code></pre></div>
 </figure>
-<pre><code class="language-text">El evento queda en el tópico y la suscripción 'factura-sub' puede recuperarlo en el pull.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">El evento queda en el tópico y la suscripción 'factura-sub' puede recuperarlo en el pull.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Una función Cloud Run recibe eventos por push: Pub/Sub hace POST al endpoint y espera un 200 o 204 para acusar.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Endpoint push que confirma con HTTP 200</span></figcaption>

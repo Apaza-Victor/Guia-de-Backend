@@ -100,8 +100,10 @@ curl -b jar.txt -c jar.txt -X POST http://api.example.com/login \
   -d '{&quot;user&quot;:&quot;ana&quot;,&quot;password&quot;:&quot;correcta&quot;}'
 grep session jar.txt  # si sigue siendo ATAQUE123, hay fijación</code></pre></div>
 </figure>
-<pre><code class="language-text">session ATAQUE123  (el servidor NO regeneró el id tras el login)</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">session ATAQUE123  (el servidor NO regeneró el id tras el login)</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>La corrección en el controlador: regenerar el session id al autenticar y emitir la cookie con SameSite=Strict.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Regeneración de sesión y cookie endurecida</span></figcaption>

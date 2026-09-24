@@ -103,8 +103,10 @@ ch.basic_publish(exchange='', routing_key='tareas',
                   properties=pika.BasicProperties(delivery_mode=2))
 conn.close()</code></pre></div>
 </figure>
-<pre><code class="language-text">El mensaje queda en la cola 'tareas' esperando a que un consumidor competidor lo tome.</code></pre></section>
-
+<figure class="code-block code-block--output">
+  <figcaption class="code-block__header"><span class="code-block__lang">Salida</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">El mensaje queda en la cola 'tareas' esperando a que un consumidor competidor lo tome.</code></pre></div>
+</figure></section>
 <section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>En el lado consumidor, el prefetch y el ack manual protegen a los workers de sobrecarga y permiten reenviar mensajes no confirmados.</p>
 <figure class="code-block">
   <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Consumidor competidor con ack manual</span></figcaption>
