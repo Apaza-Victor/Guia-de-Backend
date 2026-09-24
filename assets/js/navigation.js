@@ -120,7 +120,12 @@ const AppNav = (() => {
       '<span class="menu-toggle__bar"></span>' +
       '<span class="menu-toggle__bar"></span>' +
       "</span>";
-    headerInner.insertBefore(btn, nav);
+    const actions = qs(".header-actions");
+    if (actions) {
+      actions.appendChild(btn);
+    } else {
+      headerInner.appendChild(btn);
+    }
 
     if (!qs("[data-menu-overlay]")) {
       const overlay = document.createElement("div");
