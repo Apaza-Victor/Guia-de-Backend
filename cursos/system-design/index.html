@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System Design / Arquitectura de Sistemas · Backend Academy</title>
-<meta name="description" content="Curso experto de System Design: requisitos, escalabilidad, load balancing, caching, sharding y diseño de sistemas de alto tráfico listo para entrevistas.">
+<meta name="description" content="Requisitos, escalabilidad horizontal, load balancing, caching, CDN, replicación, sharding y diseño de sistemas de alto tráfico.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +24,10 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body data-root=".">
+<body data-root="../../">
 
 <header class="site-header" data-header>
   <div class="container site-header__inner">
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -53,147 +55,261 @@
 <aside data-sidebar></aside>
 
 <main data-content>
-  <div class="container">
-    <article class="course" data-course-id="system-design">
-
+  <section class="page-hero page-hero--course">
+    <div class="container">
       <nav class="breadcrumb" aria-label="Miga de pan">
         <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">›</span>
-        <span class="breadcrumb__item"><a href="../../aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">›</span>
-        <span class="breadcrumb__item" aria-current="page">Curso de System Design</span>
+        <span class="breadcrumb__item" aria-current="page">System Design / Arquitectura de Sistemas</span>
       </nav>
-
-      <header class="lesson-hero">
-        <p class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></p>
-        <h1 class="lesson-title">System Design / Arquitectura de Sistemas</h1>
-        <p class="section-subtitle">Requisitos, escalabilidad horizontal, load balancing, caching, CDN, replicación, sharding y diseño de sistemas de alto tráfico.</p>
-        <div class="lesson-meta">
-          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 semanas</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 4 módulos · 20 lecciones</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Load Balancing · Sharding · Alta Disponibilidad</span>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🧠 Experto</p>
+          <h1 class="page-hero__title">🧠 System Design / Arquitectura de Sistemas</h1>
+          <p class="page-hero__subtitle">Requisitos, escalabilidad horizontal, load balancing, caching, CDN, replicación, sharding y diseño de sistemas de alto tráfico.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 35 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Load Balancing · Sharding · Alta Disponibilidad</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
         </div>
-      </header>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># System Design / Arquitectura de Sistemas</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
+
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 35 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/load-balancing</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/load-balancing</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Load Balancing</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="course" data-course-id="system-design">
 
       <section class="lesson-content">
         <section>
           <h2>¿Qué vas a aprender?</h2>
-          <p>Un sistema se cae por diseño, no por casualidad. Este curso te entrena para pensar como el senior que diseña arquitecturas que soportan millones de usuarios: recopilar requisitos, estimar capacidades, elegir bases de datos y escalar con load balancers, cachés, colas y sharding. Practicarás seis casos reales — URL shortener, feed, chat global, motores de búsqueda, pagos y recomendaciones — y cerrarás con un framework completo para entrevistas.</p>
+          <p>Requisitos, escalabilidad horizontal, load balancing, caching, CDN, replicación, sharding y diseño de sistemas de alto tráfico.</p>
           <div class="info-grid">
             <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🧠 Experto</span></div>
             <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">9 semanas</span></div>
-            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">4</span></div>
-            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">20</span></div>
-            <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🧠 System Design</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">35</span></div>
           </div>
         </section>
 
         <section>
           <h2>Objetivos de aprendizaje</h2>
           <div class="objectives">
-            <div class="objective"><span class="objective__icon">✔</span><span>Recopilar requisitos y estimar capacidades de un sistema.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Escalar con load balancers, caching, CDN, colas y sharding.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Diseñar seis sistemas de alto tráfico desde cero.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Equilibrar disponibilidad y consistencia bajo el teorema CAP.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Resolver entrevistas de system design con un framework.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Diseñar sistemas de alto tráfico</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Resolver entrevistas de system design</span></div>
           </div>
         </section>
 
         <section>
           <h2>Requisitos previos</h2>
           <ul>
-            <li><strong>Sistemas Distribuidos:</strong> nodos, latencia, CAP y replicación.</li>
-            <li><strong>Arquitectura de Software:</strong> capas, microservicios y patrones.</li>
-            <li><strong>Bases de datos:</strong> modelado relacional y NoSQL.</li>
+<li>Sistemas Distribuidos</li>
+<li>Arquitectura</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
           </ul>
         </section>
 
         <section>
           <h2>Tecnologías y herramientas</h2>
           <div class="row">
-            <span class="tag tag--tech">Load Balancing</span>
-            <span class="tag tag--tech">Caching</span>
-            <span class="tag tag--tech">CDN</span>
-            <span class="tag tag--tech">Sharding</span>
-            <span class="tag tag--tech">Queues</span>
-            <span class="tag tag--tech">Alta Disponibilidad</span>
+<span class="tag tag--tech">Load Balancing</span>
+<span class="tag tag--tech">Sharding</span>
+<span class="tag tag--tech">Alta Disponibilidad</span>
           </div>
         </section>
       </section>
 
       <hr class="divider">
 
-      <section>
+      <section id="modulos">
         <h2 class="section-title">Módulos del curso</h2>
-        <p class="section-subtitle">Cuatro módulos para diseñar sistemas a gran escala: fundamentos, bloques, casos reales y entrevistas.</p>
+        <p class="section-subtitle">7 módulos con 35 lecciones en total.</p>
 
         <div class="section-grid">
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">1. Fundamentos</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 46 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Aprende a definir el problema antes de dibujar la primera caja del diagrama.</p>
-            <div class="card__meta">
-              <span>5 lecciones</span><span>≈ 60 min</span>
+            <p class="card__text">Define el problema, estima la carga y elige los datos antes de dibujar la primera caja en un pizarrón.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/que-es-system-design.html">¿Qué es system design?</a></li>
+<li><a href="./modulo-01/bloques-de-construccion.html">Bloques de construcción</a></li>
+<li><a href="./modulo-01/requisitos-y-restricciones.html">Requisitos y restricciones</a></li>
+<li><a href="./modulo-01/estimaciones-de-capacidad.html">Estimaciones de capacidad</a></li>
+<li><a href="./modulo-01/modelado-de-datos.html">Modelado de datos</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Reunir requisitos del sistema</li>
-              <li>Capacidades y estimaciones</li>
-              <li>Requisitos no funcionales (NFR)</li>
-              <li>Escalabilidad vertical y horizontal</li>
-              <li>Disponibilidad vs consistencia</li>
-            </ul>
           </article>
 
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">2. Bloques de construcción</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Patrones</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 47 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Las piezas que se repiten en todo sistema grande y cómo combinarlas.</p>
-            <div class="card__meta">
-              <span>5 lecciones</span><span>≈ 62 min</span>
+            <p class="card__text">Patrones de capas, eventos, consistencia, caché y durabilidad que todo diseñador maneja igual que un idioma.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/arquitectura-en-capas.html">Arquitectura en capas</a></li>
+<li><a href="./modulo-02/cola-y-eventos-patterns.html">Patrones de colas y eventos</a></li>
+<li><a href="./modulo-02/consistencia-consenso.html">Consistencia y consenso</a></li>
+<li><a href="./modulo-02/dedicla-y-caching-patterns.html">Patrones de durabilidad y caché</a></li>
+<li><a href="./modulo-02/monolitica-vs-distribuida.html">Monolito vs distribuida</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Load balancers</li>
-              <li>Caching y CDN</li>
-              <li>Bases de datos a escala</li>
-              <li>Colas y workers</li>
-              <li>Almacenamiento de archivos</li>
-            </ul>
           </article>
 
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">3. Diseño de sistemas</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Diseño completo</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 54 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Seis casos reales de alto tráfico, diseñados paso a paso de principio a fin.</p>
-            <div class="card__meta">
-              <span>6 lecciones</span><span>≈ 92 min</span>
+            <p class="card__text">Recorre el diseño completo de sistemas conocidos y aprende a comunicar cada decisión.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/diseno-de-una-url-shortener.html">Caso: URL shortener</a></li>
+<li><a href="./modulo-03/diseno-de-un-feed.html">Caso: feed (newsfeed)</a></li>
+<li><a href="./modulo-03/diseno-de-un-chat.html">Caso: sistema de chat</a></li>
+<li><a href="./modulo-03/diseno-de-busqueda.html">Caso: búsqueda</a></li>
+<li><a href="./modulo-03/presentar-tu-diseno.html">Presentar y comunicar</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>URL shortener</li>
-              <li>Feed de noticias</li>
-              <li>Chat global</li>
-              <li>Motores de búsqueda</li>
-              <li>Sistema de pagos</li>
-              <li>Sistema de recomendaciones</li>
-            </ul>
           </article>
 
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">4. Entrevistas</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Escalabilidad y distribución</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 55 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Convierte todo lo aprendido en un proceso claro y pulido para la entrevista.</p>
-            <div class="card__meta">
-              <span>4 lecciones</span><span>≈ 48 min</span>
+            <p class="card__text">Escalamiento vertical y horizontal, load balancing, sharding, replicación y backpressure para sostener el tráfico.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/escalamiento-horizontal-y-vertical.html">Escalamiento vertical y horizontal</a></li>
+<li><a href="./modulo-04/load-balancing.html">Load balancing a escala</a></li>
+<li><a href="./modulo-04/sharding-y-particionado.html">Sharding y particionado</a></li>
+<li><a href="./modulo-04/replicacion-y-redundancia.html">Replicación y redundancia</a></li>
+<li><a href="./modulo-04/backpressure-y-limites-de-rendimiento.html">Backpressure y límites de rendimiento</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Framework de resolución</li>
-              <li>Cómo presentar las estimaciones</li>
-              <li>Ejemplo guiado de entrevista</li>
-              <li>Errores comunes a evitar</li>
-            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Caching y datos a escala</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 52 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Cachés en cada capa, CDN, invalidación y la decisión de qué base de datos guarda qué.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/estrategias-de-cache.html">Estrategias de caché</a></li>
+<li><a href="./modulo-05/cdn-y-contenido-estatico.html">CDN y contenido estático</a></li>
+<li><a href="./modulo-05/invalidacion-de-cache.html">Invalidación y consistencia</a></li>
+<li><a href="./modulo-05/eleccion-de-base-de-datos.html">Cómo elegir base de datos</a></li>
+<li><a href="./modulo-05/migraciones-y-evolucion-de-esquemas.html">Migraciones y evolución del esquema</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Resiliencia y consistencia</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 53 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Fallos en cascada, circuit breakers, retries, idempotencia y la consistencia eventual como herramienta.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/fallos-en-cascada.html">Fallos en cascada</a></li>
+<li><a href="./modulo-06/circuit-breakers-y-timeouts.html">Circuit breakers y timeouts</a></li>
+<li><a href="./modulo-06/retries-y-backoff.html">Retries y backoff exponencial</a></li>
+<li><a href="./modulo-06/idempotencia-y-deduplicacion.html">Idempotencia y deduplicación</a></li>
+<li><a href="./modulo-06/consistencia-eventual.html">Consistencia eventual y conflictos</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Operación y entrevista de diseño</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 53 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Observabilidad a escala, capacidad, despliegues y la metodología completa de la entrevista de system design.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/observabilidad-a-escala.html">Observabilidad a escala</a></li>
+<li><a href="./modulo-07/planificacion-de-capacidad.html">Planificación de capacidad</a></li>
+<li><a href="./modulo-07/feature-flags-y-despliegues.html">Feature flags y despliegues</a></li>
+<li><a href="./modulo-07/entrevista-de-system-design.html">La entrevista paso a paso</a></li>
+<li><a href="./modulo-07/trade-offs-y-decisiones.html">Trade-offs y decisiones de diseño</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
           </article>
         </div>
       </section>
@@ -213,36 +329,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
           <li><span>Módulo 1 · Fundamentos</span></li>
-          <li><span>Módulo 2 · Bloques de construcción</span></li>
-          <li><span>Módulo 3 · Diseño de sistemas</span></li>
-          <li><span>Módulo 4 · Entrevistas</span></li>
+          <li><span>Módulo 2 · Patrones</span></li>
+          <li><span>Módulo 3 · Diseño completo</span></li>
+          <li><span>Módulo 4 · Escalabilidad y distribución</span></li>
+          <li><span>Módulo 5 · Caching y datos a escala</span></li>
+          <li><span>Módulo 6 · Resiliencia y consistencia</span></li>
+          <li><span>Módulo 7 · Operación y entrevista de diseño</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

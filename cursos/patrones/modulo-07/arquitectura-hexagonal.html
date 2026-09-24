@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="arquitectura-hexagonal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura hexagonal · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="Arquitectura hexagonal para mantener el dominio independiente de la infraestructura.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="arquitectura-hexagonal"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Patrones de Diseño</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Arquitectura hexagonal</span>
+        </nav>
+        <h1 class="lesson-title">Arquitectura hexagonal</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Patrones emergentes y arquitectura moderna</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Los backends que sobreviven años no son los que tienen mejor tecnología, sino los que pueden cambiar de base de datos, de cola de mensajes o de pasarela de pago sin reescribir la lógica de negocio. La arquitectura hexagonal, también llamada puertos y adaptadores, existe para eso.</p>
+<p>La idea es sencilla: el dominio, el corazón de tu aplicación, no sabe nada del mundo exterior. Todo lo que entra y sale (HTTP, base de datos, mensajería) viaja a través de interfaces llamadas puertos, y las implementaciones concretas son los adaptadores.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La arquitectura hexagonal organiza la aplicación en un núcleo (dominio y casos de uso) aislado del exterior mediante puertos (interfaces) que cada adaptador externo implementa, de modo que la infraestructura es intercambiable.</p><p><strong>Por qué importa.</strong> En backend, la base de datos, la cola y el framework cambian más rápido de lo que te gustaría. Si el dominio solo depende de interfaces, esos cambios se convierten en reemplazar un adaptador, no en una reescritura.</p><p><strong>Cuándo usarlo.</strong> Úsala cuando el proyecto va a vivir varios años, hay varias fuentes de datos o quieres probar el núcleo sin levantar infraestructura. No la forces en scripts simples o prototipos desechables.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Dominio: entidades y reglas de negocio sin importar HTTP ni SQL.</li>
+<li>Puerto (port): interfaz que el dominio declara y necesita.</li>
+<li>Adaptador (adapter): implementación concreta de ese puerto.</li>
+<li>Infraestructura: controladores HTTP, repositorios SQL, clientes de colas.</li>
+<li>Testeabilidad: se prueba el núcleo con dobles en lugar de servicios reales.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Definimos un puerto para la persistencia de pedidos y una implementación en memoria. El caso de uso solo conoce la interfaz.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">class PedidoRepositorio:
+    def guardar(self, pedido): ...
+    def buscar(self, id_pedido): ...
+
+class PedidoRepositorioEnMemoria(PedidoRepositorio):
+    def __init__(self):
+        self.pedidos = {}
+    def guardar(self, pedido):
+        self.pedidos[pedido.id] = pedido
+    def buscar(self, id_pedido):
+        return self.pedidos.get(id_pedido)
+
+class CrearPedido:
+    def __init__(self, repo: PedidoRepositorio):
+        self.repo = repo
+    def ejecutar(self, pedido):
+        self.repo.guardar(pedido)
+        return pedido</code></pre></div>
+</figure>
+<pre><code class="language-text">CrearPedido usa cualquier implementación de PedidoRepositorio.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Añadir un adaptador PostgreSQL solo requiere implementar el mismo puerto. El dominio no cambia una línea.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Adaptador PostgreSQL del mismo puerto</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import psycopg
+
+class PedidoRepositorioPostgres(PedidoRepositorio):
+    def __init__(self, dsn):
+        self.conn = psycopg.connect(dsn)
+    def guardar(self, pedido):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                &quot;INSERT INTO pedidos (id, total) VALUES (%s, %s)&quot;,
+                (pedido.id, pedido.total)
+            )
+        self.conn.commit()
+    def buscar(self, id_pedido):
+        with self.conn.cursor() as cur:
+            cur.execute(&quot;SELECT id, total FROM pedidos WHERE id = %s&quot;, (id_pedido,))
+            fila = cur.fetchone()
+            return {'id': fila[0], 'total': fila[1]}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una plataforma de e-commerce cambió su API de pagos y su base de datos en el mismo año. Como el dominio dependía de puertos, el cambio fue añadir dos adaptadores nuevos y arrancar la app con otras configuraciones.</p>
+<ul><li>Coloca las interfaces (puertos) en el mismo paquete que el dominio.</li>
+<li>Inyecta los adaptadores desde el punto de arranque, no desde el dominio.</li>
+<li>Mantén el dominio libre de imports de frameworks y drivers.</li>
+<li>Aprovecha la hexagonal para testear sin levantar Postgres ni Redis.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def main():
+    repo = PedidoRepositorioPostgres(dsn=config.dsn)
+    caso = CrearPedido(repo)
+    app = WebApp()
+    app.casos_de_uso[&quot;crear_pedido&quot;] = caso
+    app.run()</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El framework web es otro adaptador: el caso de uso se invoca igual desde FastAPI que desde una CLI.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Los puertos se dibujan como hexágonos porque la estructura no impone una dirección de entrada única: entra y sale por cualquier lado.</li>
+<li>La regla de dependencia apunta siempre hacia dentro: el dominio nunca importa infraestructura.</li>
+<li>Separar puertos de su implementación hace los tests unitarios triviales.</li>
+<li>No confundas hexagonal con microservicios: es una organización interna que funciona también en monolitos.</li>
+<li>El coste es más indirección; recompénsalo solo cuando el proyecto se beneficie de la flexibilidad.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Convertir el dominio en un CRUD sin reglas: la persistencia manda y el patrón pierde sentido.</li>
+<li>Importar el driver de base de datos dentro de un caso de uso.</li>
+<li>Crear interfaces para absolutamente todo, incluso llamadas internas que nunca cambian.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza por los puertos de salida (base de datos, colas) que son los que más varían.</li>
+<li>Prueba el núcleo con implementaciones falsas en memoria.</li>
+<li>Si el proyecto es pequeño, aplica la idea de forma pragmática sin 30 carpetas vacías.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Extrae una interfaz para tu cliente de pagos y crea un adaptador Sandbox.</li>
+<li>Convierte tu repositorio Framework en un puerto con dos implementaciones del mismo.</li>
+<li>Escribe un test del caso de uso CrearPedido sin tocar infraestructura real.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El dominio depende de puertos, y los adaptadores implementan esas interfaces.</li>
+<li>La infraestructura se vuelve intercambiable y el núcleo testable sin servicios reales.</li>
+<li>Es una inversión que vale la pena cuando el backend va a evolucionar durante años.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de patrones</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Patrones de backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Patrones modernos</a></li>
+          <li><a href="./index.html">Módulo 7 · Patrones emergentes y arquitectura moderna</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="aislamiento-y-hardening">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aislamiento y hardening del motor · Docker · Backend Academy</title>
+<meta name="description" content="Endurece seccomp, AppArmor y las opciones de aislamiento del motor Docker.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="docker" data-current="aislamiento-y-hardening"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Docker</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Aislamiento y hardening del motor</span>
+        </nav>
+        <h1 class="lesson-title">Aislamiento y hardening del motor</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Docker</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Seguridad en contenedores</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando endureces la imagen y el proceso, queda una última frontera: el propio motor y las syscalls que el kernel deja ejecutar. Un proceso que huye del namespace necesita syscalls específicas; tú puedes cerrar esa puerta.</p>
+<p>El runtime de Docker soporta filtros seccomp, perfiles AppArmor y SELinux, además de opciones como no-new-privileges o el bloqueo de automount. Este módulo une todas las piezas en un perfil de aislamiento.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El hardening del host restringe qué syscalls puede hacer un contenedor (seccomp), qué paths y capabilities concede AppArmor, y qué operativas adicionales como el montaje se bloquean, reduciendo el potencial de escalada al host.</p><p><strong>Por qué importa.</strong> Aunque el proceso esté 'dentro' de un contenedor, las syscalls viajan al kernel del host. Filtrarlas limita la superficie para escapes y ataques de kernel.</p><p><strong>Cuándo usarlo.</strong> Siempre que el host corra código externo, y de forma obligatoria cuando proceses datos no confiables o ejecutes imágenes de terceros.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Syscall: la llamada al kernel; el contenedor la ejecuta en el named kernel del host.</li>
+<li>seccomp: perfil que permite o niega syscalls concretas.</li>
+<li>AppArmor: perfil de acceso que restringe paths, networks y capabilities.</li>
+<li>no-new-privileges: impide ganar privilegios de binarios setuid.</li>
+<li>Read-only rootfs: el sistema de ficheros raíz no se puede modificar.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Reforzar el runtime de arranque combinando read-only, no-new-privileges y capabilities mínimas.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">docker run \
+  --rm \
+  --read-only \
+  --tmpfs /tmp \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --user 10001:10001 \
+  nginx:1.27-alpine</code></pre></div>
+</figure>
+<pre><code class="language-text">nginx corre sin capacidad de escritura, sin privileges y sin capabilities de red salvo las del arranque.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Aplicar un perfil seccomp que solo permite las syscalls necesarias (modo estricto) en una imagen propia.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Perfil seccomp que solo habilita las syscalls básicas</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">docker run \
+  --security-opt seccomp=./perfil-seccomp.json \
+  mi-api
+
+# perfil-seccomp.json (fragmento)
+{
+  &quot;defaultAction&quot;: &quot;SCMP_ACT_ERRNO&quot;,
+  &quot;syscalls&quot;: [{
+    &quot;names&quot;: [&quot;read&quot;, &quot;write&quot;, &quot;exit&quot;, &quot;execve&quot;, &quot;openat&quot;, &quot;close&quot;],
+    &quot;action&quot;: &quot;SCMP_ACT_ALLOW&quot;
+  }]
+}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un proveedor de SaaS ejecuta cientos de servicios multi-tenant del mismo pool. Cada uno corre con read-only, cap-drop ALL y un perfil AppArmor propio, más seccomp personalizado para las imágenes internas. Un escape probado en benchmarks no consiguió romper ninguno de los perfiles.</p>
+<ul><li>Empieza con no-new-privileges y read-only: el coste de aplicar es mínimo.</li>
+<li>Perfiles AppArmor y seccomp por imagen, revisables y versionados.</li>
+<li>No compartas imágenes con permisos privilegiados en tu registry.</li>
+<li>Mide el impacto de los perfiles en las APIs SLO antes de estresar.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">docker run \
+  --security-opt apparmor=perfil-api \
+  --security-opt seccomp=perfil-seccomp-api.json \
+  --cap-drop ALL \
+  --read-only \
+  mi-api:3.0</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El runtime de contenedores modernos (containerd, cri-o) permite aplicar los mismos conceptos en Kubernetes vía securityContext.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Las syscalls de un contenedor se ejecutan en el kernel del host: la frontera definitiva es ese kernel.</li>
+<li>seccomp audita o bloquea las syscalls antes de que toquen los subsistemas sensibles.</li>
+<li>AppArmor controla el acceso a rutas y operaciones más allá de las syscalls.</li>
+<li>Read-only rootfs no impide escribir en /tmp o en volúmenes montados: define esos destinos explícitamente.</li>
+<li>El conjunto mínimo de opciones robustas: USER, cap-drop ALL, no-new-privileges, read-only, tmpfs acotado.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Depender de una única capa de aislamiento y del 'contenedor = seguro'.</li>
+<li>Montar sockets, /proc o /sys del host en el contenedor.</li>
+<li>Aplicar no-new-privileges a procesos que legítimamente necesitan setuid.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Automatiza el perfil de hardening para que sea el default de tu plataforma.</li>
+<li>Valida los perfiles con pentest y benchmarks (CIS Docker Benchmark).</li>
+<li>Revisa versiones de kernels para parches de vulnerabilidades del kernel compartido.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Arranca tu API con read-only y resuelve los tmpfs que necesita.</li>
+<li>Escribe un perfil seccomp mínimo y ejecuta tu imagen con él.</li>
+<li>Comprueba un escape real: intenta montar el host desde un contenedor con todas las opciones por defecto.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El aislamiento en runtime filtra syscalls, acceso y privilegios en el borde del kernel.</li>
+<li>seccomp, AppArmor, read-only y no-new-privileges son tu cinturón de seguridad.</li>
+<li>El hardening marca la diferencia entre una brecha contenida y un host comprometido.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Contenedores</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Imágenes y Dockerfile</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes y Redes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Docker Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Docker en el Backend</a></li>
+          <li><a href="./index.html">Módulo 6 · Seguridad en contenedores</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Docker en producción a escala</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

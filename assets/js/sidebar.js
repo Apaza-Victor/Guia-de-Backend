@@ -108,7 +108,7 @@ const AppSidebar = (() => {
       const cat = cats[key];
       const a = document.createElement("a");
       a.className = "sidebar__link " + (activeCategory === key ? "is-active" : "");
-      a.href = AppHelpers.asset("aprender/index.html?cat=" + key);
+      a.href = AppHelpers.asset("secciones/aprender/index.html?cat=" + key);
       a.innerHTML = `<span>${cat.emoji}</span> ${cat.label}`;
       nav.appendChild(a);
     });

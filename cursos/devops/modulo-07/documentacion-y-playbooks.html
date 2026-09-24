@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="documentacion-y-playbooks">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentación y runbooks · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Escribe documentación técnica y runbooks accionables ante incidentes.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="documentacion-y-playbooks"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">DevOps para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Documentación y runbooks</span>
+        </nav>
+        <h1 class="lesson-title">Documentación y runbooks</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Observabilidad y cultura DevOps</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La primera pregunta de una guardia ante un incidente es: ¿esto ya pasó? Si la respuesta no está en un runbook, el conocimiento se recompra horas caras a alguien que ya lo resolvió.</p>
+<p>Documentar no es burocracia: es convertir la experiencia individual en capacidad del equipo.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un runbook es una guía operativa paso a paso para ejecutar una tarea o responder a un incidente concreto: síntomas, comandos, verificaciones y criterios de escalado.</p><p><strong>Por qué importa.</strong> Porque los errores se repiten en patrones, y un runbook bien escrito reduce el tiempo de resolución de horas a minutos, además de igualar la actuación de cualquier guardia.</p><p><strong>Cuándo usarlo.</strong> Escribe runbooks para cada alerta paginable, cada tarea crítica de operación y cada procedimiento de recuperación antes de que el incidente lo exija.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Runbook: guía accionable para responder a un incidente o tarea.</li>
+<li>Playbook: colección de runbooks organizada por sistema.</li>
+<li>Síntomas: la entrada del runbook desde la observabilidad.</li>
+<li>Escalado: cuándo y a quién subir el problema.</li>
+<li>Postmortem: aprendizaje después del incidente, sin culpas.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>La estructura de un runbook eficaz: contexto, síntomas, verificación, pasos y escalado. Un runbook corto y específico es mejor que uno largo y genérico.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Texto</span><span class="code-block__caption">ejemplo.text</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text"># Runbook: API con alto error rate
+
+## Sintomas
+- Error 5xx en monotonía de la API
+- Alert: HighErrorRate activa
+
+## Verificacion
+1. kubectl get pods -n backend
+2. kubectl logs -n backend -l app=api --tail=200
+
+## Pasos
+1. Revisar últimos deploys en el canal de releases
+2. Si el deploy fue reciente y sospechoso: rollback
+
+## Escalado
+- Nivel 1: guardia de turno
+- Nivel 2: lider de backend tras 15 min</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>La documentación se mantiene cerca del código: el repositorio guarda runbooks, diagramas y changelogs, con revisión por pull request como cualquier otro cambio técnico.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Estructura de documentación versionada</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">docs/
+  runbooks/
+    api-alto-error-rate.md
+    db-restauracion.md
+    redis-reinicio-cluster.md
+  arquitectura/
+    system-overview.md
+    despliegue-produccion.md</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El runbook de restauración de base de datos es de los más importantes que existen: ante la caída crítica, la guardia ejecuta pasos verificados en vez de improvisar. Los comandos concretos salvan horas.</p>
+<ul><li>Comprobar el backup más reciente antes de tocar nada.</li>
+<li>Apagar rautores de escritura para evitar más daño.</li>
+<li>Restaurar en un entorno temporal y validar primero.</li>
+<li>Promover la restauración validada a producción.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Texto</span><span class="code-block__caption">ejemplo.text</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">## Restauracion de PostgreSQL
+
+1. docker compose exec db pg_isready
+2. docker compose cp backup.sql.gz db:/tmp/restore.sql.gz
+3. docker compose exec db sh -c &quot;gunzip -c /tmp/restore.sql.gz | psql -U app app&quot;
+4. docker compose exec db 'select count(*) from usuarios;'
+
+Validar siempre la integridad antes de anunciar el cierre del incidente.</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un runbook sin fecha de revisión se pudre. Programa auditorías semestrales y prueba los procedimientos críticos en entornos de prueba.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El runbook empieza por los síntomas, exactamente lo que ve la alerta.</li>
+<li>Los pasos deben ser verificables: cada uno permite confirmar avance.</li>
+<li>La documentación versada evoluciona con el sistema que documenta.</li>
+<li>El postmortem sin culpables convierte cada incidente en mejora.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Runbooks desactualizados: peores que ninguno, porque generan confianza falsa.</li>
+<li>Documentación en soledad de nadie: sin dueño, se oxida.</li>
+<li>Conocimiento solo en la cabeza de la persona senior: riesgo mudo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Enlaza cada runbook desde la alerta que lo necesita.</li>
+<li>Escribe pensando en la persona de guardia a las 3 de la mañana.</li>
+<li>Prueba los runbooks críticos en jornadas de caos controlado.</li>
+<li>Mide la fracción de incidentes resueltos sin necesidad de improvisar.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Escribe el runbook del incidente más frecuente de tu API con síntomas, pasos y escalado.</li>
+<li>Revisa un runbook viejo, actualízalo y pásalo por revisión.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Los runbooks convierten la memoria individual en capacidad del equipo.</li>
+<li>La estructura eficaz va de los síntomas a la acción verificada.</li>
+<li>La documentación vive en el repositorio y se revisa como el código.</li>
+<li>Los procedimientos críticos se prueban y se auditan.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a DevOps</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de versiones para operaciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Contenedores y automatización</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo (CD)</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en el Backend</a></li>
+          <li><a href="./index.html">Módulo 7 · Observabilidad y cultura DevOps</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="pydantic-y-modelos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pydantic y modelos de datos · Python para Backend · Backend Academy</title>
+<meta name="description" content="Modelos de datos con Pydantic.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="python" data-current="pydantic-y-modelos"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Pydantic y modelos de datos</span>
+        </nav>
+        <h1 class="lesson-title">Pydantic y modelos de datos</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · APIs con FastAPI</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La parte que hace brillar a FastAPI es Pydantic: defines modelos con clases y anotaciones, y obtienes validación, coerción y serialización automáticas.</p>
+<p>Un modelo Pydantic se parece a una dataclass con superpoderes de validación.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Pydantic valida datos usando modelos (subclases de BaseModel) con campos tipados: el framework los aplica a peticiones y respuestas automáticamente.</p><p><strong>Por qué importa.</strong> Elimina decenas de if manuales: declaras el contrato y el framework responde 422 ante datos inválidos por ti.</p><p><strong>Cuándo usarlo.</strong> Usa modelos para el body de peticiones, parámetros complejos, esquemas de respuesta y configuración de la app.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>class Usuario(BaseModel) define el modelo.</li>
+<li>Los campos se anotan: nombre: str, activo: bool.</li>
+<li>Valores por defecto: rol: str = "usuario".</li>
+<li>Field permite restricciones: min_length, gt, regex.</li>
+<li>model_dump() serializa; el JSON de salida se genera solo.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un modelo Pydantic para recibir a un usuario en el body de un POST.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from pydantic import BaseModel
+
+class UsuarioEntrada(BaseModel):
+    nombre: str
+    email: str
+    edad: int
+    activo: bool = True
+
+u = UsuarioEntrada(nombre=&quot;Ana&quot;, email=&quot;ana@mail.com&quot;, edad=30)
+print(u.model_dump())</code></pre></div>
+</figure>
+<pre><code class="language-text">{'nombre': 'Ana', 'email': 'ana@mail.com', 'edad': 30, 'activo': True}</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Restricciones con Field para que la validación sea estricta.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Validación avanzada con Field</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">from pydantic import BaseModel, Field
+
+class Producto(BaseModel):
+    nombre: str = Field(min_length=3, max_length=80)
+    precio: float = Field(gt=0)
+    stock: int = Field(ge=0)
+
+try:
+    Producto(nombre=&quot;Te&quot;, precio=-5, stock=0)
+except Exception as error:
+    print(error)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Conectar el modelo a un endpoint: FastAPI valida el body y responde 422 ante errores.</p>
+<ul><li>Pydantic valida y convierte tipos automáticamente.</li>
+<li>El 422 incluye el motivo exacto de cada campo.</li>
+<li>La API declara el contrato en el schema OpenAPI.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class UsuarioEntrada(BaseModel):
+    nombre: str
+    email: str
+
+@app.post(&quot;/usuarios&quot;, status_code=201)
+def crear_usuario(usuario: UsuarioEntrada):
+    return {&quot;recibido&quot;: usuario.nombre, &quot;email&quot;: usuario.email}
+
+# curl -X POST -H &quot;Content-Type: application/json&quot; \
+#      -d &quot;{\&quot;nombre\&quot;: \&quot;Ana\&quot;}&quot; http://127.0.0.1:8000/usuarios</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Envía un body sin email y verás un 422 detallado en /docs: es la validación de Pydantic en acción.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Las instancias validadas se convierten al tipo anotado (por ejemplo, "30" a 30).</li>
+<li>Field permite min_length, gt, ge, lt, le y pattern.</li>
+<li>Enviar campos de más o incompletos dispara un 422 automático.</li>
+<li>El modelo define a la vez el schema de entrada, la documentación y la validación.</li>
+<li>Con model_dump() vuelves a dict para devolver JSON.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>NameError si la clase se define sin importar BaseModel.</li>
+<li>422 al enviar campos que faltan o que no están anotados.</li>
+<li>Olvidar que los campos SIN default son obligatorios.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Separa modelos de entrada y salida, no mezcles campos internos.</li>
+<li>Usa Field con restricciones y mensajes claros.</li>
+<li>Explota los defaults para campos opcionales y evita Optional innecesarios.</li>
+<li>Valida también la configuración de tu app con modelos Pydantic.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea un modelo Pedido con id, total y estado usando Field.</li>
+<li>Añade validación de email con pattern a UsuarioEntrada.</li>
+<li>Expón el modelo en un endpoint POST y comprueba los 422 en /docs.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Pydantic valida datos con modelos y tipos puros.</li>
+<li>Field añade restricciones detalladas.</li>
+<li>FastAPI usa el modelo para validar, documentar y serializar.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Programación orientada a objetos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Módulos, archivos y excepciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Web con Flask</a></li>
+          <li><a href="./index.html">Módulo 7 · APIs con FastAPI</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

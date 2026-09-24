@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-ab-testing-y-experimentos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A/B testing y experimentos · Backend para IA · Backend Academy</title>
+<meta name="description" content="Experimentación controlada para comparar modelos y prompts en producción.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-ab-testing-y-experimentos"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Backend para IA</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">A/B testing y experimentos</span>
+        </nav>
+        <h1 class="lesson-title">A/B testing y experimentos</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · IA en producción</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cambias el prompt y la respuesta parece mejor... pero parecer no es medir. El A/B testing asigna cada petición a una variante y compara con métricas objetivas: conversión, guardado de la respuesta, tiempo en página.</p>
+<p>En IA el experimento no mide solo latencia sino resultado de negocio: el usuario contestó, compró, resolvió. Diseñarlo bien es la diferencia entre opiniones y decisiones.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un experimento de IA asigna usuarios o peticiones a dos versiones (modelo o prompt) y compara una métrica de negocio con significancia estadística.</p><p><strong>Por qué importa.</strong> Las mejoras percibidas suelen ser subjetivas; el A/B convierte los cambios en datos y evita regresiones disfrazadas de mejoras.</p><p><strong>Cuándo usarlo.</strong> Úsalo cuando el cambio sea medible en una métrica clave y el tráfico alcance para correr en semanas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Variante A y B: la cualquiera y la nueva propuesta.</li>
+<li>Métrica de éxito: la que decida al final (conversión, aprobación).</li>
+<li>Asignación aleatoria y estable por usuario.</li>
+<li>Muestra y duración: suficiente tamaño para confiar.</li>
+<li>Interpretación: mejora vs ruido estadístico.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Asignamos a cada request una variante usando un hash del usuario.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">def asignar_variante(usuario_id):
+    hash_usuario = int(hashlib.md5(usuario_id.encode()).hexdigest(), 16)
+    return &quot;A&quot; if hash_usuario % 2 == 0 else &quot;B&quot;
+
+def servir_prompt(pregunta, usuario_id):
+    variante = asignar_variante(usuario_id)
+    prompt = PROMPT_A if variante == &quot;A&quot; else PROMPT_B
+    respuesta = llamar_modelo(prompt, pregunta)
+    registrar_experimento(usuario_id, variante, respuesta)
+    return respuesta</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Registramos métrica de éxito y comparamos con una prueba de proporciones.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Comparación de conversión</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import statsmodels.api as sm
+
+def comparar(a_exitos, a_total, b_exitos, b_total):
+    prop_a = a_exitos / a_total
+    prop_b = b_exitos / b_total
+    z, p = sm.stats.proportions_ztest([a_exitos, b_exitos], [a_total, b_total])
+    print(&quot;B mejora:&quot;, round(prop_b - prop_a, 4), &quot;p=&quot;, round(p, 4))
+    return p &lt; 0.05</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un asistente que cambia de prompt mide si el usuario confirma la respuesta sugerida.</p>
+<ul><li>Define la métrica de éxito antes de encender el experimento.</li>
+<li>Mantén fija la asignación por usuario para no mezclar muestras.</li>
+<li>Fija una duración y no la mires cada día para decidir.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">if comparar(a_exitos, a_total, b_exitos, b_total):
+    PROMOTE(PROMPT_B)
+    logger.info(&quot;se promociona prompt B con p significativa&quot;)
+else:
+    logger.info(&quot;sin diferencia: se mantiene A&quot;)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un p bajo no implica efecto grande: revisa el tamaño del efecto antes de promocionar.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La asignación por usuario evita que el mismo usuario vea dos versiones.</li>
+<li>La métrica de negocio manda sobre la calidad percibida.</li>
+<li>La significancia te dice si la diferencia es real o es azar.</li>
+<li>El tamaño del efecto decide si la mejora vale el coste del nuevo modelo.</li>
+<li>Los experimentos se versionan y guardan para no repetir errores.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Elegir la métrica después de ver los datos.</li>
+<li>Decidir mirando el A/B a diario (p-hacking).</li>
+<li>Cambios simultáneos de modelo y prompt: no sabes qué hubo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Pre-registra hipótesis y duración antes de encender.</li>
+<li>Mide latencia y coste de la variante B junto a la de negocio.</li>
+<li>Promociona también el prompt perdedor solo si es más barato.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Define una métrica para comparar dos prompts de resumen.</li>
+<li>Implementa la asignación estable por usuario con hash.</li>
+<li>Corre un A/B con datos sintéticos y comprueba la significancia.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El A/B mide cambios de modelo o prompt con métricas de negocio.</li>
+<li>Asignación estable, métrica previa y significancia evitan engaños.</li>
+<li>Decide por tamaño del efecto y coste, no solo por el valor p.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Clasificación y modelos de datos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · IA generativa y LLMs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · RAG y búsqueda semántica</a></li>
+          <li><a href="./index.html">Módulo 7 · IA en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

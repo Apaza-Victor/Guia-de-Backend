@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="iam-y-menor-privilegio">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IAM y menor privilegio · Cloud Computing · Backend Academy</title>
+<meta name="description" content="Identidad y acceso en la nube: políticas IAM, roles y el principio de menor privilegio.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="iam-y-menor-privilegio"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Cloud Computing</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">IAM y menor privilegio</span>
+        </nav>
+        <h1 class="lesson-title">IAM y menor privilegio</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud Computing</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Redes, seguridad y alta disponibilidad</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Las credenciales del backend se gestionan con IAM: usuarios, roles, políticas y la regla de oro del menor privilegio.</p>
+<p>Una política IAM mal escrita puede exponer tu cuenta entera; bien escrita, limita el daño de cualquier clave que se filtre.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>IAM define quién (identidad) puede hacer qué (acción) sobre qué (recurso). Las políticas asignan permisos concretos y los roles agrupan políticas reutilizables para humanos o máquinas.</p><p><strong>Por qué importa.</strong> Porque una clave con permisos de administrador convierte cualquier fuga en una cuenta comprometida. Limitar permisos por servicio y recurso reduce drásticamente el radio de explosión.</p><p><strong>Cuándo usarlo.</strong> Aplica menor privilegio para todo: cada instancia, función o desarrollador tiene solo los permisos que necesita, ni uno más.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Identidad (usuario o rol): quién ejecuta la acción.</li>
+<li>Política: documento JSON que autoriza o deniega acciones.</li>
+<li>Acción: recurso concreto como s3:PutObject o ec2:RunInstances.</li>
+<li>Recurso: ARN que acota dónde se aplica el permiso.</li>
+<li>Menor privilegio: el conjunto mínimo posible de permisos.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>La política JSON es el corazón de IAM. Este ejemplo permite leer un bucket concreto y nada más: ni listar todos los buckets, ni escribir, ni tocar otros servicios.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JSON</span><span class="code-block__caption">ejemplo.json</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-json">{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: &quot;s3:GetObject&quot;,
+      &quot;Resource&quot;: &quot;arn:aws:s3:::mi-bucket-seguro/*&quot;
+    }
+  ]
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">Permiso de lectura de un solo bucket</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>En vez de pegar la política a cada usuario, la agrupas en un rol y el usuario o servicio la asume. Las instancias EC2 usan instance profiles y Lambda sus roles, sin claves embebidas.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Adjuntar una política a un rol</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">aws iam create-policy --name backend-s3-read \
+  --policy-document file://politica.json
+aws iam attach-role-policy \
+  --role-name rol-api \
+  --policy-arn arn:aws:iam::123456789012:policy/backend-s3-read</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El diseño real separa roles por servicio: la API solo sabe leer su bucket y la función serverless solo procesa su cola. Un rol humano de admin existe solo para emergencias y con MFA.</p>
+<ul><li>Cada servicio tiene un rol propio con solo sus acciones.</li>
+<li>Las claves de larga duración se reemplazan por roles temporales.</li>
+<li>El MFA se exige en las cuentas administrativas.</li>
+<li>Las políticas se revisan en auditorías periódicas.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JSON</span><span class="code-block__caption">ejemplo.json</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-json">{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [&quot;s3:GetObject&quot;, &quot;s3:PutObject&quot;],
+      &quot;Resource&quot;: [
+        &quot;arn:aws:s3:::mi-bucket-seguro/entrada/*&quot;,
+        &quot;arn:aws:s3:::mi-bucket-seguro/procesado/*&quot;
+      ]
+    }
+  ]
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> En GCP el equivalente son los roles y roles personalizados; en Azure, los roles de Entra ID y las managed identities.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El menor privilegio es proporcional al riesgo: nadie sobra.</li>
+<li>Los roles temporales eliminan la necesidad de claves de larga duración.</li>
+<li>La política se evalúa contra cada operación, no contra toda la cuenta.</li>
+<li>La revisión periódica encuentra permisos abandonados.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Dar Action * en una política por si acaso.</li>
+<li>Hardcodear claves de AWS en el código o en variables compartidas.</li>
+<li>Reutilizar la misma identidad de administrador para todo el equipo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza sin permisos y agrégalos cuando un flujo real los pida.</li>
+<li>Usa roles de servicio en vez de claves embebidas.</li>
+<li>Exige MFA en todas las cuentas con acceso administrativo.</li>
+<li>Audita periódicamente con herramientas como IAM Access Analyzer.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Escribe una política que permita listar y leer solo un bucket, y pruébala creando un rol.</li>
+<li>Reemplaza una clave embebida por un rol asumible y confirma que nada cambia funcionalmente.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>IAM controla quién puede hacer qué sobre qué recurso.</li>
+<li>Las políticas se acotan a acciones y recursos concretos.</li>
+<li>Los roles de servicio reemplazan a las claves embebidas.</li>
+<li>El menor privilegio reduce el daño de cada fuga de credenciales.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos del Cloud</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Amazon Web Services (AWS)</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Microsoft Azure</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Google Cloud Platform</a></li>
+          <li><a href="./index.html">Módulo 5 · Redes, seguridad y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos y Estrategia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Serverless y arquitecturas nativas</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

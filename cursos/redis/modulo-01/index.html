@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 1 · Introducción a Redis · Redis para Backend · Backend Academy</title>
-<meta name="description" content="Introducción a Redis para Backend: instalación, CLI, tipos de datos, expiración TTL y el cliente Python redis-py.">
+<title>Módulo 1 · Introducción a Redis · Redis y Caching · Backend Academy</title>
+<meta name="description" content="Instala Redis y explora su CLI, conecta tu primer cliente Python y domina los tipos de datos, el TTL y la expiración: la base de todo el curso.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,91 +54,90 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
+      <nav class="breadcrumb" aria-label="Miga de pan">
         <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">/</span>
-        <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">/</span>
-        <span class="breadcrumb__item"><a href="../index.html">Redis para Backend</a></span>
+        <span class="breadcrumb__item"><a href="../index.html">Redis y Caching</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">/</span>
-        <span class="breadcrumb__item" aria-current="page">Módulo 1 · Introducción</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
       </nav>
-    <p class="page-hero__eyebrow">🔥 Avanzado</p>
-    <h1 class="page-hero__title">Módulo 1 · Introducción a Redis</h1>
-    <p class="page-hero__subtitle">El almacén clave-valor en memoria que todo Backend usa: instala, explora la CLI y conoce sus tipos de datos.</p>
-    <div class="page-hero__meta"><span ><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
-        <span ><i class="fa-solid fa-book" aria-hidden="true"></i> Redis para Backend</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel: Avanzado</span></div>
+      <p class="page-hero__eyebrow">🔥 Avanzado</p>
+      <h1 class="page-hero__title">Módulo 1 · Introducción a Redis</h1>
+      <p class="page-hero__subtitle">El almacén en memoria que acelera cualquier backend.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 51 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel avanzado</span>
+      </div>
     </div>
   </section>
   <div class="container">
-    <div class="lesson-content" id="contenido">
+    <section class="lesson-content">
       <section>
-        <h2 id="objetivos">Objetivos del módulo</h2>
-        <p>Redis no es "una base como las demás": todo vive en memoria y con latencias de microsegundos. Al terminar sabrás:</p>
-        <ul>
-          <li>Qué es Redis y cuándo usarlo en tu Backend.</li>
-          <li>Instalarlo y manejarlo con la <strong>CLI</strong>.</li>
-          <li>Diferenciar y aplicar las <strong>estructuras de datos</strong> básicas.</li>
-          <li>Controlar la vida de los datos con <strong>TTL</strong>.</li>
-          <li>Conectarte desde Python con <strong>redis-py</strong>.</li>
-        </ul>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Conectar un cliente de Redis desde Python</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Instalar Redis y explorar su CLI</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es Redis y cuándo usarlo</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Distinguir los tipos de datos principales</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Controlar la vida de las claves con TTL y expiración</span></div>
+        </div>
       </section>
-      <section>
-        <h2 id="ruta">Ruta de aprendizaje</h2>
-      </section>
-    </div>
-  
+    </section>
 
-<div class="module-progress" data-progress="redis">
-  <div class="module-progress__inner">
-    <div class="module-progress__info">
-      <span class="module-progress__label"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Progreso del curso Redis para Backend</span>
-      <span class="module-progress__percent" data-progress-label>0%</span>
-    </div>
-    <div class="module-progress__bar">
-      <div class="module-progress__fill" data-progress-fill></div>
-    </div>
-  </div>
-</div>
-<section class="lesson-grid-section">
-  <div class="section-head">
-    <h2>Lecciones del módulo</h2>
-    <p>5 lecciones · ~50 min · la base de todo lo que viene después.</p>
-  </div>
-  <div class="grid-2">
-    <a class="card card--lesson card--link" href="que-es-redis.html">
-        <h3>1 · ¿Qué es Redis?</h3>
-        <p>En memoria, clave-valor, de un solo hilo y rapidísimo: su arquitectura.</p>
-        <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">conceptos</span></div>
-      </a>
-    <a class="card card--lesson card--link" href="instalacion-y-cli.html">
-        <h3>2 · Instalación y CLI</h3>
-        <p>Levanta un Redis local y aprende los comandos esenciales de redis-cli.</p>
-        <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">práctica</span></div>
-      </a>
-    <a class="card card--lesson card--link" href="tipos-de-datos.html">
-        <h3>3 · Tipos de datos</h3>
-        <p>Strings, hashes, lists, sets y sorted sets: cada uno para un problema.</p>
-        <div class="card__meta"><span class="tag">13 min</span><span class="tag tag--cat">estructuras</span></div>
-      </a>
-    <a class="card card--lesson card--link" href="ttl-y-expiracion.html">
-        <h3>4 · TTL y expiración</h3>
-        <p>Datos que se borran solos: el mecanismo que hace posible la caché.</p>
-        <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">tiempos</span></div>
-      </a>
-    <a class="card card--lesson card--link" href="cliente-python-redis-py.html">
-        <h3>5 · Cliente Python: redis-py</h3>
-        <p>Conexión, comandos y red de piscina desde tu API con redis-py.</p>
-        <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">código</span></div>
-      </a>
-  </div>
-  </section>
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~51 min · Qué es Redis, cómo instalarlo y sus tipos de datos básicos..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./cliente-python-redis-py.html">
+            <h3>1 · Cliente Python: redis-py</h3>
+            <p>Conecta Python a Redis con redis-py: pip install, conexión, ping y primeras operaciones.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">cliente</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./instalacion-y-cli.html">
+            <h3>2 · Instalación y CLI</h3>
+            <p>Instala Redis en tu máquina o contenedor y explora redis-cli para ejecutar comandos.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-es-redis.html">
+            <h3>3 · ¿Qué es Redis?</h3>
+            <p>Un almacén clave-valor en memoria, single-threaded y rapidísimo, ideal para caché y estado.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./tipos-de-datos.html">
+            <h3>4 · Tipos de datos</h3>
+            <p>Strings, hashes, lists, sets y sorted sets: las cinco estructuras que definen Redis.</p>
+            <div class="card__meta"><span class="tag">13 min</span><span class="tag tag--cat">estructuras</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./ttl-y-expiracion.html">
+            <h3>5 · TTL y expiración</h3>
+            <p>Da a cada clave una vida limitada con TTL y evita que la memoria crezca sin control.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">lifecycle</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../index.html"><span class="label">← Curso</span><span class="title">Redis y Caching</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 2 · Estructuras de Datos</span></a>
+    </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -144,39 +149,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · Caché</a></li>
+          <li><a href="./index.html">Módulo 1 · Introducción a Redis</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras de Datos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché y Rendimiento</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Estructuras de datos avanzadas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Persistencia y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Colas y streaming</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Redis en producción</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

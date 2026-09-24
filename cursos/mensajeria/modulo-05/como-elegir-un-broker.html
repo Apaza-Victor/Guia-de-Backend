@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="como-elegir-un-broker">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo elegir el broker adecuado · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Aplica un proceso de decisión reproducible para elegir el broker de tu sistema.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="como-elegir-un-broker"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Cómo elegir el broker adecuado</span>
+        </nav>
+        <h1 class="lesson-title">Cómo elegir el broker adecuado</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Brokers y proveedores</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Con tantas opciones, la elección del broker puede caer en gustos personales o en la última tendencia. Un proceso serio evalúa cinco ejes: modelo de consumo, orden, retención, escalado y operación, cruzados con tu carga real.</p>
+<p>Esta lección convierte la decisión en un checklist accionable. El objetivo no es el broker perfecto, sino el broker que cubra tus necesidades con el impuesto operativo más bajo.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Elegir un broker consiste en mapear tus escenarios (volumen, latencia, orden, retención, precio) contra las capacidades de cada alternativa y decidir con datos, no con moda.</p><p><strong>Por qué importa.</strong> El broker es infraestructura de larga vida: migrarlo implica cambiar productores, consumidores, esquemas y operación, con riesgo alto y cero beneficio de negocio.</p><p><strong>Cuándo usarlo.</strong> Haz este análisis antes del primer mensaje en producción y revísalo cuando el volumen multiplique por 10 tu estimación inicial.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Modelo de consumo: cola (una entrega) vs pub/sub vs log con replay.</li>
+<li>Orden y agrupación: colas, sesiones, particiones y ordering keys.</li>
+<li>Retención: borrado al ack vs retención temporal vs almacenamiento indefinido.</li>
+<li>Rendimiento y acuerdo operación: SLO de quórum, replicación y failover del propio broker.</li>
+<li>Coste total: instancias, licencias, operación del clúster y gasto del servicio gestionado.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Trazamos la matriz de decisión: cada caso de uso se puntúa frente a cada candidato.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Hoja de decisión (0-3 en cada eje)
+       [cola] [pubsub] [replay] [latencia] [operacion]
+RabbitMQ  3     2       0       alta       media
+Kafka     1     3       3       media      alta
+Pulsar    2     3       3       media      media
+SQS/SNS   3     3       0       media      baja
+PubSub    1     3       2       media      baja
+Service Bus 3   3       0       media      baja</code></pre></div>
+</figure>
+<pre><code class="language-text">Para colas con integración AWS gana SQS; para logs con replay gana Kafka; para routing complejo gana RabbitMQ.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El proceso se vuelve reproducible con una rúbrica ponderada por peso de cada requisito.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Rúbrica ponderada de selección</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">requisitos = {
+    'orden_estricto': 0.4,   # critico para pagos
+    'retencion':     0.2,
+    'latencia_baja': 0.2,
+    'operacion':     0.2,
+}
+# Kafka: orden 1.0*0.4 + retencion 1.0*0.2 + latencia 0.7*0.2 + op 0.5*0.2 = 0.84
+# Service Bus: 0.8*0.4 + 0.3*0.2 + 0.6*0.2 +1.0*0.2 = 0.70</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un equipo que necesitaba colas de pago, streaming para analítica y pub/sub para notificaciones eligió tres brokers: SQS para los cargos (integración AWS), Kafka para la analítica (replay) y un tópico SNS para comunicar al resto. Cada pieza cubre su caso con el menor coste.</p>
+<ul><li>Divide el sistema en necesidades, no en un único broquer para todo.</li>
+<li>Anota la decisión en un ADR con fechas y supuestos de carga.</li>
+<li>Vuelve a medir cada trimestre: los volúmenes cambian las conclusiones.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">ADR-014: Seleccion de broker
+decide: dividir en 3 brokers segun caso de uso
+supuestos: &lt;1k msgs/s pago, 50k msgs/s analitica
+revision: trimestral, cuando el volumen x10</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un framework de mensajería abstracto ante ti de vendor, pero no hay que pagar esa complejidad si no se necesita.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El modelo de consumo define el marco: si hay replay, busca log; si hay routing, busca cola inteligente.</li>
+<li>El orden estricto suele costar throughput: mide cuánto pagas por él antes de exigirlo.</li>
+<li>La retención cambia el coste de almacenamiento: días vs semanas cambia la cuenta.</li>
+<li>El servicio gestionado externaliza la operación, pero lo ata a un proveedor.</li>
+<li>El benchmark con tu carga desmiente la especificación comercial de casi todos.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Elegir por fama o por el post de moda, sin datos de tu carga.</li>
+<li>Exigir orden global cuando no lo necesitas y asumir el coste de throughput.</li>
+<li>Ignorar las salidas: la facilidad de migrar y extraer datos también es un criterio.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Haz un PoC con el peor caso: mensaje grande, pico, y consumidores lentos.</li>
+<li>Pondera la operación: un broker libre perfecto te cuesta una SRE a tiempo completo.</li>
+<li>Prueba el fallo del clúster en el PoC: la recuperación dice más que el throughput pico.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Enumera tus 3 casos de uso de mensajería con volumen y latencia esperados.</li>
+<li>Aplica la rúbrica ponderada a dos brokers alternativos y compara.</li>
+<li>Redacta un ADR con la decisión y la fecha de revisión.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Elegir broker requiere mapear casos de uso a capacidades con datos reales.</li>
+<li>Orden, retención, operación y coste pesan tanto como el throughput.</li>
+<li>Un sistema puede convivir con varios brokers, cada uno en su terreno.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="./index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

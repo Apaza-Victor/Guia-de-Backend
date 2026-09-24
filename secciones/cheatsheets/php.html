@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de PHP: sintaxis, variables y tipos, arrays, strings, control de flujo, funciones, superglobals, archivos, PDO con CRUD completo, sesiones y errores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-root="../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="./index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">PHP</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🐘 PHP</h1>
+          <p class="section-subtitle">El lenguaje de servidor más utilizado en la web. Esta hoja cubre sintaxis, control de flujo, superglobals, manejo de archivos y PDO con un CRUD completo.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Backend</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="sintaxis">Sintaxis básica</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+// Comentarios: // , # y /* ... */
+
+echo "Hola, mundo";          // imprime texto
+print("Hola");               // imprime y devuelve 1
+var_dump($algo);             // tipo y valor, para depurar
+
+// Variables SIEMPRE empiezan con $
+$nombre = "Ada";
+$edad = 36;
+
+// Constantes
+const APP_VERSION = "1.0.0";
+define("APP_NOMBRE", "Backend Academy");
+
+echo APP_NOMBRE . " v" . APP_VERSION;</code></pre>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Operador</th><th>Significado</th><th>Operador</th><th>Significado</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">.</code></td><td>Concatenación</td><td><code class="inline">===</code></td><td>Igual estricto (tipo y valor)</td></tr>
+                    <tr><td><code class="inline">+=</code> <code class="inline">-=</code></td><td>Asignación aritmética</td><td><code class="inline">!==</code></td><td>Distinto estricto</td></tr>
+                    <tr><td><code class="inline">++</code> <code class="inline">--</code></td><td>Incremento / decremento</td><td><code class="inline">&amp;&amp;</code> <code class="inline">||</code></td><td>Y / O lógicos</td></tr>
+                    <tr><td><code class="inline">??</code></td><td>Si no existe o es null, usa el otro</td><td><code class="inline">?:</code></td><td>Ternario corto</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="variables-tipos">Variables y tipos</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Ejemplo</th><th>Comprobación</th></tr></thead>
+                  <tbody>
+                    <tr><td>string</td><td><code class="inline">"texto"</code></td><td><code class="inline">is_string()</code></td></tr>
+                    <tr><td>int</td><td><code class="inline">42</code></td><td><code class="inline">is_int()</code></td></tr>
+                    <tr><td>float</td><td><code class="inline">3.14</code></td><td><code class="inline">is_float()</code></td></tr>
+                    <tr><td>bool</td><td><code class="inline">true</code> / <code class="inline">false</code></td><td><code class="inline">is_bool()</code></td></tr>
+                    <tr><td>array</td><td><code class="inline">[1, 2, 3]</code></td><td><code class="inline">is_array()</code></td></tr>
+                    <tr><td>null</td><td><code class="inline">null</code></td><td><code class="inline">is_null()</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Tipado estricto en parámetros y retornos (PHP 7+ / 8)
+function saludar(string $nombre, int $edad = 0): string
+{
+    return "Hola $nombre, tienes $edad años";
+}
+
+$mensaje = saludar("Ada", 36);
+
+// Interpolación en comillas dobles vs concatenación
+$usuario = "ada";
+echo "Bienvenido $usuario";        // interpola la variable
+echo 'Bienvenido $usuario';        // texto literal: NO interpola
+echo "Hola " . $usuario;           // concatenación
+
+// Casting explícito
+$entero = (int) "42";
+$texto  = (string) 42;
+$decimal = (float) "3.14";</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="arrays">Arrays</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Indexado
+$frutas = ["manzana", "pera", "uva"];
+echo $frutas[0];                     // "manzana"
+
+// Asociativo (mapa clave => valor)
+$usuario = [
+    "id"     => 1,
+    "nombre" => "Ada",
+    "activo" => true,
+];
+
+// Colección de usuarios (para JSON)
+$usuarios = [
+    ["id" => 1, "nombre" => "Ada"],
+    ["id" => 2, "nombre" => "Grace"],
+];
+
+// Operaciones comunes
+count($frutas);                      // 3
+array_push($frutas, "kiwi");         // añade al final
+array_pop($frutas);                  // quita el último
+array_merge($a, $b);                 // fusiona arrays
+in_array("pera", $frutas);           // true
+array_key_exists("id", $usuario);    // true
+array_column($usuarios, "nombre");   // ["Ada","Grace"]
+array_map(fn($u) =&gt; $u["nombre"], $usuarios);</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="strings">Strings</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">$texto = "Backend Academy";
+
+strlen($texto);                 // 16 longitud en bytes
+strtoupper($texto);             // "BACKEND ACADEMY"
+substr($texto, 0, 7);           // "Backend"
+str_replace("Academy", "School", $texto);
+str_contains($texto, "Backend");// true (PHP 8)
+str_starts_with($texto, "B");   // true
+trim("  hola  ");               // "hola"
+explode(",", "a,b,c");          // ["a","b","c"]
+implode(" - ", ["a", "b"]);     // "a - b"
+
+// Comparación
+strcmp("a", "b");               // negativo si a < b
+strtolower("HOLA") === strtolower("hola");</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="control-de-flujo">Control de flujo</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">$rol = "admin";
+
+if ($rol === "admin") {
+    echo "Acceso total";
+} elseif ($rol === "user") {
+    echo "Acceso limitado";
+} else {
+    echo "Invitado";
+}
+
+// Match (PHP 8): expresion que devuelve valor
+$permiso = match ($rol) {
+    "admin" => 100,
+    "user"  => 50,
+    default => 10,
+};
+
+// Bucles
+foreach ($usuarios as $u) {
+    echo $u["nombre"];
+}
+
+foreach ($frutas as $indice =&gt; $fruta) { ... }
+
+for ($i = 0; $i &lt; 10; $i++) { ... }
+
+$n = 0;
+while ($n &lt; 5) { $n++; }
+
+do { $n--; } while ($n &gt; 10);</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="funciones">Funciones</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Con tipos, valores por defecto y RETORNOS tipados
+function factura(int $precio, int $cantidad = 1): int
+{
+    return $precio * $cantidad;
+}
+
+// Parámetros por nombre (PHP 8)
+factura(precio: 100, cantidad: 3);
+
+// Spread en funciones
+function sumar(...$numeros): int
+{
+    return array_sum($numeros);
+}
+
+// Funciones anónimas y arrow functions
+$doble = function (int $n): int { return $n * 2; };
+$triple = fn(int $n): int =&gt; $n * 3;
+
+// Closure captura variables del scope por referencia
+$contador = 0;
+$incrementar = function () use (&amp;$contador) { $contador++; };
+
+// Include de archivos
+require_once "config.php";
+include_once "helpers.php";</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="superglobals">Superglobals</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Variable</th><th>Contenido</th><th>Uso típico</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">$_GET</code></td><td>Parámetros de la URL (?id=5).</td><td>Leer filtros y búsquedas.</td></tr>
+                    <tr><td><code class="inline">$_POST</code></td><td>Datos del cuerpo de una petición POST.</td><td>Formularios de creación/edición.</td></tr>
+                    <tr><td><code class="inline">$_SERVER</code></td><td>Información del servidor y la petición.</td><td><code class="inline">$_SERVER["REQUEST_METHOD"]</code></td></tr>
+                    <tr><td><code class="inline">$_SESSION</code></td><td>Datos de sesión del usuario.</td><td>Login, carrito, estado.</td></tr>
+                    <tr><td><code class="inline">$_COOKIE</code></td><td>Cookies enviadas por el navegador.</td><td>Preferencias persistentes.</td></tr>
+                    <tr><td><code class="inline">$_FILES</code></td><td>Archivos subidos con multipart/form-data.</td><td>Subidas de imágenes.</td></tr>
+                    <tr><td><code class="inline">$_REQUEST</code></td><td>Fusión de GET + POST.</td><td>Evítalo: no sabes el origen.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Leer entrada de forma segura (nunca confíes en la entrada)
+$id = (int) ($_GET["id"] ?? 0);
+$nombre = htmlspecialchars(strip_tags($_POST["nombre"] ?? ""));
+
+// Detectar el método de la petición
+$metodo = $_SERVER["REQUEST_METHOD"] ?? "GET";
+
+if ($metodo === "POST") {
+    // procesar el formulario
+}
+
+// Manejar subida de archivos
+if (isset($_FILES["avatar"])) {
+    $destino = "subidas/" . basename($_FILES["avatar"]["name"]);
+    move_uploaded_file($_FILES["avatar"]["tmp_name"], $destino);
+}</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="archivos">Manejo de archivos</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Escribir (sobrescribe) y añadir
+file_put_contents("registro.txt", "nueva linea" . PHP_EOL, FILE_APPEND);
+
+// Leer completo o por líneas
+$contenido = file_get_contents("registro.txt");
+$lineas = file("registro.txt");            // array de líneas
+
+// Streams manuales
+$fh = fopen("datos.csv", "r");
+while (($fila = fgetcsv($fh)) !== false) {
+    print_r($fila);
+}
+fclose($fh);
+
+// JSON de archivo a array y viceversa
+$data = json_decode(file_get_contents("config.json"), true);
+file_put_contents("config.json", json_encode($data, JSON_PRETTY_PRINT));</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="pdo">PDO: conexión y CRUD</h2>
+              <p>PDO es la API oficial de PHP para bases de datos. Su gran ventaja: los <strong>prepared statements</strong> bloquean la inyección SQL.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">$dsn = "mysql:host=localhost;dbname=blog;charset=utf8mb4";
+$pdo = new PDO($dsn, "usuario", "password", [
+    PDO::ATTR_ERRMODE            =&gt; PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+]);
+
+// CREATE (INSERT)
+$stmt = $pdo-&gt;prepare("INSERT INTO posts (titulo, contenido) VALUES (:t, :c)");
+$stmt-&gt;execute(["t" =&gt; "Hola", "c" =&gt; "Contenido del post"]);
+$id = (int) $pdo-&gt;lastInsertId();
+
+// READ (SELECT con filtro)
+$stmt = $pdo-&gt;prepare("SELECT * FROM posts WHERE id = ?");
+$stmt-&gt;execute([$id]);
+$post = $stmt-&gt;fetch();                 // una fila
+
+$todos = $pdo-&gt;query("SELECT * FROM posts")-&gt;fetchAll();
+
+// UPDATE
+$stmt = $pdo-&gt;prepare("UPDATE posts SET titulo = ? WHERE id = ?");
+$stmt-&gt;execute(["Nuevo titulo", $id]);
+
+// DELETE
+$stmt = $pdo-&gt;prepare("DELETE FROM posts WHERE id = ?");
+$stmt-&gt;execute([$id]);</code></pre>
+                </div>
+              </div>
+              <p>Solo debes interpolar variables directamente en la cadena SQL si nada del SQL proviene de entrada de usuario y siempre fijas la parte dinámica como <code class="inline">:param</code>/<code class="inline">?</code>.</p>
+            </section>
+
+            <section>
+              <h2 id="sesiones">Sesiones</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Iniciar/continuar la sesión SIEMPRE al principio del script
+session_start();
+
+$_SESSION["usuario_id"] = 42;
+$_SESSION["nombre"] = "Ada";
+
+if (isset($_SESSION["usuario_id"])) {
+    echo "Sesión iniciada como " . $_SESSION["nombre"];
+}
+
+// Cerrar sesión de forma segura
+session_unset();      // limpia variables
+session_destroy();    // destruye la sesión
+setcookie(session_name(), "", time() - 3600, "/");</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="errores">Errores y depuración</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">PHP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-php">// Excepciones (bloques try/catch)
+try {
+    $pdo-&gt;beginTransaction();
+    $pdo-&gt;exec("UPDATE cuentas SET saldo = saldo - 100 WHERE id = 1");
+    $pdo-&gt;exec("UPDATE cuentas SET saldo = saldo + 100 WHERE id = 2");
+    $pdo-&gt;commit();
+} catch (PDOException $e) {
+    $pdo-&gt;rollBack();
+    error_log("Transacción fallida: " . $e-&gt;getMessage());
+}
+
+// Lanzar errores propios
+if (!$usuario) {
+    throw new InvalidArgumentException("Usuario no encontrado");
+}
+
+// Depurar de verdad: logs, no echo
+error_log("Debug: " . json_encode($datos));</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Activa <code class="inline">declare(strict_types=1);</code> al inicio de todos los archivos.</li>
+                <li>Usa <strong>prepared statements</strong> (PDO) para toda consulta con datos de usuario.</li>
+                <li>Nunca muestres errores en producción: loguealos con <code class="inline">error_log()</code>.</li>
+                <li>Escapa la salida con <code class="inline">htmlspecialchars()</code> para prevenir XSS.</li>
+                <li>Valida y sanea toda entrada: <code class="inline">filter_var()</code>, <code class="inline">ctype_*</code> y casting.</li>
+                <li>Separa responsabilidades: un archivo no debería hacer SQL y pintar HTML a la vez.</li>
+                <li>Usa Composer para dependencias y PSR-4 para autoloading.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="./index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="./nodejs.html">Siguiente: Node.js <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="./index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

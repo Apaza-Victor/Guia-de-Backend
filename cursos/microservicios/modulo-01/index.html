@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 1 · Fundamentos de microservicios · Microservicios</title>
-<meta name="description" content="Módulo 1 del curso Microservicios: qué es un microservicio, sus principios, los bounded contexts de DDD, cómo dividir un sistema y los antipatrones que debes evitar.">
+<title>Módulo 1 · Fundamentos de microservicios · Microservicios · Backend Academy</title>
+<meta name="description" content="Descubre qué son los microservicios, compáralos con el monolito, aprende a dividir el dominio con bounded contexts y evita los antipatrones más comunes.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
 <body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Microservicios</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 1 · Fundamentos de microservicios</span>
-    </nav>
-    <p class="page-hero__eyebrow">🔥 Avanzado</p>
-    <h1 class="page-hero__title">Módulo 1 · Fundamentos de microservicios</h1>
-    <p class="page-hero__subtitle">Del monolito a los microservicios: qué son, los principios que los rigen, cómo trazar límites con bounded contexts, cómo dividir un sistema y los antipatrones que condenan al fracaso los intentos mal hechos.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Arquitectura para Backend</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Microservicios</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
+      </nav>
+      <p class="page-hero__eyebrow">🧠 Experto</p>
+      <h1 class="page-hero__title">Módulo 1 · Fundamentos de microservicios</h1>
+      <p class="page-hero__subtitle">Divide tu sistema en piezas pequeñas que evolucionan por separado.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel experto</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,63 +82,62 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir qué es un microservicio y enumerar sus principios fundamentales.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Comparar monolito y microservicios con criterios reales de decisión.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar bounded contexts de DDD para trazar límites correctos entre servicios.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Dividir un sistema por dominio y elegir la granularidad adecuada.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Reconocer y evitar los antipatrones más comunes.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="microservicios">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="que-son-microservicios.html">
-          <h3>1 · ¿Qué son los microservicios?</h3>
-            <p>Definición, principios y la regla de los 12 factores aplicada a servicios pequeños.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">concepto</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="monolito-vs-microservicios.html">
-          <h3>2 · Monolito vs microservicios</h3>
-            <p>Ventajas, costos reales y la pregunta clave: ¿cuándo conviene migrar?</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">decisión</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="bounded-context.html">
-          <h3>3 · Bounded contexts</h3>
-            <p>Límites de dominio con DDD: qué oculta, comparte y expone cada contexto.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">ddd</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="como-dividir-servicios.html">
-          <h3>4 · Cómo dividir servicios</h3>
-            <p>Por dominio, por capacidad, por equipo: reglas para elegir la granularidad.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">división</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="antipatrones.html">
-          <h3>5 · Antipatrones comunes</h3>
-            <p>Monolito distribuido, nanoservicios y servicios dios: cómo detectarlos temprano.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">errores</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué son los microservicios y qué los hace distintos</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Comparar monolito y microservicios con criterio</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Dividir el dominio usando bounded contexts</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar criterios reales para partir un sistema</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Reconocer los antipatrones más habituales</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~48 min · Qué son, por qué existen y cómo dividir tu dominio con cabeza..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./antipatrones.html">
+            <h3>1 · Antipatrones comunes</h3>
+            <p>Los errores más repetidos al adoptar microservicios y cómo esquivarlos antes de que duelan.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">arquitectura</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./bounded-context.html">
+            <h3>2 · Bounded contexts</h3>
+            <p>El límite que define qué le pertenece a cada servicio según el lenguaje del dominio.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">ddd</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./como-dividir-servicios.html">
+            <h3>3 · Cómo dividir servicios</h3>
+            <p>Criterios prácticos para partir un monolito: por dominio, por cambio y por escala.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">arquitectura</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./monolito-vs-microservicios.html">
+            <h3>4 · Monolito vs microservicios</h3>
+            <p>Cuándo un monolito bien estructurado es más sabio que una arquitectura completa.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">arquitectura</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-son-microservicios.html">
+            <h3>5 · ¿Qué son los microservicios?</h3>
+            <p>Servicios pequeños, desplegables e independientes que colaboran por red.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../index.html">
-        <span class="label">← Curso</span>
-        <span class="title">Microservicios</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">Comunicación</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../index.html"><span class="label">← Curso</span><span class="title">Microservicios</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 2 · Comunicación</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -141,39 +149,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="index.html">Módulo 1 · Fundamentos de microservicios</a></li>
+          <li><a href="./index.html">Módulo 1 · Fundamentos de microservicios</a></li>
           <li><a href="../modulo-02/index.html">Módulo 2 · Comunicación</a></li>
           <li><a href="../modulo-03/index.html">Módulo 3 · Datos y resiliencia</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Comunicación entre servicios</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Orquestación e integración</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Observabilidad en microservicios</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Microservicios en producción</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>
@@ -183,9 +196,6 @@
 <script src="../../../assets/js/sidebar.js"></script>
 <script src="../../../assets/js/toc.js"></script>
 <script src="../../../assets/js/code.js"></script>
-<script src="../../../assets/js/favorites.js"></script>
-<script src="../../../assets/js/history.js"></script>
-<script src="../../../assets/js/search.js"></script>
 <script src="../../../assets/js/main.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cloud para Backend · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Cloud para Backend: aprende a desplegar, escalar y gestionar aplicaciones en AWS, Google Cloud y Azure. Serverless, EC2, S3, Lambda y costos.">
+<title>Cloud Computing · Backend Academy</title>
+<meta name="description" content="Conceptos cloud, IaaS / PaaS / SaaS, VPS, AWS, Azure, Google Cloud, serverless, networking y seguridad en la nube.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,158 +52,276 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Cloud para Backend</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Cloud Computing</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🔥 Avanzado</p>
+          <h1 class="page-hero__title">☁️ Cloud Computing</h1>
+          <p class="page-hero__subtitle">Conceptos cloud, IaaS / PaaS / SaaS, VPS, AWS, Azure, Google Cloud, serverless, networking y seguridad en la nube.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 7 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 37 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> AWS · Azure · IaaS · PaaS</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Cloud Computing</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></p>
-      <h1 class="lesson-title">☁️ Cloud para Backend</h1>
-      <p class="section-subtitle">Domina los servicios en la nube que sostienen el Backend moderno. Aprende a desplegar, escalar y gestionar aplicaciones en AWS, Google Cloud y Azure, y entiende cuándo usar Serverless, contenedores o máquinas virtuales.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 54 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> AWS · GCP · Azure · Serverless</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 37 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/aws</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/aws</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> AWS</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>El Backend moderno vive en la nube. En este curso aprenderás a utilizar los principales proveedores de cloud (AWS, Google Cloud y Azure) para desplegar APIs, almacenar archivos, gestionar bases de datos y escalar automáticamente. Compararás los servicios de cada proveedor, aprenderás a elegir el más adecuado para tu caso de uso y dominarás el paradigm serverless con Lambda, Cloud Functions y más.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🔧 Intermedio</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">54</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">☁️ Cloud</span></div>
+  <div class="container">
+    <article class="course" data-course-id="cloud">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Conceptos cloud, IaaS / PaaS / SaaS, VPS, AWS, Azure, Google Cloud, serverless, networking y seguridad en la nube.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🔥 Avanzado</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">7 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">37</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Desplegar backend en la nube</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Elegir el servicio cloud correcto</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>Docker</li>
+<li>DevOps básico</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">AWS</span>
+<span class="tag tag--tech">Azure</span>
+<span class="tag tag--tech">IaaS</span>
+<span class="tag tag--tech">PaaS</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 37 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos del Cloud</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 53 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Comprende qué es la nube, los modelos de servicio IaaS, PaaS y SaaS, las regiones y zonas de disponibilidad, y las herramientas de cada proveedor para empezar con bases sólidas.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/que-es-la-nube.html">¿Qué es la nube? Por qué domina el Backend</a></li>
+<li><a href="./modulo-01/modelos-de-servicio-iaas-paas-saas.html">Modelos de servicio: IaaS, PaaS, SaaS</a></li>
+<li><a href="./modulo-01/regiones-y-zonas-de-disponibilidad.html">Regiones y zonas de disponibilidad</a></li>
+<li><a href="./modulo-01/vps-vs-serverless.html">VPS vs Serverless</a></li>
+<li><a href="./modulo-01/cli-y-consolas-de-cada-proveedor.html">CLIs y consolas de cada proveedor</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Amazon Web Services (AWS)</h3>
+                <div class="card__meta">
+                  <span>6 lecciones</span><span>≈ 65 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Domina los servicios fundamentales de AWS para backend: máquinas virtuales EC2, almacenamiento S3, bases de datos gestionadas RDS, funciones serverless Lambda y seguridad IAM.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/intro-a-aws.html">Introducción a AWS</a></li>
+<li><a href="./modulo-02/ec2-maquinas-virtuales.html">EC2: máquinas virtuales</a></li>
+<li><a href="./modulo-02/s3-almacenamiento.html">S3: almacenamiento de archivos</a></li>
+<li><a href="./modulo-02/rds-bases-de-datos.html">RDS: bases de datos gestionadas</a></li>
+<li><a href="./modulo-02/lambda-functions.html">Lambda: funciones serverless</a></li>
+<li><a href="./modulo-02/iam-y-seguridad.html">IAM y seguridad</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Microsoft Azure</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 54 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Aprende Azure desde la perspectiva del backend: suscripciones y resource groups, App Service como PaaS, Functions serverless, bases de datos gestionadas y Blob Storage.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/intro-a-azure.html">Introducción a Azure</a></li>
+<li><a href="./modulo-03/azure-app-service.html">App Service: PaaS para APIs</a></li>
+<li><a href="./modulo-03/azure-functions.html">Functions: serverless en Azure</a></li>
+<li><a href="./modulo-03/azure-sql-database.html">Azure SQL Database y Cosmos DB</a></li>
+<li><a href="./modulo-03/azure-blob-storage.html">Blob Storage y almacenamiento</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Google Cloud Platform</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 55 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Aprende Google Cloud desde la perspectiva del backend: proyectos y contexto gcloud, Compute Engine, Cloud Functions, Cloud Run y el almacenamiento con Storage y Firestore.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/intro-a-gcp.html">Introducción a Google Cloud</a></li>
+<li><a href="./modulo-04/gcp-compute-engine.html">Compute Engine y VM</a></li>
+<li><a href="./modulo-04/gcp-cloud-functions.html">Cloud Functions: serverless</a></li>
+<li><a href="./modulo-04/gcp-cloud-run.html">Cloud Run: contenedores serverless</a></li>
+<li><a href="./modulo-04/gcp-storage-y-firestore.html">Storage y Firestore</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Redes, seguridad y alta disponibilidad</h3>
+                <div class="card__meta">
+                  <span>6 lecciones</span><span>≈ 71 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Domina las redes en la nube, la seguridad y compliance, el IAM con menor privilegio, los backups, las estrategias de migración y la tolerancia a fallos que sostienen un backend profesional.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/vpc-y-redes-en-la-nube.html">VPC y redes en la nube</a></li>
+<li><a href="./modulo-05/seguridad-y-compliance.html">Seguridad y compliance</a></li>
+<li><a href="./modulo-05/iam-y-menor-privilegio.html">IAM y menor privilegio</a></li>
+<li><a href="./modulo-05/backups-y-alta-disponibilidad.html">Backups y alta disponibilidad</a></li>
+<li><a href="./modulo-05/migracion-a-la-nube.html">Estrategias de migración</a></li>
+<li><a href="./modulo-05/tolerancia-a-fallos-y-redundancia.html">Tolerancia a fallos y redundancia</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Costos y Estrategia</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 58 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Gestiona el costo de tu backend en la nube: capas gratuitas, alertas de gasto, modelos de precios, optimización, equivalencias entre proveedores y el despliegue de una API con estrategia.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/capa-gratuita-y-alertas.html">Capa gratuita y alertas de gasto</a></li>
+<li><a href="./modulo-06/modelo-de-precios.html">Entender el modelo de precios</a></li>
+<li><a href="./modulo-06/optimizacion-de-costos.html">Optimización de costos</a></li>
+<li><a href="./modulo-06/equivalencias-entre-proveedores.html">Equivalencias entre AWS, GCP y Azure</a></li>
+<li><a href="./modulo-06/despliegue-api-en-la-nube.html">Despliegue de una API con estrategia</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Serverless y arquitecturas nativas</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 63 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Cierra el curso con los patrones de producción serverless, API Gateway y CDN, arquitecturas event-driven, infraestructura como código en la nube y el diseño cloud-native completo.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/serverless-en-produccion.html">Serverless en producción</a></li>
+<li><a href="./modulo-07/api-gateway-y-cdn.html">API Gateway y CDN</a></li>
+<li><a href="./modulo-07/arquitecturas-event-driven.html">Arquitecturas event-driven</a></li>
+<li><a href="./modulo-07/infraestructura-como-codigo-cloud.html">Infraestructura como código en la nube</a></li>
+<li><a href="./modulo-07/diseno-nube-nativa.html">Diseño cloud-native</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender los conceptos fundamentales de cloud computing y modelos de servicio (IaaS, PaaS, SaaS).</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Desplegar y gestionar instancias EC2, Lambda y S3 en Amazon Web Services.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Usar Google Cloud Run, Cloud Functions y Cloud Storage para Backend.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Explorar los servicios clave de Azure: App Service, Functions y Blob Storage.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Diseñar arquitecturas serverless para APIs Backend eficientes y escalables.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Gestionar variables de entorno, secrets, dominios y certificados SSL en la nube.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Comprender el modelo de costos y optimizar el gasto en cada proveedor.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos previos</h2>
-        <ul>
-          <li>Experiencia básica con Backend (APIs REST, servidores, bases de datos).</li>
-          <li>Conocimientos de Docker son recomendados pero no obligatorios.</li>
-          <li>Una cuenta gratuita en AWS, Google Cloud o Azure (todas ofrecen tier gratuito).</li>
-          <li>Familiaridad con la línea de comandos y terminal.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías y herramientas</h2>
-        <div class="row">
-          <span class="tag tag--tech">AWS</span>
-          <span class="tag tag--tech">Google Cloud</span>
-          <span class="tag tag--tech">Azure</span>
-          <span class="tag tag--tech">Lambda</span>
-          <span class="tag tag--tech">S3</span>
-          <span class="tag tag--tech">Serverless</span>
-          <span class="tag tag--tech">EC2</span>
-          <span class="tag tag--tech">Cloud Run</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Seis módulos que cubren los tres grandes proveedores de cloud, el paradigm serverless y las estrategias de costos para Backend profesional.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Fundamentos del Cloud</h3>
-          </div>
-          <p class="card__text">¿Qué es la nube y por qué domina el Backend moderno? Modelos IaaS, PaaS, SaaS, regions, AZs, la CLI de cada proveedor y cómo navegar la consola.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 78 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Amazon Web Services (AWS)</h3>
-          </div>
-          <p class="card__text">EC2, Lambda, S3, RDS, API Gateway, IAM. Despliega una API Backend en AWS con autenticación, base de datos y almacenamiento de archivos.</p>
-          <div class="card__meta">
-            <span>10 lecciones</span><span>≈ 95 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. Google Cloud Platform</h3>
-          </div>
-          <p class="card__text">Cloud Run, Cloud Functions, Cloud Storage, Firestore y Cloud SQL. Despliega microservicios containerizados y funciones serverless en GCP.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 85 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Microsoft Azure</h3>
-          </div>
-          <p class="card__text">App Service, Azure Functions, Blob Storage, Cosmos DB y Azure SQL. Configura un Backend completo en el ecosistema Microsoft con CI/CD integrado.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 82 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. Serverless en Backend</h3>
-          </div>
-          <p class="card__text">Lambda, Cloud Functions y Azure Functions. Diseña APIs sin servidores, gestiona eventos, colas y escalado automático. Cuándo usar serverless y cuándo no.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 80 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">6. Costos y Estrategia</h3>
-          </div>
-          <p class="card__text">Entiende el modelo de precios de cada proveedor, usa la capa gratuita, configura alertas de gasto y diseña una estrategia de cloud que no quiebre tu presupuesto.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 72 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-06/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -212,38 +332,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · AWS</a></li>
-          <li><a href="index.html">Módulo 3 · GCP</a></li>
-          <li><a href="index.html">Módulo 4 · Azure</a></li>
-          <li><a href="index.html">Módulo 5 · Serverless</a></li>
-          <li><a href="modulo-06/index.html">Módulo 6 · Costos</a></li>
+          <li><span>Módulo 1 · Fundamentos del Cloud</span></li>
+          <li><span>Módulo 2 · Amazon Web Services (AWS)</span></li>
+          <li><span>Módulo 3 · Microsoft Azure</span></li>
+          <li><span>Módulo 4 · Google Cloud Platform</span></li>
+          <li><span>Módulo 5 · Redes, seguridad y alta disponibilidad</span></li>
+          <li><span>Módulo 6 · Costos y Estrategia</span></li>
+          <li><span>Módulo 7 · Serverless y arquitecturas nativas</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

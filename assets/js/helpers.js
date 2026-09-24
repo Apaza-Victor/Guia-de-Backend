@@ -5,9 +5,11 @@
    ============================================================ */
 
 const AppHelpers = (() => {
-  /* Resuelve cualquier ruta a la carpeta assets según la profundidad */
+  /* Resuelve una ruta relativa desde la raíz según la profundidad
+     (usa data-root del body, fijado en todas las páginas) */
   function asset(name) {
-    return "assets/" + name;
+    const root = (document.body && document.body.dataset.root) || "";
+    return root + name;
   }
 
   /* Añade/quita la clase is-loading (skeleton) */
@@ -125,12 +127,12 @@ const AppHelpers = (() => {
         "<span>Backend Academy<small>Cursos</small></span></a>" +
         '<nav class="nav-main" aria-label="Navegación principal">' +
         '<a href="' + asset("index.html") + '">Inicio</a>' +
-        '<a href="' + asset("roadmap/index.html") + '">Roadmap</a>' +
-        '<a href="' + asset("aprender/index.html") + '">Aprender</a>' +
-        '<a href="' + asset("practica/index.html") + '">Práctica</a>' +
-        '<a href="' + asset("proyectos/index.html") + '">Proyectos</a>' +
-        '<a href="' + asset("recursos/index.html") + '">Recursos</a>' +
-        '<a href="' + asset("buscador/index.html") + '">Buscar</a></nav>' +
+        '<a href="' + asset("secciones/roadmap/index.html") + '">Roadmap</a>' +
+        '<a href="' + asset("secciones/aprender/index.html") + '">Aprender</a>' +
+        '<a href="' + asset("secciones/practica/index.html") + '">Práctica</a>' +
+        '<a href="' + asset("secciones/proyectos/index.html") + '">Proyectos</a>' +
+        '<a href="' + asset("secciones/recursos/index.html") + '">Recursos</a>' +
+        '<a href="' + asset("secciones/buscador/index.html") + '">Buscar</a></nav>' +
         '<div class="header-actions">' +
         '<button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">' +
         '<i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i></button>' +

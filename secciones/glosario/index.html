@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glosario · Backend Academy</title>
+<meta name="description" content="Glosario de términos de desarrollo Backend en español: API, HTTP, JWT, REST, SQL, Docker, middleware y decenas de conceptos con definiciones claras y concisas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+<style>
+.glossary { display: grid; gap: var(--space-6); }
+.glossary__filters { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.glossary__filter-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-right: var(--space-1); }
+.glossary__cat-title { font-size: 1.15rem; margin-bottom: var(--space-3); text-transform: capitalize; }
+.glossary__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: var(--space-4); }
+.glossary__item h3 { font-size: 1rem; }
+.glossary__item p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; }
+.glossary__item.is-active { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-100, rgba(99,102,241,0.2)); }
+.glossary__item .tag { align-self: flex-start; }
+</style>
+
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-root="../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content" data-content>
+  <section class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Glosario</span>
+      </nav>
+      <p class="page-hero__eyebrow">📖 Referencia rápida</p>
+      <h1 class="page-hero__title">Glosario</h1>
+      <p class="page-hero__subtitle">Los términos de Backend que más vas a encontrar en la plataforma y en el trabajo real. Filtra por letra o por categoría y usa los enlaces <code>?t=slug</code> del buscador para saltar directo a un término.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book" aria-hidden="true"></i> Términos en español</span>
+        <span><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Agrupado por categoría</span>
+        <span><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Anclable por slug</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <section>
+      <h2 class="section-title">Explora el glosario</h2>
+      <div id="glossary-filters" class="stack"></div>
+      <div class="glossary" data-glossary></div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="./index.html">Glosario</a></li>
+          <li><a href="../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../../cursos/arquitectura/index.html">Arquitectura</a></li>
+          <li><a href="../../cursos/system-design/index.html">System Design</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/favorites.js"></script>
+<script src="../../assets/js/history.js"></script>
+<script src="../../assets/js/search.js"></script>
+<script src="../../assets/js/main.js"></script>
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function () {
+    var root = document.querySelector("[data-glossary]");
+    var filtersBox = document.getElementById("glossary-filters");
+    if (!root) return;
+
+    var hasHelpers = typeof AppHelpers !== "undefined";
+    var esc = hasHelpers && AppHelpers.escapeHtml
+      ? function (v) { return AppHelpers.escapeHtml(v); }
+      : function (v) { return String(v == null ? "" : v); };
+    var empty = function (msg) {
+      root.innerHTML = hasHelpers
+        ? AppHelpers.emptyState("book", msg || "No hay términos que mostrar.")
+        : "<p>" + esc(msg || "No hay términos que mostrar.</p>");
+    };
+
+    if (typeof window.glossary === "undefined" || !Array.isArray(window.glossary) || !window.glossary.length) {
+      empty("El glosario no está disponible por el momento.");
+      return;
+    }
+
+    var CAT_LABELS = {
+      apis: "APIs",
+      seguridad: "Seguridad",
+      backend: "Backend",
+      performance: "Performance",
+      red: "Red",
+      web: "Web",
+      basedatos: "Bases de datos",
+      formatos: "Formatos de datos",
+      arquitectura: "Arquitectura",
+      devops: "DevOps",
+      "tiempo-real": "Tiempo real"
+    };
+    function catLabel(cat) {
+      return CAT_LABELS[cat] || cat;
+    }
+
+    var state = { category: "all", letter: "all" };
+    var items = window.glossary.map(function (g) {
+      return {
+        data: g,
+        letter: String(g.term || "?").charAt(0).toUpperCase()
+      };
+    });
+
+    var letters = [];
+    var categories = [];
+    items.forEach(function (it) {
+      if (letters.indexOf(it.letter) === -1) letters.push(it.letter);
+      if (categories.indexOf(it.data.category) === -1) categories.push(it.data.category);
+    });
+    letters.sort();
+
+    function chipRow(key, label, values) {
+      var html =
+        '<div class="glossary__filters" data-filter="' + key + '">' +
+        '<span class="glossary__filter-label">' + esc(label) + "</span>" +
+        '<button type="button" class="chip-btn is-active" data-value="all">Todos</button>';
+      values.forEach(function (v) {
+        html += '<button type="button" class="chip-btn" data-value="' + esc(v) + '">' + esc(v) + "</button>";
+      });
+      return html + "</div>";
+    }
+
+    function render() {
+      var filtered = items.filter(function (it) {
+        var okCat = state.category === "all" || it.data.category === state.category;
+        var okLetter = state.letter === "all" || it.letter === state.letter;
+        return okCat && okLetter;
+      });
+
+      if (!filtered.length) {
+        empty("No hay términos que coincidan con los filtros seleccionados.");
+        return;
+      }
+
+      var groups = {};
+      filtered.forEach(function (it) {
+        (groups[it.data.category] = groups[it.data.category] || []).push(it);
+      });
+
+      var html = "";
+      Object.keys(groups).sort().forEach(function (cat) {
+        html +=
+          '<section class="glossary__group">' +
+          '<h2 class="glossary__cat-title">' + esc(catLabel(cat)) + "</h2>" +
+          '<div class="glossary__grid">';
+        groups[cat].forEach(function (it) {
+          html +=
+            '<article class="card glossary__item" data-slug="' + esc(it.data.slug) + '">' +
+            "<h3>" + esc(it.data.term) + "</h3>" +
+            "<p>" + esc(it.data.definition) + "</p>" +
+            '<span class="tag">' + esc(it.letter) + " · " + esc(catLabel(cat)) + "</span>" +
+            "</article>";
+        });
+        html += "</div></section>";
+      });
+      root.innerHTML = html;
+
+      var params = new URLSearchParams(window.location.search);
+      var target = params.get("t");
+      if (!target) return;
+      var found = null;
+      Array.prototype.forEach.call(root.querySelectorAll(".glossary__item"), function (el) {
+        if (el.getAttribute("data-slug") === target) found = el;
+      });
+      if (found) {
+        found.classList.add("is-active");
+        setTimeout(function () {
+          found.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 80);
+      }
+    }
+
+    function refreshChips() {
+      Array.prototype.forEach.call(filtersBox.querySelectorAll(".glossary__filters"), function (row) {
+        var key = row.getAttribute("data-filter") === "letter" ? "letter" : "category";
+        Array.prototype.forEach.call(row.querySelectorAll(".chip-btn"), function (btn) {
+          btn.classList.toggle("is-active", btn.getAttribute("data-value") === state[key]);
+        });
+      });
+    }
+
+    if (filtersBox) {
+      filtersBox.innerHTML =
+        chipRow("letter", "Letra inicial", letters) +
+        chipRow("category", "Categoría", categories);
+      filtersBox.addEventListener("click", function (evt) {
+        var btn = evt.target.closest(".chip-btn");
+        if (!btn) return;
+        var row = btn.parentNode;
+        var key = row.getAttribute("data-filter") === "letter" ? "letter" : "category";
+        state[key] = btn.getAttribute("data-value");
+        refreshChips();
+        render();
+      });
+    }
+
+    render();
+  });
+})();
+</script>
+</body>
+</html>

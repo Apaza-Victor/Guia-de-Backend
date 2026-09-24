@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="streaming-y-chunks">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Streaming y respuestas por chunks · Performance y Optimización · Backend Academy</title>
+<meta name="description" content="Usa streaming en las respuestas para reducir la primera latencia de byte.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="streaming-y-chunks"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Performance y Optimización</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Streaming y respuestas por chunks</span>
+        </nav>
+        <h1 class="lesson-title">Streaming y respuestas por chunks</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance y Optimización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Optimización del runtime</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>El tiempo hasta el primer byte (TTFB) importa más de lo que parece: los usuarios y las pruebas de rendimiento lo perciben como la espera real. Una respuesta gigante de 50 MB enviada como un bloque llega al cliente mucho más tarde que la misma data en flujo.</p>
+<p>El streaming envía fragmentos (chunks) tan pronto como están listos: el cliente empieza a procesar o renderizar sin esperar la cola completa. HTTP/1.1 lo permite con Transfer-Encoding: chunked.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El streaming descompone la respuesta en fragmentos enviados incrementalmente; con Server-Sent Events (SSE) el servidor empuja eventos hacia el cliente sobre una conexión abierta.</p><p><strong>Por qué importa.</strong> Mejora la percepción de latencia (primer byte temprano), reduce la memoria del servidor (no acumula el body completo) y habilita feeds y notificaciones push sin WebSocket.</p><p><strong>Cuándo usarlo.</strong> Úsalo para descargas grandes, feeds de eventos, log streaming y actualizaciones en vivo. No lo use para JSON minúsculo donde el overhead no compensa.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Transfer-Encoding: chunked envía trozos de datos o datos continuos.</li>
+<li>El primer byte llega cuando empieza la escritura, no al final.</li>
+<li>SSE (text/event-stream) empuja eventos sin renegar la conexión.</li>
+<li>Los streams de archivo evitan cargar el archivo completo en memoria.</li>
+<li>El cliente consume a medida: total bytes idénticos, percepción mucho más rápida.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una respuesta generadora hace streaming de una secuencia de eventos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from flask import Response, Flask
+import time
+app = Flask(__name__)
+@app.route(&quot;/stream&quot;)
+def stream():
+    def generador():
+        for i in range(5):
+            time.sleep(0.1)
+            yield f&quot;dato {i}\n&quot;
+    return Response(generador(), mimetype=&quot;text/plain&quot;)
+print(list(generador()))</code></pre></div>
+</figure>
+<pre><code class="language-text">['dato 0\n', 'dato 1\n', 'dato 2\n', 'dato 3\n', 'dato 4\n']</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Empujamos eventos al cliente con SSE.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Server-Sent Events con flushing por evento</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">from flask import Response
+import time
+def sse():
+    def eventos():
+        for i in range(3):
+            time.sleep(0.2)
+            yield f&quot;data: evento {i}\n\n&quot;
+    return Response(eventos(), mimetype=&quot;text/event-stream&quot;,
+        headers={&quot;Cache-Control&quot;: &quot;no-cache&quot;, &quot;X-Accel-Buffering&quot;: &quot;no&quot;})
+print(&quot;SSE listo&quot;)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una API de importación devuelve el resultado de validar cada fila en directo: el cliente ve progreso línea a línea en vez de esperar minutos por un JSON final. La percepción de latencia cayó de 3 minutos a 2 segundos.</p>
+<ul><li>Envía el estado inicial y ve alimentando los eventos.</li>
+<li>Desactiva el buffering del proxy (X-Accel-Buffering: no) o el stream no vuela.</li>
+<li>Para archivos, usa send_file con streaming para no cargarlos en RAM.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Descarga de un CSV de 1 GB sin cargarlo en memoria
+@app.route(&quot;/export&quot;)
+def export():
+    def gen():
+        with open(&quot;backup.csv&quot;, &quot;rb&quot;) as fu:
+            while chunk := fu.read(64 * 1024):
+                yield chunk
+    return Response(gen(), mimetype=&quot;text/csv&quot;)
+print(&quot;streaming de archivo activado&quot;)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los reverse proxies pueden bufferear: revisa proxy_buffering off en Nginx para SSE.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Chunked permite emitir antes de conocer la longitud final.</li>
+<li>El cliente recibe el primer fragmento en cuanto se escribe: TTFB mínimo.</li>
+<li>SSE es unidirectional y sencillo; WebSocket sirve bidireccional.</li>
+<li>Streaming de archivos reduce el pico de memoria del servidor a un buffer.</li>
+<li>Los proxies deben desactivar el buffering o el 'streaming' se vuelve un simulacro.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Proxy que bufferea sin avisar: el cliente recibe todo el final.</li>
+<li>Conteo de keep-alive o lecturas incompatibles con chunked.</li>
+<li>SSE sin cabecera text/event-stream: el navegador lo trata como binario.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Usa Response con generador y el framework hace chunked solo.</li>
+<li>Para SSE, desactiva compression y buffering en la capa de proxy.</li>
+<li>Prueba el TTFB con curl -N contra la respuesta stream.</li>
+<li>Elimina los flush del framework si el buffer era el simulacro.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea un endpoint que streamit 10 líneas con 0,1s y mide el TTFB con curl -N.</li>
+<li>Implementa SSE y conecta un <script> EventSource del navegador.</li>
+<li>Descarga un archivo grande en chunks y vigila la memoria del worker.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El streaming manda el primer byte temprano y el cliente percibe menos espera.</li>
+<li>SSE empuja eventos sin renegar la conexión, ideal para feeds.</li>
+<li>Desactiva el buffering del proxy para que el flujo sea real.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../aprender/index.html">Aprender</a></li>
+          <li><a href="../../../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../recursos/index.html">Recursos</a></li>
+          <li><a href="../../../glosario/index.html">Glosario</a></li>
+          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../../../cursos/performance/modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../../../cursos/performance/modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../../../cursos/performance/modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+          <li><a href="../../../cursos/performance/modulo-04/index.html">Módulo 4 · Caching y CDN</a></li>
+          <li><a href="../../../cursos/performance/modulo-05/index.html">Módulo 5 · Optimización del runtime</a></li>
+          <li><a href="../../../cursos/performance/modulo-06/index.html">Módulo 6 · Nginx y redes</a></li>
+          <li><a href="../../../cursos/performance/modulo-07/index.html">Módulo 7 · Profiling y monitoreo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../acerca/index.html">Acerca de</a>
+        <a href="../../../favoritos/index.html">Favoritos</a>
+        <a href="../../../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

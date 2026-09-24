@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Módulo 1 · Fundamentos de patrones · Patrones de Diseño · Backend Academy</title>
-<meta name="description" content="Qué es un patrón de diseño, el catálogo de GoF, la diferencia entre patrones, principios y arquitectura, y cómo memorizarlos con cabeza.">
+<meta name="description" content="Define qué es un patrón de diseño, recorre el catálogo GOF y aprende a estudiarlos por contexto, problema y solución antes que por su diagrama de clases.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,72 +54,83 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-    <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../index.html">Patrones de Diseño</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
-  </nav>
-    <p class="page-hero__eyebrow">🔥 Avanzado</p>
-    <h1 class="page-hero__title">Módulo 1 · Fundamentos de patrones</h1>
-    <p class="page-hero__subtitle">La base antes de la receta: qué es un patrón, de dónde sale el catálogo, y por qué son una herramienta, no una religión.</p>
-    <div class="page-hero__meta">
-      <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 4 lecciones</span>
-      <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ~35 min</span>
-    </div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Patrones de Diseño</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
+      </nav>
+      <p class="page-hero__eyebrow">🔥 Avanzado</p>
+      <h1 class="page-hero__title">Módulo 1 · Fundamentos de patrones</h1>
+      <p class="page-hero__subtitle">Los patrones no se memorizan: se reconocen en contexto.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 4 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 35 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel avanzado</span>
+      </div>
     </div>
   </section>
   <div class="container">
-    <div class="progress" data-progress="patrones">
-    <div class="progress__bar"><div class="progress__fill"></div></div>
-    <span class="progress__label">Progreso del curso</span>
-  </div>
-  <section class="route-section">
-    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
-    <ul class="route-goals">
-      <li>Entender qué es un patrón de diseño y en qué se diferencia de un principio.</li>
-      <li>Conocer el catálogo GoF y su clasificación (creacionales, estructurales, comportamiento).</li>
-      <li>Distinguir patrones, principios y decisiones de arquitectura.</li>
-      <li>Aprender a memorizar e identificar patrones de forma práctica.</li>
-    </ul>
-  </section>
-  <section class="route-section">
-    <h2 class="route-section__title">Lecciones</h2>
-    <div class="grid-2">
-      <a class="card card--lesson card--link" href="que-es-un-patron.html">
-        <h3>¿Qué es un patrón?</h3>
-        <p>El problema recurrente y su solución probada</p>
-      </a>
-      <a class="card card--lesson card--link" href="catalogo-gof.html">
-        <h3>El catálogo GOF</h3>
-        <p>23 patrones en 3 familias</p>
-      </a>
-      <a class="card card--lesson card--link" href="patrones-principios-arquitectura.html">
-        <h3>Patrones, principios y arquitectura</h3>
-        <p>Tres niveles, no tres sinónimos</p>
-      </a>
-      <a class="card card--lesson card--link" href="patrones-con-cabeza.html">
-        <h3>Aprender patrones con cabeza</h3>
-        <p>Cómo usarlos, no cómo coleccionarlos</p>
-      </a>
-    </div>
-  </section>
-  <div class="lesson-prevnext">
-    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../index.html">
-      <span class="lesson-prevnext__tag">Anterior</span><strong>Inicio del curso</strong>
-    </a>
-    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-02/index.html">
-      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 2 · Patrones creacionales</strong>
-    </a>
-  </div>
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es un patrón y cuál es su anatomía</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Recorrer el catálogo GOF y sus tres familias</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Relacionar patrones, principios SOLID y arquitectura</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Adoptar una estrategia real para aprender patrones</span></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>4 lecciones · ~35 min · Qué es un patrón, su anatomía y el catálogo GOF..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./catalogo-gof.html">
+            <h3>1 · El catálogo GOF</h3>
+            <p>Los 23 patrones del libro de la Gang of Four organizados en creacionales, estructurales y de comportamiento.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./patrones-con-cabeza.html">
+            <h3>2 · Aprender patrones con cabeza</h3>
+            <p>Estrategias para interiorizar patrones: contexto, problema y solución en vez de memorizar diagramas.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./patrones-principios-arquitectura.html">
+            <h3>3 · Patrones, principios y arquitectura</h3>
+            <p>Cómo se conectan los patrones GoF, los principios SOLID y las decisiones de arquitectura de un backend.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-es-un-patron.html">
+            <h3>4 · ¿Qué es un patrón?</h3>
+            <p>Definición de patrón de diseño, su anatomía y por qué reutilizamos soluciones probadas.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../index.html"><span class="label">← Curso</span><span class="title">Patrones de Diseño</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 2 · Patrones creacionales</span></a>
+    </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -125,42 +142,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Creacionales</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · Estructurales</a></li>
-          <li><a href="../modulo-04/index.html">Módulo 4 · Comportamiento</a></li>
-          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
-          <li><a href="../modulo-06/index.html">Módulo 6 · Modernos</a></li>
+          <li><a href="./index.html">Módulo 1 · Fundamentos de patrones</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Patrones de backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Patrones modernos</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Patrones emergentes y arquitectura moderna</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

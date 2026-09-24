@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 1 · Fundamentos de integración · Integraciones y Servicios Externos</title>
-<meta name="description" content="Módulo 1 del curso Integraciones y Servicios Externos: qué son las integraciones, los patrones de integración, webhooks firmados, SDKs y clientes HTTP, y gestión de APIs externas.">
+<title>Módulo 1 · Fundamentos de integración · Integración y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Comprende qué es una integración, gestiona APIs externas como producto, aplica patrones de integración, elige entre SDKs, clientes HTTP y webhooks y entra en contacto con el mundo real de los servicios de terceros.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body data-sidebar="course" data-course="integraciones" data-module="01" data-root="../../../">
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Integraciones y Servicios Externos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 1 · Fundamentos de integración</span>
-    </nav>
-    <p class="page-hero__eyebrow">⚙️ Intermedio</p>
-    <h1 class="page-hero__title">Módulo 1 · Fundamentos de integración</h1>
-    <p class="page-hero__subtitle">Antes de mandar la primera petición HTTP a un servicio de terceros hay que entender qué significa integrar: contratos, patrones, la diferencia entre preguntar y escuchar, y cómo gestionar las reglas que impone cada proveedor.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Integración y servicios externos</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Integración y Servicios Externos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
+      </nav>
+      <p class="page-hero__eyebrow">⚙️ Intermedio</p>
+      <h1 class="page-hero__title">Módulo 1 · Fundamentos de integración</h1>
+      <p class="page-hero__subtitle">Tu backend conversa con sistemas que no controlas: aprende a hacerlo con criterio.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel intermedio</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,63 +82,62 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir qué es una integración y clasificar sus tipos según el valor que aporta al negocio.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar los patrones de integración clásicos: adaptadores, mappers y orquestación.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Diferenciar webhooks de polling y verificar firmas de eventos.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Usar SDKs y clientes HTTP de forma responsable, envolviendo a terceros.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Gestionar rate limits, cuotas y cambios de contrato de las APIs externas.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="integraciones">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="que-son-las-integraciones.html">
-          <h3>1 · ¿Qué son las integraciones?</h3>
-            <p>Definición, tipos de integración y el valor de negocio de conectar sistemas.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">concepto</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="patrones-de-integracion.html">
-          <h3>2 · Patrones de integración</h3>
-            <p>Enterprise Integration Patterns: adaptadores, mappers y orquestación de flujos.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">patrón</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="webhooks.html">
-          <h3>3 · Webhooks</h3>
-            <p>Que el proveedor te avise: firma HMAC, reintentos, idempotencia y vs polling.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">eventos</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="sdk-y-clientes.html">
-          <h3>4 · SDKs y clientes HTTP</h3>
-            <p>Cuándo usar el SDK oficial, cuándo el cliente HTTP plano y cómo envolver a terceros.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">cliente</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="gestion-de-apis-externas.html">
-          <h3>5 · Gestión de APIs externas</h3>
-            <p>Rate limits, cuotas, versionado y cómo sobrevivir a los cambios de contrato.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">contrato</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Definir qué es una integración y cuándo existe</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Gestionar las APIs externas como un producto más</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar los patrones de integración clásicos</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Elegir entre SDKs, clientes HTTP o webhooks según el caso</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Reconocer el ciclo de vida completo de una integración</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~48 min · Las piezas y patrones que necesitas antes de llamar a un servicio de terceros..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./gestion-de-apis-externas.html">
+            <h3>1 · Gestión de APIs externas</h3>
+            <p>Cada API externa es una pieza que hay que inventariar, versionar y vigilar como un servicio propio.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./patrones-de-integracion.html">
+            <h3>2 · Patrones de integración</h3>
+            <p>Los patrones que resuelven el mismo problema una y otra vez: colas, puertas de entrada y adaptadores.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">patrones</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-son-las-integraciones.html">
+            <h3>3 · ¿Qué son las integraciones?</h3>
+            <p>Conectar tu sistema con servicios ajenos: pagos, correo, mapas o cualquier API externa.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./sdk-y-clientes.html">
+            <h3>4 · SDKs y clientes HTTP</h3>
+            <p>SDK oficial o cliente propio: qué esconden y cuándo merecen más de lo que parecen.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">clientes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./webhooks.html">
+            <h3>5 · Webhooks</h3>
+            <p>El tercero te avisa en vez de preguntar: la inversión del modelo request-response.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">webhooks</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../index.html">
-        <span class="label">← Curso</span>
-        <span class="title">Integraciones y Servicios Externos</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">Integraciones prácticas</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../index.html"><span class="label">← Curso</span><span class="title">Integración y Servicios Externos</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 2 · Integraciones prácticas</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -141,39 +149,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="./index.html">Módulo 1 · Fundamentos de integración</a></li>
           <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
           <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Integraciones con SaaS</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Webhooks y eventos</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad en integraciones</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y mantenimiento</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>
@@ -183,9 +196,6 @@
 <script src="../../../assets/js/sidebar.js"></script>
 <script src="../../../assets/js/toc.js"></script>
 <script src="../../../assets/js/code.js"></script>
-<script src="../../../assets/js/favorites.js"></script>
-<script src="../../../assets/js/history.js"></script>
-<script src="../../../assets/js/search.js"></script>
 <script src="../../../assets/js/main.js"></script>
 </body>
 </html>

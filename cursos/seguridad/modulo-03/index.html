@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 3 · XSS y CSRF · Seguridad en el Backend</title>
-<meta name="description" content="Módulo 3 del curso de Seguridad en el Backend: tipos de XSS, sanitización y escaping, CSRF, tokens CSRF y cookies SameSite, y security headers con CSP.">
+<title>Módulo 3 · XSS y CSRF · Seguridad Backend · Backend Academy</title>
+<meta name="description" content="Los dos ataques que siguen envenenando el navegador del usuario: inyección de scripts en tu página y peticiones disfrazadas. Aprende a bloquearlos con escaping, tokens y cabeceras.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Seguridad en el Backend</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 3 · XSS y CSRF</span>
-    </nav>
-    <p class="page-hero__eyebrow">🔥 Avanzado</p>
-    <h1 class="page-hero__title">Módulo 3 · XSS y CSRF</h1>
-    <p class="page-hero__subtitle">Los dos ataques que siguen envenenando el navegador del usuario: inyección de scripts en tu página y peticiones disfrazadas. Aprende a bloquearlos con escaping, tokens y cabeceras.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 52 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Módulo 2</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Seguridad Backend</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 3</span>
+      </nav>
+      <p class="page-hero__eyebrow">🔥 Avanzado</p>
+      <h1 class="page-hero__title">Módulo 3 · XSS y CSRF</h1>
+      <p class="page-hero__subtitle">Los dos ataques que siguen envenenando el navegador del usuario: inyección de scripts en tu página y peticiones disfrazadas. Aprende a bloquearlos con escaping, tokens y cabeceras.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 52 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel avanzado</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -80,56 +89,55 @@
           <div class="objective"><span class="objective__icon">✔</span><span>Endurecer con headers: CSP, X-Frame-Options.</span></div>
         </div>
       </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="seguridad">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="tipos-de-xss.html">
-          <h3>1 · Tipos de XSS</h3>
+    </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~52 min · Los dos ataques que siguen envenenando el navegador del usuario: inyección de scripts en tu página y peticiones disfrazadas. Aprende a bloquearlos con escaping, tokens y cabeceras..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./tipos-de-xss.html">
+            <h3>1 · Tipos de XSS</h3>
             <p>Reflejado, almacenado y DOM: dónde vive cada uno.</p>
             <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">xss</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </a>
-          <a class="card card--lesson card--link" href="sanitizacion-y-escaping.html">
-          <h3>2 · Sanitización y escaping</h3>
+          <a class="card card--lesson card--link" href="./sanitizacion-y-escaping.html">
+            <h3>2 · Sanitización y escaping</h3>
             <p>Limpia en el borde y escapa en la salida para cada contexto.</p>
             <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">xss</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </a>
-          <a class="card card--lesson card--link" href="que-es-csrf.html">
-          <h3>3 · ¿Qué es CSRF?</h3>
+          <a class="card card--lesson card--link" href="./que-es-csrf.html">
+            <h3>3 · ¿Qué es CSRF?</h3>
             <p>Una petición que viaja con la identidad del usuario sin su permiso.</p>
             <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">csrf</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </a>
-          <a class="card card--lesson card--link" href="tokens-csrf-y-cookies-samesite.html">
-          <h3>4 · Tokens CSRF y cookies SameSite</h3>
+          <a class="card card--lesson card--link" href="./tokens-csrf-y-cookies-samesite.html">
+            <h3>4 · Tokens CSRF y cookies SameSite</h3>
             <p>La doble barrera: token por formulario y la cookie bien marcada.</p>
             <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">csrf</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </a>
-          <a class="card card--lesson card--link" href="security-headers-csp.html">
-          <h3>5 · Security headers y CSP</h3>
+          <a class="card card--lesson card--link" href="./security-headers-csp.html">
+            <h3>5 · Security headers y CSP</h3>
             <p>Cabeceras que cortan el XSS en la puerta: CSP, referrer, frames.</p>
             <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">headers</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </a>
-        </div>
-      </section>
+      </div>
     </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-02/index.html">
-        <span class="label">← Módulo anterior</span>
-        <span class="title">Inyecciones</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">Criptografía</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-02/index.html"><span class="label">← Anterior</span><span class="title">Módulo 2 · Inyecciones</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 4 · Criptografía</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -141,18 +149,18 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
@@ -160,7 +168,7 @@
         <ul>
           <li><a href="../modulo-01/index.html">Módulo 1 · Modelo de Amenazas</a></li>
           <li><a href="../modulo-02/index.html">Módulo 2 · Inyecciones</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · XSS y CSRF</a></li>
+          <li><a href="./index.html">Módulo 3 · XSS y CSRF</a></li>
           <li><a href="../modulo-04/index.html">Módulo 4 · Criptografía</a></li>
           <li><a href="../modulo-05/index.html">Módulo 5 · Seguridad de APIs</a></li>
           <li><a href="../modulo-06/index.html">Módulo 6 · Hardening</a></li>
@@ -171,13 +179,14 @@
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

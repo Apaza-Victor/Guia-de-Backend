@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo 4 · Métricas y servidores de métricas · Observabilidad · Backend Academy</title>
+<meta name="description" content="Perfecciona tus métricas: qué vigilar en un backend, tipos de métricas y su semántica, recolección y scraping a escala, los enfoques RED/USE y cómo instrumentar la aplicación con client libraries.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+  <section class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Observabilidad</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 4</span>
+      </nav>
+      <p class="page-hero__eyebrow">🔥 Avanzado</p>
+      <h1 class="page-hero__title">Módulo 4 · Métricas y servidores de métricas</h1>
+      <p class="page-hero__subtitle">Números que no mienten: la métrica correcta convierte la intuición en dato.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 64 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel avanzado</span>
+      </div>
+    </div>
+  </section>
+  <div class="container">
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Seleccionar las métricas esenciales de un backend</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Distinguir contadores, gauges, histogramas y resúmenes</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Configurar scraping y agregación a escala</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar las métricas doradas y los enfoques RED y USE</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Instrumentar tu aplicación con client libraries</span></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~64 min · El lenguaje cuantitativo del sistema: qué medir, cómo y con qué servirlo..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./que-metricas-vigilar.html">
+            <h3>1 · Qué métricas vigilar en tu backend</h3>
+            <p>Latencia, tráfico, errores y saturación: el mínimo que todo backend necesita.</p>
+            <div class="card__meta"><span class="tag">13 min</span><span class="tag tag--cat">métricas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./tipos-de-metricas.html">
+            <h3>2 · Tipos de métricas: contadores, gauges e histogramas</h3>
+            <p>Cada tipo cuenta y agrega distinto: elegir bien es mitad del trabajo.</p>
+            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">métricas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./recoleccion-y-agregacion.html">
+            <h3>3 · Recolección, scraping y agregación</h3>
+            <p>Cómo el servidor de métricas recoge las series y las agrega a gran escala.</p>
+            <div class="card__meta"><span class="tag">13 min</span><span class="tag tag--cat">métricas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./metricas-doradas-red-use.html">
+            <h3>4 · Las métricas doradas y los enfoques RED y USE</h3>
+            <p>Cuatro preguntas que todo sistema debe saber responder en un incidente.</p>
+            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">estrategia</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./instrumentacion-de-aplicaciones.html">
+            <h3>5 · Instrumentando tu aplicación con client libraries</h3>
+            <p>Cada endpoint, cada dependencia, cada operación: métricas desde el código.</p>
+            <div class="card__meta"><span class="tag">14 min</span><span class="tag tag--cat">métricas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../modulo-03/index.html"><span class="label">← Anterior</span><span class="title">Módulo 3 · Alertas y dashboards</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-05/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 5 · Trazas y distributed tracing</span></a>
+    </nav>
+  </div>
+</main>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+          <li><a href="./index.html">Módulo 4 · Métricas y servidores de métricas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Trazas y distributed tracing</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Alertas y SLOs</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

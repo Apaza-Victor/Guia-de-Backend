@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="comparativa-rabbitmq-kafka-pulsar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RabbitMQ vs Kafka vs Pulsar · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Compara RabbitMQ, Kafka y Pulsar para elegir el broker según tu caso de uso.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="comparativa-rabbitmq-kafka-pulsar"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">RabbitMQ vs Kafka vs Pulsar</span>
+        </nav>
+        <h1 class="lesson-title">RabbitMQ vs Kafka vs Pulsar</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Brokers y proveedores</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Hay tres brokers que dominan el panorama y se parecen menos de lo que parece. RabbitMQ es un gestor de colas clásico con routing flexible y latencia baja; Kafka es un log distribuido pensado para streaming con retención y replay; Pulsar separa computación y almacenamiento para escalar de otra manera.</p>
+<p>Elegir mal condiciona la operación durante años. En esta lección comparamos los tres por latencia, modelo de datos, retención, orden, escalado y coste operativo, con criterios accionables.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>RabbitMQ optimiza el routing de mensajes entre colas y exchanges; Kafka persiste el stream de eventos en un log con retención configurable; Pulsar separa brokers y almacenamiento y soporta tanto colas como streaming.</p><p><strong>Por qué importa.</strong> Cada broker asume un modelo mental diferente (cola inteligente vs log vs cola+stream) que decide latencia, orden y retrospectiva, y rehacer ese cambio en producción es carísimo.</p><p><strong>Cuándo usarlo.</strong> Elige RabbitMQ para workflows y routing complejo, Kafka para eventos históricos y reprocesado, y Pulsar cuando necesites ambos modelos con un solo cluster y operación gestionada.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Latencia: RabbitMQ ronda milisegundos; Kafka y Pulsar también, con compromisos según acks.</li>
+<li>Retención: Kafka y Pulsar conservan el log días o semanas; RabbitMQ elimina al entregar.</li>
+<li>Orden: por partición en Kafka y Pulsar; por cola en RabbitMQ.</li>
+<li>Replay: Kafka y Pulsar permiten volver a consumir el pasado; RabbitMQ no.</li>
+<li>Multitenancy: Pulsar separa namespaces y multi-topic desde el diseño; Kafka añade lógica extra.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Seleccionemos con criterio de throughput (mensajes por segundo) y latencia objetivo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Criterios de decisión resumidos
+latencia:    RabbitMQ (ms) | Kafka (~10ms) | Pulsar (~10ms)
+throughput:  Kafka, Pulsar &gt; RabbitMQ (por broker)
+retencion:   Pulsar/Kafka: si   | RabbitMQ: no
+routing:     RabbitMQ (exchanges) &gt; resto
+operacion:   Pulsar y brokers gestionados simplifican el cluster</code></pre></div>
+</figure>
+<pre><code class="language-text">Para un pago con latencia crítica y routing complejo gana RabbitMQ; para analítica y replay gana Kafka.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El mismo escenario en los tres: producir y consumir un evento 'pedido.creado' expresado como código conceptual.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Mismo evento, tres brokers</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># RabbitMQ (cola + ack)
+ch.basic_publish(exchange='pedidos', routing_key='creado',
+                  body='P-1024', mandatory=True)
+
+# Kafka (topic + particion por clave)
+producer.send('pedidos', key='P-1024'.encode(), value=b'{total: 89.5}')
+
+# Pulsar (topic con subscription)
+producer.send(('persistent://app/pedidos/creado', 
+               b'{total: 89.5}', 'P-1024'))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una plataforma de streaming eligió Kafka para el ingesta de eventos (retrospectiva y reprocesado) y RabbitMQ para las notificaciones transaccionales (routing y latencia). Hoy conviven y cada broker hace lo que mejor se le da, comunicados por un traductor de eventos.</p>
+<ul><li>Divide el terreno: eventos de dominio van al log, comandos operativos van a la cola.</li>
+<li>Mide latencia con y sin acks para no pagar fiabilidad que no necesitas.</li>
+<li>Documenta la decisión y los trade-offs: servirá para el próximo proyecto.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">router:
+  kafka:      { eventos, audit, reprocesado }
+  rabbitmq:   { comandos, notificaciones, dlq }
+  traduccion: bridge.eventos-a-comandos</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El producto no tiene un solo broker 'correcto': tiene un conjunto de necesidades y un broker que las cubre mejor.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>RabbitMQ entrega y olvida: su log es efímero, pensado para colas vivas.</li>
+<li>Kafka brilla por su throughput y su capacidad de replay sobre particiones.</li>
+<li>Pulsar separa el plano de datos del almacenamiento y escala de forma más elástica.</li>
+<li>La latencia depende del modo de acuse: acks=all encarece, pero protege.</li>
+<li>La operación pesa tanto como la tecnología: brokers gestionados ahorran noches enteras.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Elegir Kafka 'porque mola' y usarlo como una cola simple sin retención.</li>
+<li>Elegir RabbitMQ para ingestión masiva con replay histórico.</li>
+<li>Ignorar el coste operativo del clúster al hacer la comparativa.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Haz un benchmark con tu propia carga: latencia, tamaño de mensaje y número de particiones.</li>
+<li>Empieza con el broker más simple que cubra tu caso: la migración después es el impuesto.</li>
+<li>Prueba los dos modelos (cola y log) con el mismo escenario antes de decidir.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Compara tus casos de uso actuales y clasifícalos en cola o stream.</li>
+<li>Diseña un benchmark con 3 escenarios: latencia, throughput y retención.</li>
+<li>Escribe el trade-off de tu decisión en un ADR de arquitectura.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>RabbitMQ es la cola con routing; Kafka es el log con replay; Pulsar combina ambos con almacenamiento separado.</li>
+<li>Latencia, retención, orden y operación deciden el broker, no la fama.</li>
+<li>Brokers distintos pueden convivir en un sistema si cada uno cubre su terreno.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="./index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

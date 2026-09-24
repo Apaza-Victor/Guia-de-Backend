@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="pipelines-y-redirecciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipelines y redirecciones · Linux y Terminal para Backend · Backend Academy</title>
+<meta name="description" content="Componer pipelines y redirecciones en la terminal.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="linux" data-current="pipelines-y-redirecciones"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Linux y Terminal para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Pipelines y redirecciones</span>
+        </nav>
+        <h1 class="lesson-title">Pipelines y redirecciones</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Linux y Terminal para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Scripting y automatización</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La potencia de la terminal no está en un comando aislado: está en encadenarlos. La salida de uno se convierte en la entrada del siguiente, y así arrancas búsquedas, filtros y cuentas en una sola línea.</p>
+<p>Los pipelines (|), las redirecciones (>) y el stderr son los cimientos de esa composición.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un pipeline une con |: la salida de un comando es la entrada del siguiente. Las redirecciones (>, <, 2>, 2>&1) deciden dónde van la salida estándar y la de errores.</p><p><strong>Por qué importa.</strong> Tareas complejas (buscar en logs, contar ocurrencias, extraer campos) se resuelven combinando utilidades simples en vez de programas personalizados.</p><p><strong>Cuándo usarlo.</strong> Usa pipelines para filtrar procesos (ps|grep), procesar logs (tail|grep|awk) y redirigir resultados a archivos en cualquier script.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>cmd1 | cmd2 alimenta la salida de cmd1 a cmd2.</li>
+<li>grep filtra líneas que coinciden.</li>
+<li>tail -f + grep vigilan un log en vivo.</li>
+<li>awk y sed extraen columnas y editan texto.</li>
+<li>2>&1 fusiona error y salida; > redirige al archivo.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Encontrar y contar líneas de error en un log.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">tail -200 /var/log/nginx/error.log | grep -i 'PHP' 
+grep -c 'ERROR' /var/log/app.log</code></pre></div>
+</figure>
+<pre><code class="language-text">Solo las líneas con error relevantes y el recuento total.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Extraer la columna relevante y ordenarla.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Extraer con awk y ordenar</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">ss -tlnp | awk '{print $4}' | grep 3000
+
+ps aux --sort=-%cpu | awk 'NR&gt;1{print $11}' | head -5</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Monitorizar en vivo con tail -f y grep, y guardar resultados.</p>
+<ul><li>tail -f + grep filtra sin perder el resto del log.</li>
+<li>Redirige a un archivo cuando quieras persistir el resultado.</li>
+<li>2>&1 evita ignorar errores en scripts.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Vigilar errores en vivo
+tail -f /var/log/nginx/access.log | grep ' 500 '
+
+# Generar un resumen y guardarlo
+grep 'ERROR' /var/log/app.log | sort | uniq -c | sort -rn &gt; /tmp/resumen.txt
+cat /tmp/resumen.txt</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El pipeline con sort | uniq -c | sort -rn cuenta y ordena las incidencias: la herramienta estándar del análisis de logs.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>| encadena producción y consumo entre procesos.</li>
+<li>grep -i ignora mayúsculas; grep -c cuenta.</li>
+<li>awk extrae columnas de líneas estructuradas.</li>
+<li>2>&1 mezcla los flujos de salida.</li>
+<li>sort|uniq -c convierte repeticiones en estadísticas.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Olvidar 2>&1 y no ver errores al redirigir a un archivo.</li>
+<li>Pipelines con grep que se quedan vacíos por patrones mal escritos.</li>
+<li>Usar cat | grep cuando grep acepta el archivo directamente.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Construye el pipeline de a uno: primero una parte, luego añade.</li>
+<li>Uniq funciona sobre líneas consecutivas: ordénalo antes.</li>
+<li>Para logs, tail -f + grep es tu combo de vigilancia.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Filtra procesos con ps | grep e identifica tu app.</li>
+<li>Cuenta errores diarios con grep -c.</li>
+<li>Genera un ranking de incidencias con sort | uniq -c.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El pipeline encadena herramientas simples en tareas complejas.</li>
+<li>2>&1 y > controlan dónde van salida y errores.</li>
+<li>tail -f + grep es el combo del monitor diario.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Linux</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Navegación y archivos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Usuarios, permisos y procesos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Almacenamiento y archivos del sistema</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Redes y servicios</a></li>
+          <li><a href="./index.html">Módulo 6 · Scripting y automatización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Producción y troubleshooting</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

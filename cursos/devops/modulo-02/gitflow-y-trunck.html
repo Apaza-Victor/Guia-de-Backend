@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="gitflow-y-trunck">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitFlow y trunk-based · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Compara GitFlow y trunk-based y elige la estrategia de ramas correcta para tu equipo.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="gitflow-y-trunck"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">DevOps para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">GitFlow y trunk-based</span>
+        </nav>
+        <h1 class="lesson-title">GitFlow y trunk-based</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de versiones para operaciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La forma en la que organizas las ramas define cuánta fricción hay en tus entregas. GitFlow y trunk-based representan dos filosofías muy distintas de integración.</p>
+<p>Elegir bien no es una cuestión de moda: depende del tamaño del equipo, de la frecuencia de releases y de la madurez de tu pipeline de CI/CD.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>GitFlow organiza las ramas en ejes paralelos (develop, feature, release y main) pensados para ciclos de release largos. El trunk-based, en cambio, integra todo el trabajo directamente sobre una rama principal corta y despliega desde ella varias veces al día.</p><p><strong>Por qué importa.</strong> Porque la topología de ramas determina la velocidad de integración y la facilidad para hacer rollback. Un equipo que quiere CI/CD acelerada suele chocar con el overhead de GitFlow.</p><p><strong>Cuándo usarlo.</strong> Usa GitFlow cuando publiques versiones separadas con soporte largo. Usa trunk-based cuando quieras múltiples despliegues diarios con main siempre verde.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>GitFlow: main, develop, feature/, release/ y hotfix/ con papeles fijos.</li>
+<li>Trunk-based: una sola rama principal con ramas de tarea muy cortas.</li>
+<li>Feature flags: permiten integrar a main código inacabado sin exponerlo.</li>
+<li>Main siempre verde: condición indispensable antes de cualquier merge en trunk-based.</li>
+<li>Hotfix: rama corta para corregir producción con la máxima urgencia.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>En GitFlow la rutina es previsible: las funcionalidades nacen de develop y terminan de nuevo en develop, mientras que main solo recibe releases y hotfixes.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">git checkout -b feature/reporte-pagos develop
+git commit -m &quot;feat: agrega reporte de pagos&quot;
+git checkout develop
+git merge feature/reporte-pagos
+git checkout -b release/v1.2.0 develop
+git checkout main
+git merge release/v1.2.0
+git tag v1.2.0 -m &quot;Release 1.2.0&quot;</code></pre></div>
+</figure>
+<pre><code class="language-text">develop → feature → develop → release/v1.2.0 → main (tag v1.2.0)</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>En trunk-based la regla es simple: la rama de tarea dura horas o días, y el merge a main dispara la construcción y el despliegue de forma automática.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Rama de tarea corta en trunk-based</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">git checkout -b feat/ab-testing main
+git commit -m &quot;feat: agrega experimental al feature flag&quot;
+git push origin feat/ab-testing
+# CI corre: lint, tests y build sobre la rama
+git checkout main
+git pull origin main
+git merge feat/ab-testing
+git push origin main</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un pipeline de GitHub Actions puede aplicar la política por rama: sobre pull requests corre la verificación y sobre main corre además el despliegue a staging y producción.</p>
+<ul><li>Las pull requests solo entran si main sigue verde.</li>
+<li>Detectar fusiones huérfanas con checks obligatorios.</li>
+<li>Feature flags para liberar al usuario decidido por el equipo.</li>
+<li>Rama main como única fuente de verdad para producción.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">ejemplo.yaml</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Con protections sobre main (revisión obligatoria y checks requeridos) la rama principal nunca queda rota.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>GitFlow brilla en proyectos con fechas de release claras y versiones mantenidas en paralelo.</li>
+<li>Trunk-based elimina la fase de integración tardía: el conflicto se descubre en minutos, no al final del sprint.</li>
+<li>El hotfix de GitFlow es una deuda cultural: con trunk-based, el arreglo es una rama corta igual que cualquier otra.</li>
+<li>Un equipo que despliega varias veces al día necesita main estable; GitFlow añade pasos de merge que lo complican.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Aplicar GitFlow con releases diarias: el overhead de release branches se convierte en fricción.</li>
+<li>Trunk-based sin tests ni feature flags: cada merge es una apuesta a ciegas.</li>
+<li>Ramas que duran semanas: son un monolito escondido que nadie ve.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Elige un solo modelo y documentarlo; mezclarlos a medias genera casi siempre caos.</li>
+<li>En trunk-based integra en tandas pequeñas, idealmente cada día.</li>
+<li>Usa branch protection en main para exigir revisión y CI verde.</li>
+<li>Empieza con trunk-based si despliegas varias veces por semana.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Dibuja el flujo de ramas de tu equipo, marca las fricciones y propón el modelo que las resolvería.</li>
+<li>Configura una regla de protección sobre main que exija al menos una revisión y el estado de CI.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>GitFlow separa ejes de trabajo para ciclos de release largos.</li>
+<li>El trunk-based integra todo en una rama principal siempre verde.</li>
+<li>La elección depende de la frecuencia de releases y de tu madurez CI/CD.</li>
+<li>Los feature flags y el branch protection viabilizan el trunk-based moderno.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a DevOps</a></li>
+          <li><a href="./index.html">Módulo 2 · Control de versiones para operaciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Contenedores y automatización</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo (CD)</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en el Backend</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad y cultura DevOps</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

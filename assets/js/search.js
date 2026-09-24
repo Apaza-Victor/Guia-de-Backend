@@ -94,7 +94,7 @@ const AppSearch = (() => {
       items.push({
         kind: "glosario",
         title: g.term,
-        path: g.slug ? "glosario/index.html?t=" + encodeURIComponent(g.slug) : "glosario/index.html",
+        path: g.slug ? "secciones/glosario/index.html?t=" + encodeURIComponent(g.slug) : "secciones/glosario/index.html",
         tags: [g.category || "glosario"],
         emoji: "book",
         description: g.definition || g.description || "",

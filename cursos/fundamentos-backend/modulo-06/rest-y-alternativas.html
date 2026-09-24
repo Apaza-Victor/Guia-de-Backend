@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="rest-y-alternativas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REST y sus alternativas: GraphQL y gRPC · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="Compara REST, GraphQL y gRPC y elige el estilo de API adecuado.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="fundamentos-backend" data-current="rest-y-alternativas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Fundamentos de Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">REST y sus alternativas: GraphQL y gRPC</span>
+        </nav>
+        <h1 class="lesson-title">REST y sus alternativas: GraphQL y gRPC</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Fundamentos de Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · APIs y HTTP en la práctica</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>REST domina el ecosistema, pero no es la única respuesta. Cuando los clientes piden datos muy variados o el volumen interno es enorme, aparecen GraphQL y gRPC.</p>
+<p>Elegir bien el estilo de API depende del contexto: aquí verás qué resuelve cada uno y cuándo aplicarlo.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>REST organiza recursos con URLs y métodos HTTP; GraphQL deja que el cliente pida exactamente los campos que necesita mediante un solo endpoint; gRPC llama a métodos remotos con contratos binarios muy eficientes.</p><p><strong>Por qué importa.</strong> El transporte define la experiencia de tus clientes: elegir el protocolo adecuado reduce tiempo de carga, tráfico de red y complejidad de mantenimiento.</p><p><strong>Cuándo usarlo.</strong> REST para APIs públicas e integraciones simples; GraphQL cuando hay muchos clientes con necesidades distintas; gRPC para comunicación interna entre microservicios con alto rendimiento.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>REST: recursos, verbos HTTP y JSON; simple y universal.</li>
+<li>GraphQL: un único endpoint /graphql y el cliente elige su esquema.</li>
+<li>gRPC: define métodos en un .proto y usa HTTP/2 con mensajes binarios.</li>
+<li>El overfetching de REST frente al control fino de GraphQL.</li>
+<li>gRPC sobresale en latencia baja y streaming entre servicios.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un resumen ejecutable para comparar los tres estilos de una vez.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">estilos = {
+    &quot;REST&quot;: &quot;recursos + metodos HTTP + JSON (API publica)&quot;,
+    &quot;GraphQL&quot;: &quot;un endpoint, el cliente elige campos&quot;,
+    &quot;gRPC&quot;: &quot;metodos remotos binarios sobre HTTP/2 (interno)&quot;,
+}
+
+for estilo, desc in estilos.items():
+    print(f&quot;{estilo:9} -&gt; {desc}&quot;)</code></pre></div>
+</figure>
+<pre><code class="language-text">REST      -&gt; recursos + metodos HTTP + JSON (API publica)
+GraphQL   -&gt; un endpoint, el cliente elige campos
+gRPC      -&gt; metodos remotos binarios sobre HTTP/2 (interno)</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>GraphQL resuelve el overfetching: cada cliente pide solo lo que necesita en una sola petición.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Consulta GraphQL con selección de campos</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">query PedidoCompleto($id: ID!) {
+  pedido(id: $id) {
+    id
+    total
+    cliente { nombre email }
+    articulos { nombre cantidad }
+  }
+}
+
+# responde solo los campos pedidos, en una sola peticion</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En un sistema de microservicios, el equipo suele hablar internamente con gRPC y exponer al exterior una API REST (o GraphQL) que traduce las llamadas.</p>
+<ul><li>REST para el borde público y gRPC para la red interna.</li>
+<li>GraphQL brilla en apps móviles con pantallas que necesitan datos muy distintos.</li>
+<li>Empieza simple: REST hasta que duela; llega a GraphQL o gRPC cuando haya razón.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># contrato .proto de un microservicio de catalogo
+syntax = &quot;proto3&quot;;
+
+service Catalogo {
+  rpc ListarProductos(Query) returns (stream Producto);
+}
+
+message Producto {
+  string id = 1;
+  string nombre = 2;
+  double precio = 3;
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los protocol buffers serializan de forma binaria: hasta diez veces más rápido que JSON en tráfico interno, ideal para streaming.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>REST triunfa por simplicidad: cualquier cliente con HTTP lo entiende.</li>
+<li>GraphQL centraliza el esquema y evita versionar un endpoint por cada campo nuevo.</li>
+<li>gRPC mejora rendimiento y tipado fuerte, pero es menos amigable para navegadores.</li>
+<li>La complejidad se paga: GraphQL añade consultas peligrosas (recursión, N+1) y gRPC herramientas de depuración menos directas.</li>
+<li>La decisión correcta depende del contexto, no de la moda: empieza por REST.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Elegir GraphQL por moda sin necesidad real de su flexibilidad.</li>
+<li>Usar gRPC en el borde público y complicar la vida a tus clientes.</li>
+<li>No proteger GraphQL con límites de profundidad y abrirte a consultas abusivas.</li>
+<li>Cambiar de estilo de API sin medir primero el coste de la migración.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Mide primero: ¿hay overfetching real? ¿importa de verdad la latencia?</li>
+<li>Mantén el contrato documentado en cualquier estilo (OpenAPI o schema de GraphQL).</li>
+<li>Los microservicios internos se benefician de gRPC; las APIs públicas, de REST.</li>
+<li>No mezcles estilos en la misma familia de endpoints sin una razón clara.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Escribe la consulta GraphQL para los cinco últimos pedidos con su cliente.</li>
+<li>Define un .proto con dos métodos para un chat.</li>
+<li>Enlista tres señales de que un proyecto debería adoptar GraphQL.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>REST es simple y universal; GraphQL da control fino de campos; gRPC da rendimiento.</li>
+<li>El estilo se elige por contexto, no por moda.</li>
+<li>Es habitual combinar: gRPC interno con REST o GraphQL público.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción al Backend</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Internet y la Web</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · HTTP</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura Web</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Formatos y Comunicación</a></li>
+          <li><a href="./index.html">Módulo 6 · APIs y HTTP en la práctica</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · De cero a producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

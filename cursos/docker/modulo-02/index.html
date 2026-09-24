@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 2 · Imágenes y Dockerfile · Docker para Backend · Backend Academy</title>
-<meta name="description" content="Imágenes y Dockerfile: crea imágenes reproducibles, entiende el sistema de capas, usa .dockerignore, multi-stage builds y publica en Docker Hub.">
+<title>Módulo 2 · Imágenes y Dockerfile · Docker · Backend Academy</title>
+<meta name="description" content="Escribe Dockerfiles profesionales, entiende el sistema de capas, optimiza el tamaño con multi-stage builds y publica tus imágenes en un registry.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,82 +54,96 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-    <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../index.html">Docker para Backend</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item" aria-current="page">Módulo 2</span>
-  </nav>
-    <p class="page-hero__eyebrow">🔧 Intermedio</p>
-    <h1 class="page-hero__title">Módulo 2 · Imágenes y Dockerfile</h1>
-    <p class="page-hero__subtitle">De un Dockerfile a una imagen reproducible: sistema de capas, caché, .dockerignore, multi-stage builds y publicación en el registry.</p>
-    <div class="page-hero__meta">
-      <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 lecciones</span>
-      <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ~60 min</span>
-    </div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Docker</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 2</span>
+      </nav>
+      <p class="page-hero__eyebrow">⚙️ Intermedio</p>
+      <h1 class="page-hero__title">Módulo 2 · Imágenes y Dockerfile</h1>
+      <p class="page-hero__subtitle">Una imagen bien construida es la mitad del despliegue ganado.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 59 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel intermedio</span>
+      </div>
     </div>
   </section>
   <div class="container">
-    <div class="progress" data-progress="docker">
-    <div class="progress__bar"><div class="progress__fill"></div></div>
-    <span class="progress__label">Progreso del curso</span>
-  </div>
-  <section class="route-section">
-    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
-    <ul class="route-goals">
-      <li>Escribir un Dockerfile que construya tu backend.</li>
-      <li>Entender las capas y la caché para builds rápidos.</li>
-      <li>Excluir lo que no debe entrar al contexto con .dockerignore.</li>
-      <li>Dominar el patrón multi-stage para imágenes de producción.</li>
-      <li>Optimizar tamaño, seguridad y arranque de la imagen.</li>
-      <li>Versionar y publicar imágenes en Docker Hub.</li>
-    </ul>
-  </section>
-  <section class="route-section">
-    <h2 class="route-section__title">Lecciones</h2>
-    <div class="grid-2">
-      <a class="card card--lesson card--link" href="que-es-un-dockerfile.html">
-        <h3>¿Qué es un Dockerfile?</h3>
-        <p>FROM, RUN, COPY, CMD y el primer build</p>
-      </a>
-      <a class="card card--lesson card--link" href="capas-de-imagen.html">
-        <h3>Las capas de la imagen</h3>
-        <p>Caché de capas y por qué el orden importa</p>
-      </a>
-      <a class="card card--lesson card--link" href="dockerignore.html">
-        <h3>El build context y .dockerignore</h3>
-        <p>Lo que viaja al daemon y lo que no</p>
-      </a>
-      <a class="card card--lesson card--link" href="multi-stage-builds.html">
-        <h3>Multi-stage builds</h3>
-        <p>Compilar en un lado, correr en otro</p>
-      </a>
-      <a class="card card--lesson card--link" href="optimizando-imagenes.html">
-        <h3>Optimizando imágenes</h3>
-        <p>Menos peso, más seguridad, mismo resultado</p>
-      </a>
-      <a class="card card--lesson card--link" href="publicando-en-el-registry.html">
-        <h3>Publicando en el registry</h3>
-        <p>Tags, semver y Docker Hub</p>
-      </a>
-    </div>
-  </section>
-  <div class="lesson-prevnext">
-    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../modulo-01/index.html">
-      <span class="lesson-prevnext__tag">Anterior</span><strong>Módulo 1 · Fundamentos</strong>
-    </a>
-    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-03/index.html">
-      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 3 · Volúmenes y Redes</strong>
-    </a>
-  </div>
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Escribir un Dockerfile correcto y ordenado</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender el sistema de capas de las imágenes</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Manejar el build context y el .dockerignore</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Optimizar imágenes con multi-stage builds</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Publicar imágenes en un registry</span></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>6 lecciones · ~59 min · Construye imágenes reproducibles y ligeras..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./capas-de-imagen.html">
+            <h3>1 · Las capas de la imagen</h3>
+            <p>Cada instrucción del Dockerfile crea una capa que se puede cachear y reutilizar.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./dockerignore.html">
+            <h3>2 · El build context y .dockerignore</h3>
+            <p>Haz que el build sea rápido y seguro excluyendo ficheros que no necesitas.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./multi-stage-builds.html">
+            <h3>3 · Multi-stage builds</h3>
+            <p>Compila en una etapa y copia solo lo necesario a la imagen final.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./optimizando-imagenes.html">
+            <h3>4 · Optimizando imágenes</h3>
+            <p>Imágenes pequeñas, seguras y rápidas de descargar: técnicas de optimización.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./publicando-en-el-registry.html">
+            <h3>5 · Publicando en el registry</h3>
+            <p>Sube tus imágenes a Docker Hub o a un registry privado y versiona los tags.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-es-un-dockerfile.html">
+            <h3>6 · ¿Qué es un Dockerfile?</h3>
+            <p>El recetario que define cómo se construye tu imagen: instrucciones y sintaxis.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">imágenes</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../modulo-01/index.html"><span class="label">← Anterior</span><span class="title">Módulo 1 · Fundamentos de Contenedores</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 3 · Volúmenes y Redes</span></a>
+    </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -135,42 +155,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="../modulo-01/index.html">Módulo 1 · Contenedores</a></li>
-          <li><a href="index.html">Módulo 2 · Imágenes</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes</a></li>
-          <li><a href="../modulo-04/index.html">Módulo 4 · Compose</a></li>
-          <li><a href="../modulo-05/index.html">Módulo 5 · Backend</a></li>
-          <li><a href="../index.html">Módulo 6 · Proyecto</a></li>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Contenedores</a></li>
+          <li><a href="./index.html">Módulo 2 · Imágenes y Dockerfile</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Volúmenes y Redes</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Docker Compose</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Docker en el Backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad en contenedores</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Docker en producción a escala</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

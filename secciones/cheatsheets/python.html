@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de Python: sintaxis, tipos, listas, dicts y sets, bucles, funciones, f-strings, comprehensions, módulos, errores, pip/virtualenv y FastAPI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-root="../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="./index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">Python</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🐍 Python</h1>
+          <p class="section-subtitle">Legible, expresivo y enorme en el ecosistema de datos y APIs. Esta hoja resume sintaxis, estructuras de datos, funcionalidad esencial y un mini arranque con FastAPI.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Backend</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="sintaxis">Sintaxis básica</h2>
+              <p>Python usa <strong>indentación</strong> en lugar de llaves: cuatro espacios por nivel. Los dos puntos abren un bloque.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python"># Comentario de una línea
+
+"""
+Docstring: documenta módulos, funciones o clases.
+"""
+
+nombre = "Ada"          # variables tipadas dinámicamente
+edad = 36
+ACTIVO = True           # convención: constantes en MAYÚSCULAS
+
+print(f"Hola, {nombre}")     # imprimir
+print(type(edad))            # &lt;class 'int'&gt;
+
+# Swapping
+a, b = 1, 2
+a, b = b, a                 # intercambio sin variable temporal
+
+# Entrada del usuario
+entrada = input("Tu nombre: ")</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="tipos">Tipos de datos</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Tipo</th><th>Ejemplo</th><th>Mutable</th></tr></thead>
+                  <tbody>
+                    <tr><td>int</td><td><code class="inline">42</code></td><td>No</td></tr>
+                    <tr><td>float</td><td><code class="inline">3.14</code></td><td>No</td></tr>
+                    <tr><td>str</td><td><code class="inline">"hola"</code></td><td>No</td></tr>
+                    <tr><td>bool</td><td><code class="inline">True</code> / <code class="inline">False</code></td><td>No</td></tr>
+                    <tr><td>list</td><td><code class="inline">[1, 2, 3]</code></td><td>Sí</td></tr>
+                    <tr><td>tuple</td><td><code class="inline">(1, 2, 3)</code></td><td>No</td></tr>
+                    <tr><td>dict</td><td><code class="inline">{"id": 1}</code></td><td>Sí</td></tr>
+                    <tr><td>set</td><td><code class="inline">{1, 2, 3}</code></td><td>Sí</td></tr>
+                    <tr><td>None</td><td><code class="inline">None</code></td><td>—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python"># Conversión de tipos
+int("42")        # 42
+float("3.14")    # 3.14
+str(42)          # "42"
+bool(0); bool("")   # False; False
+
+# Operadores de comparación y lógicos (en palabras)
+a == b; a != b; a &lt; b; a &lt;= b
+a and b; a or b; not a
+
+# Pertenencia
+"ada" in ["ada", "grace"]   # True
+2 in {1, 2, 3}              # True</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="listas-dicts">Listas, dicts y sets</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python"># Listas (ordenadas, mutables)
+frutas = ["manzana", "pera", "uva"]
+frutas.append("kiwi")           # añadir al final
+frutas.pop()                    # quitar el último
+frutas[0]                       # "manzana"
+frutas[-1]                      # último elemento
+len(frutas)                     # 3
+sorted(frutas)                  # nueva lista ordenada
+
+# Slicing
+numeros = [0, 1, 2, 3, 4]
+numeros[1:4]      # [1,2,3]
+numeros[::2]      # [0,2,4]
+
+# Dicts (clave: valor, ordenados desde Python 3.7)
+usuario = {"id": 1, "nombre": "Ada", "activo": True}
+usuario["nombre"]               # "Ada"
+usuario.get("email", "sin email")  # con valor por defecto
+usuario.keys(); usuario.values(); usuario.items()
+usuario.setdefault("rol", "user")  # inserta si falta
+
+# Sets (sin duplicados, sin orden)
+colores = {"rojo", "verde", "azul"}
+colores.add("rojo")             # no hay duplicados
+a &amp; b, a | b, a - b            # interseccion, union, diferencia
+
+# Convertir entre estructuras
+list(d)  # claves de un dict
+dict([("a", 1), ("b", 2)])</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="bucles">Bucles</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">for fruta in frutas:
+    print(fruta)
+
+# Con índice
+for i, fruta in enumerate(frutas):
+    print(i, fruta)
+
+# Rango numérico
+for n in range(5):        # 0..4
+    print(n)
+for n in range(2, 10, 2): # pares del 2 al 8
+    print(n)
+
+# Recorrer dos listas a la vez
+for nombre, edad in zip(["Ada", "Grace"], [36, 36]):
+    print(nombre, edad)
+
+# while
+contador = 0
+while contador &lt; 3:
+    contador += 1
+
+# Romper flujos
+for n in range(10):
+    if n == 3:
+        continue          # salta el resto del cuerpo
+    if n == 5:
+        break             # corta el bucle
+else:
+    print("Sin break")    # solo si no hubo break</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="funciones">Funciones</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">def sumar(a: int, b: int) -&gt; int:
+    """Suma dos números."""
+    return a + b
+
+# Parámetros por defecto y por palabra clave
+def crear_usuario(nombre, rol="user", activo=True):
+    return {"nombre": nombre, "rol": rol, "activo": activo}
+
+crear_usuario("Ada")
+crear_usuario("Grace", rol="admin", activo=False)
+
+# Argumentos variables (*args tupla, **kwargs dict)
+def registrar(tipo, *valores, **opciones):
+    print(tipo, valores, opciones)
+
+registrar("log", 1, 2, nivel="info")
+
+# Lambdas (expresiones cortas)
+doblar = lambda x: x * 2
+
+# Packing/unpacking
+def tropa(*args): ...
+nums = [1, 2, 3]
+tropa(*nums)          # expande la lista como argumentos</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="fstrings">Strings y f-strings</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">nombre = "Ada"
+edad = 36
+
+# f-strings (Python 3.6+)
+saludo = f"Hola {nombre}, tienes {edad} años"
+resultado = f"Suma: {2 + 2}"
+ancho = f"Valor: {edad:04d}"       # "0036"
+decimal = f"Pi: {3.14159:.2f}"     # "3.14"
+pct = f"Avance: {25:.1f}%"         # "25.0%"
+
+# Métodos de strings
+"hola".upper()          # "HOLA"
+"hola mundo".split()    # ['hola','mundo']
+"-".join(["a", "b"])    # "a-b"
+"a,b,c".replace(",", ";")
+"  x  ".strip()         # "x"
+"abc123".isalnum()
+len("ada")
+
+# Slicing de strings
+"Backend"[0:3]          # "Bac"
+"Backend"[::-1]         # "dnekcaB" (revertido)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="comprehensions">Comprehensions</h2>
+              <p>Construyen colecciones en una línea; son más rápidas y legibles que un bucle clásico.</p>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">numeros = [1, 2, 3, 4, 5]
+
+# Lista: [expresión for elem in iterable if condición]
+cuadrados = [n ** 2 for n in numeros]              # [1,4,9,16,25]
+pares = [n for n in numeros if n % 2 == 0]         # [2,4]
+
+# Set
+unicos = {n % 3 for n in numeros}                  # {0,1,2}
+
+# Dict
+cuadrados_dict = {n: n ** 2 for n in numeros[:3]}  # {1:1,2:4,3:9}
+
+# Anidada
+matriz = [(x, y) for x in range(3) for y in range(3)]
+
+# Equivalente funcional
+list(map(lambda n: n * 2, numeros))
+list(filter(lambda n: n > 2, numeros))
+
+# Reduce no es builtin: vive en functools
+from functools import reduce
+suma = reduce(lambda a, b: a + b, numeros, 0)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="modulos">Módulos y paquetes</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python"># Importar
+import math
+from datetime import datetime, timedelta
+import json
+import os
+
+# Módulos de la stdlib muy usados en backend
+from pathlib import Path
+import random
+import re
+import sqlite3
+
+# Crear tu propio módulo: archivo `utilidades.py`
+# from utilidades import limpiar_texto
+
+# Módulos al estilo moderno (cualquier carpeta con __init__.py es un paquete)
+# app/
+#   __init__.py
+#   rutas/
+#       __init__.py
+#       usuarios.py</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="errores">Manejo de errores</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">try:
+    resultado = 10 / int(entrada)
+except ZeroDivisionError:
+    resultado = None
+except ValueError as error:
+    print("Entrada inválida:", error)
+except (TypeError, KeyError):
+    print("Otro error esperado")
+else:
+    print("Sin errores")
+finally:
+    print("Siempre se ejecuta")
+
+# Lanzar errores propios
+if not usuario:
+    raise ValueError("Usuario no encontrado")
+
+# Definir excepciones propias
+class ApiError(Exception):
+    def __init__(self, codigo, mensaje):
+        self.codigo = codigo
+        super().__init__(mensaje)
+
+raise ApiError(404, "Recurso no encontrado")</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="venv-pip">virtualenv y pip</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">python -m venv .venv</code></td><td>Crea un entorno virtual aislado.</td></tr>
+                    <tr><td><code class="inline">source .venv/bin/activate</code></td><td>Activar (Linux/macOS).</td></tr>
+                    <tr><td><code class="inline">.venv\Scripts\activate</code></td><td>Activar (Windows).</td></tr>
+                    <tr><td><code class="inline">pip install fastapi</code></td><td>Instalar un paquete.</td></tr>
+                    <tr><td><code class="inline">pip freeze &gt; requirements.txt</code></td><td>Exportar dependencias.</td></tr>
+                    <tr><td><code class="inline">pip install -r requirements.txt</code></td><td>Instalar el proyecto en otro entorno.</td></tr>
+                    <tr><td><code class="inline">deactivate</code></td><td>Salir del entorno.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="fastapi">FastAPI en 30 segundos</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Python</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-python">from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class UsuarioNuevo(BaseModel):
+    nombre: str
+    email: str
+    activo: bool = True
+
+@app.get("/")
+def raiz():
+    return {"mensaje": "API viva"}
+
+@app.get("/usuarios")
+def listar(limite: int = Query(10, ge=1, le=100)):
+    return {"usuarios": [], "limite": limite}
+
+@app.post("/usuarios", status_code=201)
+def crear(usuario: UsuarioNuevo):
+    return {"creado": True, **usuario.model_dump()}
+
+@app.get("/usuarios/{usuario_id}")
+def detalle(usuario_id: int):
+    if usuario_id != 1:
+        raise HTTPException(status_code=404, detail="No existe")
+    return {"id": usuario_id}
+
+# Alternativa clásica: Flask
+from flask import Flask, jsonify, request
+flask = Flask(__name__)
+
+@flask.get("/saludo")
+def hola():
+    return jsonify({"saludo": request.args.get("nombre", "mundo")})</code></pre>
+                </div>
+              </div>
+              <p>FastAPI genera documentación interactiva automática en <code class="inline">/docs</code> (Swagger UI) con solo tipar las respuestas.</p>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Escribe siempre con <strong>type hints</strong>: mejoran la legibilidad y permiten autocompletado y validación.</li>
+                <li>Usa <strong>venvs</strong> por proyecto y congela <code class="inline">requirements.txt</code>.</li>
+                <li>Prefiere comprehensions para transformaciones cortas y bucles claros para lógica larga.</li>
+                <li>Maneja errores capturando excepciones específicas, nunca <code class="inline">except:</code> a secas.</li>
+                <li>Nombres en <code class="inline">snake_case</code>, clases en <code class="inline">CamelCase</code>.</li>
+                <li>Configura siempre <code class="inline">if __name__ == "__main__":</code> para scripts ejecutables.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="./index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="./sql.html">Siguiente: SQL <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="./index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

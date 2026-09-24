@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="circuit-breaker-distribuido">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit breaker y aislamiento · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Circuit breaker y aislamiento para que un fallo puntual no se propague.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="circuit-breaker-distribuido"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Circuit breaker y aislamiento</span>
+        </nav>
+        <h1 class="lesson-title">Circuit breaker y aislamiento</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Tolerancia a fallos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un servicio cae en cascada: los que dependen de él se ralentizan, sus colas se llenan y el fallo se extiende por todo el sistema. El circuito abierto corta el problema en el origen.</p>
+<p>El circuit breaker monitoriza tus llamadas y, si el ratio de fallos sube, 'abre el circuito': deja de llamar al servicio enfermo y falla rápido con una respuesta degradada.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El circuit breaker es un estado por llamada a un servicio: cerrado (pasa y mide), abierto (no pasa, falla rápido) y medio abierto (prueba a unas pocas peticiones antes de reabrir).</p><p><strong>Por qué importa.</strong> Aísla el fallo de un nodo o servicio para que la falla no se propague y los consumidores no esperen eternamente en colas.</p><p><strong>Cuándo usarlo.</strong> Úsalo con cualquier dependencia crítica; especialmente con sistemas externos flaky y con red inestable.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Cerrado: las llamadas fluyen y las métricas se acumulan.</li>
+<li>Abierto: las llamadas fallan rápido sin tocar el servicio.</li>
+<li>Medio abierto: un gasto de prueba decide si el servicio volvió.</li>
+<li>Umbral de fallos: ratio que abre el circuito.</li>
+<li>Bulkhead: separar recursos para que un retraso no arrastre otras carriles.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un circuit breaker sencillo con tres estados y umbral.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">class CircuitBreaker {
+  constructor(umbral = 5, ventana = 10000) {
+    this.estado = &quot;cerrado&quot;;
+    this.fallos = 0;
+    this.umbral = umbral;
+    this.ventana = ventana;
+  }
+  abrir() { this.estado = &quot;abierto&quot;; this.fallos = 0; }
+  async llamar(url) {
+    if (this.estado === &quot;abierto&quot;) throw new Error(&quot;circuito abierto&quot;);
+    try {
+      return await fetch(url, { signal: AbortSignal.timeout(3000) });
+    } catch (e) {
+      this.fallos++;
+      if (this.fallos &gt;= this.umbral) this.abrir();
+      throw e;
+    }
+  }
+}
+
+const cb = new CircuitBreaker();</code></pre></div>
+</figure>
+<pre><code class="language-text">Tras 5 fallos el circuito abre y las siguientes llamadas fallan al instante.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Uso del patron con librerias robustas en runtime (ej. opossum en Node).</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Circuit breaker con librería robusta</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const CircuitBreaker = require(&quot;opossum&quot;);
+
+const breaker = new CircuitBreaker(procesarPedido, {
+  timeout: 5000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,
+  volumeThreshold: 10,
+});
+
+breaker.on(&quot;open&quot;, () =&gt; log.warn(&quot;Circuito ABIERTO&quot;));
+breaker.on(&quot;halfOpen&quot;, () =&gt; log.info(&quot;Probando de nuevo&quot;));
+breaker.on(&quot;close&quot;, () =&gt; log.info(&quot;Circuito CERRADO&quot;));
+
+const resultado = await breaker.fire(pedido);</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El servicio de pagos se degrada. El circuit breaker del servicio de pedidos abre, los pedidos se atienden sin bloqueo (fallback) y el equipo tiene tiempo de arreglar pagos sin que el incidente se lleve por delante a pedidos.</p>
+<ul><li>Abre por ratio de fallos o latencia, no solo por conteo.</li>
+<li>Devuelve un fallback: caché, mensaje degradado o cola.</li>
+<li>Mide cuánto tiempo pasa el circuito abierto para ajustar el reset.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">// fallback cuando el circuito abre
+const respuesta = await breaker.fire(pedido).catch(() =&gt; ({
+  ok: false,
+  causa: &quot;pagos_temporalmente_no_disponible&quot;,
+  sugerencia: &quot;procesa en la cola de reintento&quot;,
+}));
+
+console.log(respuesta);</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El circuito abierto es un síntoma: el ratio de fallos te dice que algo más abajo enfermó, no que el breaker lo arregle.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El breaker aprende del fracaso acumulado y corta antes del desastre.</li>
+<li>El fallback degrada la experiencia: mejor respuesta parcial que espera infinita.</li>
+<li>Medio abierto permite recuperar sin volcar todo el tráfico de golpe.</li>
+<li>Los bulkheads (por separación de hilos, conexiones, colas) acompañan al breaker</li>
+<li>El breaker es el freno de evacuación: no diagnostica, pero salva el ecosistema.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Umbral muy bajo: el breaker abre con un pico normal.</li>
+<li>Sin fallback: el breaker sustituye un timeout por un error seco.</li>
+<li>Ignorar el reinicio del breaker: si bajan los fallos, debe volver a cerrar.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Configura umbral y ventana según el ratio normal de tu servicio.</li>
+<li>Combina breaker con timeouts de menor alcance a nivel de petición.</li>
+<li>Log el tránsito de estados: abrir, half-open, cerrar.</li>
+<li>Usa bulkhead (pools separados) para que una dependencia lenta no consuma todo.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Envuelve una llamada a pagos con un circuit breaker.</li>
+<li>Añade un fallback y observa qué recibe el cliente al abrir.</li>
+<li>Configura el half-open y comprueba la recuperación automática.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El circuit breaker corta las llamadas a un servicio enfermo.</li>
+<li>Fallback y half-open degradan y recuperan con gracia.</li>
+<li>Aísla la epidemia: un fallo no debe tumbar todo el sistema.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+          <li><a href="./index.html">Módulo 4 · Tolerancia a fallos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Consistencia y consenso</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Sistemas distribuidos a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Patrones distribuidos en la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="composer-autoload-psr4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Composer: autoload y PSR-4 · PHP desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Organiza dependencias con Composer y carga tus clases automáticamente con PSR-4.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="php" data-current="composer-autoload-psr4"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">PHP desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Composer: autoload y PSR-4</span>
+        </nav>
+        <h1 class="lesson-title">Composer: autoload y PSR-4</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> PHP desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · APIs y servicios</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Gestionar dependencias a mano, descargando zip y pegando archivos, no escala. Composer es el gestor de paquetes de PHP: instala librerías, las versiona y resuelve sus dependencias.</p>
+<p>Su autoload PSR-4 hace que tus propias clases se carguen solas siguiendo el namespace, sin require manuales.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Composer es el gestor de dependencias de PHP que instala paquetes desde Packagist y genera un autoloader (vendor/autoload.php). PSR-4 mapea namespaces a carpetas para cargar cada clase bajo demanda.</p><p><strong>Por qué importa.</strong> Sin autoload, cada archivo que añades exige recargar manualmente require; con PSR-4 la estructura de carpetas reemplaza la gestión manual y el proyecto crece sin fricción.</p><p><strong>Cuándo usarlo.</strong> Usa Composer en cualquier proyecto PHP que quiera crecer. PSR-4 debe ser el estándar de tu propia organización, junto a 'vendor/' ignorado por git.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>composer init crea composer.json interactivamente.</li>
+<li>La sección autoload.psr-4 mapea 'Tienda\\' a 'src/'.</li>
+<li>vendor/autoload.php se incluye una vez en el front controller.</li>
+<li>composer install instala desde composer.lock; composer update lo renueva.</li>
+<li>--no-dev y --classmap-authoritative sirven para producción.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un composer.json con PSR-4 para cargar tus clases desde src/ sin ningún require manual.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JSON</span><span class="code-block__caption">ejemplo.json</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-json">{
+  &quot;name&quot;: &quot;tienda/api&quot;,
+  &quot;require&quot;: {
+    &quot;php&quot;: &quot;^8.2&quot;
+  },
+  &quot;autoload&quot;: {
+    &quot;psr-4&quot;: {
+      &quot;Tienda\\&quot;: &quot;src/&quot;
+    }
+  }
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">Las clases Tienda\PedidosController viven en src/PedidosController.php y se cargan solas.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El front controller incluye el autoloader una sola vez y con dos líneas ya está toda la aplicación disponible.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">PHP</span><span class="code-block__caption">Carga de la app con autoload y namespace</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+require __DIR__ . &quot;/../vendor/autoload.php&quot;;
+
+use Tienda\Controladores\PedidosController;
+use Tienda\Conexion;
+
+$pdo = Conexion::crear();
+$router = new Router();
+$router-&gt;get(&quot;/pedidos&quot;, fn() =&gt; (new PedidosController($pdo))-&gt;listar());</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El despliegue en producción corre composer install --no-dev --optimize-autoloader para instalar solo lo necesario y generar un mapa de clases rápido.</p>
+<ul><li>Versiona composer.lock para reproducir las mismas versiones en todos.</li>
+<li>Instala dependencias de producción con --no-dev.</li>
+<li>Optimiza el autoloader con --optimize-autoloader o --classmap-authoritative.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Local: desarrollo con herramientas de test
+composer install
+
+# Produccion: solo runtime y mapa de clases rápido
+composer install --no-dev --optimize-autoloader
+
+# En CI o al anadir una clase nueva antes del deploy
+composer dump-autoload</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> composer.lock fija versiones exactas: es el archivo que garantiza que tu deploy se comporta como tu local.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>PSR-4 liga el namespace a la ruta de archivo: Tienda\Controladores → src/Controladores.</li>
+<li>vendor/autoload.php se incluye una vez y registra todos los cargadores.</li>
+<li>composer.lock congela las versiones instaladas para reproducirlas.</li>
+<li>--classmap-authoritative desactiva la búsqueda dinámica y acelera en prod.</li>
+<li>gitignore a vendor/ y reinstálalo en cada despliegue con composer install.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Olvidar require vendor/autoload.php y recibir class not found.</li>
+<li>Commitear vendor/ (o lo contrario: no reproducir las instalaciones).</li>
+<li>Confundir composer update (renueva lock) con composer install (respeta lock).</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Organiza src/ por módulos: Controladores, Servicios, Repositorios.</li>
+<li>Escribe dos puntos de fuga en PSR-4 si mezclas librerías antiguas.</li>
+<li>Corre composer dump-autoload tras añadir carpetas o namespaces.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Inicializa composer.json y mueve una clase a src/ con PSR-4.</li>
+<li>Instala una librería (p.ej. vlucas/phpdotenv) y úsala en tu proyecto.</li>
+<li>Prepara un composer install --no-dev reproducible desde git clone y lock.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Composer instala y versiona dependencias desde Packagist.</li>
+<li>PSR-4 autoload carga cualquier clase según su namespace sin require manuales.</li>
+<li>composer.lock + --no-dev garantizan deploys reproducibles y rápidos.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · PHP moderno</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Base de datos con PDO</a></li>
+          <li><a href="./index.html">Módulo 6 · APIs y servicios</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Seguridad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

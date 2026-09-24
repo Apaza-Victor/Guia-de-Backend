@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="hyperloglog-y-conteo-unico">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HyperLogLog: conteo único aproximado · Redis y Caching · Backend Academy</title>
+<meta name="description" content="Aprende a contar únicos a escala masiva con HyperLogLog en Redis.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="hyperloglog-y-conteo-unico"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Redis y Caching</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">HyperLogLog: conteo único aproximado</span>
+        </nav>
+        <h1 class="lesson-title">HyperLogLog: conteo único aproximado</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis y Caching</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Estructuras de datos avanzadas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Contar cuántas visitas únicas tuvo una página, cuántos IP distintos realizaron login o cuántos tokens circulan es caro si guardas cada elemento. Guardar todos los únicos en un set puede terminar con la memoria de tu servidor.</p>
+<p>HyperLogLog (HLL) estima la cardinalidad de un conjunto usando probabilidad: con solo 12 KB por clave obtienes un error menor al 1% sin importar si hay 1 millón o 1.000 millones de elementos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>HyperLogLog es una estructura probabilística que estima el número de elementos únicos añadidos con PFADD y lo lee con PFCOUNT, sin almacenar los elementos en sí.</p><p><strong>Por qué importa.</strong> Permite responder preguntas de cardinalidad (visitantes únicos, dispositivos distintos) sobre volúmenes enormes con memoria constante y operaciones O(1).</p><p><strong>Cuándo usarlo.</strong> Úsalo cuando necesites conteos de únicos aproximados y te sobre la memoria. No lo uses si necesitas el valor exacto o recuperar los elementos, para eso hay sets y bloom filters.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>PFADD añade uno o varios elementos a la aproximación.</li>
+<li>PFCOUNT devuelve la cardinalidad estimada de una o varias claves.</li>
+<li>PFMERGE fusiona varias HLL en una sin recalcular desde cero.</li>
+<li>El error estándar es 0,81%, ajustable por parámetro.</li>
+<li>No guarda los elementos originales: no puedes listarlos después.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Contamos visitas únicas de la página de inicio durante una hora.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import redis
+r = redis.Redis.from_url(&quot;redis://localhost:6379&quot;)
+r.delete(&quot;uniqs:home:12h&quot;)
+for ip in [&quot;1.1.1.1&quot;, &quot;2.2.2.2&quot;, &quot;1.1.1.1&quot;, &quot;3.3.3.3&quot;, &quot;2.2.2.2&quot;]:
+    r.pfadd(&quot;uniqs:home:12h&quot;, ip)
+print(r.pfcount(&quot;uniqs:home:12h&quot;))  # cerca de 3</code></pre></div>
+</figure>
+<pre><code class="language-text">3</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Fusionamos las visitas únicas de varias horas o regiones en un único total diario.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Agregación diaria con PFMERGE</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">r.pfadd(&quot;uniqs:home:10h&quot;, &quot;2.2.2.2&quot;, &quot;3.3.3.3&quot;)
+r.pfadd(&quot;uniqs:home:11h&quot;, &quot;3.3.3.3&quot;, &quot;4.4.4.4&quot;)
+r.pfmerge(&quot;uniqs:home:dia&quot;, &quot;uniqs:home:10h&quot;, &quot;uniqs:home:11h&quot;)
+print(r.pfcount(&quot;uniqs:home:dia&quot;))  # 2.2.2.2, 3.3.3.3, 4.4.4.4</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un producto de analítica contabiliza usuarios únicos por día y por país a partir de eventos de varios servidores. Cada servidor aporta su HLL parcial y un worker las fusiona cada hora.</p>
+<ul><li>Ten una clave HLL por shard y usa PFMERGE para el total.</li>
+<li>Acota el periodo con TTL para no acumular claves olvidadas.</li>
+<li>No uses HLL para auditorías: no permite reconstruir la lista de elementos.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def registrar_visita(pais, usuario):
+    r.pfadd(f&quot;uniqs:{pais}&quot;, usuario)
+    r.pfadd(&quot;uniqs:todas&quot;, usuario)
+
+def unicos_hoy():
+    total = r.pfcount(&quot;uniqs:todas&quot;)
+    por_pais = {}
+    for p in [&quot;es&quot;, &quot;mx&quot;, &quot;ar&quot;]:
+        por_pais[p] = r.pfcount(f&quot;uniqs:{p}&quot;)
+    return total, por_pais
+
+registrar_visita(&quot;es&quot;, &quot;u_100&quot;)
+print(unicos_hoy())</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Si necesitas conteos exactos sobre millones, HLL no sirve; ahí entran los bloom filters que verás combinados con estas estructuras.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>HLL estima por la longitud de la racha de ceros iniciales en los hashes de los elementos (la calcular de Cardinalidad de Flajolet).</li>
+<li>PFCOUNT es O(1) si la clave cabe en cache y no hay fusión pendiente.</li>
+<li>Añadir el mismo elemento varias veces no incrementa la estimación (es un set lógico).</li>
+<li>12 KB fijos por clave: el coste de memoria no crece con el número de elementos.</li>
+<li>Varias claves sumadas con PFCOUNT devuelven estimaciones peores que PFMERGE previo.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>PFCOUNT con muchas claves a la vez recalcula fusión en cada llamada: caro.</li>
+<li>Esperar exactitud: el resultado es una estimación, no un conteo SQL.</li>
+<li>Añadir elementos y esperar poder recuperarlos: HLL no conserva los datos.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Usa HLL para métricas de negocio diarias y deja exactitud solo donde la ley lo exige.</li>
+<li>Prefiere claves cortas con periodo para mantener un bajo número de HLL activas.</li>
+<li>Valida contra un set en desarrollo para conocer el error real de tu caso.</li>
+<li>Combínalo con bitmaps: HLL para únicos globales, bitmap para rachas.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Cuenta usuarios únicos de una lista de 20 con duplicados y compara con len(set()).</li>
+<li>Crea HLL diarias y fusiona la semana en una clave semanal.</li>
+<li>Repite el conteo con sets y mide la diferencia de memoria en INFO.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>HLL estima cardinalidades con error <1% usando 12 KB constantes.</li>
+<li>PFADD, PFCOUNT y PFMERGE cubren conteo, consulta y agregación.</li>
+<li>Es la opción correcta para únicos a escala masiva sin memoria infinita.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Redis</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras de Datos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché y Rendimiento</a></li>
+          <li><a href="./index.html">Módulo 4 · Estructuras de datos avanzadas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Persistencia y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Colas y streaming</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Redis en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

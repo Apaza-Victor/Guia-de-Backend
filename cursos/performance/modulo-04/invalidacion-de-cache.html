@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="invalidacion-de-cache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estrategias de invalidación de caché · Performance y Optimización · Backend Academy</title>
+<meta name="description" content="Escoge la estrategia de invalidación correcta para que la caché no sirva datos viejos.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="invalidacion-de-cache"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Performance y Optimización</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Estrategias de invalidación de caché</span>
+        </nav>
+        <h1 class="lesson-title">Estrategias de invalidación de caché</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance y Optimización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Caching y CDN</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La caché acelera las lecturas, pero con la frescura paga un precio: si un dato cambia y el caché sigue sirviendo la versión antigua, los usuarios ven información obsoleta. El arte está en decidir cuándo y cómo descartar.</p>
+<p>Hay tres familias de invalidación: tiempo (TTL), evento (borrar o invalidar la clave al escribir) y versión (nombrar la clave con la versión del dato). Cada una encaja con un tipo de contenido.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La invalidación de caché son las reglas que determinan cuándo una entrada deja de ser válida: por expiración de TTL, por borrado explícito al escribir, o por abandono al cambiar la versión del recurso.</p><p><strong>Por qué importa.</strong> Un caché sin estrategia de invalidación termina en uno de los dos extremos: datos rancios que mienten al usuario o un caché inútil que se invalida siempre y no ahorra nada.</p><p><strong>Cuándo usarlo.</strong> Usa TTL para datos que caducan naturalmente, evento para datos con actualizaciones puntuales (perfil, stock), y versión para payloads que cambian por release.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>TTL expira la entrada al cabo de un tiempo prefijado.</li>
+<li>La invalidación por escritura borra/clave de caché cuando el dato se modifica en BD.</li>
+<li>El versionado de claves (cache:perfil:v2) hace obsoletas las antiguas sin borrarlas.</li>
+<li>El cache stampede ocurre si todos leen fallan y regeneran a la vez.</li>
+<li>Las lecturas stale son aceptables solo con un error controlado y corto.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Invalidamos por escritura: al actualizar el recurso en BD, borramos su entrada de caché.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import redis, time
+r = redis.Redis.from_url(&quot;redis://localhost:6379&quot;)
+r.set(&quot;cache:perfil:7&quot;, &quot;{\&quot;nombre\&quot;: \&quot;ana\&quot;}&quot;, ex=300)
+def actualizar_perfil(uid, nuevos_datos):
+    # 1) escribir en la BD (fuente de verdad)
+    guardar_en_bd(uid, nuevos_datos)
+    # 2) invalidar la cache
+    r.delete(f&quot;cache:perfil:{uid}&quot;)
+    return nuevos_datos
+def guardar_en_bd(uid, datos):
+    pass  # UPDATE perfil SET ... WHERE id = uid
+actualizar_perfil(7, {&quot;nombre&quot;: &quot;ana g.&quot;})
+print(r.get(&quot;cache:perfil:7&quot;))   # None: cache invalida</code></pre></div>
+</figure>
+<pre><code class="language-text">None</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Versionado de claves: reparamos la clave al desplegar una nueva versión.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Claves con versión embebida para despliegues limpios</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">VERSION_PERFIL = &quot;v2&quot;
+def leer_perfil(uid):
+    clave = f&quot;cache:perfil:{VERSION_PERFIL}:{uid}&quot;
+    valor = r.get(clave)
+    if valor is not None:
+        return valor
+    datos = consultar_bd(uid)
+    r.set(clave, datos, ex=3600)
+    return datos
+def consultar_bd(uid):
+    return &quot;{\&quot;nombre\&quot;: \&quot;ana\&quot;}&quot;
+print(leer_perfil(7))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un catálogo de precios usa TTL de 5 minutos y, además, al actualizar un precio en el panel de admin se borra la clave de ese producto. En picos de venta promocional, el versionado empuja una nueva generación de claves sin tocar la cola.</p>
+<ul><li>Empareja TTL cortos con invalidación por evento para mínima ranciedad.</li>
+<li>Usa versionado en despliegues: el cache viejo queda huérfano y caduca.</li>
+<li>Monitoriza el miss rate para saber si invalidas demasiado (o demasiado poco).</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import random
+def leer_precio(producto):
+    clave = f&quot;cache:precio:{producto}&quot;
+    valor = r.get(clave)
+    if valor is not None:
+        return valor
+    precio = calcular_precio(producto)
+    r.set(clave, precio, ex=300)
+    return precio
+def actualizar_precio(producto, nuevo):
+    guardar_precio_bd(producto, nuevo)
+    r.delete(f&quot;cache:precio:{producto}&quot;)
+def guardar_precio_bd(p, v): pass
+print(leer_precio(&quot;camiseta-l&quot;))</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un TTL excesivamente corto inutiliza la caché; uno largo expone datos rancios. Ajusta con métricas.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La invalidación por TTL es la más simple: nada de lógica extra, solo tiempo.</li>
+<li>La invalidación por escritura garantiza frescura casi perfecta pero añade trabajo al escribir.</li>
+<li>Versionar claves evita borrar y regenerar al instante, dejando que el cache viejito caduque.</li>
+<li>El stale-while-revalidate sirve dato viejo mientras regenera, escondiendo la regeneración.</li>
+<li>Ningún enfoque es perfecto: combina TTL + evento + versión según el dato.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Invalidar todas las claves de un prefijo con SCAN/KEYS en caliente: bloquea Redis.</li>
+<li>TTL demasiado largo para datos que cambian a menudo: usuarios ven datos muertos.</li>
+<li>Olvidar la invalidación al escribir en BD en un segundo servicio.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Establece TTL por defecto (5 min) y adáptalo con métricas de frescura.</li>
+<li>Centraliza la invalidación en el servicio que escriba en BD.</li>
+<li>Usa prefijos y versiones para poder invalidar por dominio sin KEYS.</li>
+<li>Mide el stale rate: porcentaje de lecturas que devuelven datos obsoletos.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Añade invalidación por escritura a un endpoint de actualización de perfil.</li>
+<li>Cambia el TTL de una clave a 5 minutos falsos y verifica cuándo expira.</li>
+<li>Simula dos versiones de clave y comprueba que el cache viejo se abandona.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Hay tres palancas de invalidación: TTL, evento y versión.</li>
+<li>Combinarlas según el dato da frescura sin sacrificar hit rate.</li>
+<li>El cache-y-tardo perfecto no existe: se ajusta con métricas.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+          <li><a href="./index.html">Módulo 4 · Caching y CDN</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Optimización del runtime</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Nginx y redes</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Profiling y monitoreo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Módulo 2 · Control de flujo y funciones · PHP desde cero hasta avanzado · Backend Academy</title>
-<meta name="description" content="Módulo 2 del curso de PHP: condicionales if, else y match, bucles for, foreach y while, funciones, parámetros por valor y por referencia y alcance de variables.">
+<meta name="description" content="Toma decisiones con condicionales, repite trabajo con bucles y organiza tu código en funciones con parámetros por valor y por referencia.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../index.html">PHP desde cero hasta avanzado</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 2 · Control de flujo y funciones</span>
-    </nav>
-    <p class="page-hero__eyebrow">⚙️ Intermedio</p>
-    <h1 class="page-hero__title">Módulo 2 · Control de flujo y funciones</h1>
-    <p class="page-hero__subtitle">Condicionales, bucles y funciones reutilizables para que tus scripts tomen decisiones y organicen la lógica.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Módulo 1 recomendado</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">PHP desde cero hasta avanzado</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 2</span>
+      </nav>
+      <p class="page-hero__eyebrow">⚙️ Intermedio</p>
+      <h1 class="page-hero__title">Módulo 2 · Control de flujo y funciones</h1>
+      <p class="page-hero__subtitle">Que tu código decida, repita y reutilice como un backend real.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 48 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel intermedio</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,63 +82,62 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Tomar decisiones con if, else, elseif y la nueva expresión match de PHP 8.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Repetir tareas con for, foreach y while, usando continue y break.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir funciones reutilizables con parámetros tipados, valores por defecto y retorno.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Diferenciar parámetros por valor y por referencia con el símbolo &amp;.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender el alcance de las variables y cuándo se puede acceder a ellas.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="php">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="condicionales-if-else-match.html">
-          <h3>1 · Condicionales: if, else y match</h3>
-            <p>Toma decisiones con branching clásico y la expresión match de PHP 8.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">condicionales</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="bucles-for-foreach-while.html">
-          <h3>2 · Bucles: for, foreach y while</h3>
-            <p>Repite bloques de código con for, foreach y while, con break y continue.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">bucles</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="funciones-definir-parametros-retorno.html">
-          <h3>3 · Funciones: definir, parámetros y retorno</h3>
-            <p>Declara funciones reutilizables con tipos, valores por defecto y return.</p>
-            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">funciones</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="parametros-por-valor-y-referencia.html">
-          <h3>4 · Parámetros por valor y por referencia</h3>
-            <p>Cómo se copian o se comparten los argumentos y cuándo usar el símbolo &amp;.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">funciones</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="alcance-de-variables.html">
-          <h3>5 · Alcance de variables (scope)</h3>
-            <p>Dónde vive cada variable, el scope local y global y la palabra global.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">scope</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Controlar el flujo con if, else y match</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Iterar datos con for, foreach y while</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Definir funciones con parámetros y retorno</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Diferenciar el paso por valor y por referencia</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Comprender el ámbito (scope) de las variables</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~48 min · Decisiones, bucles y funciones reutilizables para escribir lógica..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./alcance-de-variables.html">
+            <h3>1 · Alcance de variables (scope)</h3>
+            <p>global, static y el ámbito de las variables dentro y fuera de las funciones.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">funciones</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./bucles-for-foreach-while.html">
+            <h3>2 · Bucles: for, foreach y while</h3>
+            <p>Repite trabajo sobre datos y colecciones con for, foreach y while.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">control de flujo</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./condicionales-if-else-match.html">
+            <h3>3 · Condicionales: if, else y match</h3>
+            <p>Toma decisiones con if/else y la expresión match de PHP 8.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">control de flujo</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./funciones-definir-parametros-retorno.html">
+            <h3>4 · Funciones: definir, parámetros y retorno</h3>
+            <p>Define funciones con parámetros tipados, valores por defecto y retorno.</p>
+            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">funciones</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./parametros-por-valor-y-referencia.html">
+            <h3>5 · Parámetros por valor y por referencia</h3>
+            <p>Por valor se copia, por referencia (&) se muta: cuándo usar cada uno.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">funciones</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-01/index.html">
-        <span class="label">← Anterior</span>
-        <span class="title">Introducción a PHP</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">Arrays y estructuras de datos</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-01/index.html"><span class="label">← Anterior</span><span class="title">Módulo 1 · Introducción a PHP</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-03/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 3 · Arrays y estructuras de datos</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -141,39 +149,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
           <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a PHP</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="./index.html">Módulo 2 · Control de flujo y funciones</a></li>
           <li><a href="../modulo-03/index.html">Módulo 3 · Arrays y estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · PHP moderno</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Base de datos con PDO</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · APIs y servicios</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Seguridad y despliegue</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

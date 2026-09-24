@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Microservicios · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Microservicios: aprende a dividir tu Backend en servicios independientes. Límites de contexto, comunicación, descubrimiento de servicios y API Gateway.">
+<meta name="description" content="Divide tu sistema en microservicios: bounded contexts, service discovery, API Gateway, comunicación por eventos y resiliencia.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,158 +52,273 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Microservicios</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Microservicios</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🧠 Experto</p>
+          <h1 class="page-hero__title">🧩 Microservicios</h1>
+          <p class="page-hero__subtitle">Divide tu sistema en microservicios: bounded contexts, service discovery, API Gateway, comunicación por eventos y resiliencia.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 35 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> API Gateway · Service Discovery</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Microservicios</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></p>
-      <h1 class="lesson-title">🧩 Microservicios</h1>
-      <p class="section-subtitle">Divide tu Backend monolítico en servicios pequeños e independientes que escalan por separado. Aprende a definir límites de contexto, comunicarlos entre sí, descubrirlos dinámicamente y exponerlos con un API Gateway.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 54 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Arquitectura · Microservicios</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 35 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/api-gateway</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/api-gateway</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> API Gateway</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>Los microservicios son la evolución del Backend de las grandes plataformas. En este curso aprenderás a identificar los límites correctos de cada servicio, a elegir los mecanismos de comunicación (sync vs async), a registrar y descubrir servicios en un entorno dinámico, y a centralizar el ingreso de tráfico con un API Gateway. Todo con un enfoque pragmático: cuándo adoptarlos y cuándo un monolito es mejor.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🚀 Avanzado</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">54</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🧩 Microservicios</span></div>
+  <div class="container">
+    <article class="course" data-course-id="microservicios">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Divide tu sistema en microservicios: bounded contexts, service discovery, API Gateway, comunicación por eventos y resiliencia.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🧠 Experto</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">35</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Diseñar microservicios</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Comunicar servicios de forma robusta</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>Arquitectura</li>
+<li>Docker</li>
+<li>Mensajería</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">API Gateway</span>
+<span class="tag tag--tech">Service Discovery</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 35 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos de microservicios</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 48 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Descubre qué son los microservicios, compáralos con el monolito, aprende a dividir el dominio con bounded contexts y evita los antipatrones más comunes.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/antipatrones.html">Antipatrones comunes</a></li>
+<li><a href="./modulo-01/bounded-context.html">Bounded contexts</a></li>
+<li><a href="./modulo-01/como-dividir-servicios.html">Cómo dividir servicios</a></li>
+<li><a href="./modulo-01/monolito-vs-microservicios.html">Monolito vs microservicios</a></li>
+<li><a href="./modulo-01/que-son-microservicios.html">¿Qué son los microservicios?</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Comunicación</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 57 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">API Gateway, service discovery, comunicación síncrona y asíncrona y contratos versionados: la red de conversaciones entre tus servicios.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/api-gateway.html">API Gateway</a></li>
+<li><a href="./modulo-02/comunicacion-asincrona.html">Comunicación asíncrona</a></li>
+<li><a href="./modulo-02/comunicacion-sincrona.html">Comunicación síncrona</a></li>
+<li><a href="./modulo-02/contratos-y-versionado.html">Contratos y versionado</a></li>
+<li><a href="./modulo-02/service-discovery.html">Service discovery</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Datos y resiliencia</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 61 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Una base de datos por servicio, circuit breaker, reintentos, sagas y patrones de despliegue para que el sistema sobreviva a cualquier fallo.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/bases-de-datos-por-servicio.html">Bases de datos por servicio</a></li>
+<li><a href="./modulo-03/circuit-breaker.html">Circuit breaker</a></li>
+<li><a href="./modulo-03/despliegue-de-microservicios.html">Despliegue de microservicios</a></li>
+<li><a href="./modulo-03/resiliencia-y-reintentos.html">Resiliencia y reintentos</a></li>
+<li><a href="./modulo-03/sagas-y-transacciones.html">Sagas y transacciones distribuidas</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Comunicación entre servicios</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 62 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Los patrones de comunicación en profundidad: mensajería avanzada, service mesh, idempotencia y correlación de mensajes para una red de servicios robusta.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/patrones-de-comunicacion.html">Patrones de comunicación entre servicios</a></li>
+<li><a href="./modulo-04/service-mesh.html">Service mesh: la malla de servicios</a></li>
+<li><a href="./modulo-04/mensajeria-avanzada.html">Mensajería avanzada y eventos</a></li>
+<li><a href="./modulo-04/idempotencia-en-comunicacion.html">Idempotencia en la comunicación</a></li>
+<li><a href="./modulo-04/correlacion-en-mensajes.html">Correlación y trazabilidad de mensajes</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Orquestación e integración</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 61 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Orquestación frente a coreografía, patrones BFF, integraciones con el exterior, pruebas de contrato y eventos de dominio para integrar servicios sin empalmarse.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/orquestacion-vs-coreografia.html">Orquestación vs coreografía</a></li>
+<li><a href="./modulo-05/patron-bff.html">Backend for Frontend (BFF)</a></li>
+<li><a href="./modulo-05/integracion-con-sistemas-externos.html">Integración con sistemas externos</a></li>
+<li><a href="./modulo-05/pruebas-de-contrato.html">Pruebas de contrato entre servicios</a></li>
+<li><a href="./modulo-05/eventos-de-dominio.html">Eventos de dominio e integración</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Observabilidad en microservicios</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 58 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Los tres pilares de la observabilidad aplicados a microservicios: logs estructurados y correlacionados, métricas por servicio y trazas distribuidas con SLO y alertas.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/los-tres-pilares.html">Los tres pilares de la observabilidad</a></li>
+<li><a href="./modulo-06/logs-estructurados.html">Logs estructurados y correlación</a></li>
+<li><a href="./modulo-06/metricas-por-servicio.html">Métricas por servicio</a></li>
+<li><a href="./modulo-06/trazas-distribuidas.html">Trazas distribuidas (tracing)</a></li>
+<li><a href="./modulo-06/slo-y-alertas.html">SLO y alertas efectivas</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Microservicios en producción</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 60 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Despliegue con Kubernetes, escalado automático, seguridad entre servicios, gestión de configuración y secretos y la operación diaria con incidentes y postmortems.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/kubernetes-y-despliegue.html">Kubernetes y el despliegue en producción</a></li>
+<li><a href="./modulo-07/escalado-automatico.html">Escalado automático</a></li>
+<li><a href="./modulo-07/seguridad-entre-servicios.html">Seguridad entre servicios</a></li>
+<li><a href="./modulo-07/configuracion-y-secretos.html">Configuración y secretos</a></li>
+<li><a href="./modulo-07/operacion-e-incidentes.html">Operación e incidentes en producción</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Comprender las ventajas y los costos reales de la arquitectura de microservicios.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir límites de contexto usando Domain-Driven Design (DDD) y bounded contexts.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Diseñar la comunicación sincrónica (REST/gRPC) y asincrónica (eventos/colas).</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Implementar descubrimiento de servicios con Consul o Kubernetes.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Configurar un API Gateway para ruteo, autenticación y rate limiting.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Gestionar bases de datos descentralizadas (data per service).</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Desplegar y escalar microservicios con Docker y CI/CD independiente.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos previos</h2>
-        <ul>
-          <li>Experiencia sólida construyendo APIs Backend.</li>
-          <li>Conocimientos de Docker, bases de datos y fundamentos de redes.</li>
-          <li>Familiaridad con REST y formatos como JSON.</li>
-          <li>Curiosidad por la arquitectura de software a gran escala.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías y herramientas</h2>
-        <div class="row">
-          <span class="tag tag--tech">REST</span>
-          <span class="tag tag--tech">gRPC</span>
-          <span class="tag tag--tech">API Gateway</span>
-          <span class="tag tag--tech">Kubernetes</span>
-          <span class="tag tag--tech">Docker</span>
-          <span class="tag tag--tech">DDD</span>
-          <span class="tag tag--tech">Consul</span>
-          <span class="tag tag--tech">Eventos</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Seis módulos que te llevan de entender qué es un microservicio a construir y operar un sistema de varios servicios independientes.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Introducción a Microservicios</h3>
-          </div>
-          <p class="card__text">Del monolito al microservicio. Ventajas, retos y cuándo NO usar microservicios. La pregunta más importante: ¿realmente lo necesito?</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 72 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Límites y Contextos</h3>
-          </div>
-          <p class="card__text">Identifica servicios con Domain-Driven Design: bounded contexts, agregados y eventos de dominio. Descompón un sistema real en servicios con límites claros.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 84 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. Comunicación entre Servicios</h3>
-          </div>
-          <p class="card__text">REST, gRPC y mensajería asíncrona. Sagas, circuit breakers y retries. Cómo manejar la consistencia cuando cada servicio tiene sus datos.</p>
-          <div class="card__meta">
-            <span>10 lecciones</span><span>≈ 95 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-03/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Descubrimiento de Servicios</h3>
-          </div>
-          <p class="card__text">Service registry, service discovery, health checks y failover. Implementa registros dinámicos con Consul, Eureka y servicios DNS en Kubernetes.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 82 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. API Gateway</h3>
-          </div>
-          <p class="card__text">Un punto de entrada único: ruteo, autenticación, rate limiting, agregación de respuestas y manejo de CORS. Compara Kong, Traefik, Nginx y soluciones cloud.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 80 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">6. Microservicios en Producción</h3>
-          </div>
-          <p class="card__text">Deploy continuo por servicio, data per service, monitoreo distribuido y observabilidad. Proyecto final: descompón un e-commerce en microservicios.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 88 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -212,38 +329,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Introducción</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · Límites</a></li>
-          <li><a href="modulo-03/index.html">Módulo 3 · Comunicación</a></li>
-          <li><a href="index.html">Módulo 4 · Descubrimiento</a></li>
-          <li><a href="index.html">Módulo 5 · Gateway</a></li>
-          <li><a href="index.html">Módulo 6 · Producción</a></li>
+          <li><span>Módulo 1 · Fundamentos de microservicios</span></li>
+          <li><span>Módulo 2 · Comunicación</span></li>
+          <li><span>Módulo 3 · Datos y resiliencia</span></li>
+          <li><span>Módulo 4 · Comunicación entre servicios</span></li>
+          <li><span>Módulo 5 · Orquestación e integración</span></li>
+          <li><span>Módulo 6 · Observabilidad en microservicios</span></li>
+          <li><span>Módulo 7 · Microservicios en producción</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

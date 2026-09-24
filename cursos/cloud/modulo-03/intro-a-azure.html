@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="intro-a-azure">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introducción a Azure · Cloud Computing · Backend Academy</title>
+<meta name="description" content="Introducción a Azure: suscripciones, resource groups y primeros pasos con la CLI az.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="cloud" data-current="intro-a-azure"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Cloud Computing</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Introducción a Azure</span>
+        </nav>
+        <h1 class="lesson-title">Introducción a Azure</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Cloud Computing</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Microsoft Azure</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Azure es la nube pública de Microsoft y una de las tres grandes que sostienen el backend moderno. Su fortaleza histórica viene del mundo corporativo de Windows y Office, pero hoy ofrece exactamente el mismo tipo de servicios Linux, contenedores y serverless que sus competidores.</p>
+<p>Para un backend, Azure interesa sobre todo por su ecosistema PaaS, por la gestión de identidades a través de Entra ID y por niveles de entrada muy competitivos en servicios como Functions o Blob Storage.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Azure es un conjunto de más de doscientos servicios de infraestructura y plataforma ofrecidos por Microsoft con pago por uso. Los recursos se agrupan en resource groups dentro de una suscripción, y todo se gestiona desde el portal, la CLI az o las APIs.</p><p><strong>Por qué importa.</strong> Porque muchos clientes corporativos ya viven en el ecosistema Microsoft y Azure les permite desplegar backend sin cambiar de proveedor, con identidad y compliance comunes.</p><p><strong>Cuándo usarlo.</strong> Úsalo cuando el equipo ya trabaja con tecnologías Microsoft, necesites integración con Entra ID para SSO corporativo o las licencias existentes de SQL Server reduzcan el costo total.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Susbscripción: el contenedor de facturación que agrupa todos tus recursos.</li>
+<li>Resource group: carpeta lógica donde viven los recursos de un proyecto.</li>
+<li>Región: el datacenter físico de Azure como westeurope o eastus.</li>
+<li>Portal de Azure: la consola web para gestionar todo el ecosistema.</li>
+<li>Azure CLI (az): la herramienta de línea de comandos multiplataforma.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>La rutina de acceso más básica: iniciar sesión, listar las suscripciones y preparar el terreno creando un resource group. Todo lo demás se crea dentro de ese grupo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">az login
+az account list --output table
+az account set --subscription &quot;Mi-Suscripcion&quot;
+az group create --name rg-api-backend --location westeurope</code></pre></div>
+</figure>
+<pre><code class="language-text">LOCATION      NAME
+westeurope    rg-api-backend</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Cada servicio se crea con un comando az seguido del tipo de recurso. Por ejemplo, una cuenta de almacenamiento necesita un nombre único global y tags que ayuden a imputar costos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Crear una cuenta de almacenamiento de Azure</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">az storage account create \
+  --name midominioarchivos \
+  --resource-group rg-api-backend \
+  --location westeurope \
+  --sku Standard_LRS \
+  --tags proyecto=midomini api=backend</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En producción los recursos se declaran para poder reproducirlos. Con Terraform declaramos el resource group y la cuenta de almacenamiento, y todo queda versionado en el repositorio.</p>
+<ul><li>La infraestructura vive en código y se revisa con pull requests.</li>
+<li>Los recursos se etiquetan para imputar costos por proyecto.</li>
+<li>Los secretos se referencian desde variables y no se escriben en el código.</li>
+<li>El mismo plan se aplica a desarrollo, staging y producción.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">ejemplo.yaml</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">resource &quot;azurerm_resource_group&quot; &quot;main&quot; {
+  name     = &quot;rg-api-backend&quot;
+  location = &quot;westeurope&quot;
+}
+resource &quot;azurerm_storage_account&quot; &quot;archivos&quot; {
+  name                     = &quot;midominioarchivos&quot;
+  resource_group_name      = azurerm_resource_group.main.name
+  location                 = azurerm_resource_group.main.location
+  account_tier             = &quot;Standard&quot;
+  account_replication_type = &quot;LRS&quot;
+  tags = {
+    proyecto = &quot;midomini&quot;
+  }
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Declara la infraestructura como código siempre que puedas: los clics en el portal no se auditan tan fácilmente ni se reproducen solos.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Cada recurso vive dentro de un resource group y de una suscripción: esa jerarquía define qué se crea, dónde y con qué presupuesto.</li>
+<li>Las regiones de Azure no tienen todas el mismo catálogo de servicios: verifica la disponibilidad antes de comprometerte con una.</li>
+<li>La CLI az funciona igual en macOS, Linux y Windows, lo que facilita la automatización y los scripts.</li>
+<li>Empezar con servicios PaaS evita pagar máquinas virtuales que todavía no necesitas.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Crear recursos sueltos sin resource group: termina siendo imposible auditar qué pertenece a qué proyecto.</li>
+<li>Elegir una región sin revisar la disponibilidad del servicio que vas a usar.</li>
+<li>Meter credenciales en los scripts de la CLI en vez de usar Service Principal o managed identity.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Usa nombres únicos globales para recursos como las cuentas de almacenamiento.</li>
+<li>Agrega tags (proyecto, entorno, owner) desde el primer día.</li>
+<li>Activa el presupuesto y las alertas de gasto antes de crear el primer recurso de pago.</li>
+<li>Empieza con los niveles gratuitos o las SKU básicas mientras aprendes.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea tu suscripción, un resource group y una cuenta de almacenamiento con az, y lista todo con az resource list.</li>
+<li>Derriba lo creado con az group delete --name rg-api-backend --yes --no-wait y confirma el borrado.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Azure agrupa los recursos en suscripciones y resource groups.</li>
+<li>La CLI az y el portal gestionan todo el ecosistema.</li>
+<li>Los servicios PaaS son el punto de entrada recomendado para backend.</li>
+<li>Declarar la infraestructura en código la hace auditable y reproducible.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos del Cloud</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Amazon Web Services (AWS)</a></li>
+          <li><a href="./index.html">Módulo 3 · Microsoft Azure</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Google Cloud Platform</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Redes, seguridad y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Costos y Estrategia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Serverless y arquitecturas nativas</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

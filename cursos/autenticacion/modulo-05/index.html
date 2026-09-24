@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 5 · Autorización y RBAC · Autenticación y Autorización</title>
-<meta name="description" content="Módulo 5 del curso de Autenticación y Autorización: roles de usuario, permisos y claims, middleware de autorización y protección de rutas y funciones.">
+<title>Módulo 5 · Autorización y RBAC · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Separa identidad de permisos: construye roles, claims y middlewares de autorización, y protege rutas y funciones para que cada usuario solo acceda a lo suyo.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Autenticación y Autorización</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 5 · Autorización y RBAC</span>
-    </nav>
-    <p class="page-hero__eyebrow">⚙️ Intermedio</p>
-    <h1 class="page-hero__title">Módulo 5 · Autorización y RBAC</h1>
-    <p class="page-hero__subtitle">Quién puede hacer qué: roles, permisos y claims, middleware de autorización y control fino sobre rutas y funciones del negocio.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 4 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 41 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Módulo 4</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Autenticación y Autorización</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 5</span>
+      </nav>
+      <p class="page-hero__eyebrow">⚙️ Intermedio</p>
+      <h1 class="page-hero__title">Módulo 5 · Autorización y RBAC</h1>
+      <p class="page-hero__subtitle">La identidad abre la puerta; la autorización decide el pasillo.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 4 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 41 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel intermedio</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,57 +82,56 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Diferenciar autenticación de autorización.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Modelar roles y permisos en una base de datos.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Transportar rol y permisos en los claims del JWT.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Construir middleware de autorización reusable y aplicarlo a rutas y funciones.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="autenticacion">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="roles-de-usuario.html">
-          <h3>1 · Roles de usuario</h3>
-            <p>Qué es RBAC y el modelo roles/permisos con sus tablas.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">roles</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="permisos-y-claims.html">
-          <h3>2 · Permisos y claims</h3>
-            <p>De los permisos en BD a los claims del token de acceso.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">permisos</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="middleware-de-autorizacion.html">
-          <h3>3 · Middleware de autorización</h3>
-            <p>Una pieza reusable que exige permisos antes de cada petición.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">middleware</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="protegiendo-rutas-y-funciones.html">
-          <h3>4 · Protegiendo rutas y funciones</h3>
-            <p>Aplica el middleware y defiende también la capa de servicio.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">control</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Modelar roles de usuario y sus jerarquías</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Representar permisos con claims</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Construir middlewares de autorización</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Proteger rutas y funciones con políticas reutilizables</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Combinar RBAC con checks por recurso</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>4 lecciones · ~41 min · Qué puede hacer quién.</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./middleware-de-autorizacion.html">
+            <h3>1 · Middleware de autorización</h3>
+            <p>Intercepta cada petición y decide si el usuario puede seguir o recibe 403.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">autorización</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./permisos-y-claims.html">
+            <h3>2 · Permisos y claims</h3>
+            <p>Los claims declaran hechos del usuario: rol, permisos y ámbito de acción.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">autorización</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./protegiendo-rutas-y-funciones.html">
+            <h3>3 · Protegiendo rutas y funciones</h3>
+            <p>No basta con ocultar botones: la autorización debe vivir en el servidor.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">autorización</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./roles-de-usuario.html">
+            <h3>4 · Roles de usuario</h3>
+            <p>Admin, editor y visitante: jerarquías de roles que simplifican el permiso.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">rbac</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-04/index.html">
-        <span class="label">← Módulo anterior</span>
-        <span class="title">JWT</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-06/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">OAuth 2.0 y OIDC</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-04/index.html"><span class="label">← Anterior</span><span class="title">Módulo 4 · JWT</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-06/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 6 · OAuth 2.0 y OIDC</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -135,42 +143,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y login</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones</a></li>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de la Autenticación</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y Login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones del lado servidor</a></li>
           <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
-          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="./index.html">Módulo 5 · Autorización y RBAC</a></li>
           <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Seguridad, OWASP y cumplimiento</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

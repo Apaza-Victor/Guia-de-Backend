@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="eleccion-de-base-de-datos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo elegir base de datos · System Design / Arquitectura de Sistemas · Backend Academy</title>
+<meta name="description" content="Un mapa para elegir entre los mundos de almacenamiento según tu carga.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="eleccion-de-base-de-datos"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">System Design / Arquitectura de Sistemas</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Cómo elegir base de datos</span>
+        </nav>
+        <h1 class="lesson-title">Cómo elegir base de datos</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design / Arquitectura de Sistemas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Caching y datos a escala</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Elegir base de datos es elegir la pelea de mañana: cada motor brilla en un perfil de carga y sangra en el contrario. El error clásico es elegir por moda o por 'ya lo conozco' y pagar la deuda en el pico.</p>
+<p>La clave es hacer preguntas de carga: ¿Relaciones complejas o documentos? ¿Lecturas de agregación? ¿Escrituras masivas y apuntando a un solo tamaño? Las respuestas descartan motores con elegancia.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La elección de motor se basa en la forma de los datos (relacional, documento, clave-valor, columna, búsqueda), el tipo de acceso (joins, punto, rango, agregación) y la escala de escritura/lectura.</p><p><strong>Por qué importa.</strong> Un motor relacional modela transparencia y consistencia, pero se complica en escala de escritura; un documental es flexible y cómodo pero castiga joins; el clave-valor es la bala para cachés pero casi sin consultas.</p><p><strong>Cuándo usarlo.</strong> Usa SQL como default y baja a motores especializados cuando la forma o la escala lo exige: Redis para caché/sesiones, Elasticsearch para búsqueda, columnares para análisis, vectoriales para ML.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Relacional (Postgres, MySQL): consistencia, joins, transacciones ACID. El default correcto.</li>
+<li>Documento (Mongo, DynamoDB): flexibilidad de esquema y escala horizontal; joins fuera de casa.</li>
+<li>Clave-valor (Redis): latencias < 1 ms, perfecto como capa de caché y sesiones; no para consultas complejas.</li>
+<li>Columna (BigQuery, ClickHouse): análisis y agregaciones sobre tablas enormes.</li>
+<li>Abstractora: miden lo mismo (CAP, consistencia, escala); lo que cambia es qué sacrificas por defecto.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>La decisión en servilleta: si la carga es transaccional y con relaciones → SQL; si es millones de lecturas por clave → Redis; si es agregación de logs → columnar.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Texto</span><span class="code-block__caption">ejemplo.text</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-text">CASO                    | MOTOR SENSATO      
+pedidos + inventario     | PostgreSQL (ACID)  
+sesiones y contadores    | Redis / Memcached  
+catálogo flexible        | DynamoDB/Mongo     
+logs y métricas          | ClickHouse/BigQuery
+búsqueda full-text       | Elasticsearch      
+grafos                   | Neo4j              </code></pre></div>
+</figure>
+<pre><code class="language-text">La forma del dato y del acceso elige el motor.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Los motores conviven: la clave es separar responsabilidades y duplicar lo necesario (la especialización cuesta consistencia).</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">persistencia políglota</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">almacenes:
+  postgres:   # fuente de verdad
+    modelos: [pedidos, usuarios, inventario]
+  redis:      # sesión + caché de catálogo
+    TTL: true
+  search:     # réplica optimizada
+    engine: Elasticsearch
+    sincroniza: eventos(catálogo)
+  analytics:
+    engine: ClickHouse
+    cargador: export nightly</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un marketplace migró su buscador de PostgreSQL a Elasticsearch porque el 'LIKE %texto%' sobre 40 millones de filas tardaba 900 ms. La fuente de verdad siguió en Postgres; cada cambio de producto publica un evento que Elasticsearch consume; las búsquedas pasaron a 15 ms y el coordinador de facetas se resolvió en el motor de búsqueda.</p>
+<ul><li>Mantén una sola fuente de verdad y deja que los especializados sean réplicas dirigidas por eventos.</li>
+<li>El precio de la réplica es consistencia eventual: mide cuánto tarda en verse un cambio.</li>
+<li>Delimita responsabilidades: búsqueda al buscador, sesión al KV, análisis al columnar.</li>
+<li>Revisa la elección cuando el cambio de volumen acerque un motor a su punto de dolor.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># productor: cada alta publica al topic del catálogo
+kafka-topics.sh --create --topic catalog-events --partitions 8
+# consumidor: Elasticsearch se suscribe y reindexa
+kafka-console-consumer.sh --topic catalog-events \
+  --from-beginning | indexer --into search</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> La réplica especializada vale por resolver una lectura concreta; no por duplicar toda la verdad.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El SQL no está viejo: es el estándar de consistencia y relaciones; elijo algo más solo cuando hay una razón de forma o escala.</li>
+<li>DynamoDB/Mongo ganan en flexibilidad y escala horizontal, y pierden en consultas ad-hoc y joins.</li>
+<li>Redis es el queso de la arquitectura: rápido, y se abusa de él en cosas que deberían estar en el origen.</li>
+<li>Los analíticos columnar leen megabytes en vez de filas: la elección para dashboards sobre datos gordos.</li>
+<li>La elección no termina: el volumen crece y la lectura cambia; el diseño debe permitir migrar gradualmente.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Elegir un motor NoSQL por su fama y vivir un año de joins hechos por la app.</li>
+<li>Poner datos transaccionales (saldos) en un documental sin transacciones reales.</li>
+<li>Mantener 4 motores para lo mismo sin una fuente de verdad, contradiciéndose hoy.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>El default defensible es un SQL maduro (Postgres): sal de él con motivo.</li>
+<li>Formaliza la fuente de verdad y cada réplica especializada con su mecanismo de sincronía.</li>
+<li>Prueba la elección contra tu ratio de escritura/lectura y tu latencia objetivo.</li>
+<li>Mide la consistencia eventual de cada réplica: el lag es una deuda conocida.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Elige motores para: pedidos, sesiones, búsqueda de productos y reportes mensuales.</li>
+<li>Describe el evento que sincroniza el catálogo entre Postgres y Elasticsearch.</li>
+<li>Argumenta cuándo prefieres Postgres antes que DynamoDB para tu app actual.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La forma del dato y del acceso, no la moda, elige el motor.</li>
+<li>SQL como default; especializados como réplicas de responsabilidad única.</li>
+<li>La elección se revisa cuando el volumen o la lectura cambian de perfil.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Escalabilidad y distribución</a></li>
+          <li><a href="./index.html">Módulo 5 · Caching y datos a escala</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Resiliencia y consistencia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y entrevista de diseño</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

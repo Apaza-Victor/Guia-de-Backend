@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integracion-continua-conceptos">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integración continua: conceptos · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Aprende los fundamentos de la integración continua: qué es, por qué importa y cómo se automatiza.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="integracion-continua-conceptos"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">DevOps para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Integración continua: conceptos</span>
+        </nav>
+        <h1 class="lesson-title">Integración continua: conceptos</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de versiones para operaciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La integración continua (CI) es la práctica de fusionar a menudo el trabajo de todo el equipo y verificar cada integración de manera automática.</p>
+<p>En lugar de esperar al final del proyecto para unir ramas, cada push dispara una serie de comprobaciones que protegen a la rama principal.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>CI es el proceso automático que se ejecuta ante cada cambio: descarga el código, instala dependencias, compila, ejecuta tests, linting y análisis de seguridad. Si algo falla, el equipo lo sabe en minutos.</p><p><strong>Por qué importa.</strong> Porque detectar un error cinco horas después de romperse es mucho más barato que detectarlo a los cinco días. La CI convierte los bugs en resueltos rápidos y mantiene a main siempre publicable.</p><p><strong>Cuándo usarlo.</strong> Actívala desde el primer commit de un proyecto y hazla obligatoria en el repositorio con checks protegidos.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Pipeline: la secuencia ordenada de pasos que verifica el código.</li>
+<li>Stage: cada fase del pipeline (instalar, testear, empaquetar).</li>
+<li>Runner: la máquina que ejecuta los jobs bajo demanda.</li>
+<li>Cache: almacenar dependencias para que las builds sean rápidas.</li>
+<li>Feedback: el resultado visible que llega al equipo (verde/rojo).</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una sesión de CI reproducible empieza con el entorno limpio seguido de las instalación de dependencias y la ejecución de pruebas. Con npm esto se traduce en tres comandos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">npm ci
+npm run lint
+npm test
+npm run build</code></pre></div>
+</figure>
+<pre><code class="language-text">Instalación de dependencias... OK
+Lint: 0 errores
+Tests: 42 passed
+Build: generado en ./dist</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El mismo flujo, pero escrito como un job de GitHub Actions. Cada paso es un command que se ejecuta en un runner de ubuntu con Node 20.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">Job de integración continua con GitHub Actions</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un pipeline de CI real separa la verificación por tipo de cambio y empaqueta artefactos que la etapa de despliegue consumirá después.</p>
+<ul><li>Job lint: calidad del código y estilo.</li>
+<li>Job test: suite completa con cobertura.</li>
+<li>Job build: genera el artefacto y lo sube como artifact.</li>
+<li>Triggers: pull_request para ramas y push para main.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">ejemplo.yaml</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Con needs: la etapa build solo corre si test terminó bien, así los artefactos malos jamás llegan a producción.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Los cambios pequeños y frecuentes hacen que cada error sea localizable.</li>
+<li>El runner empieza desde cero: la configuración es declarativa y reproducible.</li>
+<li>El cache de dependencias evita re-descargar miles de paquetes en cada ejecución.</li>
+<li>El feedback rojo inmediato es el mecanismo principal de corrección del equipo.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Tests que dependen de una base de datos local: sin isolación, el pipeline es inestable.</li>
+<li>Instalar con npm install y trabar la build en lock: usa npm ci para reproducibilidad.</li>
+<li>Ignorar un test intermitente (flaky): enmascara regresiones reales.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Haz que la CI bloquee el merge: revisión + checks obligatorios.</li>
+<li>Mide el tiempo de la build y reduce los sospechosos con caché.</li>
+<li>Testea sobre una copia limpia del entorno de producción.</li>
+<li>Pon un límite de tiempo por job para evitar runners colgados.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea un flujo de trabajo de CI básico para un proyecto Node y haz que falle a propósito para ver el feedback.</li>
+<li>Agrega branch protection en main exigiendo los checks del pipeline recién creado.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>CI verifica automáticamente cada integración del equipo.</li>
+<li>Un pipeline típico instala, prueba, compila y empaqueta.</li>
+<li>Los checks obligatorios protegen la rama principal.</li>
+<li>El ciclo de feedback corto es el verdadero valor de la práctica.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a DevOps</a></li>
+          <li><a href="./index.html">Módulo 2 · Control de versiones para operaciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Contenedores y automatización</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo (CD)</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en el Backend</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad y cultura DevOps</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

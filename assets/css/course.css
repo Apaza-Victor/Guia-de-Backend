@@ -1,0 +1,197 @@
+/* ============================================================
+   Backend Academy — course.css
+   Página de curso: hero a ancho completo con mockup de terminal,
+   cards de módulos con botón de acceso y lecciones clicables.
+   Se carga en todas las páginas (implica poca sobrecarga).
+   ============================================================ */
+
+/* ================= Hero de curso (dos columnas) ================= */
+.page-hero--course .page-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+}
+
+.page-hero--course .page-hero__title {
+  font-size: clamp(1.9rem, 4.2vw, 3.1rem);
+}
+
+.page-hero--course .page-hero__content {
+  min-width: 0;
+}
+
+.page-hero--course .page-hero__actions {
+  margin-top: var(--space-5);
+}
+
+/* ================= Mockup de terminal (landing de curso) ================= */
+.course-visual {
+  position: relative;
+  perspective: 1200px;
+}
+
+.course-visual .terminal-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 32px 64px rgba(2, 6, 23, 0.55);
+  overflow: hidden;
+  transform: rotateY(-4deg) rotateX(2deg);
+  transition: transform var(--transition-slow);
+}
+
+.course-visual:hover .terminal-card {
+  transform: rotateY(0deg) rotateX(0deg);
+}
+
+.course-visual .terminal-card__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.course-visual .terminal-card__bar span {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+}
+
+.course-visual .terminal-card__bar span:nth-child(1) { background: #f87171; }
+.course-visual .terminal-card__bar span:nth-child(2) { background: #fbbf24; }
+.course-visual .terminal-card__bar span:nth-child(3) { background: #34d399; }
+
+.course-visual .terminal-card__bar small {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.course-visual .terminal-card__body {
+  margin: 0;
+  padding: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #a5b4fc;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.course-visual .terminal-card__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(99, 102, 241, 0.28), transparent 70%);
+}
+
+.course-visual .t-c { color: #64748b; font-style: italic; }
+.course-visual .t-p { color: #34d399; }
+.course-visual .t-w { color: #cbd5e1; }
+.course-visual .t-g { color: #34d399; }
+.course-visual .t-b { color: #818cf8; font-weight: 600; }
+
+@keyframes course-floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.course-visual .floating-chip {
+  position: absolute;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  animation: course-floaty 5s ease-in-out infinite;
+}
+
+.course-visual .floating-chip--top {
+  top: -18px;
+  right: -8px;
+  color: var(--color-accent);
+}
+
+.course-visual .floating-chip--bottom {
+  bottom: -16px;
+  left: -10px;
+  color: var(--color-primary);
+  animation-delay: 1.2s;
+}
+
+/* ================= Zona de módulos (landing) ================= */
+.course {
+  display: grid;
+  gap: var(--space-7);
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.card--module .card__head {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.card--module .card__icon {
+  background: rgba(6, 182, 212, 0.14);
+  color: var(--color-accent);
+}
+
+[data-theme="dark"] .card--module .card__icon {
+  background: rgba(6, 182, 212, 0.18);
+}
+
+.module-lessons {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-1) 0 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.module-lessons li {
+  margin: 0;
+}
+
+.module-lessons a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.module-lessons a::before {
+  content: "→";
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.module-lessons a:hover {
+  background: var(--bg-alt);
+  color: var(--color-primary);
+}
+
+.card__actions {
+  margin-top: auto;
+}
+
+/* Botón de acceso en las tarjetas de lección (índices de módulo) */
+.card--lesson .card__action {
+  margin-top: auto;
+  align-self: flex-start;
+}

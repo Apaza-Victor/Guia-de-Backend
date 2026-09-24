@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-webhook-firmas-seguras">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificar firmas de webhook · Integración y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Verifica firmas criptográficas de webhooks y protégete del fraude por URLs públicas.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-webhook-firmas-seguras"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Integración y Servicios Externos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Verificar firmas de webhook</span>
+        </nav>
+        <h1 class="lesson-title">Verificar firmas de webhook</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integración y Servicios Externos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Webhooks y eventos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Tu endpoint de webhook es una URL pública: cualquiera que la descubra puede mandar payloads falsos. Un webhook sin verificación de firma permite a un atacante crear facturas, marcar pagos o inyectar datos falsos que tu negocio tratará como ciertos.</p>
+<p>Los proveedores serios firman su mensaje. La firma demuestra que el contenido llegó intacto y que lo envió quien posee el secreto. Verificarla es la primera condición de seguridad de cualquier integración por webhook.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La firma de un webhook es un valor criptográfico que acompaña al payload y se calcula con un secreto compartido (HMAC) o con la clave privada del proveedor (RSA), de modo que el receptor pueda probar autenticidad e integridad.</p><p><strong>Por qué importa.</strong> Sin firma, cualquiera que conozca tu URL puede imitar al proveedor. Con firma, el fraude exige conocer el secreto, algo que solo tú y el proveedor saben.</p><p><strong>Cuándo usarlo.</strong> Usa HMAC con hash del cuerpo exacto para proveedores que comparten secreto; RSA cuando el proveedor publica su clave pública y firma con la privada.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>HMAC con secreto compartido es el mecanismo más común.</li>
+<li>La firma se calcula sobre el cuerpo exacto recibido, byte a byte.</li>
+<li>Las firmas RSA se verifican con la clave pública del proveedor.</li>
+<li>La comparación de firmas debe hacerse en tiempo constante para evitar timing attacks.</li>
+<li>El payload con firma caducada o con timestamp lejano debe rechazarse.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Verificación con HMAC en Node: mismo algoritmo que el proveedor y comparación en tiempo constante:</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const crypto = require(&quot;crypto&quot;);
+
+function firmaValida(req) {
+  const secreto = process.env.WEBHOOK_SECRETO;
+  const firma = req.headers[&quot;x-proveedor-firma&quot;];
+  const esperada = crypto
+    .createHmac(&quot;sha256&quot;, secreto)
+    .update(req.rawBody)
+    .digest(&quot;hex&quot;);
+  return crypto.timingSafeEqual(
+    Buffer.from(firma),
+    Buffer.from(esperada)
+  );
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">Devuelve true solo si la firma coincide con la esperada; rechaza cualquier manipulación.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Con RSA el proveedor publica su clave: descargas la clave pública y verificas sin compartir ningún secreto:</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Verificación con clave pública RSA</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const crypto = require(&quot;crypto&quot;);
+const clavePublica = obtenerClavePublica();
+
+const correcto = crypto.verify(
+  &quot;sha256&quot;,
+  Buffer.from(req.rawBody),
+  clavePublica,
+  Buffer.from(req.headers[&quot;x-proveedor-firma&quot;], &quot;base64&quot;)
+);</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una plataforma de tickets manda sus webhooks firmados con HMAC y un secreto por tienda. Un atacante descubrió la URL del webhook y probó a crear usuarios falsos; la firma lo rechazó siempre. El defecto que sí tuvieron fue loggear el payload completo: hoy rotan secretos y loguean solo el id.</p>
+<ul><li>Rotar el secreto del webhook periódicamente o tras sospecha de fuga.</li>
+<li>Rechazar firmas con timestamp de más de cinco minutos de antigüedad.</li>
+<li>Usar un secreto distinto por entorno y por cliente cuando el proveedor lo permite.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">function antiguedadOk(timestamp, maximoMs) {
+  return Date.now() - timestamp &lt; maximoMs;
+}
+if (!antiguedadOk(req.body.timestamp, 5 * 60 * 1000)) {
+  return res.status(401).send();
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El reloj del servidor debe mantenerse sincronizado con NTP para que el antirreplay funcione.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>HMAC demuestra que el emisor conoce un secreto que solo tu sistema y el proveedor comparten.</li>
+<li>La verificación debe usar el cuerpo sin modificar, tal y como llegó por la red.</li>
+<li>La comparación en tiempo constante evita medir diferencias por longitud.</li>
+<li>RSA no necesita compartir secreto y permite múltiples emisores con una sola clave pública.</li>
+<li>El timestamp añade la defensa antirreplay frente a entregas capturadas y reenviadas.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Verificar la firma sobre un cuerpo re-serializado en vez del cuerpo original.</li>
+<li>Comparar con == en lugar de timingSafeEqual y filtrar información por el tiempo.</li>
+<li>Guardar el secreto en el código o loggear payloads con datos sensibles.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Consume siempre el cuerpo original, no el objeto ya parseado.</li>
+<li>Responde 401 con texto corto y sin detalle técnico para el atacante.</li>
+<li>Renueva y rota los secretos y guarda la fecha de cada rotación.</li>
+<li>Borra la firma y el payload completo de los logs, deja solo el id y el estado.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Genera una firma HMAC correcta y otra manipulada, y comprueba que solo la primera pasa.</li>
+<li>Rechaza un webhook con timestamp viejo y uno con firma caducada.</li>
+<li>Cambia el algoritmo a RSA y verifica con la clave pública del proveedor.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La firma prueba autenticidad e integridad del webhook.</li>
+<li>HMAC con secreto compartido o RSA con clave pública son las dos vías estándar.</li>
+<li>Verifica sobre el cuerpo original, en tiempo constante y con antirreplay por timestamp.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de integración</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Integraciones con SaaS</a></li>
+          <li><a href="./index.html">Módulo 5 · Webhooks y eventos</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad en integraciones</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y mantenimiento</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

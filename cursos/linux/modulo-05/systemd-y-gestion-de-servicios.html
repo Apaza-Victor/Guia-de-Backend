@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="systemd-y-gestion-de-servicios">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>systemd y gestión de servicios · Linux y Terminal para Backend · Backend Academy</title>
+<meta name="description" content="Gestiona servicios del sistema con systemd y systemctl.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="linux" data-current="systemd-y-gestion-de-servicios"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Linux y Terminal para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">systemd y gestión de servicios</span>
+        </nav>
+        <h1 class="lesson-title">systemd y gestión de servicios</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Linux y Terminal para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Redes y servicios</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Desde que aparece systemd, un servicio en Linux se declara en una unit: qué ejecuta, con qué usuario, cómo reinicia. El sistema lo levanta en el arranque y lo vigila de por vida.</p>
+<p>Con systemctl y journalctl gestionas el ciclo de vida de cada servicio y su log, sin depender de nohup ni de procesos sueltos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>systemd es el gestor de servicios moderno. Una unit (.service) describe un servicio (exec, user, restart). systemctl lo arranca/para y journalctl lee sus logs centralizados.</p><p><strong>Por qué importa.</strong> Disponibilidad y orden: un servicio con Restart=always vuelve solo tras una caída, arranca en el boot y su log vive en un sitio conocido.</p><p><strong>Cuándo usarlo.</strong> Usa systemd para cualquier servicio persistente: tu app Node, PHP-FPM, bases de datos o un worker de colas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Las units viven en /etc/systemd/system/.</li>
+<li>systemctl start/stop/restart/status gestionan un servicio.</li>
+<li>enable/disable deciden si arranca en el boot.</li>
+<li>Restart=always y RestartSec controlan la supervivencia.</li>
+<li>journalctl -u servicio lee el log de ese servicio.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>El ciclo de vida diario de un servicio.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">sudo systemctl start mi-app
+sudo systemctl status mi-app
+sudo systemctl restart mi-app
+sudo systemctl enable mi-app</code></pre></div>
+</figure>
+<pre><code class="language-text">Servicio arrancado, su estado visible y registrado para el próximo boot.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Una unit completa para tu aplicación por producción.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Crear una unit propia</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">sudo tee /etc/systemd/system/mi-app.service &lt;&lt;'EOF'
+[Unit]
+Description=Aplicacion backend
+After=network.target postgresql.service
+
+[Service]
+User=deploy
+WorkingDirectory=/srv/tienda
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now mi-app</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>La unit de tu app con auto-reinicio y logs, más el diagnóstico de journalctl cuando algo va mal.</p>
+<ul><li>Restart=always recupera caídas sin intervención.</li>
+<li>El usuario de la unit nunca es root.</li>
+<li>journalctl filtra por servicio, rango y prioridad.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Ver el log del servicio en vivo
+journalctl -u mi-app -f
+# Solo errores recientes
+journalctl -u mi-app -p err -n 30
+# Desde una fecha concreta
+journalctl -u mi-app --since '1 hour ago'</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> La unit con Environment y WorkingDirectory define el entorno exacto: así no hay 'funciona en mi máquina'.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>daemon-reload regenera las units tras editarlas.</li>
+<li>Restart=always reinicia sin importar el motivo.</li>
+<li>enable--now arranca y registra para el boot.</li>
+<li>journalctl centraliza los logs con filtros potentes.</li>
+<li>La unit con minuto de usuario y WorkinDir hace el runtime predecible.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Editar una unit y olvidar systemctl daemon-reload.</li>
+<li>Dejar la app sin Restart=always y no saber que murió.</li>
+<li>Ejecutar como root servicios que solo necesitan su usuario.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Cada deploy que toque la unit acaba en daemon-reload + restart.</li>
+<li>Fija RestartSec para no reiniciar en bucle furioso.</li>
+<li>Aprende journalctl antes que el cat de logs manus.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Observa el ciclo de vida con systemctl status de un servicio.</li>
+<li>Crea una unit para tu app con Reyport y env.</li>
+<li>Filtra journalctl por errores de tu servicio.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>systemd declara servicios como units y los vigila.</li>
+<li>start/restart/enable y Restart=always dan disponibilidad.</li>
+<li>journalctl centraliza y filtra los logs.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Linux</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Navegación y archivos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Usuarios, permisos y procesos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Almacenamiento y archivos del sistema</a></li>
+          <li><a href="./index.html">Módulo 5 · Redes y servicios</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Scripting y automatización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Producción y troubleshooting</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

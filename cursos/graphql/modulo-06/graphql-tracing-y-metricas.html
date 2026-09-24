@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-tracing-y-metricas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracing y métricas por resolver · GraphQL · Backend Academy</title>
+<meta name="description" content="Tracing y métricas por resolver para optimizar GraphQL.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-tracing-y-metricas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">GraphQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Tracing y métricas por resolver</span>
+        </nav>
+        <h1 class="lesson-title">Tracing y métricas por resolver</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Seguridad y rendimiento GraphQL</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Una query que responde en 700 ms puede esconder un resolver que tarda 600 y otros diez casi gratis. Para optimizar GraphQL hay que verlo por campo: el tracing descompone el tiempo de cada resolver.</p>
+<p>Con métricas por resolver sabes qué campo trae la ralentización, si la base de datos es la culpable o si un campo anidado multiplica el coste.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El tracing registra la duración de cada resolver dentro de una operación; las métricas agregan esos tiempos por tipo, campo y operación.</p><p><strong>Por qué importa.</strong> Sin trazado, optimizar GraphQL es adivinar: el coste está repartido en decenas de campos y niveles.</p><p><strong>Cuándo usarlo.</strong> Activa tracing desde el día uno y agrega paneles cuando el API cobre importancia.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El trace de una operación lista cada resolver con su duración.</li>
+<li>PersistedUptime se agregatea por campo y operación.</li>
+<li>Apollo Server integra tracing con plugins.</li>
+<li>Los gráficos visibilitan el p95 por resolver.</li>
+<li>Un campo caro repetido en N+1 se descubre al trazar.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Activar un plugin de tracing que registra la duración de cada resolver.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">import { ApolloServerPluginUsageReporting } from &quot;@apollo/server/plugin/usageReporting&quot;
+const server = new ApolloServer({
+  schema,
+  plugins: [ApolloServerPluginUsageReporting({ sendReportsImmediately: true })],
+})</code></pre></div>
+</figure>
+<pre><code class="language-text">Los informes de uso llegan con el tiempo de cada resolver.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Un plugin local que imprime los resolvers más lentos de cada operación.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Plugin de tracing local</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const imprimirLentos = {
+  async didResolveOperation(context) {
+    const op = context.operationName || &quot;anónima&quot;
+    console.log(&quot;Operación:&quot;, op)
+  },
+}
+const server = new ApolloServer({ schema, plugins: [imprimirLentos] })</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Con los traces agregados detectas qué campo crackea el p95 de una operación de contax.</p>
+<ul><li>Activa el plugin de usage reporting en producción.</li>
+<li>Construye gráficos de tiempo medio por campo.</li>
+<li>Alerta cuando el p95 de un resolver supere el umbral.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const p95PorResolver = trazas.mapa((t) =&gt; ({
+  campo: t.campo,
+  p95: percentil(t.tiempos, 0.95),
+}))</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los plugins de Apollo Server no reemplazan a OpenTelemetry cuando quieras correlación completa.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El trace de una operación es un árbol: el tiempo del padre incluye a los hijos.</li>
+<li>Agregar por campo revela los resolvers que valen la pena optimizar.</li>
+<li>El N+1 se ve en el trace como muchas llamadas cortas duplicadas.</li>
+<li>Comparar traces entre consultas del mismo tipo muestra outliers.</li>
+<li>Traza solo lo que necesitas: trace completo de todo puede ser caro y ruidoso.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Optimizar a ciegas sin medir primero.</li>
+<li>Traces en producción que revelan datos sensibles en los spans.</li>
+<li>Configurar tracing solo en development y adivinar en producción.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Activa el trazado en producción pero reduciendo el muestreo.</li>
+<li>Correla traces con métricas de base de datos.</li>
+<li>Asigna el p95 como métrica de alerta, no la media.</li>
+<li>Guarda ejemplos de traces de queries lentas para depurar.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Activa el plugin de usage reporting y observa los resolvers.</li>
+<li>Crea un plugin local que liste los campos de más de 100 ms.</li>
+<li>Detecta un N+1 en el trace de una query anidada.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El tracing descompone la duración de cada resolver.</li>
+<li>Las métricas por campo señalan dónde optimizar.</li>
+<li>El p95 por resolver es la señal de alerta correcta.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Queries y resolvers avanzados</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Mutaciones y suscripciones</a></li>
+          <li><a href="./index.html">Módulo 6 · Seguridad y rendimiento GraphQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · GraphQL en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

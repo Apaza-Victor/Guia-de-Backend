@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Testing Backend · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Testing Backend: aprende a crear tests unitarios, de integración y E2E con Jest, PHPUnit y pytest. Domina TDD, mocks y estrategias de testing para APIs.">
+<meta name="description" content="Unit testing, integration testing, E2E, mocks, stubs, fixtures, cobertura y pruebas automatizadas para tu backend.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,159 +52,272 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Testing Backend</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Testing Backend</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🔥 Avanzado</p>
+          <h1 class="page-hero__title">🧪 Testing Backend</h1>
+          <p class="page-hero__subtitle">Unit testing, integration testing, E2E, mocks, stubs, fixtures, cobertura y pruebas automatizadas para tu backend.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 34 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Unit · Integration · E2E</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Testing Backend</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">🔧 Intermedio</span></p>
-      <h1 class="lesson-title">🧪 Testing Backend</h1>
-      <p class="section-subtitle">Aprende a escribir tests confiables para tus APIs y aplicaciones Backend. Desde unit tests con Jest y pytest hasta pruebas end-to-end que simulan al usuario real. Si no lo testeas, no existe.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 48 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Testing · QA · TDD</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 34 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/unit</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/unit</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Unit</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>El testing es el pilar de cualquier Backend profesional. En este curso aprenderás a diseñar estrategias de testing, escribir pruebas unitarias, de integración y end-to-end, usar mocks y stubs, aplicar TDD en tu flujo de trabajo y medir la cobertura de código. Usarás herramientas reales como Jest, pytest, PHPUnit y Vitest, y entenderás cómo integrar tests en un pipeline de CI/CD.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🔧 Intermedio</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">48</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🧪 Testing</span></div>
+  <div class="container">
+    <article class="course" data-course-id="testing">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Unit testing, integration testing, E2E, mocks, stubs, fixtures, cobertura y pruebas automatizadas para tu backend.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🔥 Avanzado</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">34</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Escribir tests de calidad</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Automatizar las pruebas</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>APIs REST</li>
+<li>Arquitectura</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">Unit</span>
+<span class="tag tag--tech">Integration</span>
+<span class="tag tag--tech">E2E</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 34 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos del Testing</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 48 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Comprende qué es el testing, por qué importa en backend, la pirámide de testing, los tipos de pruebas, el ciclo de vida de un test y cómo organizar la suite para que crezca con el proyecto.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/ciclo-de-vida-de-un-test.html">Ciclo de vida de un test</a></li>
+<li><a href="./modulo-01/organizando-tests.html">Organizando los tests</a></li>
+<li><a href="./modulo-01/piramide-de-testing.html">La pirámide de testing</a></li>
+<li><a href="./modulo-01/que-es-testing.html">¿Qué es el testing?</a></li>
+<li><a href="./modulo-01/tipos-de-pruebas.html">Tipos de pruebas</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Unit Testing</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 66 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Escribe tu primer test con PHPUnit, domina assertions y expectativas, aisla dependencias con mocks, stubs y spies, y cubre el testing de excepciones.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/assertions-y-expectativas.html">Assertions y expectativas</a></li>
+<li><a href="./modulo-02/dobles-en-practica.html">Dobles en práctica</a></li>
+<li><a href="./modulo-02/mocks-stubs-y-spies.html">Mocks, stubs y spies</a></li>
+<li><a href="./modulo-02/primer-test-phpunit.html">Primer test con PHPUnit</a></li>
+<li><a href="./modulo-02/testeando-excepciones.html">Testeando excepciones</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Tests de Integración</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 73 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Prueba la integración real: bases de datos con contenedores, test data con fixtures y seeds, HTTP y servicios externos, y pruebas contractuales entre consumidor y proveedor.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/banco-postgres-y-contenedores.html">Postgres con contenedores</a></li>
+<li><a href="./modulo-03/pruebas-contractuales.html">Pruebas contractuales</a></li>
+<li><a href="./modulo-03/test-data-fixtures-y-seeds.html">Test data, fixtures y seeds</a></li>
+<li><a href="./modulo-03/testing-bases-de-datos.html">Testing de bases de datos</a></li>
+<li><a href="./modulo-03/testing-http-y-servicios-externos.html">Testing HTTP y servicios externos</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Pruebas End-to-End</h3>
+                <div class="card__meta">
+                  <span>4 lecciones</span><span>≈ 55 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Cubre el sistema de cabo a rabo: Supertest sobre la API, flujos completos, E2E con Playwright y ejecución de pruebas E2E dentro del CI.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/e2e-con-playwright-api.html">E2E con Playwright sobre la API</a></li>
+<li><a href="./modulo-04/flujos-completos-api.html">Flujos completos de API</a></li>
+<li><a href="./modulo-04/pruebas-e2e-en-ci.html">Pruebas E2E en CI</a></li>
+<li><a href="./modulo-04/supertest-api.html">Supertest para tu API</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · TDD y Buenas Prácticas</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 71 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Desarrolla con Test-Driven Development: su filosofía, el ciclo Red, Green, Refactor, su aplicación a una API REST y al arreglo de bugs, con casos borde y errores bien cubiertos.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/casos-borde-y-errores.html">Casos borde y errores</a></li>
+<li><a href="./modulo-05/que-es-tdd.html">¿Qué es TDD?</a></li>
+<li><a href="./modulo-05/red-green-refactor.html">Red, Green, Refactor</a></li>
+<li><a href="./modulo-05/tdd-en-api-rest.html">TDD aplicado a una API REST</a></li>
+<li><a href="./modulo-05/tdd-para-corregir-bugs.html">TDD para corregir bugs</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Métricas y CI/CD</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 66 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Mide la cobertura de código, detecta regresiones, limpia los tests inestables y ejecuta el pipeline en GitHub Actions y GitLab CI.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/cobertura-de-codigo.html">Cobertura de código</a></li>
+<li><a href="./modulo-06/detectando-regresiones.html">Detectando regresiones</a></li>
+<li><a href="./modulo-06/integracion-con-github-actions.html">Tests en GitHub Actions</a></li>
+<li><a href="./modulo-06/integracion-con-gitlab-ci.html">Tests en GitLab CI</a></li>
+<li><a href="./modulo-06/limpiando-tests-inestables.html">Limpiando tests inestables</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Testing en CI/CD y calidad continua</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 64 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Lleva el testing al siguiente nivel: quality gates y umbrales de calidad, análisis estático y secretos, mutation testing, tests en paralelo y una estrategia integral de testing para el equipo.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/quality-gates-y-umbrales.html">Quality gates y umbrales de calidad</a></li>
+<li><a href="./modulo-07/sast-y-deteccion-de-secretos.html">SAST y detección de secretos</a></li>
+<li><a href="./modulo-07/mutation-testing.html">Mutation testing: midiendo la fortaleza</a></li>
+<li><a href="./modulo-07/tests-en-paralelo-y-optimizacion.html">Tests en paralelo y optimización del pipeline</a></li>
+<li><a href="./modulo-07/estrategia-de-testing-integral.html">Estrategia de testing integral</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender la pirámide de testing y diseñar una estrategia efectiva.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Escribir tests unitarios que validen lógica aislada de negocio.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Crear tests de integración que verifiquen el contrato con bases de datos y servicios externos.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Implementar pruebas end-to-end que simulen flujos completos del usuario.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Domina mocks, stubs y spies para aislar dependencias en tus tests.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Aplica TDD (Test-Driven Development) como metodología de desarrollo.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Mide y mejora la cobertura de código con herramientas reales.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Integra tests automatizados en pipelines de CI/CD.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos previos</h2>
-        <ul>
-          <li>Conocimientos básicos de al menos un lenguaje Backend (Node.js, Python o PHP).</li>
-          <li>Familiaridad con peticiones HTTP y estructura de APIs REST.</li>
-          <li>Un editor de código y terminal configurados en tu máquina.</li>
-          <li>Ganas de escribir código más confiable y profesional.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías y herramientas</h2>
-        <div class="row">
-          <span class="tag tag--tech">Jest</span>
-          <span class="tag tag--tech">pytest</span>
-          <span class="tag tag--tech">PHPUnit</span>
-          <span class="tag tag--tech">Vitest</span>
-          <span class="tag tag--tech">Supertest</span>
-          <span class="tag tag--tech">Mock / Stub</span>
-          <span class="tag tag--tech">TDD</span>
-          <span class="tag tag--tech">Cobertura</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Seis módulos que te llevan desde los fundamentos del testing hasta la integración completa con CI/CD. Aprenderás con ejemplos prácticos en cada paso.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Fundamentos del Testing</h3>
-          </div>
-          <p class="card__text">¿Por qué testear? La pirámide de testing, tipos de pruebas (unitaria, integración, E2E), el ciclo de vida de un test y las convenciones que hacen que los tests sean mantenibles.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 72 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Unit Testing en la Práctica</h3>
-          </div>
-          <p class="card__text">Escribe tu primer test unitario con Jest, pytest o PHPUnit. Aprende a mockear dependencias, usar spies y assertions que describan el comportamiento esperado.</p>
-          <div class="card__meta">
-            <span>9 lecciones</span><span>≈ 85 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. Tests de Integración</h3>
-          </div>
-          <p class="card__text">Prueba la interacción entre componentes reales: bases de datos, archivos y servicios. Usa bases de datos en memoria y contenedores para tests reproducibles.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 78 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-03/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Pruebas End-to-End (E2E)</h3>
-          </div>
-          <p class="card__text">Simula al usuario real con herramientas E2E: Supertest para APIs HTTP, Playwright para flujos completos. Valida desde la capa HTTP hasta la respuesta del servidor.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 80 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-04/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. TDD y Buenas Prácticas</h3>
-          </div>
-          <p class="card__text">Test-Driven Development: escribe el test antes del código. Ciclo Red-Green-Refactor, testing de APIs REST, manejo de errores y casos edge.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 75 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-05/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">6. Métricas y CI/CD</h3>
-          </div>
-          <p class="card__text">Mide cobertura de código, detecta regresiones, integra tests en pipelines de GitHub Actions y GitLab CI. Cierra el círculo con un proyecto final completo.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 68 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-06/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -213,38 +328,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · Unit Testing</a></li>
-          <li><a href="modulo-03/index.html">Módulo 3 · Integración</a></li>
-          <li><a href="modulo-04/index.html">Módulo 4 · E2E</a></li>
-          <li><a href="modulo-05/index.html">Módulo 5 · TDD</a></li>
-          <li><a href="modulo-06/index.html">Módulo 6 · Métricas</a></li>
+          <li><span>Módulo 1 · Fundamentos del Testing</span></li>
+          <li><span>Módulo 2 · Unit Testing</span></li>
+          <li><span>Módulo 3 · Tests de Integración</span></li>
+          <li><span>Módulo 4 · Pruebas End-to-End</span></li>
+          <li><span>Módulo 5 · TDD y Buenas Prácticas</span></li>
+          <li><span>Módulo 6 · Métricas y CI/CD</span></li>
+          <li><span>Módulo 7 · Testing en CI/CD y calidad continua</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

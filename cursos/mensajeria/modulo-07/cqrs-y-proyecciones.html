@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="cqrs-y-proyecciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CQRS y proyecciones de lectura · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Separa lectura y escritura con CQRS y construye proyecciones desde tus eventos.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="cqrs-y-proyecciones"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">CQRS y proyecciones de lectura</span>
+        </nav>
+        <h1 class="lesson-title">CQRS y proyecciones de lectura</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Arquitecturas orientadas a eventos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>El modelo de escritura y el de lectura suelen tener intereses opuestos: las escrituras quieren consistencia y reglas; las lecturas quieren velocidad, agregación y formas de ver los datos. CQRS (Command Query Responsibility Segregation) las separa en dos modelos dentro del mismo dominio.</p>
+<p>Combinado con event sourcing o con un broker de eventos, las lecturas se convierten en proyecciones que se actualizan con cada evento. El resultado: escribir cómodo, leer rápido y cada lado con su propia base o índice.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>CQRS segrega los comandos (escrituras, ops que cambian estado) de las consultas (lecturas sin efectos), cada una en su propio modelo, a menudo con almacenes y esquemas distintos sincronizados por eventos.</p><p><strong>Por qué importa.</strong> Libera a cada lado de sacrificarse por el otro: las escrituras conservan su integridad y las lecturas se optimizan sin fricción, escalando de forma independiente.</p><p><strong>Cuándo usarlo.</strong> Usa CQRS cuando una proyección de lectura pidar eficiencia y el modelo canónico sea incómodo, o cuando quieras sincronizar vistas múltiples desde un mismo stream de eventos. Evítalo en CRUD simple: duplica la complejidad sin retorno.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Comando: operación que cambia el estado; se valida contra el modelo de escritura.</li>
+<li>Consulta: operación de solo lectura contra la proyección optimizada.</li>
+<li>Proyección: visión derivada del estado, construida y actualizada por eventos.</li>
+<li>Uno a muchos: un solo stream de eventos alimenta saldos, extractos y notificaciones.</li>
+<li>El almacenamiento de lectura se optimiza por consulta, no por integridad.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Separamos la API: los comandos van al servicio de escritura y las consultas a la proyección.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python"># Servicio de escritura: valida y emite el comando
+def aplicar_pedido(datos):
+    validar(datos)
+    emitir_evento('pedido.creado', datos)
+
+# Servicio de lectura: consulta la proyeccion, no la cadena de eventos
+def resumen_pedido(pedido_id):
+    return proyeccion_pedidos.find(pedido_id)
+# Sin CQRS, cada lectura resolveria mil eventos o una tabla inadecuada.</code></pre></div>
+</figure>
+<pre><code class="language-text">La lectura es una query rápida sobre una tabla pensada para ella; la escritura mantiene sus reglas.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Una proyección escucha los eventos del aggretado y mantiene una vista lista para leer.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Proyector de saldos</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def proyectar(event):
+    if event.tipo == 'pedido.creado':
+        saldos[event.pedido] = {'total': event.total, 'pagado': 0}
+    if event.tipo == 'pago.recibido':
+        saldos[event.pedido]['pagado'] += event.monto
+    if event.tipo == 'pedido.cancelado':
+        saldos.pop(event.pedido, None)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>La sección de clientes consulta sus extractos, pendientes y saldo con muchas formas. El equipo aplicó CQRS: el modelo de escritura guarda eventos y la proyección mantiene una tabla de saldos por cliente actualizada en milisegundos. Las consultas dejaron de tocar el historial y pasan de 300ms a 8ms.</p>
+<ul><li>Las proyecciones se reconstruyen desde el stream: nunca son fuente de verdad.</li>
+<li>Escala la proyección de forma independiente de las escrituras.</li>
+<li>Define una consulta por proyección: cada lectura tiene su forma óptima.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">proyecciones:
+  saldo_cliente:  eventos -&gt; tabla clientes.saldo
+  extracto_30d:   eventos -&gt; índice por cliente y fecha
+  notificaciones: eventos -&gt; cola para avisos
+# Cada proyección puede vivir en su servicio y su almacen.</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> CQRS sin consistencia eventual es contradictorio: las lecturas pueden ir unos pasos por detrás. Decide el retardo aceptable para cada consulta.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Separar comandos y consultas permite distintos lenguajes y modelos por cada lado.</li>
+<li>Las escrituras siguen siendo válidas con sus reglas sin sacrificarse por la lectura.</li>
+<li>Las proyecciones son derivadas: borrarlas y reconstruirlas siempre se puede.</li>
+<li>El mismo flujo de eventos alimenta varias vistas con formas distintas.</li>
+<li>La latencia de propagación hace que la lectura sea eventual: define el objetivo de cada vista.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Aplicar CQRS a un CRUD trivial: duplicas servicios, esquemas y latencia sin beneficio.</li>
+<li>Tratar la proyección como un estado mutable además: entonces deja de ser derivada.</li>
+<li>Permitir escrituras al modelo de lectura: se rompe la separación y la coherencia.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Combina CQRS con event sourcing o al menos con eventos del dominio para alimentar vistas.</li>
+<li>Empieza separando una sola consulta dolorosa antes de remodelar todo.</li>
+<li>Haz reconstruibles todas las proyecciones: su problema es la garantía de consistencia.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Identifica una consulta lenta de tu sistema y su modelo de escritura.</li>
+<li>Construye una proyección simple impulsada por eventos y consúltala.</li>
+<li>Define plazos de eventualidad (¿cuánto puede atrasarse tu vista?) y justifícalo.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>CQRS separa el modelo de escritura del de lectura en el mismo dominio.</li>
+<li>Las proyecciones derivan vistas optimizadas desde el flujo de eventos.</li>
+<li>Escrituras íntegras y lecturas rápidas, cada una con su propia jerarquía.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="./index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

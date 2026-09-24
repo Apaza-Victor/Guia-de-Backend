@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="schema-registry-evolucion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schema registry y evolución de mensajes · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Gestiona la evolución de esquemas con un schema registry y cambia servicios sin romper.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="schema-registry-evolucion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Schema registry y evolución de mensajes</span>
+        </nav>
+        <h1 class="lesson-title">Schema registry y evolución de mensajes</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Mensajería a escala</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Los mensajes son contratos entre servicios, y los contratos cambian. Si no controlas el esquema, basta un nuevo campo obligatorio para tumbar a todos los consumidores antiguos. Sin embargo, no se trata de nunca cambiar: se trata de que el cambio esté pactado y sea compatible.</p>
+<p>Un schema registry guarda las versiones del esquema, valida los mensajes antes de publicar y aplica políticas de compatibilidad que hacen caer a los servicios de forma evolutiva.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un schema registry es un servicio central que versiona los esquemas (Avro, Protobuf, JSON Schema), asigna identificadores y valida la compatibilidad de cada publicación y de cada evolución.</p><p><strong>Por qué importa.</strong> El contrato de los mensajes no puede ser 'cada uno mira el JSON': un cambio silencioso de tipo o de cardinalidad rompe consumidores en producción sin error a tiempo.</p><p><strong>Cuándo usarlo.</strong> Usa schema registry en cuanto haya más de un consumidor por tópico o un equipo que publique y otro que consuma; hazlo obligatorio desde el primer contrato.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Versión del esquema: cada cambio registrado tiene un id y un historial.</li>
+<li>Compatibility modes: backward, forward, full: definen qué cambios permito.</li>
+<li>Semantic versioning: adiciones opcionales vs cambios breaking.</li>
+<li>Avro/Protobuf binarios: más ligeros y con validación nativa de schema.</li>
+<li>El productor serializa con el schema; los consumidores deserializan cualquier versión compatible.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Registramos un esquema Avro y publicamos con el identificador que asigna el registry.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">schema = &quot;&quot;&quot;
+{
+  &quot;namespace&quot;: &quot;pagos&quot;,
+  &quot;type&quot;: &quot;record&quot;,
+  &quot;name&quot;: &quot;Cargo&quot;,
+  &quot;fields&quot;: [
+    {&quot;name&quot;: &quot;pedido&quot;, &quot;type&quot;: &quot;string&quot;},
+    {&quot;name&quot;: &quot;monto&quot;,    &quot;type&quot;: &quot;double&quot;},
+    {&quot;name&quot;: &quot;moneda&quot;,   &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;EUR&quot;}
+  ]
+}
+&quot;&quot;&quot;</code></pre></div>
+</figure>
+<pre><code class="language-text">El cargo queda serializado con su schema id: los consumidores lo deserializarán según su versión compatible.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Evolución compatible: añadimos un campo con default (backward compatible) para no romper a consumidores antiguos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Añadir campo sin romper a nadie</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">fields:
+  - { name: pedido, type: string }
+  - { name: monto,  type: double }
+  - { name: moneda, type: string, default: EUR }
+  - { name: origen, type: [null, string], default: null }
+# backward: los consumidores viejos pueden leer el nuevo schema
+# con defaults y avro lo valida antes de publicar</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Billing migró su tópico de cargos: necesitaban añadir 'cuota_iva'. Con backward compatibility, el productor publicó la nueva versión sin detener nada; los consumidores que no conocían el campo siguieron funcionando y los nuevos lo usaron. Dos semanas después, se hizo obligatorio.</p>
+<ul><li>Añade campos con default o nullable para mantener la compatibilidad.</li>
+<li>Nunca quites ni renombres un campo sin versión mayor y migración planificada.</li>
+<li>Test en staging el cambio de schema con consumidores de ambas versiones.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Politicas del schema registry
+compatibility: BACKWARD  # el nuevo schema lee todos los datos antiguos
+evolucion:
+  - add: cuota_iva (default 0.0)
+  - add: referencia_pago (nullable)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Con compatibilidad FORWARD, los consumidores nuevos leen datos viejos; con BACKWARD, los viejos leen datos nuevos. Full exige ambas.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El registry asigna un id a cada versión y lo antepone al mensaje para su resolución.</li>
+<li>La compatibilidad backward permita que consumidores antiguos sobrevivan al nuevo esquema con defaults.</li>
+<li>Avro y Protobuf serializan con tipo firme: los errores aparecen en publicar, no en leer.</li>
+<li>La evolución se negocia entre equipos: el registry es el punto de pacto del contrato.</li>
+<li>Un schema breaking pasa por versión mayor y una migración consciente, no por sorpresa.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Cambiar el tipo de un campo sin cambiar de doctrina: rompe a todos los consumidores.</li>
+<li>Eliminar un campo: los datos históricos dejan de deserializar.</li>
+<li>Ignorar la política de compatibilidad y publicar 'por defecto' cambios breaking.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Añade defaults generosos: el camino más fácil para evolucionar es añadir con default.</li>
+<li>Monitoriza los errores de deserialización: denuncian compatibility no controlada.</li>
+<li>Revisa el historial de versiones del tópico en las revisiones de arquitectura.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Registra un esquema y publica un mensaje con su id correspondiente.</li>
+<li>Añade un campo nullable y verifica que consumidores viejos siguen leyendo.</li>
+<li>Forza un cambio breaking y comprueba que el registry lo rechaza según política.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El schema registry versiona y valida los contratos de mensajería.</li>
+<li>Los modos de compatibilidad hacen evolucionar sin romper consumidores.</li>
+<li>Añadir con defaults es la palanca práctica para cambios no breaking.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="./index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

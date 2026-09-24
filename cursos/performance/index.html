@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Performance Backend · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Performance Backend: aprende a medir y mejorar latencia, concurrencia, caché HTTP, consultas N+1, indexado de bases de datos y profiling de APIs.">
+<title>Performance y Optimización · Backend Academy</title>
+<meta name="description" content="Profiling, caching, consultas SQL, índices, paginación, connection pooling y optimización de APIs de alto tráfico.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,158 +52,273 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Performance Backend</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Performance y Optimización</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🧠 Experto</p>
+          <h1 class="page-hero__title">🚀 Performance y Optimización</h1>
+          <p class="page-hero__subtitle">Profiling, caching, consultas SQL, índices, paginación, connection pooling y optimización de APIs de alto tráfico.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 35 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Profiling · Índices · CDN</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Performance y Optimización</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></p>
-      <h1 class="lesson-title">🚀 Performance Backend</h1>
-      <p class="section-subtitle">Mide, diagnostica y optimiza el rendimiento de tus APIs. Aprende a reducir latencia, manejar concurrencia, configurar caché HTTP, eliminar consultas N+1, indexar bases de datos y profilear tu código como un profesional.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 47 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Rendimiento · Optimización · Latencia</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 35 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/profiling</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/profiling</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Profiling</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>El rendimiento es una característica, no un extra. En este curso aprenderás a medir el rendimiento de tus sistemas Backend con métricas y herramientas de profiling, identificar cuellos de botella en latencia y concurrencia, optimizar consultas y base de datos, y aplicar estrategias de caché HTTP y Redis. Terminarás con la capacidad de hacer que una API lenta responda en milisegundos.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🚀 Avanzado</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">47</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🚀 Performance</span></div>
+  <div class="container">
+    <article class="course" data-course-id="performance">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Profiling, caching, consultas SQL, índices, paginación, connection pooling y optimización de APIs de alto tráfico.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🧠 Experto</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">35</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Acelerar APIs</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Optimizar bases de datos</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>SQL avanzado</li>
+<li>Redis</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">Profiling</span>
+<span class="tag tag--tech">Índices</span>
+<span class="tag tag--tech">CDN</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 35 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Medir rendimiento</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 45 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Aprende a medir el rendimiento como un ingeniero senior: benchmarking, perfiles, identificando cuellos de botella, presupuestos con SLO y pruebas de carga realistas.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/benchmarking-y-perfiles.html">Benchmarking y perfiles</a></li>
+<li><a href="./modulo-01/cuellos-de-botalla.html">Identificar cuellos de botella</a></li>
+<li><a href="./modulo-01/que-es-performance-backend.html">¿Qué es performance?</a></li>
+<li><a href="./modulo-01/slo-y-presupuesto-de-rendimiento.html">SLO y presupuesto de rendimiento</a></li>
+<li><a href="./modulo-01/test-de-carga.html">Pruebas de carga</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Optimización</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 46 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Optimiza los puntos calientes reales: estrategias de caching, consultas SQL y índices, APIs que devuelven menos y más rápido, y operaciones de I/O que no bloqueen el hilo.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/caching-estrategias.html">Caching y estrategias</a></li>
+<li><a href="./modulo-02/concurrencia-y-asincronia.html">Concurrencia y asincronía</a></li>
+<li><a href="./modulo-02/optimizacion-de-apis.html">Optimizar APIs</a></li>
+<li><a href="./modulo-02/optimizacion-de-bases-de-datos.html">Optimizar bases de datos</a></li>
+<li><a href="./modulo-02/optimizacion-de-io.html">Optimizar I/O</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Escalabilidad y despliegue</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 45 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Lleva el rendimiento a escala: escalado vertical u horizontal, load balancing, bases de datos distribuidas y el papel de la CDN y el edge en la latencia global.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/bases-de-datos-a-escala.html">Bases de datos a escala</a></li>
+<li><a href="./modulo-03/cdny-edge-caching.html">CDN y edge caching</a></li>
+<li><a href="./modulo-03/escalado-vertical-vs-horizontal.html">Escalado vertical vs horizontal</a></li>
+<li><a href="./modulo-03/estrategia-de-rendimiento.html">Estrategia integral</a></li>
+<li><a href="./modulo-03/load-balancing.html">Load balancing</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Caching y CDN</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 56 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Este modulo profundiza donde terminó la optimización: estrategias de invalidación, Cache-Control y ETag, caché L1/L2 en memoria y Redis, y el salto a la CDN con edge caching y cache stampede.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/invalidacion-de-cache.html">Estrategias de invalidación de caché</a></li>
+<li><a href="./modulo-04/cache-http-etag-cache-control.html">Caché HTTP: Cache-Control y ETag</a></li>
+<li><a href="./modulo-04/cache-multinivel-redis.html">Caché multinivel: en memoria y Redis</a></li>
+<li><a href="./modulo-04/cdn-y-edge-caching.html">CDN y edge caching</a></li>
+<li><a href="./modulo-04/cache-stampede-y-actualizacion.html">Cache stampede y actualización en caliente</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Optimización del runtime</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 54 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Optimiza el propio proceso: el event loop, la gestión de memoria, el pooling de conexiones, la descarga de trabajo pesado a workers y el streaming de respuestas.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/event-loop-y-asincronia.html">El event loop y la asincronía</a></li>
+<li><a href="./modulo-05/memoria-y-garbage-collection.html">Memoria y garbage collection</a></li>
+<li><a href="./modulo-05/connection-pooling.html">Pooling de conexiones y sockets</a></li>
+<li><a href="./modulo-05/workers-y-tareas-pesadas.html">Trabajo pesado: workers y tareas</a></li>
+<li><a href="./modulo-05/streaming-y-chunks.html">Streaming y respuestas por chunks</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Nginx y redes</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 53 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Convierte Nginx en la primera línea de tu backend: reverse proxy, estáticos y compresión, HTTP/2 y keep-alive, buffering acotado y tuning de sockets y kernel para latencia.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/nginx-reverse-proxy.html">Nginx como reverse proxy</a></li>
+<li><a href="./modulo-06/estaticos-y-compresion.html">Estáticos, gzip y brotli</a></li>
+<li><a href="./modulo-06/http2-y-keep-alive.html">HTTP/2, keep-alive y conexiones</a></li>
+<li><a href="./modulo-06/buffering-timeouts-limites.html">Buffering, timeouts y límites</a></li>
+<li><a href="./modulo-06/tuning-tcp-y-kernel.html">Tuning de red y del kernel</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Profiling y monitoreo</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 56 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Cierra el círculo: perfil de CPU y memoria, observabilidad con métricas, logs y trazas, APM y alertas proactivas, presupuestos de rendimiento y un proceso de mejora continua que evita regresiones.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/perfiles-cpu-y-memoria.html">Perfiles de CPU y memoria</a></li>
+<li><a href="./modulo-07/observabilidad-metricas-trazas.html">Observabilidad: métricas, logs y trazas</a></li>
+<li><a href="./modulo-07/apm-y-alertas.html">APM y alertas proactivas</a></li>
+<li><a href="./modulo-07/presupuesto-de-rendimiento.html">Presupuesto y coste por petición</a></li>
+<li><a href="./modulo-07/mejora-continua-y-regresiones.html">Mejora continua y prevención de regresiones</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir y medir métricas clave: latencia, throughput y percentiles (p50, p95, p99).</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Identificar cuellos de botella y aplicar principios de alta concurrencia.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Configurar caché HTTP con headers, ETags y control de cacheo a nivel de CDN.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Detectar y resolver el problema N+1 en consultas a bases de datos.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Crear índices eficientes y entender EXPLAIN en PostgreSQL y MySQL.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Usar herramientas de profiling para CPU, memoria y operaciones de I/O.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Optimizar timeouts, pooling de conexiones y procesamiento asíncrono.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos previos</h2>
-        <ul>
-          <li>Conocimientos sólidos de Backend y construcción de APIs REST.</li>
-          <li>Experiencia con bases de datos relacionales (PostgreSQL o MySQL).</li>
-          <li>Familiaridad con HTTP, headers y procesos de red.</li>
-          <li>Un proyecto propio o de práctica para aplicar los optimizaciones.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías y herramientas</h2>
-        <div class="row">
-          <span class="tag tag--tech">Latencia</span>
-          <span class="tag tag--tech">Concurrencia</span>
-          <span class="tag tag--tech">Caché HTTP</span>
-          <span class="tag tag--tech">N+1</span>
-          <span class="tag tag--tech">Índices</span>
-          <span class="tag tag--tech">EXPLAIN</span>
-          <span class="tag tag--tech">Profiling</span>
-          <span class="tag tag--tech">Redis</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Seis módulos centrados en los problemas de rendimiento reales: los mides, los entiendes y los resuelves con técnicas probadas.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Medir el Rendimiento</h3>
-          </div>
-          <p class="card__text">Métricas fundamentales: latencia, throughput, percentiles y SLOs. Cómo medir con herramientas de load testing y qué significan los resultados.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 70 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Latencia y Concurrencia</h3>
-          </div>
-          <p class="card__text">De dónde viene la latencia: red, CPU, I/O. Modelos de concurrencia, async, worker pools, procesos Node.js vs threads y backpressure.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 78 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. Caché HTTP y Headers</h3>
-          </div>
-          <p class="card__text">Cache-Control, ETags, Last-Modified, Conditional Requests, stale-while-revalidate y cómo una CDN salva tu Backend de tráfico innecesario.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 72 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-03/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Base de Datos y N+1</h3>
-          </div>
-          <p class="card__text">Detecta el problema N+1, eager loading, paginación eficiente, joins vs queries separadas y reducción de carga en la base de datos.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 75 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. Indexado y EXPLAIN</h3>
-          </div>
-          <p class="card__text">Índices B-tree, compuestos, parciales y de expresiones. Lee planes de ejecución con EXPLAIN ANALYZE y encuentra índices que faltan.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 76 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">6. Profiling y Optimización Final</h3>
-          </div>
-          <p class="card__text">Perfiladores de CPU y memoria, timeouts, connection pooling y compresión. Proyecto final: optimize una API real de principio a fin.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 64 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -212,38 +329,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Medir</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · Latencia</a></li>
-          <li><a href="modulo-03/index.html">Módulo 3 · Caché HTTP</a></li>
-          <li><a href="index.html">Módulo 4 · N+1</a></li>
-          <li><a href="index.html">Módulo 5 · Indexado</a></li>
-          <li><a href="index.html">Módulo 6 · Profiling</a></li>
+          <li><span>Módulo 1 · Medir rendimiento</span></li>
+          <li><span>Módulo 2 · Optimización</span></li>
+          <li><span>Módulo 3 · Escalabilidad y despliegue</span></li>
+          <li><span>Módulo 4 · Caching y CDN</span></li>
+          <li><span>Módulo 5 · Optimización del runtime</span></li>
+          <li><span>Módulo 6 · Nginx y redes</span></li>
+          <li><span>Módulo 7 · Profiling y monitoreo</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

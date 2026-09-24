@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="maxmemory-y-eviction">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>maxmemory y políticas de desalojo · Redis y Caching · Backend Academy</title>
+<meta name="description" content="Configura límites de memoria y políticas de eviction para proteger Redis.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="maxmemory-y-eviction"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Redis y Caching</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">maxmemory y políticas de desalojo</span>
+        </nav>
+        <h1 class="lesson-title">maxmemory y políticas de desalojo</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis y Caching</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Persistencia y alta disponibilidad</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Redis guarda todo en RAM, y la RAM es finita y cara. Si un developer dispara un loop que genera claves sin TTL, la memoria se agota y Redis comienza a fallar: las escrituras llenan el sistema de latidos.</p>
+<p>La configuración maxmemory define un techo y la política de desalojo (eviction-policy) indica qué claves sacrificar primero. Elegir bien la política salva el servicio; elegir mal, entierra el caché.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>maxmemory fija el límite de RAM del dataset; maxmemory-policy decide el conjunto de claves a evictar cuando se alcanza (LRU, LFU, random, noeviction).</p><p><strong>Por qué importa.</strong> Sin techo, Redis puede consumir el host entero y caer con OOM killer. Con política, el sistema degrada el caché de forma controlada en vez de reventar.</p><p><strong>Cuándo usarlo.</strong> Define maxmemory en 60-80% de la RAM del servidor y usa políticas según el uso: allkeys-lru para caché, volatile-lru para datos con TTL, noeviction para colas que no deben perderse.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>maxmemory en bytes (o mb/gb) fija el tope del dataset.</li>
+<li>volatile-lru desaloja las claves con TTL menos recientes.</li>
+<li>allkeys-lru desaloja cualquier clave no usada recientemente.</li>
+<li>noeviction devuelve error a escrituras cuando se llena.</li>
+<li>LFU (allkeys-lfu) descarta las menos frecuentes, no solo las menos recientes.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Configuramos un límite de 100 MB con la política de desalojo LRU total.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import redis
+r = redis.Redis.from_url(&quot;redis://localhost:6379&quot;)
+r.config_set(&quot;maxmemory&quot;, &quot;100mb&quot;)
+r.config_set(&quot;maxmemory-policy&quot;, &quot;allkeys-lru&quot;)
+info = r.info(&quot;memory&quot;)
+print(info[&quot;maxmemory_policy&quot;])
+print(info[&quot;used_memory&quot;] &lt; info[&quot;maxmemory&quot;])</code></pre></div>
+</figure>
+<pre><code class="language-text">allkeys-lru
+True</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Comprobamos cuántas claves fueron desalojadas al llenar el límite.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Métrica de claves desalojadas y cambio de política en caliente</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">info = r.info(&quot;stats&quot;)
+print(info[&quot;evicted_keys&quot;])   # &gt;0 si la politica trabajo
+r.config_set(&quot;maxmemory-policy&quot;, &quot;volatile-lru&quot;)
+print(r.config_get(&quot;maxmemory-policy&quot;))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un portal de noticias usa Redis de cache-aside. Configuran allkeys-lru con 512 MB y observan como, en picos, las claves menos leídas caen mientras las populares siguen en memoria: el hit rate se mantiene alto sin intervención humana.</p>
+<ul><li>Empieza con allkeys-lru para caché y checkea el hit rate.</li>
+<li>Mide evicted_keys: eviction alta indica que tu caché es pequeña.</li>
+<li>Protege las colas de trabajo con noeviction o datasets separados.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def metricas_memoria() -&gt; dict:
+    info = r.info(&quot;memory&quot;)
+    return {
+        &quot;evictions&quot;: r.info(&quot;stats&quot;)[&quot;evicted_keys&quot;],
+        &quot;uso&quot;: round(info[&quot;used_memory&quot;] / (1024 ** 3), 2),
+    }
+print(metricas_memoria())</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Para claves concretas es mejor no evictar, marca TTL: separa el caché del estado crítico.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>LRU aproximado (sampling) no escanea toda la memoria: evalúa pocos candidatos por muestra.</li>
+<li>volatile-* solo ataca claves con expiración: las que no expiran se quedan.</li>
+<li>LFU cuenta frecuencias de acceso y entierra claves que raramente se piden.</li>
+<li>noeviction convierte la escritura en error OOM: útil para colas y contadores de negocio.</li>
+<li>El hit rate y evicted_keys son las dos métricas para calibrar el techo.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Usar noeviction en caché de HTTP y llenar la cola hasta bloquear escrituras.</li>
+<li>Poner maxmemory mayor que la RAM del host: el kernel OOM-kill pega primero.</li>
+<li>Despreciar los bytes de overhead: 80% de RAM es un techo realista, no 100%.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Configura maxmemory desde config_set en desarrollo y desde redis.conf en los nodos.</li>
+<li>Supervisa used_memory, maxmemory y evicted_keys en tu monitor.</li>
+<li>Para estado crítico (carritos, trabajos) usa otra instancia con noeviction.</li>
+<li>Combínalo con TTL agresivo para que la eviction sea la excepción, no la norma.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Pon maxmemory a 1 mb y añade 1000 claves: observa evicted_keys crecer.</li>
+<li>Compara allkeys-lru vs allkeys-lfu con un acceso sesgado a pocas claves.</li>
+<li>Prueba noeviction y captura el error OOM escribiendo al límite.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>maxmemory pone un techo a la RAM y la política decide qué se sacrifica.</li>
+<li>allkeys-lru es el encaje natural para cachés; noeviction para estado crítico.</li>
+<li>Monitoriza evicted_keys y el hit rate para calibrar el límite.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Redis</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras de Datos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché y Rendimiento</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Estructuras de datos avanzadas</a></li>
+          <li><a href="./index.html">Módulo 5 · Persistencia y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Colas y streaming</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Redis en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

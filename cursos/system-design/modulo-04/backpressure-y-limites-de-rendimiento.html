@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backpressure-y-limites-de-rendimiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backpressure y límites de rendimiento · System Design / Arquitectura de Sistemas · Backend Academy</title>
+<meta name="description" content="Limita lo que entra y degrada con control cuando el sistema va al límite.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="backpressure-y-limites-de-rendimiento"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">System Design / Arquitectura de Sistemas</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Backpressure y límites de rendimiento</span>
+        </nav>
+        <h1 class="lesson-title">Backpressure y límites de rendimiento</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design / Arquitectura de Sistemas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Escalabilidad y distribución</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Todo sistema tiene un techo de rendimiento, y el tráfico no respeta techos. Cuando la demanda supera la capacidad, pasa una de dos: el sistema dice 'no' elegante (degradación, rechazo rápido) o se atasca acumulando trabajo hasta caerse.</p>
+<p>La backpressure es la disciplina de no aceptar más de lo que puedes procesar: el truco es que el rechazo sea el comportamiento planeado, no el síntoma de un fallo.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La backpressure (contrapresión) hace que un consumidor lento limite al productor: autorregulación con control de flujo, límites de concurrencia o rechazo temprano cuando el buffer se llena.</p><p><strong>Por qué importa.</strong> Si el productor lanza sin límite, las colas crecen sin tope, la memoria se llena y el sistema entero muere lejos del punto del problema. Rechazar temprano es años más barato que caerse más tarde.</p><p><strong>Cuándo usarlo.</strong> Aplica límites en toda frontera: rate limiting por cliente, límite de workers y colas acotadas, timeout en cada llamada externa y rechazo 503 temprano cuando el sistema satura.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El buffer siempre se llena: la pregunta no es si, es qué pasa después (bloquea, descarta, rechaza con 429/503).</li>
+<li>Timeout en cada espera: sin él, una dependencia lenta congela workers que deberían atender a otros.</li>
+<li>Límite de concurrencia: cap de workers o semáforos para que las tareas no se multipliquen sin freno.</li>
+<li>Rate limiting: por cliente/módulo, en su propia capa, decide quién entra antes de gastar recursos.</li>
+<li>Rechazo temprano con señal explícita (429, 503, retry-after): el cliente sabe que debe esperar.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una cola acotada con descarte explícito: cuando está llena, la petición recibe un 503 claro en vez de acumularse.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from collections import deque
+
+MAX = 1000
+queue = deque(maxlen=MAX)
+
+def enqueue(task):
+    if len(queue) &gt;= MAX:
+        raise TooBusy(&quot;503 · cola llena&quot;, retry_after=2)
+    queue.append(task)
+
+def worker():
+    task = queue.popleft()
+    process(task)</code></pre></div>
+</figure>
+<pre><code class="language-text">Cola llena → 503 con retry-after, no OOM.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El patrón de confiabilidad en nubes: el cliente espera períodos de 'busy' y los respeta con backoff, mientras la cola acotada protege al servicio.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">cliente con backoff</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import time
+
+for intent in range(5):
+    try:
+        return client.enqueue(task)
+    except TooBusy as e:
+        time.sleep(min(intent * 0.5, e.retry_after))
+
+# 5 intentos, respetando el retry-after del servidor</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una API de imágenes (3k req/s) recibió una campaña que la duplicó en diez minutos. La BBDD de cola se saturó, las peticiones se acumularon y el backend cayó con OOM. La corrección: límite de concurrencia en los workers, cola acotada con descarte, rate limit por API-key y 503 con Retry-After. Los usuarios vieron error controlado un rato en vez de una caída total de 40 minutos.</p>
+<ul><li>Cola acotada + descarte explícito antes de que la memoria decida por ti.</li>
+<li>Rate limit por cliente en la capa de entrada con bustsize controlado.</li>
+<li>Workers con semáforo y timeout por tarea para que una lenta no ocupe la flota.</li>
+<li>503 con Retry-After para que los clientes respeten la recuperación.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Nginx</span><span class="code-block__caption">ejemplo.nginx</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-nginx">limit_req_zone $binary_remote_addr zone=por_ip:10m rate=20r/s;
+limit_req_zone $http_x_api_key   zone=por_key:10m rate=200r/s;
+server {
+  location /api/ {
+    limit_req zone=por_key burst=50 nodelay;
+    limit_req_status 429;
+    add_header Retry-After 5 always;
+    proxy_pass http://api_pool;
+  }
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El 429/503 con Retry-After convierte el rechazo en un mecanismo legible por los clientes.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La cola es un amortiguador, no un almacén: un tamaño grande esconde el colapso hasta que el tiempo de espera mata la experiencia.</li>
+<li>Rechazo temprano localiza el problema: la petición que no puede atenderse se cae en la frontera, no en la dependencia profunda.</li>
+<li>El rate limit protege a todo el sistema de un solo cliente transversal y del spam accidental.</li>
+<li>Sin timeout, un worker bloqueado eternamente es capacidad muerta: cada tarea tiene su presupuesto.</li>
+<li>El sistema degradado debe ser visible en métricas: tasa de 429/503 y longitud de la cola son tus sensores.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Cola sin límite que llena la memoria y mata el proceso con OOM a las 3 de la mañana.</li>
+<li>Retries infinitos del cliente que multiplican la carga justo cuando el servidor quiere recuperarse.</li>
+<li>Sin rate limit, un cliente iterando acelerado come la flota de workers del resto.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Dimensiona la cola por el peor caso de duración de pico, no por el promedio.</li>
+<li>Usa 429 para límites de tasa y 503 para capacidad; ambos con Retry-After.</li>
+<li>Los workers llevan timeout propio y límite de reintentos acotado.</li>
+<li>Alerta sobre longitud de cola y request rate, no esperes al OOM.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Diseña una cola acotada de notificaciones con rechazo 503.</li>
+<li>Configura rate limit por API key para una API de 5 clientes grandes.</li>
+<li>Escribe el retry con backoff de un cliente que respeta Retry-After.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El sistema debe decir 'no' con 429/503 y Retry-After cuando satura.</li>
+<li>Cola acotada, workers con timeout y rate limit por cliente forman la red de seguridad.</li>
+<li>La degradación planeada es mejor que la caída accidental.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="./index.html">Módulo 4 · Escalabilidad y distribución</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Caching y datos a escala</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Resiliencia y consistencia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y entrevista de diseño</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

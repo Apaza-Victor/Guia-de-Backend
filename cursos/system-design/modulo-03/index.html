@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 3 · Diseño completo · System Design</title>
-<meta name="description" content="Módulo 3 del curso System Design: diseñar sistemas completos paso a paso con casos reales de URL shortener, chat, feed, búsqueda y cómo presentar el diseño en una entrevista.">
+<title>Módulo 3 · Diseño completo · System Design / Arquitectura de Sistemas · Backend Academy</title>
+<meta name="description" content="Recorre el diseño completo de sistemas conocidos y aprende a comunicar cada decisión.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
 <body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">System Design</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 3 · Diseño completo</span>
-    </nav>
-    <p class="page-hero__eyebrow">🧠 Experto</p>
-    <h1 class="page-hero__title">Módulo 3 · Diseño completo</h1>
-    <p class="page-hero__subtitle">Pon en práctica todo el método: diseña un URL shortener, un sistema de chat, un feed de noticias y un motor de búsqueda desde cero, y aprende a presentar tu diseño de forma clara y convincente.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 54 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> System Design</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">System Design / Arquitectura de Sistemas</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 3</span>
+      </nav>
+      <p class="page-hero__eyebrow">🧠 Experto</p>
+      <h1 class="page-hero__title">Módulo 3 · Diseño completo</h1>
+      <p class="page-hero__subtitle">Cuatro casos clásicos de entrevista resueltos paso a paso.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 54 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel experto</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,63 +82,60 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar requisitos, estimaciones y bloques de construcción a un caso real.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Diseñar un URL shortener, un chat, un feed y una búsqueda paso a paso.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Decidir entre fan-out push, pull e híbrido para timelines a escala.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender índices invertidos, tokenización y ranking de relevancia.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Comunicar un diseño completo con diagramas, estimaciones y trade-offs.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="system-design">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="diseno-de-una-url-shortener.html">
-          <h3>1 · Caso: URL shortener</h3>
-            <p>Generación de claves, estimaciones, caché y redirección a escala.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="diseno-de-un-chat.html">
-          <h3>2 · Caso: sistema de chat</h3>
-            <p>WebSockets, historial particionado y entrega fiable de mensajes.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="diseno-de-un-feed.html">
-          <h3>3 · Caso: feed (newsfeed)</h3>
-            <p>Fan-out push, pull e híbrido, caché de timelines y ranking.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="diseno-de-busqueda.html">
-          <h3>4 · Caso: búsqueda</h3>
-            <p>Índice invertido, tokenización, relevancia y particionado del índice.</p>
-            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="presentar-tu-diseno.html">
-          <h3>5 · Presentar y comunicar</h3>
-            <p>Framework de entrevista, diagramas y comunicación de trade-offs.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">entrevista</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Aplicar el proceso completo a sistemas conocidos</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Resolver los casos de entrevista: búsqueda, chat, feed y shortener</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Presentar y comunicar el diseño con claridad</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~54 min · Casos reales de principio a fin: búsqueda, chat, feed y URL shortener..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./diseno-de-una-url-shortener.html">
+            <h3>1 · Caso: URL shortener</h3>
+            <p>IDs cortos, redundancia y consistencia para millones de URLs.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./diseno-de-un-feed.html">
+            <h3>2 · Caso: feed (newsfeed)</h3>
+            <p>Fanout push/pull y el ranking que no mata al backend.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./diseno-de-un-chat.html">
+            <h3>3 · Caso: sistema de chat</h3>
+            <p>WebSockets, presencia y el límite de las conexiones.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./diseno-de-busqueda.html">
+            <h3>4 · Caso: búsqueda</h3>
+            <p>Índices invertidos, tokenización y relevancia.</p>
+            <div class="card__meta"><span class="tag">11 min</span><span class="tag tag--cat">caso</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./presentar-tu-diseno.html">
+            <h3>5 · Presentar y comunicar</h3>
+            <p>Estructura la historia del diseño y defiende trade-offs.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">soft</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-02/index.html">
-        <span class="label">← Módulo anterior</span>
-        <span class="title">Patrones</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
-        <span class="label">Volver al curso →</span>
-        <span class="title">System Design</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-02/index.html"><span class="label">← Anterior</span><span class="title">Módulo 2 · Patrones</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 4 · Escalabilidad y distribución</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -141,18 +147,18 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
@@ -160,20 +166,25 @@
         <ul>
           <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
           <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
-          <li><a href="index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="./index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Escalabilidad y distribución</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Caching y datos a escala</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Resiliencia y consistencia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y entrevista de diseño</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>
@@ -183,9 +194,6 @@
 <script src="../../../assets/js/sidebar.js"></script>
 <script src="../../../assets/js/toc.js"></script>
 <script src="../../../assets/js/code.js"></script>
-<script src="../../../assets/js/favorites.js"></script>
-<script src="../../../assets/js/history.js"></script>
-<script src="../../../assets/js/search.js"></script>
 <script src="../../../assets/js/main.js"></script>
 </body>
 </html>

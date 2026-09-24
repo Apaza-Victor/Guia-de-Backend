@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="api-gateway-y-bff">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Gateway y Backend for Frontend · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="API Gateway y Backend for Frontend para unificar el acceso a tus servicios.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="api-gateway-y-bff"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Patrones de Diseño</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">API Gateway y Backend for Frontend</span>
+        </nav>
+        <h1 class="lesson-title">API Gateway y Backend for Frontend</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Patrones emergentes y arquitectura moderna</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando un solo cliente tiene que hablar con usuarios, pedidos, pagos y búsqueda, las llamadas se multiplican, la seguridad se dispersa y cada refactor acopla a todos. El API Gateway concentra ese frente en un único punto de entrada.</p>
+<p>El Backend for Frontend (BFF) afina la idea: un backend adaptado a las necesidades de cada cliente concreto, de modo que la app móvil y la web reciben justo lo que necesitan, ni más ni menos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un API Gateway es un único punto de entrada que enruta, autentica, agrega y gestiona el tráfico hacia el resto de servicios internos. El BFF es una variante que crea una API específica para cada tipo de cliente.</p><p><strong>Por qué importa.</strong> Reduce la complejidad del cliente, centraliza la seguridad y el rate limiting, y permite agregar varias llamadas internas en una sola respuesta de red.</p><p><strong>Cuándo usarlo.</strong> Úsalo al pasar de unos pocos microservicios a varios, o cuando distintos clientes necesitan contratos distintos. En monolitos pequeños añade latencia sin beneficio.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Enrutado: reenvía cada petición al servicio responsable.</li>
+<li>Agregación: responde combinando llamadas a varios servicios.</li>
+<li>Autenticación central: valida tokens una sola vez en el borde.</li>
+<li>Rate limiting: protege los servicios de abuso desde fuera.</li>
+<li>BFF: una API adaptada por cliente (web, móvil, terceros).</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una agregación sencilla: el gateway recibe /pedido/12 y encadena las llamadas a pedidos y cliente para devolver una sola respuesta.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">class PedidoGateway:
+    def __init__(self, clientes, pedidos):
+        self.clientes = clientes
+        self.pedidos = pedidos
+
+    def pedido_completo(self, token, pedido_id):
+        cliente = self.clientes.perfil(token)
+        pedido = self.pedidos.obtener(pedido_id)
+        return {
+            &quot;pedido&quot;: pedido,
+            &quot;cliente&quot;: cliente,
+        }</code></pre></div>
+</figure>
+<pre><code class="language-text">Dos llamadas internas se convierten en una respuesta para el cliente.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Configuración de un gateway con Express: enrutado con validación de token y límite de peticiones para clientes anónimos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Gateway con Express: rate limiting y validación de token</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const express = require('express');
+const rateLimit = require('express-rate-limit');
+
+const app = express();
+app.use(express.json());
+
+const limitador = rateLimit({ windowMs: 60000, max: 60 });
+
+app.post('/api/pagos', limitador, validarToken, async (req, res) =&gt; {
+    const resultado = await pagosServicio.cobrar(req.body);
+    res.status(201).json(resultado);
+});
+
+app.listen(8080);</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una app de comercio necesita un perfil con pedidos e historial de pagos en la primera pantalla. El gateway agrega tres servicios y también oculta los detalles internos (URLs, formatos) al móvil.</p>
+<ul><li>Centraliza ahí la autenticación, el rate limiting y el logging de entrada.</li>
+<li>Agrega solo lo necesario para ahorrar round-trips; evita ir sobrevuelos con timeout largo.</li>
+<li>Mantén contratos estables por versión para no romper clientes publicados.</li>
+<li>Diferencia un BFF por cliente cuando los contratos divergen de verdad.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">async function perfilCompleto(req, res) {
+    const [usuario, pedidos, pagos] = await Promise.all([
+        usuarios.perfil(req.usuarioId),
+        pedidos.listar(req.usuarioId),
+        pagos.listar(req.usuarioId),
+    ]);
+    res.json({ usuario, pedidos, pagos });
+}</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un gateway que solo enruta sin agregar sigue siendo útil, pero el valor real aparece con la agregación y la seguridad centralizada.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El gateway se convierte en el contrato público que los equipos internos pueden mover libremente.</li>
+<li>La agregación con Promise.all reduce latencia: las llamadas internas van en paralelo.</li>
+<li>Centralizar el rate limiting evita que un cliente ruidoso sature un servicio crítico.</li>
+<li>El BFF permite que el equipo móvil cambie su API sin tocar la web.</li>
+<li>Su riesgo es convertirse en un monolito de integración: vigila su tamaño y split en dominios.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Crear un gateway sin rate limiting y exponer directamente los servicios internos.</li>
+<li>Agregar llamadas en serie que multiplican la latencia total.</li>
+<li>Mantener el contrato del gateway rígido cuando los clientes evolucionan.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Diseña el gateway en torno a casos de uso del cliente, no a tablas del servidor.</li>
+<li>Mide la latencia de cada ruta agregada para detectar cuellos de botella.</li>
+<li>Combínalo con circuit breakers hacia los servicios internos.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea una ruta /perfil/... que agregue usuario, pedidos y pagos en paralelo.</li>
+<li>Añade rate limiting por IP y un mensaje claro al superar el límite.</li>
+<li>Separa un BFF móvil con un contrato reducido y mide la diferencia de payload.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Un API Gateway unifica entrada, seguridad y agregación de servicios.</li>
+<li>El BFF adapta la API a cada cliente concreto.</li>
+<li>Bien diseñado, reduce latencia y acoplamiento; mal diseñado, es otro monolito.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de patrones</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Patrones de backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Patrones modernos</a></li>
+          <li><a href="./index.html">Módulo 7 · Patrones emergentes y arquitectura moderna</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

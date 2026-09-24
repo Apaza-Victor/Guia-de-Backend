@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="aws-sqs-sns">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWS SQS y SNS · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Domina SQS para colas y SNS para difusión en la nube de Amazon con un ejemplo práctico.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="aws-sqs-sns"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">AWS SQS y SNS</span>
+        </nav>
+        <h1 class="lesson-title">AWS SQS y SNS</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Brokers y proveedores</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Amazon simplifica la mensajería con dos servicios gestionados: SQS para colas (una entrega por consumidor) y SNS para difusión pub/sub (cada suscriptor recibe copia). Ambos eliminan la operación del broker y se integran con el resto de servicios AWS.</p>
+<p>SQS ofrece dead letter queues, visibilidad por mensaje, retención configurable y escalado automático; SNS agrega filtrado de mensajes y entrega a SQS, Lambda, HTTP y email. Juntos forman la mensajería estándar en la nube de Amazon.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>SQS es un servicio de colas gestionado (Simple Queue Service) con entregas at-least-once y ventana de visibilidad; SNS es un servicio pub/sub (Simple Notification Service) que difunde mensajes a distintos tipos de suscriptores.</p><p><strong>Por qué importa.</strong> Al ser gestionados, no operas brokers, escalas con el uso y pagas por petición; su integración con Lambda, S3 e IAM acelera el desarrollo en AWS.</p><p><strong>Cuándo usarlo.</strong> Usa SQS para trabajos encolados con ack por mensaje y DLQ; usa SNS para difundir eventos a varios destinos o a colas regionales distintas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Cola estándar: entrega al menos una vez, reorden posible; FIFO: orden estricto y deduplicación.</li>
+<li>Visibility timeout: el tiempo que un mensaje queda oculto de otros consumidores tras tomarlo.</li>
+<li>Dead Letter Queue: redrive hacia una cola de emergencia tras superar recepciones.</li>
+<li>SNS Topic con filtros: cada suscripción recibe solo mensajes que cumplen su política.</li>
+<li>Fanout SNS→SQS: una sola publicación reparte copias a varias colas.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Envie un mensaje a una cola SQS y léalo desde un worker Lambda con el SDK de AWS.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import boto3
+sqs = boto3.client('sqs', region_name='eu-west-1')
+cola = sqs.get_queue_url(QueueName='tareas-pagos')['QueueUrl']
+sqs.send_message(QueueUrl=cola,
+                 MessageBody='procesar cargo P-1024')
+resp = sqs.receive_message(QueueUrl=cola, MaxNumberOfMessages=1,
+                           WaitTimeSeconds=10)
+msg = resp.get('Messages', [None])[0]
+sqs.delete_message(QueueUrl=cola,
+                    ReceiptHandle=msg['ReceiptHandle'])</code></pre></div>
+</figure>
+<pre><code class="language-text">El mensaje viaja a la cola, se recibe tras la espera larga y se elimina al procesar.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Publica un evento en SNS y deja que un fanout lo entregue a dos colas SQS distintas.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Fanout SNS a varias colas</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">sns = boto3.client('sns')
+topic_arn = 'arn:aws:sns:eu-west-1:1234567890:pedidos'
+sns.publish(TopicArn=topic_arn,
+            Message='pedido.creado P-1024'
+            MessageAttributes={'evento': {'DataType': 'String',
+                                          'StringValue': 'creado'}})
+# Dos suscripciones SQS reciben sendas copias del evento</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un processing de pedidos AWS: la API publica en SNS, el fanout duplica hacia 'facturas' y 'inventario', y un worker Python lee de 'facturas'. Si un cargo falla 3 veces, SQS reenvía a la DLQ y una alerta CloudWatch avisa al equipo.</p>
+<ul><li>Usa colas FIFO para pagos donde el orden importa, estándar para el resto.</li>
+<li>Configura redrive policy para no enviar a DLQ mensajes recuperables.</li>
+<li>Prueba el visibility timeout para no procesar dos veces un trabajo lento.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">sqs:
+  cola_pagos:
+    tipo: fifo
+    redrive_policy: { deadLetter: pagos.dlq, maxReceiveCount: 3 }
+  ventana_visibilidad: 120s
+sns:
+  topic_pedidos:
+    suscripciones: [facturas-sqs, inventario-sqs, lambda-audit]</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> SQS no garantiza que un mensaje se procese una sola vez: la idempotencia en el worker sigue siendo obligatoria.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El visibility timeout oculta el mensaje durante el procesamiento; si el worker muere, el mensaje vuelve.</li>
+<li>La cola FIFO garantiza orden, pero limita throughput: sopesa precio y rigor.</li>
+<li>SNS añade los atributos de mensaje que permiten a las suscripciones filtrar.</li>
+<li>El fanout SNS→SQS replica el patrón pub/sub sin tocar lógica del productor.</li>
+<li>La DLQ de SQS incluye timestamp del envío y motivo, ideal para diagnosis.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Olvidar el delete_message: el mensaje reaparece y se procesa cientos de veces.</li>
+<li>Visibility timeout menor que el trabajo: otro worker toma el mensaje a mitad.</li>
+<li>Usar cola estándar donde el orden es crítico: los reordenes rompen la lógica.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Configura WaitTimeSeconds=10 para reducir llamadas vacías y coste.</li>
+<li>Activa la métrica de mensajes disponibles en CloudWatch para vigilar el backlog.</li>
+<li>Empareja SNS con una DLQ por cada suscripción para no perder eventos de nadie.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea una cola SQS y procesa 20 mensajes con un worker Lambda.</li>
+<li>Monta un fanout SNS con dos suscripciones SQS y verifica que ambas reciben copia.</li>
+<li>Configura el redrive a DLQ tras 3 recepciones y observa el reenvío.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>SQS gestiona colas con visibilidad, DLQ y escalado automático.</li>
+<li>SNS difunde eventos con filtrado y fanout a múltiples destinos.</li>
+<li>Idempotencia y visibility timeout correctos evitan el doble procesamiento.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="./index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

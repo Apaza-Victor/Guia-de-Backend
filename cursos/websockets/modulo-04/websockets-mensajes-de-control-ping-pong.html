@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-mensajes-de-control-ping-pong">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mensajes de control: ping y pong · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="Ping, pong y heartbeat para mantener vivas las conexiones WebSocket.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-mensajes-de-control-ping-pong"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Mensajes de control: ping y pong</span>
+        </nav>
+        <h1 class="lesson-title">Mensajes de control: ping y pong</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Protocolo WebSocket en profundidad</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Las conexiones WebSocket pueden morir sin avisar: el router se reinicia, el móvil cambia de red o un proxy agota su timeout. El protocolo ofrece mensajes de control pensados para comprobar que el otro extremo sigue vivo.</p>
+<p>El ping (opcode 0x9) se envía desde el servidor y el cliente debe responder con un pong (0xA). Este latido convierte un socket zombi en una conexión que podemos cerrar con criterio.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El ping es un frame de control que pregunta si sigues ahí; el pong es la respuesta automática que confirma que la conexión sigue operativa.</p><p><strong>Por qué importa.</strong> Detectar conexiones muertas a tiempo evita enviar mensajes al vacío y libera recursos; sin heartbeat los sockets fantasma se acumulan hasta agotar los límites del sistema.</p><p><strong>Cuándo usarlo.</strong> Implementa heartbeat siempre en producción, con intervalos de 30 a 60 segundos, y cierra el socket tras dos o tres pings sin respuesta.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Ping y pong son frames de control con opcodes 0x9 y 0xA.</li>
+<li>El pong puede llevar copia del payload del ping para medir el RTT.</li>
+<li>ws ofrece ping() y emite el evento pong para personalizar el ritmo.</li>
+<li>Los mensajes de control no interrumpen los mensajes de datos en curso.</li>
+<li>El timeout del pong es tu criterio para declarar una conexión muerta.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un heartbeat mínimo con ws que marca, pregunta y limpia conexiones zombis cada 30 segundos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const WebSocket = require(&quot;ws&quot;)
+const servidor = new WebSocket.Server({ port: 8080 })
+servidor.on(&quot;connection&quot;, (socket) =&gt; {
+  socket.isAlive = true
+  socket.on(&quot;pong&quot;, () =&gt; { socket.isAlive = true })
+})
+
+const intervalo = setInterval(() =&gt; {
+  servidor.clients.forEach((socket) =&gt; {
+    if (!socket.isAlive) { socket.terminate(); return }
+    socket.isAlive = false
+    socket.ping()
+  })
+}, 30000)</code></pre></div>
+</figure>
+<pre><code class="language-text">Sin salida; cada 30 segundos se verifica el estado de todas las conexiones.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Además de latir, un servidor ordenado limpiará el intervalo cuando se apague.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Drenando el intervalo al cerrar el servidor</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const cerrar = () =&gt; {
+  clearInterval(intervalo)
+  servidor.clients.forEach((c) =&gt; c.terminate())
+  process.exit(0)
+}
+process.on(&quot;SIGINT&quot;, cerrar)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En un despliegue real el heartbeat convive con el proxy y con la red del cliente: hay que calibrar el intervalo.</p>
+<ul><li>Envía el ping desde el servidor y espera el pong; no te fíes del silencio.</li>
+<li>Marca la conexión como muerta y termina tras dos o tres fallos seguidos.</li>
+<li>Ajusta el intervalo según los timeouts del proxy que tienes delante.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">socket.isAlive = true
+socket.on(&quot;pong&quot;, () =&gt; { clearTimeout(socket.timeout); socket.isAlive = true })
+socket.timeout = setTimeout(() =&gt; socket.terminate(), 40000)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Socket.IO ya incluye pingInterval y pingTimeout configurables: hace este trabajo por ti.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Un socket muerto no dispara el evento close inmediatamente; el heartbeat es la única forma fiable de detectarlo.</li>
+<li>Un intervalo de 30 segundos suele estar por debajo de los timeouts típicos de los proxies (75 a 120 segundos).</li>
+<li>terminate() cierra de inmediato; close() intenta un cierre negociado con el protocolo.</li>
+<li>El RTT del pong alimenta métricas de latencia del sistema.</li>
+<li>Limpia el setInterval al apagar el servidor para no dejar procesos fantasma.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Enviar pings solo al abrir la conexión y no periódicamente.</li>
+<li>Confiar en que el evento close siempre llega: no llega en cortes de red.</li>
+<li>No resetear isAlive tras cada pong.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Configura el intervalo pensando en el proxy que tienes delante.</li>
+<li>Registra los pings sin respuesta para identificar redes problemáticas.</li>
+<li>No envíes payloads grandes en el ping: es una señal de control.</li>
+<li>Prueba el heartbeat desconectando la red del cliente y observando la limpieza.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Cambia el intervalo a 10 segundos y comprueba cuánto tarda en limpiarse un socket desconectado.</li>
+<li>Registra el RTT medio de los pong de un cliente.</li>
+<li>Cierra la conexión tras tres pings sin respuesta.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Ping y pong mantienen vivas las conexiones y detectan zombis.</li>
+<li>ws ofrece ping() y el reseteo del estado con el evento pong.</li>
+<li>Limpia el intervalo al apagar el servidor para no dejar procesos colgados.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+          <li><a href="./index.html">Módulo 4 · Protocolo WebSocket en profundidad</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Salas y broadcast</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Escalado y balanceo</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · WebSockets en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

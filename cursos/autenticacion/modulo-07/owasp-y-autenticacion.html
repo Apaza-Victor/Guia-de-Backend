@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="owasp-y-autenticacion">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OWASP y la autenticación · Autenticación y Autorización · Backend Academy</title>
+<meta name="description" content="Usa las guías de OWASP para auditar y blindar tu sistema de autenticación.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="autenticacion" data-current="owasp-y-autenticacion"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Autenticación y Autorización</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">OWASP y la autenticación</span>
+        </nav>
+        <h1 class="lesson-title">OWASP y la autenticación</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Autenticación y Autorización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Seguridad, OWASP y cumplimiento</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La autenticación concentra la mayoría de los ataques contra un backend: contraseñas robadas, sesiones secuestradas o enums de usuarios. OWASP publica las referencias de facto para saber qué cubrir y en qué orden.</p>
+<p>Este módulo cierra el curso llevando tu login de "funciona" a "defiende". Aquí conectamos los conceptos de toda la ruta con las guías OWASP Top 10 y el Application Security Verification Standard (ASVS).</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>OWASP es una fundación que publica estándares abiertos de seguridad web. El Top 10 lista los riesgos más críticos y el ASVS define niveles verificables de requisitos de seguridad para aplicaciones, incluida la autenticación.</p><p><strong>Por qué importa.</strong> Un login vulnerable compromete todo el sistema aunque el resto del código sea impecable: el atacante entra con la identidad de otro y cruza cualquier autorización.</p><p><strong>Cuándo usarlo.</strong> Úsalo siempre, pero especialmente en el diseño, en cada code review y cuando un pentest o auditoría te pida un estándar que citar.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>OWASP Top 10 agrupa los 10 riesgos más críticos: broken authentication, IDOR, injection y más.</li>
+<li>ASVS define niveles (1 básico, 2 estándar, 3 avanzado) con requisitos verificables por módulo.</li>
+<li>Broken authentication agrupa credenciales débiles, sesiones mal gestionadas y falta de rate limiting.</li>
+<li>Security misconfiguration acumula headers faltantes, errores con stack traces y puertos abiertos.</li>
+<li>La verificación de seguridad es reproducible: misma versión, misma checklist, mismo resultado.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Empieza la auditoría con una checklist rápida sobre el login real. Simulamos la inspección de un endpoint con curl y revisamos qué responde ante fallos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">curl -i -X POST https://api.example.com/login \
+  -H 'Content-Type: application/json' \
+  -d '{&quot;email&quot;:&quot;nadie@example.com&quot;,&quot;password&quot;:&quot;incorrecta&quot;}'
+# Respuestas de control:
+# 1) 401 siempre que fallen las credenciales (nunca 404 ni 'usuario inexistente')
+# 2) sin stack trace ni detalles internos en el cuerpo
+# 3) Set-Cookie con HttpOnly, Secure y SameSite=Strict en cada login</code></pre></div>
+</figure>
+<pre><code class="language-text">HTTP/1.1 401 Unauthorized\nSet-Cookie: session=...; HttpOnly; Secure; SameSite=Strict</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Traducimos la checklist a código: un middleware de login que registra intentos, responde igual ante errores y aplica un pequeño 'cooldown' de incremento.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Middleware de login con checks de OWASP</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import bcrypt
+from flask import request, jsonify
+
+def login(users, failed_attempts):
+    data = request.get_json()
+    email = (data.get(&quot;email&quot;) or &quot;&quot;).strip().lower()
+    password = data.get(&quot;password&quot;) or &quot;&quot;
+    user = users.find_one({&quot;email&quot;: email})
+    if not user or not bcrypt.checkpw(password.encode(), user[&quot;hash&quot;].encode()):
+        key = email or &quot;anónimo&quot;
+        failed_attempts[key] = failed_attempts.get(key, 0) + 1
+        return jsonify({&quot;error&quot;: &quot;Credenciales inválidas&quot;}), 401
+    if failed_attempts.get(email, 0) &gt;= 5:
+        return jsonify({&quot;error&quot;: &quot;Cuenta bloqueada&quot;}), 423
+    failed_attempts[email] = 0
+    return jsonify({&quot;ok&quot;: True, &quot;token&quot;: create_jwt(user)}), 200</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En un informe de pentest real, los hallazgos de autenticación llegan casi siempre con una referencia ASVS. Antes de que eso pase, tu equipo puede correr el mismo chequeo de forma regular y dejar constancia.</p>
+<ul><li>Elige un nivel ASVS objetivo (2 como mínimo) y cúbrelo por partes en cada sprint.</li>
+<li>Automatiza lo automatizable: headers, rate limiting y manejo de errores son verificables en CI.</li>
+<li>Conserva los hallazgos y su remediación documentados para auditorías.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Check rápido del nivel ASVS 2 (V2-Authentication) en CI
+asvs_checks = {
+  &quot;v2.1 passwords_stored_with_argon2_or_bcrypt&quot;: True,
+  &quot;v2.5 no_enumeration_on_login_errors&quot;: True,
+  &quot;v2.9 rate_limiting_on_login&quot;: True,
+  &quot;v2.20 session_rotation_on_login&quot;: False,  # PENDIENTE
+}
+failed = [k for k, ok in asvs_checks.items() if not ok]
+if failed:
+    raise SystemExit(f&quot;ASVS pendiente: {failed}&quot;)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El ASVS no es una licencia de seguridad perfecta, pero convertir sus requisitos en tu checklist elimina la improvisación.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Broken authentication es el fallo transversal: cualquier eslabón débil del ciclo de la cuenta pone en riesgo las demás capas.</li>
+<li>El ASVS mide con requisitos accionables y niveles, lo que permite comparar dos sistemas de forma objetiva.</li>
+<li>Los errores de login idénticos evitan la enumeración de usuarios, uno de los vectores más rentables para el atacante.</li>
+<li>Un stack trace o un 500 con detalles convierte un fallo lógico en información: siempre respondes JSON plano.</li>
+<li>Las revisiones de seguridad pierden valor si no se hacen con una versión reproducible y una checklist fija.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Revelar con el mensaje de error si el email existe o no (enumeración de usuarios).</li>
+<li>Entregar la forma de credenciales original en los logs por error de codificación.</li>
+<li>Copiar y pegar una 'checklist general' sin requisitos verificables adoptables por tu equipo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Fija un nivel ASVS objetivo y ticket con la referencia en cada incidencia.</li>
+<li>Revisa primero los requisitos de autenticación: suelen concentrar el mayor riesgo.</li>
+<li>Incluye una tarea de auditoría ligera en cada sprint, no un pentest anual de golpe.</li>
+<li>Documenta supuestos: si usas un servicio externo, el alcance de responsabilidades cambia.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Clasifica 3 hallazgos reales de tu login según los requisitos ASVS V2.</li>
+<li>Redacta la política de contraseñas y bloqueo que cumpliría V2.1 y V2.9.</li>
+<li>Eleva tu checklist actual a nivel ASVS 2 y marca los puntos pendientes.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>OWASP Top 10 y ASVS dan un marco verificable para asegurar la autenticación.</li>
+<li>La enumeración de usuarios, los errores ricos y la falta de rate limiting son los fallos más típicos.</li>
+<li>La seguridad de auth se revisa con checklist reproducible, no con intuición.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de la Autenticación</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Registro y Login</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Sesiones del lado servidor</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · JWT</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Autorización y RBAC</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · OAuth 2.0 y OIDC</a></li>
+          <li><a href="./index.html">Módulo 7 · Seguridad, OWASP y cumplimiento</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

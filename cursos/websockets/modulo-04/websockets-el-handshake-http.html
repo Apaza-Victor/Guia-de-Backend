@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="websockets-el-handshake-http">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El handshake HTTP al detalle · WebSockets y Tiempo Real · Backend Academy</title>
+<meta name="description" content="El handshake HTTP que transforma una petición GET en un socket WebSocket.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="websockets" data-current="websockets-el-handshake-http"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">WebSockets y Tiempo Real</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">El handshake HTTP al detalle</span>
+        </nav>
+        <h1 class="lesson-title">El handshake HTTP al detalle</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> WebSockets y Tiempo Real</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Protocolo WebSocket en profundidad</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Toda conexión WebSocket empieza siendo una petición HTTP normal. El cliente envía un GET con cabeceras especiales y, si el servidor acepta, la respuesta 101 cambia el protocolo en mitad de la conexión.</p>
+<p>Este handshake es la razón por la que WebSocket atraviesa firewalls y frameworks web sin dramas: no es un puerto mágico, es una petición HTTP que se transforma.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El handshake es el intercambio de una petición HTTP GET con Sec-WebSocket-Key y Sec-WebSocket-Version; si el servidor responde 101 Switching Protocols, la conexión pasa a ser un socket WebSocket.</p><p><strong>Por qué importa.</strong> Te permite servir REST y WebSocket en el mismo servidor y ruta, y entender por qué algunos proxies bloquean el upgrade.</p><p><strong>Cuándo usarlo.</strong> Analiza el handshake al configurar un reverse proxy, al recordar la petición original (query, cookies, token) o al depurar rechazos de conexión.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>La petición inicial es un GET HTTP/1.1 con cabeceras de upgrade.</li>
+<li>Sec-WebSocket-Key es un nonce que el servidor devuelve firmado en Sec-WebSocket-Accept.</li>
+<li>La respuesta 101 Switching Protocols materializa la conexión.</li>
+<li>El cliente puede incluir query params, cookies o Authorization en el handshake.</li>
+<li>La mayoría de implementaciones usan HTTP/1.1 para el handshake.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un servidor HTTP con montaje manual del uptime: handleUpgrade conserva la petición original.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const http = require(&quot;http&quot;)
+const WebSocket = require(&quot;ws&quot;)
+const wss = new WebSocket.Server({ noServer: true })
+const servidor = http.createServer()
+servidor.on(&quot;upgrade&quot;, (req, socket) =&gt; {
+  wss.handleUpgrade(req, socket, (ws) =&gt; { wss.emit(&quot;connection&quot;, ws, req) })
+})
+servidor.listen(8080)</code></pre></div>
+</figure>
+<pre><code class="language-text">El servidor acepta peticiones de tipo upgrade y crea sockets WebSocket.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Con el objeto req a mano, la conexión conserva información del handshake original.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Accediendo a la petición original en la conexión</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">wss.on(&quot;connection&quot;, (socket, req) =&gt; {
+  const usuario = extraerUsuarioDeUrl(req.url)
+  socket.usuario = usuario
+  console.log(&quot;Handshake de:&quot;, usuario.id)
+})</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En producción el handshake es la puerta de entrada: sirve para autenticar y sembrar el estado de cada socket.</p>
+<ul><li>Autentica en el handshake para no abrir sockets anónimos.</li>
+<li>Valida la URL del handshake para rechazar rutas no permitidas.</li>
+<li>Guarda el estado inicial (usuario, salas) en el objeto del socket.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">servidor.on(&quot;upgrade&quot;, (req, socket, head) =&gt; {
+  if (!esOrigenPermitido(req.headers.origin)) { socket.destroy(); return }
+  wss.handleUpgrade(req, socket, head, (ws) =&gt; { wss.emit(&quot;connection&quot;, ws, req) })
+})</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los proxies deben reenvníar Upgrade y Connection; con Nginx hay que añadir esas cabeceras explícitamente.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El servidor calcula Sec-WebSocket-Accept con SHA-1 sobre la key y un GUID fijo del protocolo.</li>
+<li>Un código 400 en el handshake suele indicar cabeceras incorrectas o una versión no soportada.</li>
+<li>La petición original sirve de seed de estado: evitas un segundo round-trip de autenticación.</li>
+<li>Express no gestiona sockets; hace falta el servidor HTTP con handleUpgrade o un montaje noServer.</li>
+<li>Comprender el handshake es la llave para integrar WebSocket en servicios ya desplegados.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Rechazar todas las conexiones porque el proxy no reenvía Connection: upgrade.</li>
+<li>Depender del evento connection sin pasar el objeto req al callback.</li>
+<li>Olvidar cerrar el socket cuando la validación de la URL lo rechaza.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Pasa req a la conexión: te da query, cookies y cabeceras del handshake.</li>
+<li>Valida el origen en producción para bloquear conexiones cross-site.</li>
+<li>Inspecciona el handshake con wscat o con una pestaña de red del navegador.</li>
+<li>Mantén el servidor HTTP para seguir sirviendo REST junto al socket.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Muestra por consola todos los headers del handshake al conectar un cliente.</li>
+<li>Rechaza conexiones cuya URL no empiece por /ws.</li>
+<li>Autentica en el handshake y guarda el usuario en el objeto del socket.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>WebSocket nace como una petición HTTP GET y se materializa con el 101.</li>
+<li>El handshake transporta key, versión, subprotocolos y extensiones.</li>
+<li>Usa la petición original para autenticar y sembrar el estado del socket.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de WebSocket</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · WebSockets en Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalar y asegurar WebSockets</a></li>
+          <li><a href="./index.html">Módulo 4 · Protocolo WebSocket en profundidad</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Salas y broadcast</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Escalado y balanceo</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · WebSockets en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

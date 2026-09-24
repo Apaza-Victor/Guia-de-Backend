@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="presupuesto-de-rendimiento">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presupuesto y coste por petición · Performance y Optimización · Backend Academy</title>
+<meta name="description" content="Define presupuestos de latencia y coste por petición para gobernar el rendimiento.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="performance" data-current="presupuesto-de-rendimiento"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Performance y Optimización</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Presupuesto y coste por petición</span>
+        </nav>
+        <h1 class="lesson-title">Presupuesto y coste por petición</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Performance y Optimización</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Profiling y monitoreo</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Pedir 'rápido' no es una métrica. Un presupuesto de rendimiento dicta cuánto puede tardar, p. ej.: p95 < 250 ms, sonear en presupuesto de 300 ms de red + 100 de app + 50 de BD. Y el coste por petición convierte el rendimiento en euros.</p>
+<p>Definir y vigilar el presupuesto convierte cada degradación en una alerta y cada mejora en dinero ahorrado. Es la forma adulta de gobernar la performance: con números cerrados y responsables.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un presupuesto de rendimiento fija límites presupuestarios por capa y umbral (p95, p99) de latencia, tamaño de payload y coste; el coste por petición calcula el gasto de infraestructura imputable a cada request.</p><p><strong>Por qué importa.</strong> Darle presupuesto a cada capa evita degradaciones silenciosas: si la capa de BD supera su parte, la alerta parpadea aunque el p95 global aguante.</p><p><strong>Cuándo usarlo.</strong> Usa el budget en APIs críticas y en el arranque de proyectos; calibra los números con p95 reales de semanas y ajústalos.en la mejora. Es candidato a CI en cada merge.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El presupuesto total = suma de presupuestos por capa (red, app, BD).</li>
+<li>Se gobierna con percentiles (p95/p99), no con promedios.</li>
+<li>El tamaño del payload forma parte del presupuesto (bytes).</li>
+<li>El coste por petición = gasto de infra / nº peticiones por unidad de tiempo.</li>
+<li>El presupuesto se revisa en el ciclo de vida, no una vez.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Definimos el presupuesto como un objeto y comprobamos un p95 contra él.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">presupuesto = {&quot;red&quot;: 0.15, &quot;app&quot;: 0.06, &quot;bd&quot;: 0.04, &quot;total&quot;: 0.25}
+def cumple(p95_por_capa):
+    over = []
+    for capa, limite in presupuesto.items():
+        if p95_por_capa.get(capa, 0) &gt; limite:
+            over.append(capa)
+    return over
+medidas = {&quot;red&quot;: 0.13, &quot;app&quot;: 0.05, &quot;bd&quot;: 0.07}
+print(&quot;capa sobre presupuesto:&quot;, cumple(medidas))</code></pre></div>
+</figure>
+<pre><code class="language-text">capa sobre presupuesto: ['bd']</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Calculamos el coste por petición de un stack concreto.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Coste unitario del rendimiento: infrastructura / tráfico</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def coste_por_peticion(gasto_hora, peticiones_hora):
+    if peticiones_hora == 0:
+        return 0
+    return gasto_hora / peticiones_hora * 1_000_000   # en micro-euros
+
+# 3 nodos de app a 0.08$/h + BD a 0.12$/h = 0.36$/h, 40k req/min
+print(round(coste_por_peticion(0.36, 40_000 * 60), 2), &quot;μ€/petición&quot;)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un equipo fijó un presupuesto de p95 250 ms y lo protege en CI: cada PR ejecuta un test sintético y si el p95 del nuevo código supera el 110% del baseline, la pipeline frena. En un año, la degradación acumulada dejó de existir</p>
+<ul><li>Imponelo en CI: performance budgets como gate de pull request.</li>
+<li>Vigila también el tamaño del payload: comprimir y recortar campos es presupuesto puro.</li>
+<li>Revisa el coste por petición en cada cambio de infra.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">baseline = 0.25   # p95 en segundos
+def gate_pr(p95_nuevo):
+    if p95_nuevo &gt; baseline * 1.1:
+        return f&quot;BLOQUEADO: p95 {p95_nuevo:.3f}s &gt; {baseline * 1.1:.3f}s&quot;
+    return &quot;pasa CI&quot;
+print(gate_pr(0.29))
+print(gate_pr(0.24))</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Reduzcirlo no es un fin: es la práctica que evita que el rendimiento se 'cargue' de forma silenciosa.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Los percentiles muestran la experiencia real; la media esconde colas.</li>
+<li>Presupuestar por capa permite aislar y repartir la responsabilidad.</li>
+<li>El coste por petición convierte métricas en dinero: argumento ejecutivo final.</li>
+<li>Los budgets se calibran con baselines históricos y se endurecen gradualmente.</li>
+<li>Un budget en CI evita regresiones por defecto del día a día.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Presupuesto que nadie monitoriza: papel mojado.</li>
+<li>Optimizar una capa más allá de lo que el budget exige (sobre-ingeniería).</li>
+<li>Basetype en medias: pasas p95 de 300ms y el promedio oculta la degradación.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Publica el budget en el dashboard: quien lo mira 'unordered' lo cumple.</li>
+<li>Fija budgets por dominio (login más estricto que listado).</li>
+<li>Une budget + coste por petición para priorizar inversiones.</li>
+<li>Revisa mensualmente: el presupuesto madura con el equipo.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Define un presupuesto por capa para tu endpoint más caliente.</li>
+<li>Calcula el coste por petición con tus cifras de gasto y tráfico.</li>
+<li>Pon un gate en CI que compare el p95 del nuevo código contra el baseline.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El presupuesto da límites numéricos por capa y por percentil.</li>
+<li>El coste por petición justifica inversiones en rendimiento.</li>
+<li>Vigilarlo en CI deja de producir regresiones silenciosas.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Medir rendimiento</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Optimización</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y despliegue</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Caching y CDN</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Optimización del runtime</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Nginx y redes</a></li>
+          <li><a href="./index.html">Módulo 7 · Profiling y monitoreo</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

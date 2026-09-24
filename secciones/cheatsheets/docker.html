@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docker · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de Docker: run, imágenes, build y push, volúmenes, redes, Dockerfile, Compose y limpieza.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-root="../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="./index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">Docker</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🐳 Docker</h1>
+          <p class="section-subtitle">Contenedores para empaquetar aplicaciones y sus dependencias. Imágenes, run, volúmenes, redes, Dockerfile y Compose.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Herramientas</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="conceptos">Conceptos clave</h2>
+              <ul>
+                <li><strong>Imagen</strong>: plantilla inmutable con el código y sus dependencias. Se comparte.</li>
+                <li><strong>Contenedor</strong>: instancia en ejecución de una imagen. Efímero por naturaleza.</li>
+                <li><strong>Volumen</strong>: datos que sobreviven al contenedor (BD, uploads).</li>
+                <li><strong>Red</strong>: los contenedores se descubren por nombre dentro de una red propia.</li>
+                <li><strong>Dockerfile</strong>: receta para construir una imagen.</li>
+                <li><strong>Compose</strong>: define varios servicios (app + postgres + redis) con un <code class="inline">docker-compose.yml</code>.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 id="run">Ejecutar contenedores: docker run</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">docker run nginx                     # descargar y ejecutar (foreground)
+docker run -d --name web -p 8080:80 nginx
+#   -d          → en segundo plano (detached)
+#   --name web  → nombre del contenedor
+#   -p 8080:80  → mapea host:puerto-contendor
+
+docker run -it ubuntu bash           # interactivo con terminal
+docker run --rm alpine echo "hola"   # borra el contenedor al terminar
+docker run -e DATABASE_URL=... -e NODE_ENV=production mi-app
+
+# Con volumen (datos persistentes)
+docker run -d -p 5432:5432 \
+  -e POSTGRES_PASSWORD=secreto \
+  -v pgdata:/var/lib/postgresql/data \
+  --name postgres postgres:16
+
+# Ver contenedores
+docker ps                  # en marcha
+docker ps -a               # todos (parados también)
+docker logs -f web         # logs en vivo
+docker exec -it web bash   # terminal dentro del contenedor
+docker stop web            # detener
+docker rm web              # borrar contenedor</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="imagenes">Imágenes: pull, build y push</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">docker pull node:20-alpine        # bajar una imagen
+docker images                     # listar imágenes locales
+
+# Construir con etiqueta (el . es el contexto de build)
+docker build -t mi-app .
+docker build -t mi-app:1.0 .
+docker build -t usuario/app:v1 .
+
+# Subir a un registro (Docker Hub / GitHub Packages / ECR)
+docker login
+docker push usuario/app:v1
+
+# Inspeccionar
+docker inspect web
+docker image history mi-app
+docker image rm mi-app
+
+# Alpine = mínima (~5 MB), ideal para producción</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="dockerfile">Dockerfile esencial</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Dockerfile</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-dockerfile"># --- build de dependencias ---
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# --- imagen de producción, sin node_modules de desarrollo ---
+FROM node:20-alpine
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+# usuario sin privilegios (mejores prácticas de seguridad)
+RUN addgroup -S app &amp;&amp; adduser -S app -G app
+USER app
+
+EXPOSE 3000
+CMD ["node", "dist/server.js"]</code></pre>
+                </div>
+              </div>
+              <p>El <strong>orden importa</strong>: capas con menos cambios van primero para aprovechar la caché de capas (<code class="inline">npm ci</code> antes de copiar el código).</p>
+            </section>
+
+            <section>
+              <h2 id="volumenes">Volúmenes</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash"># Volumen nombrado (persiste en el host, gestionado por Docker)
+docker volume create pgdata
+docker run -v pgdata:/var/lib/postgresql/data postgres:16
+docker volume ls
+docker volume rm pgdata
+
+# Bind mount: una ruta del host directa (útil en desarrollo)
+docker run -v "$(pwd):/app" -p 3000:3000 node:20 node /app/server.js
+
+# Copiar archivos hacia y desde el contenedor
+docker cp app.log web:/tmp/app.log
+docker cp web:/etc/nginx/nginx.conf ./nginx.conf
+
+# Sin volumen, al borrar el contenedor se pierde TODO lo escrito dentro.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="red">Redes</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">docker network ls
+docker network create app-net
+
+# Conectar contenedores a la misma red → se llaman por --name
+docker run -d --name api --network app-net ...
+docker run -d --name redis --network app-net ...
+# Desde API: redis:6379 (no localhost)
+
+# Red por defecto "bridge" permite el -p host:puerto
+# Red "host" comparte la red del host (Linux, riesgo)
+# "none" aísla sin red
+
+# Abrir puertos de un contenedor en marcha no se puede
+# → levantar de nuevo con -p actualizado</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="compose">Compose (multi-servicio)</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">YAML</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-yaml">services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://app:secreto@db:5432/app
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app          # hot-reload en desarrollo
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: secreto
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:</code></pre>
+                </div>
+              </div>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">docker compose up -d              # levantar todo
+docker compose up -d --build      # reconstruir imágenes
+docker compose ps                 # estado
+docker compose logs -f api        # logs de un servicio
+docker compose exec api sh        # terminal en un servicio
+docker compose down               # parar y quitar (sin volúmenes)
+docker compose down -v            # parar y borrar volúmenes (¡datos dentro!)
+docker compose config             # validar el YAML</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="limpieza">Limpieza y diagnóstico</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">Bash</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-bash">docker system df                # cuánto ocupa cada cosa
+docker stats                    # CPU/memoria por contenedor
+
+# Limpiar
+docker container prune          # contenedores parados
+docker image prune              # imágenes sin usar
+docker volume prune             # volúmenes huérfanos
+docker builder prune            # caché de build
+docker system prune -a --volumes  # TODO lo no usado (¡cuidado!)
+
+# Errores típicos
+#   "port is already allocated"  → otro contenedor usa ese puerto: docker ps
+#   "no space left"              → docker system prune y revisa df -h
+#   imagen no arranca            → docker logs -f contenedor
+docker inspect -f '{{.Config.Image}}' web</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Usa imágenes oficiales y etiquetas concretas (nunca <code class="inline">latest</code> en producción).</li>
+                <li>Prefiere bases slim/alpine y build en multi-etapa para imágenes pequeñas.</li>
+                <li>No instales dependencias de desarrollo en la imagen final.</li>
+                <li>Secretos vía variables de entorno o secrets de Compose, nunca dentro de la imagen.</li>
+                <li>Un servicio por contenedor; procesos con PID 1 gestionado (<code class="inline">node</code> directo, no <code class="inline">npm start</code> si pide shell).</li>
+                <li>Define <code class="inline">restart</code> y límites de recursos en producción.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="./index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="./rest.html">Siguiente: REST <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="./index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

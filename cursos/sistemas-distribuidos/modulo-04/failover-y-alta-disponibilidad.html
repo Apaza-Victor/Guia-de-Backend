@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="failover-y-alta-disponibilidad">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Failover y alta disponibilidad · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Failover y alta disponibilidad para sobrevivir a la pérdida de un nodo.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="failover-y-alta-disponibilidad"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Failover y alta disponibilidad</span>
+        </nav>
+        <h1 class="lesson-title">Failover y alta disponibilidad</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Tolerancia a fallos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un servidor se quema, un pod se revienta, una zona de nube se apaga. La alta disponibilidad es la promesa de que esas bajas no interrumpen el servicio: siempre queda alguien para seguir atendiendo.</p>
+<p>El failover es el mecanismo: detectar la pérdida, conmutar al nodo de respaldo y seguir con el menor corte posible, mejor sin que el usuario se entere.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Alta disponibilidad (HA) es la capacidad de un sistema de seguir operando ante fallos de nodos o zonas; el failover es la conmutación automática de un recurso caído a su respaldo.</p><p><strong>Por qué importa.</strong> Ningún HW o proveedor es inmortal: la HA diseña la redundancia y el failover la activación para que la caída no sea percibida.</p><p><strong>Cuándo usarlo.</strong> Aplica HA en componentes críticos (DB, gateway, balanceadores) con réplicas y en varias zonas de disponibilidad.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Redundancia: existen copias listas para sustituir al recurso caído.</li>
+<li>Failover: el proceso de conmutación automática al respaldo.</li>
+<li>Active-passive: un nodo principal y uno en espera que toma el relevo.</li>
+<li>Active-active: varios nodos sirviendo a la vez; la pérdida de uno no corta nada.</li>
+<li>Zona de disponibilidad: aislamiento físico para que un fallo no afecte a todo.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Failover activo-pasivo en una base de datos con réplica.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">class RepositorioConFailover {
+  constructor({ primario, pasivo }) {
+    this.primario = primario;
+    this.pasivo = pasivo;
+  }
+  async leer(id) {
+    try {
+      return await this.primario.obtener(id);
+    } catch (e) {
+      console.log(&quot;Primario caido, failover al pasivo&quot;);
+      return await this.pasivo.obtener(id);
+    }
+  }
+}
+
+const repo = new RepositorioConFailover({ primario, pasivo });</code></pre></div>
+</figure>
+<pre><code class="language-text">Si el primario falla, la lectura sigue desde el pasivo.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Alta disponibilidad cross-zone: la réplica vive en otra zona física.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">DB con réplica en segunda zona de disponibilidad</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">apiVersion: v1
+kind: Service
+metadata: { name: pedidos-bd }
+spec:
+  selector:
+    app: postgres
+    az: eu-west-1b
+
+# el orchestrador promueve la replica si la primaria se pierde
+kubectl get pods -l app=postgres -o wide --all-namespaces</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>La zona primaria de la nube sufre un corte de red. Las réplicas en la segunda zona toman el relevo: el balanceador del gateway no nota nada, el usuario sigue comprando y el equipo recupera la primera zona sin urgencia.</p>
+<ul><li>Distribuye réplicas en zonas distintas: el failover real es cross-zone.</li>
+<li>Prueba el failover con regularidad: un backup que no se prueba no existe.</li>
+<li>Elige activo-activo cuando la tolerancia al corte es casi cero.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># prueba de failover (cambio de token de rol)
+pg_ctl promote -D /var/lib/postgresql/12/main
+kubectl annotate statefulset postgres role=primary
+curl -s http://localhost:5432/health | jq .role</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El failover activo-activo reparte lectura y escritura por zonas: más caro de modelar pero sin punto único lógico.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La redundancia hace posible el failover; sin ella, la caída es total.</li>
+<li>Activo-pasivo tiene un punto de espera y un corte de segundos al conmutar.</li>
+<li>Activo-activo reparte carga y tolera pérdida de nodos sin corte.</li>
+<li>La zona de disponibilidad separa físicamente los fallos latentes.</li>
+<li>El failover debe probarse porque los caminos de recuperación suelen dejar de funcionar en silencio.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Réplica en la misma zona: un corte de la zona elimina primaria y respaldo.</li>
+<li>No probar el failover: la primera prueba real coincide con el incidente.</li>
+<li>Confundir backups (restaurar en minutos) con HA (continuidad sin corte).</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Define un RTO/RPO: cuánto puedes estar caído y cuántos datos puedes perder.</li>
+<li>Practica el failover en un escenario simulado al menos una vez al trimestre.</li>
+<li>Mide la latencia entre zonas: la replicación síncrona cuesta distancia.</li>
+<li>Usa balanceadores y DNS con health checks que detecten la conmutación.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Diseña la HA de tu BD con réplica en segunda zona.</li>
+<li>Escribe un script que promueva la réplica como primaria.</li>
+<li>Simula la caída y mide el tiempo de conmutación real.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La alta disponibilidad se consigue con redundancia y zonas separadas.</li>
+<li>El failover conmuta automáticamente al nodo de respaldo.</li>
+<li>Activo-pasivo para no perder el servicio; activo-activo para no cortar nada.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+          <li><a href="./index.html">Módulo 4 · Tolerancia a fallos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Consistencia y consenso</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Sistemas distribuidos a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Patrones distribuidos en la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

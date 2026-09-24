@@ -177,6 +177,7 @@ const AppNav = (() => {
     buildBreadcrumb();
     const headings = buildToc();
     scrollSpy(headings);
+    ensureMobileMenu();
     mobileMenu();
     backToTop();
     prevNext();

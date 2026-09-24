@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-saas-notificaciones-multicanal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notificaciones multicanal · Integración y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Diseña un servicio de notificaciones que reparte email, SMS y push con un único contrato.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-saas-notificaciones-multicanal"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Integración y Servicios Externos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Notificaciones multicanal</span>
+        </nav>
+        <h1 class="lesson-title">Notificaciones multicanal</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integración y Servicios Externos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Integraciones con SaaS</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un mismo hecho de negocio necesita avisar por email, por SMS y por push según el cliente y la urgencia. Si cada canal se integra por separado dentro de los flujos de negocio, el código se llena de ramas y de proveedores distintos.</p>
+<p>La solución es un servicio de notificaciones con una interfaz única: el resto del sistema manda un evento y el servicio decide canal, plantilla, proveedor y reintentos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un servicio de notificaciones multicanal expone una única API para solicitar un aviso y se encarga de resolver canal, plantilla, proveedor externo, cola, reintentos y registro de entrega.</p><p><strong>Por qué importa.</strong> Aísla a los proveedores (email, SMS, push) del resto del sistema y concentra en un solo sitio la política de reintentos y las plantillas.</p><p><strong>Cuándo usarlo.</strong> Úsalo cuando más de un canal o de un proveedor necesiten enviar avisos; evítalo si solo mandas un email puntual y un proveedor te basta.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Un contrato de petición único: destinatario, tipo de aviso y datos de contexto.</li>
+<li>El enrutado decide el canal según preferencias y urgencia del usuario.</li>
+<li>Las plantillas viven en el servicio, no desperdigadas por el código.</li>
+<li>La cola protege al proveedor de picos de envío masivo.</li>
+<li>El estado de cada envío se registra para reenviar y auditar.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>El contrato mínimo de petición: quien pide el aviso no sabe (ni debe saber) quién lo manda.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import requests
+
+def notificar(usuario, tipo, datos):
+    payload = {
+        &quot;destinatario&quot;: {&quot;email&quot;: usuario[&quot;email&quot;], &quot;telefono&quot;: usuario[&quot;telefono&quot;]},
+        &quot;tipo&quot;: tipo,
+        &quot;datos&quot;: datos,
+        &quot;preferencias&quot;: usuario[&quot;preferencias&quot;],
+    }
+    requests.post(&quot;https://notif.ejemplo.com/v1/avisos&quot;, json=payload)
+
+notificar(usuario, &quot;recibo&quot;, {&quot;importe&quot;: 34.9, &quot;pedido&quot;: &quot;P-1234&quot;})</code></pre></div>
+</figure>
+<pre><code class="language-text">El servicio de notificaciones encola y reparte el aviso por los canales adecuados.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Dentro del servicio, el adaptador por canal mantiene la interfaz y cambia de proveedor sin tocar el resto:</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Interfaz de canal con adaptador de proveedor</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">class CanalEmail:
+    def enviar(self, plantilla, datos):
+        return provider_a.enviar_email(plantilla, datos)
+
+class CanalSMS:
+    def enviar(self, plantilla, datos):
+        return provider_b.enviar_sms(plantilla, datos)
+
+CANALES = {&quot;email&quot;: CanalEmail(), &quot;sms&quot;: CanalSMS()}
+canal = CANALES[preferencia]
+resultado = canal.enviar(plantilla_id, datos)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un e-commerce avisa de una promoción flash. Los clientes con app reciben push, los que no, email; y las listas VIP suman SMS. La campaña se lanza como un único evento y el servicio resolvió canal y cola por usuario sin tocar el código de la campaña.</p>
+<ul><li>Separa la decisión del envío: tu negocio no debe conocer a los proveedores.</li>
+<li>Mide tasa de entrega y de apertura por canal para ajustar la política.</li>
+<li>Respeta las preferencias del usuario: no enviar por un canal que pidió callar.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def enrutar(usuario, tipo):
+    pref = usuario[&quot;preferencias&quot;]
+    if tipo == &quot;promocion_vip&quot; and &quot;sms&quot; in pref[&quot;canales&quot;]:
+        return &quot;sms&quot;
+    if &quot;push&quot; in pref[&quot;canales&quot;]:
+        return &quot;push&quot;
+    return &quot;email&quot;</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Las preferencias se combinan con la urgencia: un aviso de fraude ignora los silencios de newsletter.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Un contrato único de petición desacopla el negocio de los proveedores de envío.</li>
+<li>El enrutado por preferencia y urgencia decide el canal sin ramas en cada flujo.</li>
+<li>La cola aplana los picos y protege la cuota de cada proveedor.</li>
+<li>Registrar el estado de cada envío permite reenviar a quien no recibió o no abrió.</li>
+<li>Cambiar de proveedor de SMS o push es cambiar una línea de configuración del adaptador.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Meter el proveedor de email dentro de cada elección del negocio y acoplar todo.</li>
+<li>Enviar por SMS todos los avisos porque es el canal que antes se programó.</li>
+<li>No registrar la preferencia de canal y enviar el doble de lo debido.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Define el contrato de petición antes de elegir proveedor.</li>
+<li>Empieza por un solo canal con cola y añade el resto como adaptadores.</li>
+<li>Centraliza las plantillas en el servicio con variables de contexto.</li>
+<li>Loggea el estado de cada envío con fecha y proveedor usado.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Define el contrato de petición de avisos para un caso de recibo mensual.</li>
+<li>Escribe la función de enrutado para dos canales y una preferencia silenciosa.</li>
+<li>Diseña un adaptador concreto de un proveedor de SMS y su test con mock.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Un servicio multicanal expone un contrato único y esconde canales y proveedores.</li>
+<li>El enrutado decide canal por preferencia y urgencia de cada usuario.</li>
+<li>Colas, plantillas y registro de estado convierten el envío en algo auditable y barato de mantener.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de integración</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+          <li><a href="./index.html">Módulo 4 · Integraciones con SaaS</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Webhooks y eventos</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad en integraciones</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y mantenimiento</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

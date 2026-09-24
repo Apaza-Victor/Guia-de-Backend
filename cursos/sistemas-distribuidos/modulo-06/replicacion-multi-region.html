@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="replicacion-multi-region">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replicación y multi-región · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Replicación multi-región para reducir latencia y resistir desastres.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="replicacion-multi-region"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Replicación y multi-región</span>
+        </nav>
+        <h1 class="lesson-title">Replicación y multi-región</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Sistemas distribuidos a escala</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un usuario en Madrid no puede esperar los 300 ms que una petición a Singapur añade. La replicación multi-región acerca los datos y el servicio al usuario, y de paso convierte tu sistema en resistente a la caída de una región.</p>
+<p>El precio es la consistencia: escribir en dos regiones a la vez necesita pensarse bien, con líderes por región o resolución de conflictos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La replicación multi-región mantiene copias del servicio y de los datos en varias regiones de mundo para acercar la latencia y resistir la pérdida de una de ellas.</p><p><strong>Por qué importa.</strong> Reduce la latencia geográfica y convierte un fallo regional en algo sin impacto para la mayoría de usuarios.</p><p><strong>Cuándo usarlo.</strong> Úsala para usuarios globales o cuando la continuidad regional es un requisito.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Leader por región: cada región lee y escribe a un líder local.</li>
+<li>Read replicas: copias de solo lectura para descargar el líder.</li>
+<li>Conflictos: escrituras en dos líderes que tocan lo mismo.</li>
+<li>Last-write-wins y CRDTs: resoluciones simples de conflicto.</li>
+<li>Active-active vs active-passive: ambas regiones sirven o solo una.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Enrutar la lectura a la región más cercana con geo-DNS.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">// el DNS o geo-liga devuelve la region del usuario
+async function leerDatos(usuario) {
+  const region = detectarRegion(usuario.ip);
+  const endpoint = region === &quot;eu&quot; ? &quot;eu.api.example.com&quot; : &quot;us.api.example.com&quot;;
+  return await fetch(`https://${endpoint}/api/datos`).then((r) =&gt; r.json());
+}
+
+leerDatos({ ip: &quot;84.120.30.11&quot; }); // al EU en milisegundos</code></pre></div>
+</figure>
+<pre><code class="language-text">Cada usuario lee de su región, con una latencia mínima.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Modelo leader-per-region: escrituras locales replicadas a las demás.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Replicación multi-región con líderes locales</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const regiones = [&quot;eu&quot;, &quot;us&quot;, &quot;ap&quot;];
+
+async function escribir(dato) {
+  const lider = liderLocal(region);
+  await lider.escribir(dato);
+  // la replica del lider propaga a las demas regiones
+  await lider.replicarA(regionesSin(region), dato);
+  // si dos lideres tocan lo mismo, resolver conflictos
+  resolverConflicto(dato);
+}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una red social con usuarios en 3 continentes usa leader-per-region. Las escrituras locales son rápidas; los conflictos de perfil se resuelven por el valor más reciente. La región de Singapur cae y nadie se entera.</p>
+<ul><li>Eliges el modelo según el patrón de escritura y lectura.</li>
+<li>Los conflictos se resuelven explícitamente, no con magia.</li>
+<li>Prueba la caída de una región antes de necesitarla.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">// geodesico: las escrituras de cada region van a su lider
+console.log(&quot;region eu escribe local: 8ms&quot;);
+console.log(&quot;region us mas demas regiones: +120ms de replicacion&quot;);
+
+// decision: si escribes mucho en una region, alli el lider</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> La multi-región convierte cada caída de centro de datos en un ejercicio probado y rutinario.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Cada región con su líder reduce la latencia de escritura local.</li>
+<li>Las read replicas resuelven el pico de lecturas por región.</li>
+<li>Los conflictos son inevitables en active-active: resuélvelos por diseño.</li>
+<li>LWW es simple y pierde datos; CRDTs convergen sin perderlos.</li>
+<li>El enslave del proveedor (región 'elástica') escala tu réplica sin tu operar.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Multi-región sin estrategia de conflictos: datos de dos líderes se pisan.</li>
+<li>Ignorar la latencia de replicación inter-región para lecturas frescas.</li>
+<li>Probar la caída de una región solo cuando ocurre.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Separa lecturas (local) de escrituras (lider regional).</li>
+<li>Decide LWW vs CRDT según el dato y su pérdida tolerable.</li>
+<li>Monitorea la lag de replicación entre regiones.</li>
+<li>Practica el failover regional en simulacro.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Diseña el routing geo-DNS de tu API hacia dos regiones.</li>
+<li>Define la política de resolución de conflictos de un dato compartido.</li>
+<li>Simula la caída de una región y comprueba la continuidad.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Multi-región acerca los datos al usuario y soporta la caída de una región.</li>
+<li>Leader-per-region y read replicas balancean latencia y coherencia.</li>
+<li>Los conflictos se predisponen y se resuelven por diseño.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Tolerancia a fallos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Consistencia y consenso</a></li>
+          <li><a href="./index.html">Módulo 6 · Sistemas distribuidos a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Patrones distribuidos en la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

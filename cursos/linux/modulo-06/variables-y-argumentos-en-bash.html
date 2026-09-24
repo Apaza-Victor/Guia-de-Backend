@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="variables-y-argumentos-en-bash">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variables y argumentos en Bash · Linux y Terminal para Backend · Backend Academy</title>
+<meta name="description" content="Usa variables y argumentos en tus scripts Bash.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="linux" data-current="variables-y-argumentos-en-bash"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Linux y Terminal para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Variables y argumentos en Bash</span>
+        </nav>
+        <h1 class="lesson-title">Variables y argumentos en Bash</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Linux y Terminal para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Scripting y automatización</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un script que solo imprime texto no sirve de nada: quieres guardar rutas, aceptar parámetros y leer la salida de otros comandos.</p>
+<p>Las variables y los argumentos dan esa flexibilidad. Y las comillas son la diferencia entre copiar una ruta con espacios y destruirla.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>En Bash las variables se asignan sin espacios (nombre=valor) y se leen con $. Los argumentos se llaman $1, $2… $@, y las comillas dobles preservan espacios dentro del valor.</p><p><strong>Por qué importa.</strong> Los scripts reutilizables dependen de parámetros y de manejar correctamente los valores: rutas con espacios y salida de subshells son la pesadilla clásica.</p><p><strong>Cuándo usarlo.</strong> Usa variables para todo valor repetido y argumentos para hacer el script parametrizable desde la línea de comandos.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>MI_VAR=/srv/tienda asigna; echo "$MI_VAR" lee.</li>
+<li>$1, $2, … $9 son los argumentos posicionales.</li>
+<li>$# cuenta argumentos; $@ lista todos.</li>
+<li>Las comillas dobles preservan los espacios.</li>
+<li>$(comando) captura la salida y la convierte en valor.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Variables y argumentos en un script de respaldo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">#!/usr/bin/env bash
+ORIGEN=${1:?Indica el origen}
+DESTINO=/backups/$(date +%F)
+
+mkdir -p &quot;$DESTINO&quot;
+rsync -av &quot;$ORIGEN&quot; &quot;$DESTINO/&quot;</code></pre></div>
+</figure>
+<pre><code class="language-text">Con un origen como argumento, el script respalda a /backups/fecha.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Capturar salida de un comando y usarla dentro del script.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Subshell y verificación</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+
+PUERTO=$(ss -tlnp | grep 3000 | awk '{print $4}')
+
+if [ -n &quot;$PUERTO&quot; ]; then
+    echo &quot;El servicio escucha en $PUERTO&quot;
+else
+    echo &quot;No hay nadie escuchando&quot; 1&gt;&amp;2
+    exit 1
+fi</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El script que respeta los espacios de las rutas y verifica sus variables.</p>
+<ul><li>Siempre comillas dobles en las variables.</li>
+<li>Valida argumentos con ${1:?mensaje}: falla claro.</li>
+<li>Fuente la configuración (source config) y refactor.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+source /etc/mi-app/entorno.env
+
+RUTA_APP=${RUTA_APP:?variable sin definir}
+
+echo &quot;Backup de $RUTA_APP a las $(date)&quot;
+tar czf &quot;/backups/codigo-$(date +%F).tar.gz&quot; \
+    --exclude=node_modules &quot;$RUTA_APP&quot;</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un valor entre comillas dobles se trata como un solo argumento, hagan lo que hagan los espacios. Tu script lo agradece.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La asignación nunca lleva espacios alrededor del =.</li>
+<li>Las comillas dobles guardan espacios; las simples literal total.</li>
+<li>$(...) ejecuta un subshell y guarda su stdout.</li>
+<li>${var:-porDefecto} aporta un default ante variable vacía.</li>
+<li>$? guarda el código del último comando.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Partir rutas con espacios por no comillar la variable.</li>
+<li>Asignar con espacios: nombre = valor (comando no encontrado).</li>
+<li>Usar comillas simples y que el contenido no interpole variables.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Comilla doble TODO lo que pueda contener espacios.</li>
+<li>Usa ${1:?mensaje} para argumentos obligatorios.</li>
+<li>Valida las variables críticas al inicio.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea un script que copie un origen a un destino parametrizado.</li>
+<li>Usa $(date +%F) para nombres con fecha.</li>
+<li>Protege una ruta con espacios usando comillas.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Variables y argumentos hacen los scripts parametrizables.</li>
+<li>Las comillas dobles preservan valores con espacios.</li>
+<li>$(comando) convierte salidas del sistema en valores útiles.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de Linux</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Navegación y archivos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Usuarios, permisos y procesos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Almacenamiento y archivos del sistema</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Redes y servicios</a></li>
+          <li><a href="./index.html">Módulo 6 · Scripting y automatización</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Producción y troubleshooting</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

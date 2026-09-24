@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="particionado-y-throughput">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Particionado y throughput · Mensajería y Sistemas Asíncronos · Backend Academy</title>
+<meta name="description" content="Aprende a particionar mensajes y dimensionar el throughput de tu broker.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="mensajeria" data-current="particionado-y-throughput"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Mensajería y Sistemas Asíncronos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Particionado y throughput</span>
+        </nav>
+        <h1 class="lesson-title">Particionado y throughput</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Mensajería y Sistemas Asíncronos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Mensajería a escala</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando tienes pocos miles de mensajes por segundo, cualquier broker sobra. El problema llega cuando el volumen se dispara: una sola cola o un solo consumidor se convierten en el cuello de botella. El particionado es la herramienta que reparte ese tráfico en paralelo.</p>
+<p>Kafka y Pulsar organizan los tópicos en particiones, y RabbitMQ escala replicando colas. La regla de oro es simple: el paralelismo máximo de consumo es el número de particiones.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Partir un tópico en particiones reparte los mensajes entre varias secuencias ordenadas que pueden consumir en paralelo: más particiones permiten más instancias de consumo simultáneas y más throughput.</p><p><strong>Por qué importa.</strong> Una partición única a lo sumo iguala la velocidad de un solo consumidor; el particionado desbloquea el paralelismo y permite alcanzar decenas de miles de mensajes por segundo.</p><p><strong>Cuándo usarlo.</strong> Particiona cuando necesites mantener orden por clave y a la vez alto throughput, o cuando un único consumidor no procesa el pico. No particiones por inercia: hay coste de operación y de reorden.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Partición: una secuencia ordenada e inmutable de mensajes dentro del tópico.</li>
+<li>Clave de partición: el hash de la clave decide la partición de cada mensaje.</li>
+<li>Más particiones = más consumidores en paralelo, pero más metadatos de broker.</li>
+<li>El orden se garantiza dentro de la partición, no entre particiones.</li>
+<li>El rebalanceo redistribuye particiones cuando cambia el número de consumidores.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Publicar con claves distribuye el tráfico; cada partición puede consumirse en paralelo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from confluent_kafka import Producer
+p = Producer({'bootstrap.servers': 'kafka:9092'})
+def clave(pedido):            # misma clave =&gt; misma particion
+    return pedido['usuario']
+for pedido in pedidos:
+    p.produce('pedidos', key=clave(pedido).encode(),
+              value=str(pedido).encode())
+p.flush()</code></pre></div>
+</figure>
+<pre><code class="language-text">Los mensajes se reparten por usuario entre las particiones; cada consumidor procesa una partición con su orden intacto.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El consumo en paralelo suma instancias: cada una toma particiones y las procesa en streaming.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Conjunto consumidor repartiendo particiones</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">consumer = KafkaConsumer('pedidos', bootstrap_servers=['kafka:9092'],
+                         group_id='pagos', auto_offset_reset='earliest')
+# 6 instancias del mismo consumer group = 6 particiones en paralelo
+for mensaje in consumer:
+    procesar(mensaje.key, mensaje.value)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una plataforma de billing pasó de 5k a 120k eventos/s dividendo el tópico en 64 particiones, dimensionando los consumidores a 64 instancias y usando claves por cuenta. El orden por cuenta se preservó en cada partición y el throughput se multiplicó.</p>
+<ul><li>Dimensiona particiones con el throughput objetivo y el número de consumidores.</li>
+<li>Elige claves con buena distribución para no saturar una partición 'caliente'.</li>
+<li>Monitorea la cola por partición: una clave dominante crea un hotspot.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Kafka: crea 64 particiones en el tópico de billing
+kafka-topics --bootstrap-server kafka:9092 --create \
+  --topic billing-eventos --partitions 64 --replication-factor 3</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El rebalanceo de un grupo muy grande puede causar 'stop-the-world': compensa con estática asignación o con más particiones que consumidores.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Cada partición es un log independiente, lo que permite consumidores en paralelo sin compartir estado.</li>
+<li>La clave hash aplicada decide partición: claves distintas reparten, claves iguales agrupan.</li>
+<li>El número óptimo de particiones equilibra paralelismo y coste de metadatos y commits.</li>
+<li>Con más particiones, el broker paga más ficheros y replicación: no es gratis.</li>
+<li>El rebalanceo reparte particiones entre consumidores al subir o bajar instancias.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Una partición por todo el gran pedido: el paralelismo queda en 1.</li>
+<li>Claves mal distribuidas: una partición 'hot' recibe todo mientras las otras holgazan.</li>
+<li>Añadir particiones sin comprobar que los consumidores escalan igual que ellas.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza con 4-8 particiones y duplica según medido, no por intuición.</li>
+<li>Usa claves de negocio estables y variadas (cuenta, sesión, usuario).</li>
+<li>Vigila la métrica de records-lag por partición: detecta ahogos específicos.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea un tópico con 3 particiones y publica mensajes con 3 claves distintas.</li>
+<li>Consume con 1 y con 3 instancias: mide cómo crece el throughput.</li>
+<li>Identifica una clave dominante en tus datos y propón una distribución mejor.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El paralelismo máximo de consumo es el número de particiones.</li>
+<li>Las claves controlan la distribución y preservan el orden por entidad.</li>
+<li>El particionado se dimensiona midiendo según crecer, no por intuición.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de mensajería</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · RabbitMQ y colas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Kafka y event streaming</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de mensajería</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Brokers y proveedores</a></li>
+          <li><a href="./index.html">Módulo 6 · Mensajería a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Arquitecturas orientadas a eventos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

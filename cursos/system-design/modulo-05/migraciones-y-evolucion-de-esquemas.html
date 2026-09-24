@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="migraciones-y-evolucion-de-esquemas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migraciones y evolución del esquema · System Design / Arquitectura de Sistemas · Backend Academy</title>
+<meta name="description" content="Estrategias para evolucionar el esquema y migrar datos con la app yendo.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="migraciones-y-evolucion-de-esquemas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">System Design / Arquitectura de Sistemas</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Migraciones y evolución del esquema</span>
+        </nav>
+        <h1 class="lesson-title">Migraciones y evolución del esquema</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design / Arquitectura de Sistemas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Caching y datos a escala</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Los esquemas viven: añades columnas, cambias tipos, mueves tablas a otro motor. Hacerlo en caliente, con el servicio sirviendo, es una de las tareas más delicadas del system design.</p>
+<p>La idea central: cada migración debe ser un cambio hacia adelante y reversible, desplegada en pasos donde app y BBDD siempre siguen compatiendo.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Evolucionar el esquema es modificar la estructura de datos en producción con la aplicación ejecutándose, usando migraciones versionadas, expansión/contracción (expand-contract) y backfills controlados.</p><p><strong>Por qué importa.</strong> Un ALTER gigante tarda, bloquea filas y, si rompes, el rollback es otro desastre. Dividir el cambio en pasos compatibles hace que cada deploy sea seguro y que el fallo sea solo un paso atrás.</p><p><strong>Cuándo usarlo.</strong> Aplica expand-contract para todo cambio de estructura con datos enormes, backfills por lotes con límite de escritura y feature flags para apagar la vieja vía cuando la nueva domina.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Expand-contract (3 fases): añadir (expand), hacer doble escritura/lectura, y eliminar (contract) la pieza vieja.</li>
+<li>Migraciones versionadas: cada cambio es un fichero con número de orden, aplicado en serie y registrado.</li>
+<li>Backfill por lotes: actualizar los datos históricos en pedazos con pausa, no en un UPDATE gigante.</li>
+<li>Lock mínimo: los ALTER en Postgres modernos (ADD COLUMN por defecto, etc.) evitan el bloqueo; los específicos (changing type) no.</li>
+<li>La compatibilidad de esquemas: app nueva debe poder leer/escribir BBDD vieja y viceversa en la ventana del deploy.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>El patrón de migración versionada mínimo: ordenado, idempotente y registrado en la BBDD.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">SQL</span><span class="code-block__caption">ejemplo.sql</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-sql">-- 004_nuevo_campo.sql
+BEGIN;
+  ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS paid_at
+    TIMESTAMP NULL;
+-- ídem: idempotente, no bloquea con NULL por defecto
+CREATE INDEX IF NOT EXISTS ix_orders_paid
+  ON orders (paid_at);
+COMMIT;</code></pre></div>
+</figure>
+<pre><code class="language-text">Añadir columna nullable no pide reescribir la tabla.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Expand/contract con doble escritura para renombrar una tabla sin parar el servicio.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">SQL</span><span class="code-block__caption">expand-contract</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-sql">-- FASE 1 · expand
+CREATE TABLE orders_v2 (id BIGSERIAL PRIMARY KEY, code TEXT, ...);
+-- la app escribe en v1 y v2 a la vez
+
+-- FASE 2 · doble escritura + backfill
+INSERT INTO orders_v2 SELECT ... FROM orders;
+-- FASE 3 · leer de v2 (feature flag 95-100%)
+-- FASE 4 · contract: drop de la vieja</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un sistema de facturación debía renombrar `amount` a `total_amount` con signo: la FACTURACIÓN A2 gigante llevaría horas y bloquearía la tabla en venta alta. El plan: columna nueva nullable, backfill por lotes de 10k filas cada 5s, feature flag en la app para leer la nueva, y 3 días después, contracción de la vieja. Ningún bloqueo si la app nunca leyó las dos columnas modernas.</p>
+<ul><li>Añade la columna nueva nullable y con índice diferido (después del backfill).</li>
+<li>Backfill de a poco, con un rate que no estorbe el tráfico productivo.</li>
+<li>Levanta primero la lectura/escritura de la app con feature flag y despliega por porcentaje.</li>
+<li>Contrae solo cuando la vieja no se lea ni se escriba desde hace N días.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">ejemplo.yaml</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">migracion:
+  fase: &quot;expand&quot;
+  backfill:
+    lote: 10000
+    pausa: 5s
+    condicion: &quot;paid_at IS NULL&quot;
+  cutover:
+    flag: &quot;usar_v2&quot;
+    rollout: [5, 50, 100] %
+  contraccion:
+    espera_dias: 2</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El feature flag convierte el cutover en un interruptor, no en una ventana límite.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Cada paso de una migración debe dejar BBDD y app funcionando en el estado anterior o en el nuevo: nunca en el vacío.</li>
+<li>Un backfill sin límite es un pico de I/O que compite con tu producción.</li>
+<li>Las migraciones se prueban contra una copia con volumen real, no contra 100 filas de dev.</li>
+<li>El lock de las operaciones DDL es el asesino callado: conocer qué ALTER bloquea es parte del diseño.</li>
+<li>Los rollbacks modernos se hacen con la misma herramienta: 'rollback' de la migración, no un ALTER manual.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Una migración no idempotente que al repetirse en staging rompe y falla el pipeline.</li>
+<li>Backfill gigante en una sola transacción que bloquea la tabla y congela el SaaS.</li>
+<li>Deploy de la app que lee la columna nueva antes de que exista: 500 por esquema adelantado.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Versiona y registra cada migración; que sea idempotente y sin locks.</li>
+<li>Backfill a pedazos con pausa y monitoreo de I/O del origen.</li>
+<li>Cutover con feature flag y despliegue por porcentaje.</li>
+<li>Contrae la pieza vieja en otra fecha, con métricas de uso de por medio.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Diseña el expand-contract para añadir un tipo de pago nuevo a una tabla de 80M filas.</li>
+<li>Escribe una migración idempotente con ADD COLUMN y su índice diferido.</li>
+<li>Planea un backfill por lotes con límite de I/O y timeline de cutover.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Evolucionar el esquema es expandir, escribir las dos, migrar a pedazos y contraer.</li>
+<li>Migrantes versionadas, idempotentes y sin bloqueos de tabla.</li>
+<li>El cutover con feature flag convierte la migración en interruptor, no en salto al vacío.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Escalabilidad y distribución</a></li>
+          <li><a href="./index.html">Módulo 5 · Caching y datos a escala</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Resiliencia y consistencia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y entrevista de diseño</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

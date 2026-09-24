@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="condicionales-if-elif-else">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condicionales: if, elif y else · Python para Backend · Backend Academy</title>
+<meta name="description" content="Aprende if, elif y else en Python para tomar decisiones en tu backend.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="python" data-current="condicionales-if-elif-else"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 2</a><span class="sep">/</span>
+          <span class="current">Condicionales: if, elif y else</span>
+        </nav>
+        <h1 class="lesson-title">Condicionales: if, elif y else</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-basico">💻 Básico</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 2 · Control de flujo y funciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Las APIs y servicios reciben datos que cambian según la petición. Tu código necesita decidir qué hacer frente a cada caso: ¿el usuario tiene permisos? ¿el campo viene vacío? ¿el status es 200 o 404? Eso se resuelve con condicionales.</p>
+<p>En Python las condiciones se escriben con if, elif y else, y el bloque de código que se ejecuta se marca por indentación.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un condicional evalúa una expresión booleana y ejecuta un bloque de código solo si el resultado es verdadero. elif encadena condiciones alternativas y else captura el caso restante.</p><p><strong>Por qué importa.</strong> Todo backend toma decisiones: autorización, validaciones, enrutado lógico y control de errores. Sin condicionales el código se ejecutaría siempre en línea recta.</p><p><strong>Cuándo usarlo.</strong> Usa si verificas una condición de entrada, un estado de usuario, el valor de una variable de configuración o el código de respuesta de otra API.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>if evalúa una condición y ejecuta el bloque si es True.</li>
+<li>elif permite probar condiciones adicionales cuando la anterior falla.</li>
+<li>else ejecuta el bloque final si ninguna condición se cumplió.</li>
+<li>La indentación (4 espacios) delimita el bloque de cada rama.</li>
+<li>Operadores: ==, !=, <, >, <=, >= y los lógicos and, or, not.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Vamos a clasificar un código de estado HTTP con una cadena de condiciones.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">status = 200
+if status &gt;= 200 and status &lt; 300:  # el bloque va indentado
+    print(&quot;Respuesta OK, procesando cuerpo...&quot;)
+elif status == 404:
+    print(&quot;Recurso no encontrado&quot;)
+elif status &gt;= 500:
+    print(&quot;Error del servidor, reintenta en 5 segundos&quot;)
+else:
+    print(&quot;Respuesta inesperada&quot;)</code></pre></div>
+</figure>
+<pre><code class="language-text">Respuesta OK, procesando cuerpo...</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Combinando comparaciones con operadores lógicos para validar varios campos de una petición.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Validación de múltiples condiciones con and y or</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">usuario = {&quot;rol&quot;: &quot;editor&quot;, &quot;activo&quot;: True, &quot;intentos&quot;: 2}
+if usuario[&quot;rol&quot;] == &quot;admin&quot; and usuario[&quot;activo&quot;]:
+    print(&quot;Acceso completo&quot;)
+if usuario[&quot;rol&quot;] == &quot;editor&quot; or usuario[&quot;intentos&quot;] &lt; 3:
+    print(&quot;Acceso parcial concedido&quot;)
+else:
+    print(&quot;Cuenta bloqueada&quot;)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En un backend real sueles decidir qué respuesta devolver. Este patrón de clasificación es común en clientes HTTP y validadores de peticiones.</p>
+<ul><li>Devuelve pronto: evalúa primero los casos más urgentes.</li>
+<li>Evita condiciones gigantes; refactoriza a funciones claras.</li>
+<li>Usa constantes nombradas para que códigos como 404 sean legibles.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def clasificar_respuesta(status, error_mensaje):
+    if status is None:
+        return &quot;error&quot;, &quot;Sin respuesta del servidor&quot;
+    if 200 &lt;= status &lt; 300:
+        return &quot;ok&quot;, &quot;Peticion completada&quot;
+    if status == 404:
+        return &quot;error&quot;, &quot;El recurso solicitado no existe&quot;
+    if status &gt;= 500:
+        return &quot;error&quot;, f&quot;Fallo interno del servidor: {error_mensaje}&quot;
+    return &quot;desconocido&quot;, &quot;Estado no contemplado&quot;
+
+tipo, mensaje = clasificar_respuesta(503, &quot;timeout en la base de datos&quot;)
+print(tipo, &quot;-&quot;, mensaje)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> En FastAPI o Express usarás este tipo de lógica en middlewares y validadores antes de tocar la base de datos.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La condición de un if siempre se reduce a un booleano: variables como 0, "" y None se consideran falsas.</li>
+<li>elif ahorra anidar if dentro de else, dejando el código plano y legible.</li>
+<li>Evalúa arriba los casos más probables o los más baratos de comprobar.</li>
+<li>Un dict o match puede sustituir cadenas largas de elif cuando comparas un mismo valor.</li>
+<li>La indentación inconsistente rompe el programa con IndentationError.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>SyntaxError: expected ':' cuando olvidas los dos puntos al final de la condición.</li>
+<li>IndentationError al mezclar espacios y tabulaciones.</li>
+<li>Confundir = (asignación) con == (comparación).</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Escribe condiciones legibles: 200 <= status < 300 en lugar de status >= 200 and status < 300.</li>
+<li>Evita else innecesarios con guard clauses (return anticipado).</li>
+<li>Usa constantes con nombre para códigos mágicos: HTTP_OK = 200.</li>
+<li>Comprueba primero None o vacío para no reventar al acceder a atributos.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Escribe una función nivel_acceso(rol) que devuelva el nivel según admin, editor o visitante.</li>
+<li>Clasifica las edades de un diccionario de usuarios en mayor o menor usando condicionales.</li>
+<li>Agrega el caso de estado 3xx a clasificar_respuesta.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>if/elif/else deciden qué bloque se ejecuta según una condición booleana.</li>
+<li>Los operadores de comparación y lógicos componen condiciones poderosas.</li>
+<li>Las guard clauses y las constantes nombradas hacen el código de backend más claro.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="./index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Programación orientada a objetos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Módulos, archivos y excepciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Web con Flask</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · APIs con FastAPI</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

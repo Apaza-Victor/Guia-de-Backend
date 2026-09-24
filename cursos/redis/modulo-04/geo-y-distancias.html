@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="geo-y-distancias">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geolocalización y distancias · Redis y Caching · Backend Academy</title>
+<meta name="description" content="Índices geoespaciales en Redis para proximidad, radios y distancias.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="geo-y-distancias"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Redis y Caching</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Geolocalización y distancias</span>
+        </nav>
+        <h1 class="lesson-title">Geolocalización y distancias</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis y Caching</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Estructuras de datos avanzadas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Mostrar tiendas cercanas, conductores disponibles o sedes próximas exige calcular distancias sobre millones de puntos. Hacer besel en la base de datos relacional suele acabar en scans completos que matan la latencia.</p>
+<p>Redis indexa puntos geográficos como un sorted set especial: GEOADD guarda coordenadas y GEOSEARCH responde qué hay dentro de un radio o rectángulo en tiempo logarítmico.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Los comandos GEO (GEOADD, GEOPOS, GEODIST y GEOSEARCH) almacenan coordenadas lat/lon en claves tipo sorted set y realizan búsquedas por proximidad, radio y circunferencia.</p><p><strong>Por qué importa.</strong> Permite resolver 'dame lo que hay cerca de X' con latencias de sub-milisegundo y escalando a millones de puntos sin motores extra.</p><p><strong>Cuándo usarlo.</strong> Úsalo para geolocalización de recursos: tiendas, riders, torres, incidencias. No lo uses para cálculos precisos de ruta sobre mapas (eso es del dominio de motores GIS).</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>GEOADD añade miembros con longitud y latitud.</li>
+<li>GEOSEARCH busca miembros dentro de un radio (BYRADIUS) o rectángulo (BYBOX).</li>
+<li>GEODIST calcula la distancia entre dos miembros en m, km, mi o ft.</li>
+<li>GEOPOS devuelve las coordenadas de miembros guardados.</li>
+<li>Internamente es un sorted set: ZREM y ZADD funcionan sobre él.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Registramos tres tiendas y pedimos las que están a menos de 5 km de un punto.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import redis
+r = redis.Redis.from_url(&quot;redis://localhost:6379&quot;)
+r.geoadd(&quot;tiendas&quot;, (-3.70379, 40.41678, &quot;madrid&quot;))
+r.geoadd(&quot;tiendas&quot;, (-3.699, 40.452, &quot;norte&quot;))
+r.geoadd(&quot;tiendas&quot;, (-3.72, 40.33, &quot;sur&quot;))
+cercanas = r.geosearch(&quot;tiendas&quot;, longitude=-3.70379,
+    latitude=40.41678, radius=10, unit=&quot;km&quot;)
+print([c.decode() for c in cercanas])</code></pre></div>
+</figure>
+<pre><code class="language-text">['madrid', 'norte']</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Pedimos la distancia exacta entre dos sedes y las coordenadas almacenadas.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Distancias y coordenadas con GEODIST y GEOPOS</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">dist = r.geodist(&quot;tiendas&quot;, &quot;madrid&quot;, &quot;norte&quot;, unit=&quot;km&quot;)
+print(round(float(dist), 2), &quot;km&quot;)
+pos = r.geopos(&quot;tiendas&quot;, &quot;madrid&quot;)
+print(pos[0])</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Una app de comida actualiza la posición de cada rider con su GPS y busca los disponibles en un radio alrededor del restaurante antes de crear el pedido.</p>
+<ul><li>Nombra la clave por tipo de recurso: riders, tiendas, repartidores.</li>
+<li>Actualiza posiciones con GEOADD (mismo miembro, nuevas coordenadas).</li>
+<li>Ordena por distancia con ASC y limita con COUNT para devolver top N.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def riders_cercanos(lon, lat, radio_km, maximo=5):
+    resultado = r.geosearch(&quot;riders&quot;, longitude=lon, latitude=lat,
+        radius=radio_km, unit=&quot;km&quot;, sort=&quot;ASC&quot;, count=maximo,
+        withdist=True, withcoord=True)
+    return [(m.decode(), float(d)) for m, d, _ in resultado]
+
+r.geoadd(&quot;riders&quot;, (-3.72, 40.35, &quot;r_77&quot;))
+r.geoadd(&quot;riders&quot;, (-3.70, 40.42, &quot;r_12&quot;))
+print(riders_cercanos(-3.70379, 40.41678, 8))</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El usuario 0.5 degrada GEOADD: combina con sets para filtrar riders ociosos antes de la búsqueda.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Las coordenadas se codifican en un score de 52 bits (geohash truncado), por eso los controles son excelentes pero aproximados.</li>
+<li>GEOSEARCH admite rectángulos con width/height/heigth en metros sobre la coordenada central.</li>
+<li>BYRADIUS usa la distancia haversine aproximada, suficiente para proximidad de negocio.</li>
+<li>Los miembros se ordenan por distancia cuando se pasa sort=ASC/DESC, evitando ordenar en la app.</li>
+<li>Con withdist y withcoord obtienes distancia y posición en la misma llamada, sin round-trips extra.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Pasar lat/long invertidos ubica resultados en el océano o devuelve vacío.</li>
+<li>Fusionar coordenadas para varios tipos en una misma clave mezcla dominios.</li>
+<li>Usar unidades incorrectas (mi vs km) para los radios y leer distancias mal.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Crea una clave GEO por tipo de entidad y añade índices auxiliares con sets.</li>
+<li>Normaliza update de posición con un worker para no saturar de escrituras.</li>
+<li>Prueba primero el radio en km para tu ciudad: 5-10 km suele ser realista.</li>
+<li>Combina GEOADD y ZREM para el alta/baja de recursos con disponibilidad.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Guarda 5 monumentos de tu ciudad y lista los 2 más cercanos a un punto.</li>
+<li>Devuelve la distancia en km entre dos miembros y redondéala.</li>
+<li>Busca por rectángulo (BYBOX) de 2x2 km alrededor de un centro.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>GEOADD y GEOSEARCH ofrecen índices geoespaciales de O(log N) en Redis.</li>
+<li>GEODIST y GEOPOS completan las consultas de distancia y posición.</li>
+<li>Son ideales para proximidad de recursos en tiempo real sin motores externos.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Redis</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras de Datos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché y Rendimiento</a></li>
+          <li><a href="./index.html">Módulo 4 · Estructuras de datos avanzadas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Persistencia y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Colas y streaming</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Redis en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

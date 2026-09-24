@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="integraciones-costes-y-limites-de-uso">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Costes y límites de uso · Integración y Servicios Externos · Backend Academy</title>
+<meta name="description" content="Controla costes y límites de uso de los servicios externos que consumes.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="integraciones" data-current="integraciones-costes-y-limites-de-uso"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Integración y Servicios Externos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Costes y límites de uso</span>
+        </nav>
+        <h1 class="lesson-title">Costes y límites de uso</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Integración y Servicios Externos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Operación y mantenimiento</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>La mayoría de APIs SaaS se cobran por uso y castigan el abuso con rate limits. Es la fórmula perfecta para que un bug de producción —un bucle que rellama al tercero— se traduzca en factura inflada o en 429 en cadena.</p>
+<p>El control de costes y límites empieza en el código: medir cada llamada, cachear lo repetido, respetar el backoff y poner alertas cuando el consumo se dispara. La plataforma te avisa a posteriori; tu backend debe avisarte antes.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La gestión de límites de uso consiste en conocer cuántas llamadas puedes hacer, medir las que haces y avisar antes de chocar con la cuota, el rate limit o el presupuesto del mes.</p><p><strong>Por qué importa.</strong> El rate limit del proveedor es imprevisible y la factura crece con cada dato en exceso: ambos son riesgos técnicos y financieros.</p><p><strong>Cuándo usarlo.</strong> Mide, cachea y fija presupuestos en toda integración de pago por uso; la alerta de consumo debe preceder al corte.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>La cuota define tu tope contratado: llamadas, filas u horas de uso.</li>
+<li>El rate limit es la cadencia máxima permitida en una ventana temporal.</li>
+<li>El presupuesto expresa cuánto quieres gastar, no cuánto dice el contrato.</li>
+<li>El cacheado de respuestas reduce llamadas sin cambiar el resultado de negocio.</li>
+<li>El acuse de límite (retry-after, x-rate-limit) se lee y se respeta.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Lee los límites desde las cabeceras del proveedor y réstalos de tu presupuesto:</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const r = await cliente.get(&quot;/consumo&quot;);
+const restantes = r.headers[&quot;x-ratelimit-remaining&quot;];
+const total = r.headers[&quot;x-ratelimit-limit&quot;];
+metricas.set(&quot;tercero_llamadas_restantes&quot;, restantes);
+if (restantes &lt; UMBRAL_ALERTA) {
+  alerta(&quot;rate limit externo bajo&quot;, { restantes, total });
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">La alerta llega cuando quedan pocas llamadas, antes de tocar el 429.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Cachea la respuesta estable del tercero para no repetir llamadas que pagas dos veces:</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Cache con TTL para el externo</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">export async function consultarTarifa(zona) {
+  const clave = `tarifa:${zona}`;
+  const enCache = await cache.get(clave);
+  if (enCache) return enCache;
+  const r = await cliente.get(`/tarifas/${zona}`);
+  await cache.set(clave, r, TTL_TARIFA);
+  return r;
+}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un equipo detecta que el 63% de sus llamadas al servicio de geolocalización eran la misma consulta repetida por la hora. Con una caché de quince minutos el gasto cae a la mitad y el riesgo de rate limit desaparece. El ahorro pagó el refactor en el primer mes.</p>
+<ul><li>Mide tu gasto real por integración antes de optimizar.</li>
+<li>Cachea lo repetido y no volátil con un TTL razonable.</li>
+<li>Fija un presupuesto por servicio y alarma al 70% y 90%.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">consumo_diario_geo: 4120 llamadas
+cache_hits: 63%
+presupuesto_mes: 9000
+alarma_70%: 6300</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los rate limits cambian con el plan: revisa las cabeceras, no las documentes de memoria.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Medir cada llamada externalizada da el mapa real del coste.</li>
+<li>El cacheado reduce llamadas duplicadas sin cambiar la lógica.</li>
+<li>El presupuesto por servicio convierte el coste en una decisión medible.</li>
+<li>Respetar retry-after evita agravar un rate limit activo.</li>
+<li>La alerta temprana separa el gasto previsto del incendio.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Cachear con TTL eterno datos que cambian y servir respuestas rancias.</li>
+<li>Reintentar sin leer las cabeceras de rate limit del proveedor.</li>
+<li>Ignorar el coste por uso hasta que llega la factura del mes.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Cachea las respuestas estables y volátiles con TTL cortos.</li>
+<li>Lee las cabeceras de límites y alimenta métricas con ellas.</li>
+<li>Alerta al 70% y 90% del presupuesto de cada servicio externo.</li>
+<li>Revisa el plan del proveedor cuando te acerques a tu cuota.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Alimenta una métrica con las cabeceras de rate limit de un proveedor.</li>
+<li>Cachea una consulta repetida y verifica la caída de llamadas.</li>
+<li>Fija un presupuesto por servicio y alerta cuando supere el 70%.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Medir cada llamada y leer las cabeceras de límites anticipa el 429.</li>
+<li>El cacheado de lo repetido reduce el gasto y el riesgo.</li>
+<li>El presupuesto por servicio convierte el coste en decisión medible.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de integración</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Integraciones prácticas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Robustez</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Integraciones con SaaS</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Webhooks y eventos</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad en integraciones</a></li>
+          <li><a href="./index.html">Módulo 7 · Operación y mantenimiento</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

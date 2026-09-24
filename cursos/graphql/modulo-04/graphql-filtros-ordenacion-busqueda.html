@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-filtros-ordenacion-busqueda">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filtros, ordenación y búsqueda · GraphQL · Backend Academy</title>
+<meta name="description" content="Filtros, ordenación y búsqueda combinados en resolvers GraphQL.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-filtros-ordenacion-busqueda"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">GraphQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Filtros, ordenación y búsqueda</span>
+        </nav>
+        <h1 class="lesson-title">Filtros, ordenación y búsqueda</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Queries y resolvers avanzados</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Las listas en producción nunca se consultan tal cual: se filtran por estado, se ordenan por fecha y se buscan por texto. GraphQL modela esas opciones como argumentos tipados y deja que cada resolver decida a la base de datos.</p>
+<p>La arquitectura y la consulta final importan tanto como el schema: un filtro mal traducido convierte una query simple en un barrido de toda la tabla.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Filtrar es reducir el conjunto con condiciones (estado, autor, fecha); ordenar define la secuencia y buscar localiza por texto o campos parciales.</p><p><strong>Por qué importa.</strong> Delegar filtro, orden y búsqueda a la base de datos evita trasladar todo el dataset al servidor y paginar en memoria.</p><p><strong>Cuándo usarlo.</strong> Modela el filtro como un input opcional y construye la query SQL/prisma según los campos presentes; nunca filtres la lista completa en memoria.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El filtro es un argumento input opcional, no obligatorio.</li>
+<li>La ordenación se exponen con un enum de campos y dirección.</li>
+<li>La búsqueda de texto se hace en la base, con ILIKE o full-text.</li>
+<li>Las cláusulas se acumulan solo con los campos presentes.</li>
+<li>Una paginación sin filtro correcto devuelve resultados incoherentes.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un schema con filtro, ordenación y búsqueda sobre publicaciones.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">GRAPHQL</span><span class="code-block__caption">ejemplo.graphql</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-graphql">input OrdenPublicaciones {
+  campo: CampoPublicacion!
+  direccion: Direccion!
+}
+enum CampoPublicacion { creadaEn titulo autor }
+enum Direccion { ASC DESC }
+type Query {
+  publicaciones(filtro: FiltroPublicaciones, orden: OrdenPublicaciones, buscar: String): [Publicacion!]!
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">El cliente compone filtro, orden y búsqueda con tipos que no admiten errores de tipeo.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Construir la cláusula dinámicamente según los argumentos presentes.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Construcción condicional de la query</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const clausulas = {
+  ...(filtro?.autorId &amp;&amp; { autorId: filtro.autorId }),
+  ...(filtro?.publicadas === undefined ? {} : { publicadas: filtro.publicadas }),
+  ...(buscar &amp;&amp; { OR: [{ titulo: { contains: buscar, mode: &quot;insensitive&quot; } }] }),
+}
+const publicaciones = await db.publicacion.findMany({ where: clausulas, orderBy: orden })</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un buscador real combina filtros de estado con búsqueda de texto y paginación estable.</p>
+<ul><li>Aplica índices a las columnas que filtras y ordenas.</li>
+<li>Usa full-text para búsquedas grandes; contains basta en prototipos.</li>
+<li>Combina filtro + orden + búsqueda siempre en la misma consulta.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">publicaciones(
+  filtro: { publicadas: true },
+  orden: { campo: creadaEn, direccion: DESC },
+  buscar: &quot;graphql&quot;
+)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Ordenar por autor requiere un join o un índice; ordénelo por columna simple siempre que puedas.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Los enums convierten errores de tipeo en errores de validación en tiempo real.</li>
+<li>Construir where condicionalmente evita enviar cláusulas vacías inútiles.</li>
+<li>La búsqueda contains en bases grandes es lenta: indexa y considera full-text.</li>
+<li>Aplicar el orden en la misma consulta que el filtro mantiene la paginación coherente.</li>
+<li>Los filtros por rango de fechas se declaran como from y to en el input.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Filtrar en memoria toda la colección.</li>
+<li>Dejar que un orden sin filtro contradiga a la paginación.</li>
+<li>No indexar la columna que más se filtra.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Marca los campos de filtro como opcionales y usa defaults.</li>
+<li>Expón enums en vez de strings para orden y dirección.</li>
+<li>Testea las combinaciones de filtro móvil: filtro sin orden, orden sin filtro.</li>
+<li>Registra la query SQL generada para depurar los planes de ejecución.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Añade un filtro por rango de fechas a tus publicaciones.</li>
+<li>Implementa búsqueda por texto con contains.</li>
+<li>Combina orden DESC por fecha con filtro por autor.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Filtro, orden y búsqueda se modelan como argumentos tipados.</li>
+<li>La combinación debe traducirse a una sola consulta en la base.</li>
+<li>Indexa las columnas implicadas para que escale.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+          <li><a href="./index.html">Módulo 4 · Queries y resolvers avanzados</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Mutaciones y suscripciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad y rendimiento GraphQL</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · GraphQL en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

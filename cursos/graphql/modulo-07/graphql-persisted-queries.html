@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="graphql-persisted-queries">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persisted queries y CDN · GraphQL · Backend Academy</title>
+<meta name="description" content="Persisted queries y su integración con CDN.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="graphql" data-current="graphql-persisted-queries"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">GraphQL</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Persisted queries y CDN</span>
+        </nav>
+        <h1 class="lesson-title">Persisted queries y CDN</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> GraphQL</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · GraphQL en producción</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Permitir cualquier query libre abre el API a la imaginación y al abuso; las persisted queries restringen el catálogo: el servidor conoce una whitelist de queries registradas por hash y rechaza lo demás.</p>
+<p>Además, que cada query tenga un identificador estable permite servirlas desde el CDN y evita rondar un parser en el navegador.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Una persisted query es una query registrada en el servidor con un hash; el cliente referencia el hash y el servidor resuelve la query almacenada.</p><p><strong>Por qué importa.</strong> Restringe el coste (solo lo aprobado), simplifica la caché y reduce el payload de red al mínimo.</p><p><strong>Cuándo usarlo.</strong> Úsala en clientes de producción donde controlas qué queries se emiten; evita fricciones con queries dinámicas no registradas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El hash SHA-256 identifica la query de forma estable.</li>
+<li>El servidor mantiene la lista de queries permitidas.</li>
+<li>El cliente envia solo el hash en el GET.</li>
+<li>Las queries dinámicas se pueden enviar como fallback.</li>
+<li>El CDN cachea por hash y variables: win-win.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Registrar una query y obtener su hash para el cliente.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const query = &quot;query { catalogo { id nombre } }&quot;
+const crypto = require(&quot;crypto&quot;)
+const hash = crypto.createHash(&quot;sha256&quot;).update(query).digest(&quot;hex&quot;)
+console.log(hash)</code></pre></div>
+</figure>
+<pre><code class="language-text">El cliente usa el hash en lugar de la query completa.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El cliente envía el hash y el server resuelve; si no existe, fallback con la query.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Flujo de persisted query en Apollo Client</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">fetch(&quot;/graphql?extensions=&quot; + encodeURIComponent(JSON.stringify({ persistedQuery: { version: 1, sha256Hash: hash } })))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En producción la whitelist se mantiene en repositorio y el CDN cachea por hash variables.</p>
+<ul><li>Registra cada query nueva en la whitelist del cliente.</li>
+<li>Usa los hashes como claves de caché del CDN.</li>
+<li>Difunde el cambio de whitelist sin romper a los clientes en vuelo.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">verdeling: const persisted = new Map()
+persisted.set(hash, query)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Apollo Client soporta persisted queries de forma nativa con AutomaticPersistedQueries.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Permitir query libre abre coste ilimitado y queries raras.</li>
+<li>El hash estable y la lista permiten evaluar el coste antes de ejecutar.</li>
+<li>El CDN servirá cada hash+variables desde el borde.</li>
+<li>Las query dinámicas pueden hacer fallback a texto, pero pierdes caché.</li>
+<li>La whitelist vive en el repositorio: revisión clara y auditada.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Queries dinámicas rotas por la whitelist sin registro previo.</li>
+<li>Enviar el hash con variables que no casan con la query.</li>
+<li>Olvidar desplegar la whitelist al lanzar una nueva función.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza con Automatic Persisted Queries y registra solo lo crítico.</li>
+<li>Versa la whitelist junto al cliente.</li>
+<li>Mide el ratio de hits en el CDN.</li>
+<li>Registra las queries no encontradas para completar la lista.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Registra una query y llama con su hash.</li>
+<li>Prueba el fallback con una hash inexistente.</li>
+<li>Configura Automatique Persisted Queries en Apollo Client.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Las persisted queries limitan el coste a un catálogo.</li>
+<li>El hash estable habilita la caché de CDN.</li>
+<li>La whitelist se gestiona en repositorio y se despliega con el cliente.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de GraphQL</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Implementación con Node.js</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Avanzado y producción</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Queries y resolvers avanzados</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Mutaciones y suscripciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Seguridad y rendimiento GraphQL</a></li>
+          <li><a href="./index.html">Módulo 7 · GraphQL en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="paginacion-y-filtros">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paginación y filtros · Node.js desde cero hasta avanzado · Backend Academy</title>
+<meta name="description" content="Implementa paginación y filtros en los listados de tu API.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="nodejs" data-current="paginacion-y-filtros"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Node.js desde cero hasta avanzado</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Paginación y filtros</span>
+        </nav>
+        <h1 class="lesson-title">Paginación y filtros</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Node.js desde cero hasta avanzado</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · APIs REST en Node</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando un listado crece a miles de filas, devolverlas todas entierra al servidor y al cliente. La paginación limita cada respuesta y los filtros dejan que el cliente afine.</p>
+<p>Query params estándar como page y limit controlan la ventana; los filtros por campos (estado, fecha, término) reducen el volumen antes de paginar.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La paginación por página corta los resultados en ventanas con page (página actual) y limit (tamaño). Los filtros se pasan por query params y se traducen a condiciones SQL con parámetros.</p><p><strong>Por qué importa.</strong> Las respuestas se vuelven rápidas y pequeñas, el cliente navega por páginas conocidas y el servidor no paga el coste de leer y serializar toda la tabla.</p><p><strong>Cuándo usarlo.</strong> Paginación en todo listado con volumen potencial. Filtra en el servidor siempre que la lógica de negocio dependa de ello (no filtres en el cliente).</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>page y limit viajan como query params.</li>
+<li>El límite se recorta a un máximo (p.ej. 100) para no abusar.</li>
+<li>offset = (page - 1) * limit lleva la ventana a la fila correcta.</li>
+<li>El total de filas se devuelve en los metadatos.</li>
+<li>Los filtros (estado, fecha, query) se añaden al WHERE con parámetros.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un listado paginado que respeta page/limit y devuelve el total.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">router.get('/pedidos', asyncHandler(async (req, res) =&gt; {
+  const pagina = Math.max(1, Number(req.query.page) || 1);
+  const limite = Math.min(100, Number(req.query.limit) || 20);
+  const offset = (pagina - 1) * limite;
+
+  const { rows: filas } = await pool.query(
+    'SELECT * FROM pedidos ORDER BY id DESC LIMIT $1 OFFSET $2',
+    [limite, offset],
+  );
+
+  const { rows: [c] } = await pool.query(
+    'SELECT COUNT(*)::int AS total FROM pedidos'
+  );
+
+  exito(res, { pedidos: filas, total: c.total, pagina, limite });
+}));</code></pre></div>
+</figure>
+<pre><code class="language-text">Limit 20, page 2 devuelve los pedidos 21..40 y el total en metadatos.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Los filtros por estado y término se integran al WHERE con parámetros.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">Filtros dinámicos con parámetros</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">router.get('/pedidos', asyncHandler(async (req, res) =&gt; {
+  const { estado, termino } = req.filtros;
+  const valores = [];
+  const condiciones = [];
+
+  if (estado) {
+    valores.push(estado);
+    condiciones.push(`estado = $${valores.length}`);
+  }
+
+  if (termino) {
+    valores.push(`%${termino}%`);
+    condiciones.push(`referencia ILIKE $${valores.length}`);
+  }
+
+  const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
+  const { rows } = await pool.query(
+    `SELECT * FROM pedidos ${where} ORDER BY id DESC LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+    [...valores, req.filtros.limite, req.filtros.offset],
+  );
+
+  exito(res, { pedidos: rows });
+}));</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El modelo cursor (page = id) evita saltos cuando entran filas nuevas entre páginas.</p>
+<ul><li>Filtra antes de paginar: cuenta la misma ventana.</li>
+<li>Usa ORDER BY estable (id) para que la paginación sea fija.</li>
+<li>Para feeds con volumen enorme, prefiere cursor sobre offset.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">// Paginacion por cursor: ?cursor=42&amp;limit=20
+router.get('/pedidos', asyncHandler(async (req, res) =&gt; {
+  const cursor = Number(req.query.cursor) || 0;
+  const limite = Math.min(100, Number(req.query.limit) || 20);
+
+  const { rows } = await pool.query(
+    'SELECT * FROM pedidos WHERE id &gt; $1 ORDER BY id LIMIT $2',
+    [cursor, limite],
+  );
+
+  const siguiente = rows.length ? rows[rows.length - 1].id : null;
+  exito(res, { pedidos: rows, siguienteCursor: siguiente });
+}));</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El cursor elimina los saltos y los duplicados de la paginación por offset bajo escritura constante.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>limit y page definen la ventana; offset la calcula.</li>
+<li>Los filtros se añaden al WHERE con parámetros y no cambian la paginación.</li>
+<li>El COUNT da el total para navegar la última página.</li>
+<li>Un ORDER BY estable garantiza que las ventanas sean coherentes.</li>
+<li>El cursor es la opción robusta para feeds de escritura continua.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>No limitar el valor máximo del límite (un limit=99999 vuelve al infierno).</li>
+<li>Paginación con ORDER BY no determinista que repite filas.</li>
+<li>Filtrar presente en SQL con valores interpolados sin sanitizar.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Siempre devuelve total, pagina y limite en los metadatos.</li>
+<li>Valida y parsea los números (z.coerce) antes de usarlos.</li>
+<li>Indexa la columna del ORDER BY para que OFFSET no duela.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Añade limit máximo y paginación a un listado existente.</li>
+<li>Integra un filtro por estado con parámetros.</li>
+<li>Implementa paginación por cursor en una ruta de feed.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>page/limit recortan la ventana; offset la calcula.</li>
+<li>Los filtros viajan por query y entran con parámetros.</li>
+<li>El cursor estabiliza la paginación bajo escrituras.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Node.js</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Módulos y npm</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Asincronía avanzada</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Express avanzado</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Bases de datos con Node</a></li>
+          <li><a href="./index.html">Módulo 6 · APIs REST en Node</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Seguridad y despliegue</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

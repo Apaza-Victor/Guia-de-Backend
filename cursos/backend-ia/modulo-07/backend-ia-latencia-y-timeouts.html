@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-latencia-y-timeouts">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latencia y límites de tiempo · Backend para IA · Backend Academy</title>
+<meta name="description" content="Estrategias de latencia y timeouts para llamadas a modelos de IA.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-latencia-y-timeouts"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Backend para IA</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Latencia y límites de tiempo</span>
+        </nav>
+        <h1 class="lesson-title">Latencia y límites de tiempo</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · IA en producción</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Los LLM son servicios lentos en comparación con una consulta a base de datos: uno o dos segundos de media, picos de más. Tu API debe decidir cuánto esperar y qué devolver si se pasa.</p>
+<p>Entre el streaming, los timeouts invertidos y los fallbacks se construye una experiencia donde la lentitud del modelo no tumba a tu servicio.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La gestión de latencia establece límites de espera para cada llamada al modelo y una política de degradación cuando se excede.</p><p><strong>Por qué importa.</strong> Un timeout descontrolado consume tu pool de conexiones, satura la cola y convierte un modelo lento en una bajada de tu API.</p><p><strong>Cuándo usarlo.</strong> Aplícala en todo acceso a modelos; aúón ajusta el timeout según el modelo y el tamaño del prompt.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Timeout de conexión y de lectura, por separado.</li>
+<li>Streaming: el primer token aparece antes y la espera se reparte.</li>
+<li>Backpressure: limitar concurrencia hacia el proveedor.</li>
+<li>Fallback: responder con caché o plantilla si el modelo no contesta.</li>
+<li>P95 y P99: métricas que revelan los picos reales.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Fijamos timeouts y retries limitados en la llamada al modelo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from openai import OpenAI
+cliente = OpenAI(timeout=20.0, max_retries=2)
+
+try:
+    respuesta = cliente.chat.completions.create(
+        model=&quot;gpt-4o-mini&quot;,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hola&quot;}],
+        timeout=15.0,
+    )
+except Exception as e:
+    print(&quot;degradacion:&quot;, type(e).__name__)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Usamos streaming para que el cliente reciba el primer token sin esperar el final.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Streaming con degradación</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def emitir_respuesta(mensaje, sse_writer):
+    stream = cliente.chat.completions.create(
+        model=&quot;gpt-4o-mini&quot;,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: mensaje}],
+        stream=True,
+    )
+    for trozo in stream:
+        texto = trozo.choices[0].delta.content
+        if texto:
+            sse_writer.dar(texto)
+    sse_writer.cerrar()</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un asistente en producción limita la concurrencia al proveedor y degrada con gracia.</p>
+<ul><li>Limita con semáforos las llamadas simultáneas al modelo.</li>
+<li>Devuelve 202 y una cola para tareas largas del modelo.</li>
+<li>Cae a una plantilla o a caché cuando el modelo no responde.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import asyncio, semaforo
+sem = semaforo.Semaforo(10)
+
+async def llamar_con_limite(mensaje):
+    async with sem:
+        return await pedir_modelo(mensaje)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Medir P95 y contar los degradados te dice cuándo ampliar o cambiar de proveedor.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Con streaming, la latencia percibida baja aunque la total sea igual.</li>
+<li>El semáforo reparte la presión y evita saturar al proveedor.</li>
+<li>Los fallbacks de plantilla convierten un pico en un mal-ligero, no en bajada.</li>
+<li>Los picos del modelo se trasladan a tu API si no hay backpressure.</li>
+<li>Separar conexión y lectura permite reintentar solo la parte lenta.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Timeout gigante que amontona peticiones en espera.</li>
+<li>Reintentar agresivamente sin backoff: mejores y más lentitud.</li>
+<li>No medir P95 y creer que la media basta para escalar.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Prefiere streaming siempre que la UX lo permita.</li>
+<li>Corta la llamada por margen antes de los límites duros.</li>
+<li>Diseña la degradación antes de tener el primer pico.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Mide P50, P95 y P99 de una llamada durante una hora.</li>
+<li>Implementa el semáforo de 10 concurrentes y observa los degradados.</li>
+<li>Añade un fallback con plantilla y prueba un corte del proveedor.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Los LLM son lentos: la latencia se gestiona con timeout, streaming y límite.</li>
+<li>Backpressure y fallbacks evitan que un proveedor lento tumbe tu API.</li>
+<li>Mide P95 y degradados para decidir cuándo ampliar o cambiar.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Clasificación y modelos de datos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · IA generativa y LLMs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · RAG y búsqueda semántica</a></li>
+          <li><a href="./index.html">Módulo 7 · IA en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

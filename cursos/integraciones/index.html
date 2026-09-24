@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Integración y Servicios Externos · Backend Academy</title>
-<meta name="description" content="Curso de integraciones: consumir APIs externas, webhooks firmados, reintentos e idempotencia, OAuth2, pasarelas de pago y almacenamiento en la nube.">
+<meta name="description" content="APIs externas, webhooks, pagos, correo, almacenamiento de archivos, OAuth e idempotencia con servicios de terceros.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +24,10 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body data-root=".">
+<body data-root="../../">
 
 <header class="site-header" data-header>
   <div class="container site-header__inner">
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -53,130 +55,259 @@
 <aside data-sidebar></aside>
 
 <main data-content>
-  <div class="container">
-    <article class="course" data-course-id="integraciones">
-
+  <section class="page-hero page-hero--course">
+    <div class="container">
       <nav class="breadcrumb" aria-label="Miga de pan">
         <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">›</span>
-        <span class="breadcrumb__item"><a href="../../aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
         <span class="breadcrumb__separator" aria-hidden="true">›</span>
-        <span class="breadcrumb__item" aria-current="page">Curso de Integración y Servicios Externos</span>
+        <span class="breadcrumb__item" aria-current="page">Integración y Servicios Externos</span>
       </nav>
-
-      <header class="lesson-hero">
-        <p class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></p>
-        <h1 class="lesson-title">Integración y Servicios Externos</h1>
-        <p class="section-subtitle">Conecta tu backend con el mundo: webhooks, OAuth, pasarelas de pago, correo y almacenamiento en la nube con elegancia y seguridad.</p>
-        <div class="lesson-meta">
-          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 4 semanas</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 3 módulos · 15 lecciones</span>
-          <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Webhooks · OAuth · Pagos</span>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">⚙️ Intermedio</p>
+          <h1 class="page-hero__title">🔌 Integración y Servicios Externos</h1>
+          <p class="page-hero__subtitle">APIs externas, webhooks, pagos, correo, almacenamiento de archivos, OAuth e idempotencia con servicios de terceros.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 4 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 34 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Webhooks · OAuth · Pagos</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
         </div>
-      </header>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Integración y Servicios Externos</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
+
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 34 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/webhooks</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/webhooks</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Webhooks</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="course" data-course-id="integraciones">
 
       <section class="lesson-content">
         <section>
           <h2>¿Qué vas a aprender?</h2>
-          <p>Ningún producto real es una isla: pagas con Stripe, autenticas con Google, envías correos y subes archivos a la nube. En este curso aprenderás a consumir APIs externas con reintentos e idempotencia, a recibir y verificar webhooks firmados y a integrar pasarelas de pago, correo y almacenamiento. Terminarás escribiendo integraciones robustas que no se rompen cuando el servicio de terceros falla.</p>
+          <p>APIs externas, webhooks, pagos, correo, almacenamiento de archivos, OAuth e idempotencia con servicios de terceros.</p>
           <div class="info-grid">
             <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">⚙️ Intermedio</span></div>
             <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">4 semanas</span></div>
-            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">3</span></div>
-            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">15</span></div>
-            <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🔌 Integraciones</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">34</span></div>
           </div>
         </section>
 
         <section>
           <h2>Objetivos de aprendizaje</h2>
           <div class="objectives">
-            <div class="objective"><span class="objective__icon">✔</span><span>Consumir APIs externas con retries, backoff e idempotencia.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Recibir y verificar webhooks con firmas, reintentos y deduplicación.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Implementar OAuth2 con tokens de acceso y refresh.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Integrar pasarelas de pago de forma segura.</span></div>
-            <div class="objective"><span class="objective__icon">✔</span><span>Enviar correos y subir archivos al almacenamiento en la nube.</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Integrar servicios externos de forma segura</span></div>
           </div>
         </section>
 
         <section>
           <h2>Requisitos previos</h2>
           <ul>
-            <li><strong>APIs REST:</strong> diseñar y consumir endpoints con HTTP.</li>
-            <li><strong>Autenticación:</strong> tokens, sesiones y conceptos de OAuth.</li>
-            <li>Cierto nivel de <strong>Node.js o Python</strong> para los ejemplos.</li>
+<li>APIs REST</li>
+<li>Autenticación</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
           </ul>
         </section>
 
         <section>
           <h2>Tecnologías y herramientas</h2>
           <div class="row">
-            <span class="tag tag--tech">Webhooks</span>
-            <span class="tag tag--tech">OAuth 2.0</span>
-            <span class="tag tag--tech">Stripe</span>
-            <span class="tag tag--tech">GitHub API</span>
-            <span class="tag tag--tech">Nodemailer</span>
-            <span class="tag tag--tech">S3</span>
+<span class="tag tag--tech">Webhooks</span>
+<span class="tag tag--tech">OAuth</span>
+<span class="tag tag--tech">Pagos</span>
           </div>
         </section>
       </section>
 
       <hr class="divider">
 
-      <section>
+      <section id="modulos">
         <h2 class="section-title">Módulos del curso</h2>
-        <p class="section-subtitle">Tres módulos para integrar con servicios externos de forma profesional: consumir, escuchar y autenticar todo lo que el mundo ofrece.</p>
+        <p class="section-subtitle">7 módulos con 34 lecciones en total.</p>
 
         <div class="section-grid">
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">1. Trabajar con APIs externas</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos de integración</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 48 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Haz llamadas a terceros que no fallan aunque el proveedor tenga un mal día.</p>
-            <div class="card__meta">
-              <span>5 lecciones</span><span>≈ 55 min</span>
+            <p class="card__text">Comprende qué es una integración, gestiona APIs externas como producto, aplica patrones de integración, elige entre SDKs, clientes HTTP y webhooks y entra en contacto con el mundo real de los servicios de terceros.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/gestion-de-apis-externas.html">Gestión de APIs externas</a></li>
+<li><a href="./modulo-01/patrones-de-integracion.html">Patrones de integración</a></li>
+<li><a href="./modulo-01/que-son-las-integraciones.html">¿Qué son las integraciones?</a></li>
+<li><a href="./modulo-01/sdk-y-clientes.html">SDKs y clientes HTTP</a></li>
+<li><a href="./modulo-01/webhooks.html">Webhooks</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Consumir APIs externas</li>
-              <li>Manejo de errores y timeouts</li>
-              <li>Retries y exponential backoff</li>
-              <li>Idempotencia en tus llamadas</li>
-              <li>Cache de respuestas</li>
-            </ul>
           </article>
 
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">2. Webhooks y eventos</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Integraciones prácticas</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 55 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Aprende a recibir en lugar de preguntar: eventos de Stripe, GitHub y más.</p>
-            <div class="card__meta">
-              <span>5 lecciones</span><span>≈ 62 min</span>
+            <p class="card__text">Integra correo y notificaciones, mapas y geolocalización, pasarelas de pago, social login con OAuth y almacenamiento de archivos en la nube con ejemplos de backend real.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/email-y-notificaciones.html">Email y notificaciones</a></li>
+<li><a href="./modulo-02/mapa-y-geolocalizacion.html">Mapas y geolocalización</a></li>
+<li><a href="./modulo-02/pasarelas-de-pago.html">Pasarelas de pago</a></li>
+<li><a href="./modulo-02/social-login-y-oauth.html">Social login y OAuth</a></li>
+<li><a href="./modulo-02/storage-y-crunch.html">Almacenamiento en la nube</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Qué es un webhook</li>
-              <li>Firmas y verificación</li>
-              <li>Reintentos y deduplicación</li>
-              <li>Integración con Stripe y GitHub</li>
-              <li>Seguridad de tus endpoints</li>
-            </ul>
           </article>
 
           <article class="card card--module">
-            <div class="card__top">
-              <h3 class="card__title">3. OAuth y pagos</h3>
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Robustez</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 54 min</span>
+                </div>
+              </div>
             </div>
-            <p class="card__text">Autenticación delegada, cobros, correos y archivos: los servicios esenciales del backend real.</p>
-            <div class="card__meta">
-              <span>5 lecciones</span><span>≈ 60 min</span>
+            <p class="card__text">Encola tareas lentas, guarda secretos fuera del código, reintenta con estrategia, monitoriza cada integración y automatiza las pruebas contra terceros.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/colas-para-tareas-lentas.html">Colas para tareas lentas</a></li>
+<li><a href="./modulo-03/env-vars-y-secrets.html">Configuración y secretos</a></li>
+<li><a href="./modulo-03/manejo-de-errores-reintentos.html">Errores y reintentos</a></li>
+<li><a href="./modulo-03/monitoreo-de-integraciones.html">Monitoreo de integraciones</a></li>
+<li><a href="./modulo-03/pruebas-de-integracion.html">Pruebas de integración</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </div>
-            <ul class="module-lessons">
-              <li>Flujo OAuth2</li>
-              <li>Tokens de acceso y refresh</li>
-              <li>Pasarelas de pago</li>
-              <li>Envío de correo</li>
-              <li>Almacenamiento en la nube</li>
-            </ul>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Integraciones con SaaS</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 53 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Integra SaaS de referencia con rigor: entender el contrato, sincronizar con un CRM, enviar notificaciones multicanal, gestionar pagos recurrentes y emitir eventos de analítica.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/integraciones-saas-contrato-api.html">El contrato de un SaaS</a></li>
+<li><a href="./modulo-04/integraciones-saas-sincronizacion-crm.html">Sincronizar datos con un CRM</a></li>
+<li><a href="./modulo-04/integraciones-saas-notificaciones-multicanal.html">Notificaciones multicanal</a></li>
+<li><a href="./modulo-04/integraciones-saas-suscripciones-recurrentes.html">Suscripciones y pagos recurrentes</a></li>
+<li><a href="./modulo-04/integraciones-saas-eventos-analitica.html">Eventos de analítica desde el backend</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Webhooks y eventos</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 54 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Exponer y proteger endpoints de webhook, verificar firmas criptográficas, reintentar de forma idempotente, estudiar un caso real de proveedor y derivar webhooks hacia eventos asíncronos.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/integraciones-webhook-recepcion-controlada.html">Recibir un webhook con control</a></li>
+<li><a href="./modulo-05/integraciones-webhook-firmas-seguras.html">Verificar firmas de webhook</a></li>
+<li><a href="./modulo-05/integraciones-webhook-reintentos-idempotencia.html">Reintentos e idempotencia en webhooks</a></li>
+<li><a href="./modulo-05/integraciones-webhook-github-en-accion.html">Caso real: webhooks de GitHub</a></li>
+<li><a href="./modulo-05/integraciones-webhook-a-eventos.html">De webhook a evento asíncrono</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Seguridad en integraciones</h3>
+                <div class="card__meta">
+                  <span>4 lecciones</span><span>≈ 44 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Aplica mínimos privilegios con API keys y scopes, usa flujos de máquina a máquina, evita ataques SSRF, protege los datos personales que viajan a terceros y vigila la cadena de suministro de tus dependencias.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/integraciones-seguridad-api-keys-scopes.html">API keys y scopes</a></li>
+<li><a href="./modulo-06/integraciones-seguridad-flujo-maquina-a-maquina.html">OAuth de máquina a máquina</a></li>
+<li><a href="./modulo-06/integraciones-seguridad-ssrf.html">SSRF: el riesgo de pedir URL al usuario</a></li>
+<li><a href="./modulo-06/integraciones-seguridad-pii.html">Datos personales en integraciones</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Operación y mantenimiento</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 59 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">La integración no acaba cuando publicas: terceros cambian sus APIs, fallan, cobran y se retiran. Planifica cómo sobrevivir, migrar y cerrar cada integración con criterio.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/integraciones-cambio-externo-y-regresiones.html">Cuando el tercero cambia su API</a></li>
+<li><a href="./modulo-07/integraciones-failover-y-alta-disponibilidad.html">Failover sin el tercero</a></li>
+<li><a href="./modulo-07/integraciones-gobierno-y-catalogo.html">Catálogo y gobierno de integraciones</a></li>
+<li><a href="./modulo-07/integraciones-costes-y-limites-de-uso.html">Costes y límites de uso</a></li>
+<li><a href="./modulo-07/integraciones-retirada-y-migracion.html">Retirar y migrar una integración</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
           </article>
         </div>
       </section>
@@ -196,35 +327,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><span>Módulo 1 · Trabajar con APIs externas</span></li>
-          <li><span>Módulo 2 · Webhooks y eventos</span></li>
-          <li><span>Módulo 3 · OAuth y pagos</span></li>
+          <li><span>Módulo 1 · Fundamentos de integración</span></li>
+          <li><span>Módulo 2 · Integraciones prácticas</span></li>
+          <li><span>Módulo 3 · Robustez</span></li>
+          <li><span>Módulo 4 · Integraciones con SaaS</span></li>
+          <li><span>Módulo 5 · Webhooks y eventos</span></li>
+          <li><span>Módulo 6 · Seguridad en integraciones</span></li>
+          <li><span>Módulo 7 · Operación y mantenimiento</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP · Cheatsheet · Backend Academy</title>
+<meta name="description" content="Cheatsheet de HTTP: métodos, cabeceras de petición y respuesta, códigos de estado, Content-Type, CORS, ETag, Cache-Control, cookies, HTTPS y compresión.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../assets/css/reset.css">
+<link rel="stylesheet" href="../../assets/css/variables.css">
+<link rel="stylesheet" href="../../assets/css/global.css">
+<link rel="stylesheet" href="../../assets/css/layout.css">
+<link rel="stylesheet" href="../../assets/css/header.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../assets/css/footer.css">
+<link rel="stylesheet" href="../../assets/css/cards.css">
+<link rel="stylesheet" href="../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../assets/css/code.css">
+<link rel="stylesheet" href="../../assets/css/forms.css">
+<link rel="stylesheet" href="../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="../../assets/css/toc.css">
+<style>
+.lesson-layout--cheat { grid-template-columns: minmax(0, 1fr) var(--toc-w); }
+@media (max-width: 1024px) { .lesson-layout--cheat { grid-template-columns: 1fr; } .lesson-layout--cheat .toc-rail { display: none; } }
+</style>
+
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-root="../../">
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../index.html">Inicio</a>
+      <a href="../roadmap/index.html">Roadmap</a>
+      <a href="../aprender/index.html">Aprender</a>
+      <a href="../practica/index.html">Práctica</a>
+      <a href="../proyectos/index.html">Proyectos</a>
+      <a href="../recursos/index.html" class="is-active">Recursos</a>
+      <a href="../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container" id="top">
+  <nav class="breadcrumb" aria-label="Miga de pan">
+    <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="../recursos/index.html">Recursos</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item"><a href="./index.html">Cheatsheets</a></span>
+    <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    <span class="breadcrumb__item" aria-current="page">HTTP</span>
+  </nav>
+
+  <div class="lesson-layout lesson-layout--cheat">
+    <main class="lesson-main">
+      <article class="lesson-article">
+        <header class="lesson-hero">
+          <h1 class="lesson-title">🌐 HTTP</h1>
+          <p class="section-subtitle">El protocolo que mueve la web: peticiones, respuestas, cabeceras, caché, cookies, CORS, HTTPS y compresión. Base de todo backend.</p>
+          <div class="lesson-meta">
+            <span class="lesson-meta__item"><span class="badge badge--info">⚡ Cheatsheet</span></span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Protocolos</span>
+            <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Cheatsheets</span>
+          </div>
+        </header>
+
+        <div class="container-narrow">
+          <div class="lesson-content" id="contenido">
+
+            <section>
+              <h2 id="mensaje">La petición y la respuesta</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// PETICIÓN
+POST /api/users HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer eyJ...
+Accept: application/json
+
+{"email":"ada@dev.io","name":"Ada"}
+
+// RESPUESTA
+HTTP/1.1 201 Created
+Content-Type: application/json
+Location: /api/users/42
+Cache-Control: no-store
+
+{"id":42,"email":"ada@dev.io"}
+
+// Línea de inicio, cabeceras, línea vacía y cuerpo.
+// Headers: nombre (case-insensitive) : valor</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="metodos">Métodos HTTP</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Método</th><th>Uso</th><th>Cuerpo</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">GET</code></td><td>Leer recursos, sin efectos.</td><td>No</td></tr>
+                    <tr><td><code class="inline">HEAD</code></td><td>Como GET, sin cuerpo (para comprobar existencia).</td><td>No</td></tr>
+                    <tr><td><code class="inline">POST</code></td><td>Crear recursos o acciones.</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">PUT</code></td><td>Reemplazar por completo.</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">PATCH</code></td><td>Actualización parcial.</td><td>Sí</td></tr>
+                    <tr><td><code class="inline">DELETE</code></td><td>Eliminar.</td><td>Opcional</td></tr>
+                    <tr><td><code class="inline">OPTIONS</code></td><td>Consulta CORS / métodos permitidos.</td><td>No</td></tr>
+                    <tr><td><code class="inline">TRACE</code>, <code class="inline">CONNECT</code></td><td>Diagnóstico / túneles.</td><td>Raro</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="request-headers">Cabeceras de petición</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Cabecera</th><th>Qué indica</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">Host</code></td><td>Dominio al que se pide (obligatoria en HTTP/1.1).</td></tr>
+                    <tr><td><code class="inline">User-Agent</code></td><td>Cliente (navegador, bot, curl).</td></tr>
+                    <tr><td><code class="inline">Accept</code></td><td>Formatos que el cliente acepta.</td></tr>
+                    <tr><td><code class="inline">Accept-Encoding</code></td><td>Compresiones soportadas (gzip, br).</td></tr>
+                    <tr><td><code class="inline">Content-Type</code></td><td>Formato del cuerpo enviado.</td></tr>
+                    <tr><td><code class="inline">Content-Length</code></td><td>Bytes del cuerpo.</td></tr>
+                    <tr><td><code class="inline">Authorization</code></td><td>Credenciales (Basic, Bearer).</td></tr>
+                    <tr><td><code class="inline">Cookie</code></td><td>Cookies almacenadas del sitio.</td></tr>
+                    <tr><td><code class="inline">Origin</code></td><td>Origen real de una petición cross-origin (CORS).</td></tr>
+                    <tr><td><code class="inline">Referer</code></td><td>Página desde la que se llegó.</td></tr>
+                    <tr><td><code class="inline">If-None-Match</code> / <code class="inline">If-Modified-Since</code></td><td>Validadores para caché condicional.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="response-headers">Cabeceras de respuesta</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Cabecera</th><th>Qué indica</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">Content-Type</code></td><td>Formato del cuerpo devuelto.</td></tr>
+                    <tr><td><code class="inline">Content-Length</code></td><td>Tamaño en bytes.</td></tr>
+                    <tr><td><code class="inline">Location</code></td><td>URL del recurso creado o redirección.</td></tr>
+                    <tr><td><code class="inline">Set-Cookie</code></td><td>Cookie que el navegador debe guardar.</td></tr>
+                    <tr><td><code class="inline">Cache-Control</code></td><td>Política de caché del recurso.</td></tr>
+                    <tr><td><code class="inline">ETag</code></td><td>Versión (hash) del recurso.</td></tr>
+                    <tr><td><code class="inline">Last-Modified</code></td><td>Fecha de la última modificación.</td></tr>
+                    <tr><td><code class="inline">Access-Control-Allow-Origin</code></td><td>Orígenes permitidos por CORS.</td></tr>
+                    <tr><td><code class="inline">Strict-Transport-Security</code></td><td>Fuerza HTTPS en el navegador.</td></tr>
+                    <tr><td><code class="inline">Retry-After</code></td><td>Tiempo antes de reintentar (429/503).</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="status">Códigos de estado</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// 1xx - informativos
+100 Continue           // sigue enviando el cuerpo
+
+// 2xx - éxito
+200 OK
+201 Created
+202 Accepted           // procesado en segundo plano
+204 No Content
+
+// 3xx - redirecciones
+301 Moved Permanently   // nueva URL para siempre
+302 Found               // redirección temporal
+304 Not Modified        // usar la caché (validador coincidió)
+307 Temporary Redirect  // mantiene método y body
+308 Permanent Redirect  // mantiene método y body
+
+// 4xx - error del cliente
+400 Bad Request
+401 Unauthorized        // sin autenticar
+403 Forbidden           // autenticado sin permiso
+404 Not Found
+405 Method Not Allowed  // la ruta existe, el método no
+409 Conflict
+410 Gone
+422 Unprocessable Entity // validación semántica
+429 Too Many Requests
+
+// 5xx - error del servidor
+500 Internal Server Error
+502 Bad Gateway
+503 Service Unavailable
+504 Gateway Timeout</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="content-type">Content-Type: la negociación de contenido</h2>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Content-Type</th><th>Para qué</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline">application/json</code></td><td>APIs JSON.</td></tr>
+                    <tr><td><code class="inline">application/x-www-form-urlencoded</code></td><td>Formularios HTML clásicos.</td></tr>
+                    <tr><td><code class="inline">multipart/form-data</code></td><td>Formularios con archivos subidos.</td></tr>
+                    <tr><td><code class="inline">text/plain</code></td><td>Texto plano.</td></tr>
+                    <tr><td><code class="inline">text/html</code></td><td>Páginas web.</td></tr>
+                    <tr><td><code class="inline">application/octet-stream</code></td><td>Binarios genéricos.</td></tr>
+                    <tr><td><code class="inline">application/xml</code></td><td>XML.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>El charset se indica así: <code class="inline">application/json; charset=utf-8</code>. El servidor devuelve la respuesta con el <code class="inline">Content-Type</code> apropiado a lo que envía.</p>
+            </section>
+
+            <section>
+              <h2 id="cors">CORS</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// Origen = protocolo + host + puerto
+//   https://app.example.com  → distinto de  https://api.example.com
+
+// Petición simple (GET/POST con tipos básicos) → se envía directa.
+// Peticiones "preflighted" → primero OPTIONS preguntando permiso.
+
+// OPTIONS /api/users
+//   Origin: https://app.example.com
+//   Access-Control-Request-Method: POST
+
+// → RESPONSE con permiso
+//   Access-Control-Allow-Origin: https://app.example.com
+//   Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+//   Access-Control-Allow-Headers: Content-Type, Authorization
+//   Access-Control-Max-Age: 86400
+
+// Producción: lista blanca exacta en Allow-Origin (nunca "*" con credenciales)
+// Con cookies/Authorization: Access-Control-Allow-Credentials: true</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="etag">ETag y revalidación</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// El servidor marca la versión con un ETag (hash del contenido)
+// RESPONSE 1
+HTTP/1.1 200 OK
+ETag: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+
+// El cliente guarda el recurso y su ETag.
+// REQUEST 2: el cliente pregunta "¿ha cambiado?"
+GET /api/users/42
+If-None-Match: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+
+// RESPONSE 2
+HTTP/1.1 304 Not Modified     // sin body: usa la caché
+
+// Si el recurso cambió → 200 con el ETag nuevo y contenido.
+// En APIs: sirve también para control de concurrencia
+// (el cliente manda If-Match con el ETag al hacer PUT/PATCH).</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="cache">Cache-Control: control de caché</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// ¿Cuánto y dónde se puede cachear?
+Cache-Control: no-store              // nada de caché (datos sensibles)
+Cache-Control: no-cache              // sí cachea, pero revalida cada vez
+Cache-Control: private               // solo en el navegador
+Cache-Control: public                // también en proxies/CDN
+Cache-Control: max-age=3600          // 1 hora como máximo
+Cache-Control: s-maxage=600          // límite para proxies/CDN
+Cache-Control: stale-while-revalidate=60  // sirve lo viejo mientras refresca
+
+// Combina directivas:
+Cache-Control: public, max-age=3600, s-maxage=600
+
+// Recursos estáticos con hash (build.webpack.abc123.css):
+Cache-Control: public, max-age=31536000, immutable
+
+// Páginas/API personales:
+Cache-Control: private, no-cache
+
+// Alternativa antigua: Expires: Wed, 21 Oct 2026 07:28:00 GMT</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="cookies">Cookies</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// El servidor manda la cookie en Set-Cookie
+HTTP/1.1 200 OK
+Set-Cookie: sesion=abc123; HttpOnly; Secure; Path=/; Max-Age=86400; SameSite=Lax
+
+// El navegador la devuelve automáticamente en cada petición al dominio
+Cookie: sesion=abc123
+
+// Atributos que debes aplicar
+//   HttpOnly  → el JS del navegador NO puede leerla (antifraude)
+//   Secure    → solo por HTTPS
+//   SameSite=Lax | Strict  → protección CSRF
+//   Max-Age   → caducidad (mejor que la expirada Session cookie)
+//   Domain    → a qué dominios se envía (¡cuidado con subdominios!)
+//   Path      → a qué rutas se envía
+
+// Borrar una cookie: mandarla con Max-Age=0 o un ya vencido.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="https">HTTPS y compresión</h2>
+              <figure class="code-block">
+                <div class="code-block__header"><span class="code-block__lang">HTTP</span></div>
+                <div class="code-block__body">
+                  <pre><code class="language-http">// HTTPS = HTTP sobre TLS: cifra la conexión completa.
+// Hoy por hoy es obligatorio (certificados gratuitos con Let's Encrypt).
+
+// Negociación de compresión:
+// REQUEST:  Accept-Encoding: gzip, deflate, br
+// RESPONSE: Content-Encoding: gzip   + Content-Type + Vary: Accept-Encoding
+
+// Cabeceras de seguridad recomendadas en cada respuesta
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+Content-Security-Policy: default-src 'self'
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 id="buenas-practicas">Buenas prácticas</h2>
+              <ul>
+                <li>Elige el método correcto y respeta su semántica (nunca <code class="inline">GET</code> que borre).</li>
+                <li>Devuelve códigos 4xx/5xx precisos, nunca <code class="inline">200</code> para errores.</li>
+                <li>Cookies de sesión con <code class="inline">HttpOnly</code>, <code class="inline">Secure</code> y <code class="inline">SameSite</code>.</li>
+                <li>Valida <code class="inline">Content-Type</code> del body que recibes.</li>
+                <li>Cache-Control explícito y ETag en recursos revalidables.</li>
+                <li>HTTPS con HSTS; compresión gzip/br para respuestas grandes.</li>
+              </ul>
+            </section>
+
+          </div>
+        </div>
+
+        <nav class="lesson-nav-footer" aria-label="Navegación">
+          <a class="lesson-nav-footer__link" href="./index.html"><i class="fa-solid fa-bars" aria-hidden="true"></i> Índice de Cheatsheets</a>
+          <a class="lesson-nav-footer__link lesson-nav-footer__link--next" href="./regex.html">Siguiente: Regex <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+        </nav>
+      </article>
+    </main>
+
+    <aside class="toc-rail" data-toc aria-label="En esta página"></aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../index.html">Inicio</a></li>
+          <li><a href="../roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../aprender/index.html">Aprender</a></li>
+          <li><a href="../practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../recursos/index.html">Recursos</a></li>
+          <li><a href="../glosario/index.html">Glosario</a></li>
+          <li><a href="./index.html">Cheatsheets</a></li>
+          <li><a href="../buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Cursos">
+        <h4>Cursos destacados</h4>
+        <ul>
+          <li><a href="../../cursos/fundamentos-backend/index.html">Fundamentos de Backend</a></li>
+          <li><a href="../../cursos/apis-rest/index.html">APIs REST</a></li>
+          <li><a href="../../cursos/docker/index.html">Docker</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../acerca/index.html">Acerca de</a>
+        <a href="../favoritos/index.html">Favoritos</a>
+        <a href="../historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../assets/js/helpers.js"></script>
+<script src="../../assets/js/storage.js"></script>
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/data.js"></script>
+<script src="../../assets/js/progress.js"></script>
+<script src="../../assets/js/navigation.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/toc.js"></script>
+<script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/main.js"></script>
+</body>
+</html>

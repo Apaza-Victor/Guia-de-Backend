@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="burn-rate-y-deteccion-precoz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Burn rate y detección precoz · Observabilidad · Backend Academy</title>
+<meta name="description" content="Usa el burn rate para detectar incidentes antes de agotar el error budget.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="burn-rate-y-deteccion-precoz"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Observabilidad</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Burn rate y detección precoz</span>
+        </nav>
+        <h1 class="lesson-title">Burn rate y detección precoz</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Alertas y SLOs</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>El error budget mensual se consume poco a poco, como un depósito. Esperar a ver el dashboard del fin de mes es tarde: un incidente que quema rápido el presupuesto lo descubres horas después si solo miras el acumulado. Ahí entra el burn rate.</p>
+<p>El burn rate mide la velocidad de consumo del presupuesto: si una hora de errores graves equivale a 24 horas de presupuesto, la página debe sonar ya. Es la técnica de alertas más eficiente para cerrar la distancia entre el incidente y la detección.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El burn rate es la velocidad a la que consumes el error budget: 1x significa consumo normal, 2x el doble. Una alerta se dispara cuando la tasa de error sostenida supera el multiplicador del presupuesto en un intervalo.</p><p><strong>Por qué importa.</strong> Permite alertar por presupuesto, no por umbral arbitrario: el número tiene significado (estás quemando el mes) y el tiempo de respuesta se acorta.</p><p><strong>Cuándo usarlo.</strong> Usa burn rates para todo SLO: alerta rápida (1h a 14.4x para 99.9% en 30 días) y alerta lenta (6h a 6x) y camina al estilo Google con las dos ventanas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Error budget: fracción de peticiones fuera de objetivo permitida al mes.</li>
+<li>Burn rate: ratio de consumo por hora del presupuesto.</li>
+<li>Multiplicador: tasa de error sostenida que equivale a agotar el presupuesto en X horas.</li>
+<li>Doble ventana: alerta rápida (short window) + alerta lenta (long window).</li>
+<li>El umbral se calcula como: error rate sostenido = (1 - SLO) × burn rate objetivo.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Cálculo del umbral de burn rate para un SLO 99.9% (30 días) y su alerta rápida.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># SLO 0.999 a 30d -&gt; error budget = 0.001 en el periodo
+# Burn 1x: tasa de error sostenida = 1 - 0.999 = 0.001
+# Alertar a 14.4x: el presupuesto se agotaria en ~2h
+umbral_rapida  = 0.001 * 14.4 = 0.0144   (1.44% de error)
+umbral_lenta   = 0.001 * 6    = 0.006    (0.6% de error)
+# Rápida: window 1h, condición 1.44% error
+# Lenta: window 6h, condición 0.6% error</code></pre></div>
+</figure>
+<pre><code class="language-text">Si durante una hora hay más de 1.44% de errores, la página suena aunque el mes aún luzca bien.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Ambas alertas juntas en Prometheus: la rápida paga y la lenta anticipa.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Alertas de burn rate con doble ventana</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">groups:
+  - name: slo-checkout
+    rules:
+      - alert: BurnRateRapida
+        expr: (1 - ratio_buenas_1h) &gt; 0.0144
+        labels: { severity: P1 }
+        annotations: { runbook: checkout-burn }
+      - alert: BurnRateLenta
+        expr: (1 - ratio_buenas_6h) &gt; 0.006
+        labels: { severity: P2 }</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un error intermitente en una dependencia quema el presupuesto al 3x durante un fin de semana. La alerta lenta (6h) avisó el sábado por la tarde, mientras el dashboard mensual aún apuntaba verde. El equipo investigó con calma el domingo y el SLO cerró el mes intacto.</p>
+<ul><li>Configura siempre las dos ventanas: la rápida paga, la lenta anticipa.</li>
+<li>Ajusta los multiplicadores a tu SLO: 14.4x y 6x son buenas arranques.</li>
+<li>Publica el burn rate en el dashboard para ver el consumo en tiempo real.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Dashboard del burn rate
+consumo = (1 - ratio_buenas_30d) / (1 - slo)
+# &lt; 0.5 verde | 0.5-0.8 atencion | &gt; 0.8 riesgo de agotar
+# La alerta rapida protege de agotar en horas; la lenta de meses cortos</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> La alerta rápida puede molestar con picos legítimos: por eso se calibra con la ventana larga y data histórica.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El burn rate escala la tasa de error a la velocidad de consumo del presupuesto.</li>
+<li>Multiplicador X significa agotar el presupuesto en 1/X del periodo.</li>
+<li>La doble ventana cubre picos cortos (rápida) y degradaciones suaves (lenta).</li>
+<li>Los umbrales salen de la fórmula (1 - SLO) × factor: nada arbitrario.</li>
+<li>El burn rate alerta sobre el presupuesto, la métrica de fiabilidad más legítima.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Umbral por intuición: sin la fórmula (1-SLO)×factor, el número no significa nada.</li>
+<li>Solo la alerta rápida: los picos aislados producen ruido y las degradaciones quietas pasan.</li>
+<li>Cruzar el burn rate solo al final del mes: la detección que debía ser temprana.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza con 14.4x/1h + 6x/6h, el estándar pragmático para 99.9%.</li>
+<li>Anima el dashboard con la escala de consumo del presupuesto.</li>
+<li>Revisa trimestralmente los multiplicadores según tu incidentología.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Calcula los umbrales de burn rate para tu SLO con la fórmula.</li>
+<li>Configura las dos alertas (rápida y lenta) y verifica el cálculo con error simulado.</li>
+<li>Pinta el consumo del error budget en el dashboard y actívalo.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El burn rate mide la velocidad de consumo del error budget.</li>
+<li>La fórmula (1-SLO)×factor fija umbrales con significado.</li>
+<li>Las alertas de doble ventana cubren picos y degradaciones suaves.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Métricas y servidores de métricas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Trazas y distributed tracing</a></li>
+          <li><a href="./index.html">Módulo 6 · Alertas y SLOs</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

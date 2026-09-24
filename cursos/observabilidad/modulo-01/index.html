@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light" data-lesson-id="observabilidad-m1-index">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 1 · Fundamentos · Observabilidad Backend · Backend Academy</title>
-<meta name="description" content="Primer módulo del curso de Observabilidad Backend: qué es la observabilidad, por qué importa, los tres pilares (logs, métricas y trazas distribuidas).">
+<title>Módulo 1 · Fundamentos · Observabilidad · Backend Academy</title>
+<meta name="description" content="Comprende qué es la observabilidad, los tres pilares (logs, métricas y trazas), cómo se estructura cada uno y por qué juntos permiten explicar qué pasa dentro del sistema.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
 <body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,77 +54,90 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-    <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item"><a href="../index.html">Observabilidad Backend</a></span>
-    <span class="breadcrumb__separator" aria-hidden="true">/</span>
-    <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
-  </nav>
-    <p class="page-hero__eyebrow">🚀 Avanzado</p>
-    <h1 class="page-hero__title">Módulo 1 · Fundamentos</h1>
-    <p class="page-hero__subtitle">Antes de instalar herramientas hay que entender el problema: tu sistema necesita responder preguntas que todavía no sabes que vas a hacer. Aquí están los conceptos que sostienen todo lo demás.</p>
-    <div class="page-hero__meta">
-      <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
-      <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ~42 min</span>
-    </div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Observabilidad</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 1</span>
+      </nav>
+      <p class="page-hero__eyebrow">🔥 Avanzado</p>
+      <h1 class="page-hero__title">Módulo 1 · Fundamentos</h1>
+      <p class="page-hero__subtitle">Ver no es suficiente: la observabilidad te deja preguntarle al sistema qué pasa de verdad.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 43 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel avanzado</span>
+      </div>
     </div>
   </section>
   <div class="container">
-    <div class="progress" data-progress="observabilidad">
-    <div class="progress__bar"><div class="progress__fill"></div></div>
-    <span class="progress__label">Progreso del curso</span>
-  </div>
-  <section class="route-section">
-    <h2 class="route-section__title">Objetivos de aprendizaje</h2>
-    <ul class="route-goals">
-      <li>Definir observabilidad y diferenciarla del monitoreo tradicional.</li>
-      <li>Dominar los tres pilares: logs, métricas y trazas distribuidas.</li>
-      <li>Escribir logs estructurados en JSON con niveles y correlación por request.</li>
-      <li>Distinguir los tipos de métricas (counter, gauge, histogram) y los enfoques RED y USE.</li>
-      <li>Entender las trazas distribuidas: spans, traceId y propagación de contexto.</li>
-    </ul>
-  </section>
-  <section class="route-section">
-    <h2 class="route-section__title">Lecciones</h2>
-    <div class="grid-2">
-      <a class="card card--lesson card--link" href="que-es-observabilidad.html">
-        <h3>¿Qué es la observabilidad?</h3>
-        <p>Definición, por qué importa y por qué no basta con monitorear</p>
-      </a>
-      <a class="card card--lesson card--link" href="los-tres-pilares.html">
-        <h3>Los tres pilares</h3>
-        <p>Logs, métricas y trazas: qué aporta cada uno</p>
-      </a>
-      <a class="card card--lesson card--link" href="logs-estructurados.html">
-        <h3>Logs estructurados</h3>
-        <p>Formato JSON, niveles y correlación por request</p>
-      </a>
-      <a class="card card--lesson card--link" href="metricas.html">
-        <h3>Métricas</h3>
-        <p>Counters, gauges e histogramas, RED y USE</p>
-      </a>
-      <a class="card card--lesson card--link" href="trazas-distribuidas.html">
-        <h3>Trazas distribuidas</h3>
-        <p>Spans, traceId y propagación de contexto</p>
-      </a>
-    </div>
-  </section>
-  <div class="lesson-prevnext">
-    <a class="lesson-prevnext__item lesson-prevnext__item--prev" href="../index.html">
-      <span class="lesson-prevnext__tag">Anterior</span><strong>Observabilidad Backend</strong>
-    </a>
-    <a class="lesson-prevnext__item lesson-prevnext__item--next" href="../modulo-02/index.html">
-      <span class="lesson-prevnext__tag">Siguiente</span><strong>Módulo 2 · Herramientas</strong>
-    </a>
-  </div>
+    <section class="lesson-content">
+      <section>
+        <h2>Objetivos del módulo</h2>
+        <div class="objectives">
+          <div class="objective"><span class="objective__icon">✔</span><span>Definir la observabilidad y diferenciarla del monitoreo</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Dominar los tres pilares: logs, métricas y trazas</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es un log estructurado y por qué importa</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Conocer las métricas como señal cuantitativa del sistema</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Introducir las trazas distribuidas para seguir una petición</span></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>5 lecciones · ~43 min · Los tres pilares: logs, métricas y trazas desde el primer concepto..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./logs-estructurados.html">
+            <h3>1 · Logs estructurados</h3>
+            <p>Claves y valores en vez de texto libre: logs que se filtran y correlacionan.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">logs</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./los-tres-pilares.html">
+            <h3>2 · Los tres pilares</h3>
+            <p>Logs, métricas y trazas: cada uno responde una pregunta distinta del sistema.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./metricas.html">
+            <h3>3 · Métricas</h3>
+            <p>Números que se agregan en el tiempo: contadores, gauges y más.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">métricas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./que-es-observabilidad.html">
+            <h3>4 · ¿Qué es la observabilidad?</h3>
+            <p>La capacidad de entender un sistema por su salida, sin depender de adivinar.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">fundamentos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./trazas-distribuidas.html">
+            <h3>5 · Trazas distribuidas</h3>
+            <p>Sigue una petición a través de cada servicio que toca.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">trazas</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
+    <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
+      <a class="lesson-prevnext__link" href="../index.html"><span class="label">← Curso</span><span class="title">Observabilidad</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-02/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 2 · Herramientas</span></a>
+    </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -130,39 +149,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="./index.html">Módulo 1 · Fundamentos</a></li>
           <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
           <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Métricas y servidores de métricas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Trazas y distributed tracing</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Alertas y SLOs</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad en producción</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>
@@ -172,9 +196,6 @@
 <script src="../../../assets/js/sidebar.js"></script>
 <script src="../../../assets/js/toc.js"></script>
 <script src="../../../assets/js/code.js"></script>
-<script src="../../../assets/js/favorites.js"></script>
-<script src="../../../assets/js/history.js"></script>
-<script src="../../../assets/js/search.js"></script>
 <script src="../../../assets/js/main.js"></script>
 </body>
 </html>

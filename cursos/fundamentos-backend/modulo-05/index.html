@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 5 · Formatos y Comunicación · Fundamentos de Backend</title>
-<meta name="description" content="Módulo 5 del curso Fundamentos de Backend: JSON, XML, Form Data, Multipart, WebSockets y Server-Sent Events. Los formatos en los que las máquinas se comunican.">
+<title>Módulo 5 · Formatos y Comunicación · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="JSON, XML, form data, multipart, WebSockets y Server-Sent Events: cómo se codifica y se comunica la información entre cliente y servidor.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Fundamentos de Backend</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 5 · Formatos y Comunicación</span>
-    </nav>
-    <p class="page-hero__eyebrow">⚙️ Intermedio</p>
-    <h1 class="page-hero__title">Módulo 5 · Formatos y Comunicación</h1>
-    <p class="page-hero__subtitle">Las máquinas también hablan. Cierra el curso dominando los formatos de datos (JSON, XML, formularios) y las comunicaciones en tiempo real (WebSockets y SSE).</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 55 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> HTTP y arquitectura</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Fundamentos de Backend</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 5</span>
+      </nav>
+      <p class="page-hero__eyebrow">💻 Básico</p>
+      <h1 class="page-hero__title">Módulo 5 · Formatos y Comunicación</h1>
+      <p class="page-hero__subtitle">Los datos viajan en formatos concretos; saber cuál elegir es medio backend.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 55 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel básico</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,67 +82,68 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Escribir y leer JSON con soltura y convertirlo en cualquier lenguaje.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Reconocer XML y diferenciar los formatos de formulario.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender Multipart para subir archivos de forma segura y eficiente.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Distinguir WebSockets y SSE y saber cuándo elegir cada uno.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="fundamentos-backend">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="json.html">
-          <h3>1 · JSON</h3>
-            <p>El formato rey del intercambio de datos entre servicios.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">formato</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="xml.html">
-          <h3>2 · XML</h3>
-            <p>El veterano extensible que aún vive en muchos sistemas.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">formato</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="form-data.html">
-          <h3>3 · Form Data</h3>
-            <p>Datos de formularios codificados como pares clave-valor.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">formularios</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="multipart.html">
-          <h3>4 · Multipart</h3>
-            <p>El formato que permite subir archivos con datos del formulario.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">archivos</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="websockets.html">
-          <h3>5 · WebSockets</h3>
-            <p>Una tubería bidireccional siempre abierta para el tiempo real.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">tiempo real</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="sse.html">
-          <h3>6 · Server-Sent Events</h3>
-            <p>El servidor empuja mensajes al navegador por un solo canal.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">tiempo real</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Diferenciar JSON y XML y cuándo usar cada uno</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender form data y multipart para formularios y archivos</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Conocer las comunicaciones en tiempo real</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Comparar WebSockets y Server-Sent Events</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Elegir el formato según el caso real</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>6 lecciones · ~55 min · El contenido de cada petición: formatos y comunicación en tiempo real..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./json.html">
+            <h3>1 · JSON</h3>
+            <p>El formato de datos que habla toda la web moderna.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./xml.html">
+            <h3>2 · XML</h3>
+            <p>El formato robusto que aún manda en muchos legados.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./form-data.html">
+            <h3>3 · Form Data</h3>
+            <p>Los formularios clásicos codificados para viajar por HTTP.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./multipart.html">
+            <h3>4 · Multipart</h3>
+            <p>Subir archivos y mezclarlos con datos en una misma petición.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./websockets.html">
+            <h3>5 · WebSockets</h3>
+            <p>Canal bidireccional y persistente: la comunicación en tiempo real.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./sse.html">
+            <h3>6 · Server-Sent Events</h3>
+            <p>El servidor empuja eventos a un cliente que solo escucha.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">formatos</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-04/index.html">
-        <span class="label">← Módulo anterior</span>
-        <span class="title">Arquitectura Web</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../index.html">
-        <span class="label">Curso completo →</span>
-        <span class="title">Fundamentos de Backend</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-04/index.html"><span class="label">← Anterior</span><span class="title">Módulo 4 · Arquitectura Web</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-06/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 6 · APIs y HTTP en la práctica</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -145,41 +155,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Internet</a></li>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción al Backend</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Internet y la Web</a></li>
           <li><a href="../modulo-03/index.html">Módulo 3 · HTTP</a></li>
-          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura</a></li>
-          <li><a href="../modulo-05/index.html">Módulo 5 · Formatos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura Web</a></li>
+          <li><a href="./index.html">Módulo 5 · Formatos y Comunicación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · APIs y HTTP en la práctica</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · De cero a producción</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

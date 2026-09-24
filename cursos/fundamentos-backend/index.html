@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fundamentos de Backend · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Fundamentos de Backend: Internet, HTTP, arquitectura web, formatos de comunicación y todo lo que un desarrollador Backend debe dominar.">
+<meta name="description" content="Aprende qué es el Backend, cómo funciona Internet, HTTP, la arquitectura web y los fundamentos que todo desarrollador Backend debe dominar desde el primer día.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,144 +52,305 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Fundamentos de Backend</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Fundamentos de Backend</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🌱 Principiante</p>
+          <h1 class="page-hero__title">🌱 Fundamentos de Backend</h1>
+          <p class="page-hero__subtitle">Aprende qué es el Backend, cómo funciona Internet, HTTP, la arquitectura web y los fundamentos que todo desarrollador Backend debe dominar desde el primer día.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 65 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Backend · Web · HTTP</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Fundamentos de Backend</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-principiante">🌱 Principiante</span></p>
-      <h1 class="lesson-title">🌱 Fundamentos de Backend</h1>
-      <p class="section-subtitle">Aprende qué es el Backend, cómo funciona Internet, HTTP, la arquitectura web y los fundamentos que todo desarrollador Backend debe dominar desde el primer día.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 6 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 5 módulos · 55 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Backend · Web · HTTP</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 65 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/backend</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/backend</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Backend</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>Este curso es la puerta de entrada al desarrollo Backend. No necesitas experiencia previa: empieza desde cero, con lenguaje claro, ejemplos reales y ejercicios prácticos en cada lección. Al terminar entenderás qué ocurre detrás de cada clic, de cada petición y de cada API, y estarás listo para aprender cualquier lenguaje de servidor (PHP, Node.js, Python&hellip;) con una base sólida.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🌱 Principiante</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">5</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">55</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">⚙️ Backend</span></div>
+  <div class="container">
+    <article class="course" data-course-id="fundamentos-backend">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Aprende qué es el Backend, cómo funciona Internet, HTTP, la arquitectura web y los fundamentos que todo desarrollador Backend debe dominar desde el primer día.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🌱 Principiante</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">6 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">65</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es el Backend y por qué existe</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Comprender cómo funciona Internet y HTTP</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Conocer la arquitectura cliente-servidor</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Dominar los formatos de comunicación</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Tener una base sólida para cualquier curso Backend</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>Ninguno. Solo ganas de aprender.</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">Backend</span>
+<span class="tag tag--tech">Web</span>
+<span class="tag tag--tech">HTTP</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 65 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Introducción al Backend</h3>
+                <div class="card__meta">
+                  <span>13 lecciones</span><span>≈ 112 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Descubre qué es el backend, qué hacen quienes lo construyen, la diferencia con el frontend y el ciclo de petición y respuesta que sostiene cualquier aplicación web.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/que-es-backend.html">¿Qué es Backend?</a></li>
+<li><a href="./modulo-01/que-hace-un-desarrollador-backend.html">¿Qué hace un desarrollador Backend?</a></li>
+<li><a href="./modulo-01/backend-vs-frontend.html">Backend vs Frontend</a></li>
+<li><a href="./modulo-01/fullstack.html">Full Stack</a></li>
+<li><a href="./modulo-01/que-es-cliente.html">Cliente</a></li>
+<li><a href="./modulo-01/que-es-servidor.html">Servidor</a></li>
+<li><a href="./modulo-01/cliente-servidor.html">Cliente-Servidor</a></li>
+<li><a href="./modulo-01/que-es-request.html">Request</a></li>
+<li><a href="./modulo-01/que-es-response.html">Response</a></li>
+<li><a href="./modulo-01/request-response.html">Request y Response</a></li>
+<li><a href="./modulo-01/aplicaciones-web.html">Aplicaciones Web</a></li>
+<li><a href="./modulo-01/aplicaciones-moviles-backend.html">Aplicaciones Móviles y Backend</a></li>
+<li><a href="./modulo-01/arquitectura-basica.html">Arquitectura Básica</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Internet y la Web</h3>
+                <div class="card__meta">
+                  <span>14 lecciones</span><span>≈ 116 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Internet, la web, el navegador, direcciones IP, puertos, DNS, dominios, hosting y CDN: el mapa completo de la infraestructura que sostiene cualquier backend.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/como-funciona-internet.html">¿Cómo funciona Internet?</a></li>
+<li><a href="./modulo-02/que-es-la-web.html">La Web</a></li>
+<li><a href="./modulo-02/que-es-un-navegador.html">El Navegador</a></li>
+<li><a href="./modulo-02/servidores.html">Servidores</a></li>
+<li><a href="./modulo-02/que-es-un-isp.html">ISP</a></li>
+<li><a href="./modulo-02/que-es-una-ip.html">Direcciones IP</a></li>
+<li><a href="./modulo-02/ipv4.html">IPv4</a></li>
+<li><a href="./modulo-02/ipv6.html">IPv6</a></li>
+<li><a href="./modulo-02/puertos.html">Puertos</a></li>
+<li><a href="./modulo-02/dns.html">DNS</a></li>
+<li><a href="./modulo-02/dominio.html">Dominios</a></li>
+<li><a href="./modulo-02/hosting.html">Hosting</a></li>
+<li><a href="./modulo-02/vps.html">VPS</a></li>
+<li><a href="./modulo-02/cdn.html">CDN</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · HTTP</h3>
+                <div class="card__meta">
+                  <span>12 lecciones</span><span>≈ 109 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">HTTP y HTTPS, la anatomía de peticiones y respuestas, cabeceras, body, parámetros, cookies, caché y códigos de estado: el protocolo que todo backend debe dominar.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/que-es-http.html">HTTP</a></li>
+<li><a href="./modulo-03/http-vs-https.html">HTTPS</a></li>
+<li><a href="./modulo-03/peticion-http.html">Request HTTP</a></li>
+<li><a href="./modulo-03/respuesta-http.html">Response HTTP</a></li>
+<li><a href="./modulo-03/headers-http.html">Headers HTTP</a></li>
+<li><a href="./modulo-03/body-http.html">Body HTTP</a></li>
+<li><a href="./modulo-03/query-parameters.html">Query Parameters</a></li>
+<li><a href="./modulo-03/path-parameters.html">Path Parameters</a></li>
+<li><a href="./modulo-03/cookies.html">Cookies</a></li>
+<li><a href="./modulo-03/cache-control.html">Cache-Control</a></li>
+<li><a href="./modulo-03/content-type.html">Content-Type</a></li>
+<li><a href="./modulo-03/status-codes.html">Códigos de Estado HTTP</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Arquitectura Web</h3>
+                <div class="card__meta">
+                  <span>10 lecciones</span><span>≈ 92 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Del monolito al cliente-servidor, pasando por MVC, APIs, bases de datos, caché, reverse proxy y load balancer: el vocabulario de la arquitectura web.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/monolito.html">Monolito</a></li>
+<li><a href="./modulo-04/arquitectura-cliente-servidor.html">Arquitectura Cliente-Servidor</a></li>
+<li><a href="./modulo-04/arquitectura-en-capas.html">Arquitectura en Capas</a></li>
+<li><a href="./modulo-04/mvc.html">MVC</a></li>
+<li><a href="./modulo-04/que-es-una-api.html">API</a></li>
+<li><a href="./modulo-04/que-es-el-backend.html">El Backend</a></li>
+<li><a href="./modulo-04/base-de-datos.html">Base de Datos</a></li>
+<li><a href="./modulo-04/cache.html">Cache</a></li>
+<li><a href="./modulo-04/reverse-proxy.html">Reverse Proxy</a></li>
+<li><a href="./modulo-04/load-balancer.html">Load Balancer</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Formatos y Comunicación</h3>
+                <div class="card__meta">
+                  <span>6 lecciones</span><span>≈ 55 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">JSON, XML, form data, multipart, WebSockets y Server-Sent Events: cómo se codifica y se comunica la información entre cliente y servidor.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/json.html">JSON</a></li>
+<li><a href="./modulo-05/xml.html">XML</a></li>
+<li><a href="./modulo-05/form-data.html">Form Data</a></li>
+<li><a href="./modulo-05/multipart.html">Multipart</a></li>
+<li><a href="./modulo-05/websockets.html">WebSockets</a></li>
+<li><a href="./modulo-05/sse.html">Server-Sent Events</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · APIs y HTTP en la práctica</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 60 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Diseña recursos con rutas coherentes, aplica los métodos HTTP con intención, prueba endpoint a endpoint con curl y aprende a consumir APIs de terceros con criterio.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/disenando-una-api-de-recursos.html">Diseñando una API de recursos</a></li>
+<li><a href="./modulo-06/metodos-http-en-la-practica.html">Métodos HTTP en la práctica</a></li>
+<li><a href="./modulo-06/probando-apis-con-curl.html">Probando APIs con curl</a></li>
+<li><a href="./modulo-06/consumir-apis-externas.html">Consumiendo APIs externas</a></li>
+<li><a href="./modulo-06/rest-y-alternativas.html">REST y sus alternativas: GraphQL y gRPC</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · De cero a producción</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 57 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Prepara un entorno reproducible, configura el backend con variables de entorno, registra actividad con criterio, aplica seguridad básica y lleva tu primera API a producción.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/entorno-de-desarrollo-backend.html">Configurando tu entorno de desarrollo</a></li>
+<li><a href="./modulo-07/variables-de-entorno-y-configuracion.html">Variables de entorno y configuración</a></li>
+<li><a href="./modulo-07/errores-y-logging-backend.html">Errores y registro de actividad: logging</a></li>
+<li><a href="./modulo-07/seguridad-basica-del-backend.html">Seguridad básica del backend</a></li>
+<li><a href="./modulo-07/desplegar-tu-api-en-produccion.html">Poner tu API en producción</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es el Backend y por qué existe.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Comprender cómo funciona Internet y el protocolo HTTP.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Conocer la arquitectura cliente-servidor y los modelos de despliegue.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Dominar los formatos de comunicación: JSON, XML, formularios y tiempo real.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Tener una base sólida para cualquier curso Backend posterior.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos</h2>
-        <ul>
-          <li><strong>Ninguno.</strong> Solo ganas de aprender y un navegador moderno.</li>
-          <li>Es recomendable (no obligatorio) tener Python o Node.js instalado para probar los ejemplos.</li>
-          <li>Curiosidad técnica: preguntarte <em>cómo funciona</em> todo por dentro.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías que verás</h2>
-        <div class="row">
-          <span class="tag tag--tech">Backend</span>
-          <span class="tag tag--tech">Web</span>
-          <span class="tag tag--tech">HTTP</span>
-          <span class="tag tag--tech">Internet</span>
-          <span class="tag tag--tech">DNS</span>
-          <span class="tag tag--tech">JSON</span>
-          <span class="tag tag--tech">REST</span>
-          <span class="tag tag--tech">WebSockets</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Cinco módulos pensados para avanzar de menos a más: primero los conceptos, luego Internet, el protocolo HTTP, la arquitectura y por último los formatos de comunicación.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Introducción al Backend</h3>
-          </div>
-          <p class="card__text">¿Qué es el Backend? Cliente y servidor, peticiones y respuestas, aplicaciones web y móviles. Aquí se construyen los cimientos.</p>
-          <div class="card__meta">
-            <span>13 lecciones</span><span>≈ 112 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Internet y la Web</h3>
-          </div>
-          <p class="card__text">Cómo viajan los datos por la red: IP, puertos, DNS, dominios, hosting, VPS y CDN. El mundo físico detrás de cada URL.</p>
-          <div class="card__meta">
-            <span>14 lecciones</span><span>≈ 117 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. HTTP</h3>
-          </div>
-          <p class="card__text">El lenguaje que usan el navegador y el servidor: requests, responses, headers, cookies, caché, y códigos de estado.</p>
-          <div class="card__meta">
-            <span>12 lecciones</span><span>≈ 109 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-03/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Arquitectura Web</h3>
-          </div>
-          <p class="card__text">Del monolito al load balancer: capas, MVC, APIs, bases de datos, caché y reverse proxy. Cómo se organiza un sistema real.</p>
-          <div class="card__meta">
-            <span>10 lecciones</span><span>≈ 92 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-04/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. Formatos y Comunicación</h3>
-          </div>
-          <p class="card__text">JSON, XML, formularios, archivos multipart, WebSockets y Server-Sent Events: las formas en que las máquinas intercambian datos.</p>
-          <div class="card__meta">
-            <span>6 lecciones</span><span>≈ 55 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-05/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -198,37 +361,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Introducción</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · Internet</a></li>
-          <li><a href="modulo-03/index.html">Módulo 3 · HTTP</a></li>
-          <li><a href="modulo-04/index.html">Módulo 4 · Arquitectura</a></li>
-          <li><a href="modulo-05/index.html">Módulo 5 · Formatos</a></li>
+          <li><span>Módulo 1 · Introducción al Backend</span></li>
+          <li><span>Módulo 2 · Internet y la Web</span></li>
+          <li><span>Módulo 3 · HTTP</span></li>
+          <li><span>Módulo 4 · Arquitectura Web</span></li>
+          <li><span>Módulo 5 · Formatos y Comunicación</span></li>
+          <li><span>Módulo 6 · APIs y HTTP en la práctica</span></li>
+          <li><span>Módulo 7 · De cero a producción</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

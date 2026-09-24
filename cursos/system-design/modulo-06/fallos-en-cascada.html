@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="fallos-en-cascada">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fallos en cascada · System Design / Arquitectura de Sistemas · Backend Academy</title>
+<meta name="description" content="Reconoce y corta las cascadas de fallo antes de que toquen al usuario.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="system-design" data-current="fallos-en-cascada"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">System Design / Arquitectura de Sistemas</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 6</a><span class="sep">/</span>
+          <span class="current">Fallos en cascada</span>
+        </nav>
+        <h1 class="lesson-title">Fallos en cascada</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> System Design / Arquitectura de Sistemas</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 6 · Resiliencia y consistencia</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>El fallo aislado es manejable: una copia, una BBDD, un host se caen y el resto sigue. El problema es cuando la caída viaja: un componente lento hace esperar al siguiente, que acumula trabajo, se esfuerza el doble y al final también cae.</p>
+<p>Las cascadas de fallos casi nunca empiezan en el sistema entero: empiezan en una dependencia del 1 % y terminan en el 100 % de disponibilidad. Cortar esa propagación es resiliencia.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un fallo en cascada ocurre cuando la falla de un componente aumenta la carga o la recurso de otros hasta que estos también fallan, propagando la indisponibilidad a través de dependencias en cadena.</p><p><strong>Por qué importa.</strong> Los sistemas distribuidos conectan antes el todo que el modo individual: un back que tarda rellena workers, sube las colas, y el frente termina con timeouts que repiten la petición, multiplicando la carga del back caído.</p><p><strong>Cuándo usarlo.</strong> Prepara límites en todas las fronteras: peticiones por segundo, timeouts por dependencia, semáforos de concurrencia y 'fail fast' cuando una dependencia cruza su latencia crítica.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El efecto manada: una dependencia revive y todos sus clientes (que esperaban) le pegan a la vez.</li>
+<li>Cascada por retries: tiempo de espera + reintentos en cada cliente multiplica la carga del origen.</li>
+<li>Semáforo per-dependencia: limita la concurrencia hacia cada recurso, no global.</li>
+<li>Colapso del multiproceso: procesos nuevos se inician, hacen teclado a la dependencia caída y consumen recursos muriendo en loop.</li>
+<li>Aislamiento por timeout y por límite: la dependencia lenta se degrada, no se propaga.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>El patrón básico de aislamiento: todo accesso a una dependencia pasa por un límite de tiempo y de concurrencia.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JAVASCRIPT</span><span class="code-block__caption">ejemplo.javascript</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-javascript">const TIMEOUT = 500; // ms
+const MAX_CONCURRENCY = 20;
+
+async function callWithIsolation(path) {
+  if (inflight &gt;= MAX_CONCURRENCY) throw new CircuitOpen();
+  inflight++;
+  try {
+    return await fetch(path, { signal: AbortSignal.timeout(TIMEOUT) });
+  } finally {
+    inflight--;
+  }
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">Más de 20 en vuelo o más de 500 ms → fail fast.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El límite por semáforo evita el colapso del pool: no dejes que una dependencia rara llegue a consumir toda la flota de workers.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JAVASCRIPT</span><span class="code-block__caption">ejemplo.javascript</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-javascript">class Semaphore {
+  constructor(max) { this.max = max; this.used = 0; this.wait = []; }
+  async acquire() {
+    if (this.used &lt; this.max) { this.used++; return; }
+    await new Promise((r) =&gt; this.wait.push(r));
+  }
+  release() {
+    this.used--;
+    const next = this.wait.shift();
+    if (next) { this.used++; next(); }
+  }
+}
+
+const s = new Semaphore(10);
+await s.acquire();
+try { await callExternal(); } finally { s.release(); }</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un servicio de notificaciones dependía de 3 proveedores. Uno empezó a responder a los 2 s (eran esperados 300 ms). Los workers, con timeout de 10 s, se llenaron esperando a ese proveedor; las notificaciones del resto esperaban detrás; y el email (sano) se enviaba con 40 s de retraso. Con timeout de 800 ms y semáforo de 5 para ese proveedor, su lentitud pasó de tumbar todo a solo 'ese canal degradado', y llegó la notificación de que el proveedor caía, no la caída general.</p>
+<ul><li>Timeout corto por dependencia: el presupuesto de tiempo es por llamada externa, no global.</li>
+<li>Semáforo per-dependencia: un proveedor no roba la capacidad de otro.</li>
+<li>Canal del proveedor degradado: el usuario entiende 'retrasado', no 'caído'.</li>
+<li>Al ascensor de la dependencia, sube límites gradualmente para no recibir la manada de golpe.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">YAML</span><span class="code-block__caption">ejemplo.yaml</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-yaml">dependencias:
+  sms:
+    timeout_ms: 800
+    concurrencia: 5
+    circuit: { fallos: 10, ventana: 30s }
+  email:
+    timeout_ms: 1500
+    concurrencia: 50
+  push:
+    timeout_ms: 600
+    concurrencia: 8</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Cada dependencia tiene su presupuesto: aislamiento es config, no altruismo.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La cascada viaja por dos rutas: esperas que saturan recursos y reintentos que multiplican carga.</li>
+<li>El fail fast con límite corto convierte la lentitud en rechazo temprano y en métrica.</li>
+<li>El aislamiento per-dependencia es la diferencia entre 'un proveedor degradado' y 'todo caído'.</li>
+<li>La reactivación vuela por el ventanal: al volver, el tráfico acumulado pega de golpe; la subida gradual la absorbe.</li>
+<li>La zombi es peor que el caído: un host que responde lento y arde CPU sin morirse es el peor caso de fallo en cascada.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Timeout global de 10 s que convierte una dependencia lenta en un vertedero de workers.</li>
+<li>Retries sin límite que multiplican la carga justo cuando el origen quiere recuperarse.</li>
+<li>Sin semáforo per-dependencia, el canal minoritario come la capacidad del que sostiene el servicio.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Fija timeout por llamada externa y semáforo por dependencia.</li>
+<li>Reintentos con backoff y jitter, y con tope total corto.</li>
+<li>Sube límites gradualmente al recuperar una dependencia.</li>
+<li>Monitorea la cascada: aumento de cola + aumento de latencia = inicio de caída.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Diseña los límites (timeout, concurrencia, retries) de una API que llama a 3 terceros.</li>
+<li>Describe cómo se propaga un fallo del tercero de SMS en tu sistema y dónde cortas.</li>
+<li>Escribe el plan de reactivación gradual tras recuperar una dependencia.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El fallo de una dependencia debe aislarse con timeouts y límites por canal.</li>
+<li>Los reintentos sin tope multiplican la cascada.</li>
+<li>La subida gradual de límites al recuperar evita la manada.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Diseño completo</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Escalabilidad y distribución</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Caching y datos a escala</a></li>
+          <li><a href="./index.html">Módulo 6 · Resiliencia y consistencia</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Operación y entrevista de diseño</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

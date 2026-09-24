@@ -1,0 +1,328 @@
+/* ============================================================
+   Backend Academy — responsive.css
+   Responsive global: de 360px a pantallas grandes.
+   Se carga en todas las páginas (después de components.css).
+   ============================================================ */
+
+/* ---------- Pantallas muy grandes (PC / monitores) ---------- */
+@media (min-width: 1600px) {
+  :root {
+    --content-max: 1140px;
+  }
+
+  .container {
+    padding-inline: clamp(24px, 2.5vw, 40px);
+  }
+
+  .lesson-layout {
+    gap: var(--space-7);
+    padding-inline: clamp(20px, 2.5vw, 40px);
+  }
+
+  .section-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  }
+
+  .grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+
+  .code-block {
+    font-size: 0.88rem;
+  }
+}
+
+@media (min-width: 1800px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+/* ---------- Portátiles / tablet horizontal ---------- */
+@media (max-width: 1280px) {
+  .lesson-layout--with-toc {
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  }
+
+  .toc-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .lesson-layout,
+  .lesson-layout--with-toc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+
+  .page-hero--course .page-hero__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .course-visual {
+    max-width: 520px;
+  }
+
+  .hero__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Móvil / tablet vertical ---------- */
+
+/* Botón hamburguesa: oculto en desktop, visible en móvil (lo inyecta navigation.js) */
+.menu-toggle {
+  display: none;
+  flex-shrink: 0;
+  position: relative;
+  z-index: var(--z-header);
+}
+
+.menu-toggle__bars {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-toggle__bar {
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-header) - 2);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+@media (max-width: 860px) {
+  .site-header__inner {
+    gap: var(--space-2);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-main--drawer {
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    z-index: calc(var(--z-header) - 1);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: min(285px, 84vw);
+    height: calc(100dvh - var(--header-h));
+    padding: var(--space-3);
+    background: var(--bg-solid, var(--bg));
+    border-left: 1px solid var(--border);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.32);
+    overflow-y: auto;
+    transform: translateX(105%);
+    visibility: hidden;
+    transition: transform 0.28s ease, visibility 0.28s;
+  }
+
+  .nav-main--drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .nav-main--drawer a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+  }
+
+  .nav-main:not(.nav-main--drawer) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .nav-main:not(.nav-main--drawer)::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-main:not(.nav-main--drawer) a {
+    flex: 0 0 auto;
+  }
+
+  .nav-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  body.has-open-drawer {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-inline: 16px;
+  }
+
+  .main-content {
+    padding-block: var(--space-5) var(--space-7);
+  }
+
+  .lesson-layout {
+    padding-inline: 14px;
+  }
+
+  .page-hero {
+    padding-block: clamp(30px, 6vw, 48px);
+  }
+
+  .page-hero__title {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+  }
+
+  .page-hero__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .section-grid,
+  .grid-2,
+  .grid-3,
+  .info-grid,
+  .features-grid,
+  .related-lessons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lesson-prevnext {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-prevnext__link--next {
+    text-align: left;
+  }
+
+  .code-block {
+    font-size: 0.78rem;
+  }
+
+  .code-block__body {
+    padding: var(--space-3);
+  }
+
+  .stat-card {
+    padding: var(--space-4);
+  }
+
+  .card--course__body {
+    padding: var(--space-3);
+  }
+}
+
+/* ---------- 360px / pantallas muy pequeñas ---------- */
+@media (max-width: 400px) {
+  .container {
+    padding-inline: 12px;
+  }
+
+  .brand {
+    font-size: 0.95rem;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .hero__title {
+    font-size: clamp(1.7rem, 9vw, 2.2rem);
+  }
+
+  .hero__subtitle {
+    font-size: 0.95rem;
+  }
+
+  .page-hero__eyebrow {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+
+  .code-block {
+    font-size: 0.72rem;
+  }
+
+  .code-block__body {
+    padding: var(--space-2);
+  }
+
+  .code-ln__num {
+    width: 1.8em;
+    margin-right: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .module-lessons a {
+    font-size: 0.8rem;
+  }
+
+  .terminal-card__body {
+    font-size: 0.72rem;
+    padding: var(--space-3);
+  }
+
+  .objectives,
+  .lesson-content {
+    gap: var(--space-5);
+  }
+
+  .lesson-title {
+    font-size: 1.45rem;
+  }
+}
+
+/* ---------- Preferencias de movimiento ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .course-visual .terminal-card,
+  .course-visual .floating-chip {
+    transform: none;
+    animation: none;
+  }
+}

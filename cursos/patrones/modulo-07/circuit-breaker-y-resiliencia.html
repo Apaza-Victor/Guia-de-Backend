@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="circuit-breaker-y-resiliencia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit breaker y resiliencia · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="Circuit breaker para aislar fallos de dependencias y mantener tu backend vivo.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="circuit-breaker-y-resiliencia"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Patrones de Diseño</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Circuit breaker y resiliencia</span>
+        </nav>
+        <h1 class="lesson-title">Circuit breaker y resiliencia</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Patrones emergentes y arquitectura moderna</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando tu API depende de otra API lenta o caída, cada petición espera un tiempo hasta fallar. Con suficiente tráfico, esos tiempos muertos llenan los pools de conexiones y derriban también tu servicio.</p>
+<p>El circuit breaker actúa como un fusible: si una dependencia falla demasiado, dejas de llamarla durante un tiempo y devuelves una respuesta degradada, dando al sistema externo margen para recuperarse.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El circuit breaker monitoriza las llamadas a una dependencia y pasa por tres estados: cerrado (llama con normalidad), abierto (deja de llamar durante un tiempo de espera) y semicerrado (prueba una llamada de forma controlada).</p><p><strong>Por qué importa.</strong> Evita que un fallo ajeno consuma tus recursos de forma indefinida y protege a la propia dependencia de un aluvión de peticiones cuando aún no se ha recuperado.</p><p><strong>Cuándo usarlo.</strong> Úsalo para cualquier llamada externa: APIs de pago, proveedores de envío, servicios de IA o bases de datos replicadas. No lo uses para fallos locales que no dependen de red.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Fusible (breaker): decide si se llama a la dependencia o se degrada.</li>
+<li>Umbral de fallos: porcentaje o número de errores que abre el circuito.</li>
+<li>Tiempo de apertura: cuánto espera el circuito antes de reintentar.</li>
+<li>Semicerrado: permite un tráfico mínimo de prueba durante la recuperación.</li>
+<li>Fallback: respuesta alternativa cuando el circuito está abierto.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una implementación mínima: si superamos 5 fallos seguidos, abrimos el circuito durante 30 segundos.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">class CircuitBreaker:
+    def __init__(self, umbral=5, tiempo_apertura=30):
+        self.umbral = umbral
+        self.tiempo_apertura = tiempo_apertura
+        self.fallos = 0
+        self.abierto_hasta = 0
+
+    def ejecutar(self, accion, fallback):
+        if time.time() &lt; self.abierto_hasta:
+            return fallback(&quot;servicio no disponible&quot;)
+        try:
+            resultado = accion()
+            self.fallos = 0
+            return resultado
+        except ExcepcionRemota:
+            self.fallos += 1
+            if self.fallos &gt;= self.umbral:
+                self.abierto_hasta = time.time() + self.tiempo_apertura
+            return fallback(str(self.fallos))</code></pre></div>
+</figure>
+<pre><code class="language-text">Tras 5 fallos, el circuito abre y responde con el fallback 30 segundos.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Usando una librería madura como pybreaker sobre un cliente HTTP, con estados observables.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Circuit breaker con pybreaker sobre una pasarela de pago</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import pybreaker
+from requests import Session
+
+breaker = pybreaker.CircuitBreaker(
+    fail_max=5, reset_timeout=30
+)
+
+def llamar_pasarela(session: Session, payload):
+    try:
+        with breaker:
+            respuesta = session.post(PASARELA_URL, json=payload)
+            respuesta.raise_for_status()
+            return respuesta.json()
+    except pybreaker.CircuitBreakerError:
+        return {&quot;estado&quot;: &quot;degradado&quot;, &quot;motivo&quot;: &quot;pagos temporalmente no disponibles&quot;}
+    except requests.HTTPError:
+        return {&quot;estado&quot;: &quot;error&quot;, &quot;motivo&quot;: &quot;la pasarela rechazó el pago&quot;}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Durante un pico de black friday, una pasarela de pagos satura. Sin circuit breaker, cada compra bloqueaba un worker durante 45 segundos de timeout. Con el fusible, el sistema degrada tras el umbral y devuelve un mensaje de reintento en segundos.</p>
+<ul><li>Da siempre un fallback digno: caché, cola o mensaje de reintento.</li>
+<li>Configura timeouts cortos: el circuit breaker complementa, no sustituye, el timeout.</li>
+<li>Expón el estado del circuito en tus métricas para ver la degradación.</li>
+<li>Prueba la apertura y la recuperación en staging con interrupciones simuladas.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">metrics.increment(&quot;circuit.pagos.estado&quot;, breaker.estado)
+if breaker.estado == &quot;abierto&quot;:
+    return Respuesta(503, &quot;Inténtalo en unos segundos, estamos cuidando tus pagos&quot;)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El patrón brilla cuando cada componente externo tiene su propio fusible: uno caído no arrastra al resto.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>En estado cerrado se mide la tasa de errores real de la dependencia.</li>
+<li>Al superar el umbral, el circuito abre y deja de hacer llamadas reales.</li>
+<li>El tiempo de espera (reset_timeout) da a la dependencia espacio para recuperarse.</li>
+<li>En semicerrado se deja pasar un tráfico mínimo de sondeo.</li>
+<li>El fallback es clave: más vale una respuesta degradada clara que un timeout ciego.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Confundir el circuit breaker con un timeout: solo el fusible detiene la hemorragia de peticiones.</li>
+<li>Reintentar sin control durante la apertura, que reproduce el problema original.</li>
+<li>Olvidar resetear el contador tras un éxito y abrir el circuito por errores antiguos.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Elige umbrales y tiempos según el SLO de la dependencia y los reintentos del cliente.</li>
+<li>Separa circuit breakers por proveedor y por operación crítica.</li>
+<li>Monitoriza aperturas: una apertura frecuente indica que necesitas un fallback mejor.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Implementa un circuit breaker manual y comprueba los tres estados.</li>
+<li>Añade un endpoint /health que reporte el estado del circuito de pagos.</li>
+<li>Configura pybreaker y simula un proveedor caído en pruebas de integración.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El circuit breaker corta las llamadas a una dependencia fallida para protegerte.</li>
+<li>Requiere umbral, tiempo de espera y un semicerrado de prueba.</li>
+<li>Un buen fallback mantiene tu API útil aunque un tercero falle.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de patrones</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Patrones de backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Patrones modernos</a></li>
+          <li><a href="./index.html">Módulo 7 · Patrones emergentes y arquitectura moderna</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="patron-outbox-mensajeria-fiable">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outbox pattern y mensajería fiable · Patrones de Diseño · Backend Academy</title>
+<meta name="description" content="Outbox pattern para publicar eventos de forma fiable sin perder mensajes.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="patrones" data-current="patron-outbox-mensajeria-fiable"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Patrones de Diseño</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Outbox pattern y mensajería fiable</span>
+        </nav>
+        <h1 class="lesson-title">Outbox pattern y mensajería fiable</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Patrones de Diseño</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Patrones emergentes y arquitectura moderna</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando un pedido se confirma, quieres notificar a facturación, stock y email. Si publicas el evento en la cola dentro de la misma transacción que guarda el pedido, cualquier sistema de mensajería reparte esa actualización en dos sistemas que pueden fallar por separado.</p>
+<p>El resultado clásico de ese enfoque son eventos perdidos o duplicados que generan pedidos sin factura y stock desincronizado. El outbox pattern resuelve el problema con una tabla sencilla y un proceso que nunca olvida un mensaje.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El outbox pattern guarda en una tabla de la misma base de datos (outbox) tanto el estado de negocio como los eventos a publicar, dentro de la misma transacción. Un relayer publica después los eventos pendientes en el broker.</p><p><strong>Por qué importa.</strong> Garantiza exactly-once en la creación y te permite mantener base de datos y broker eventualmente consistentes sin transacciones distribuidas.</p><p><strong>Cuándo usarlo.</strong> Úsalo cuando la publicación de eventos debe ser tan fiable como el commit de la base de datos. No lo necesitas en flujos donde perder un evento puntual es aceptable.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Outbox: tabla que guarda los eventos pendientes de publicación.</li>
+<li>Transacción atómica: pedido y evento se guardan juntos o no se guarda nada.</li>
+<li>Relayer o publicador: lee la tabla y publica en el broker.</li>
+<li>Idempotencia: el consumidor procesa el mismo evento una sola vez.</li>
+<li>Deduplicación: un id único de evento permite descartar duplicados.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Guardamos el pedido y su evento de confirmación en la misma transacción con SQL.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">SQL</span><span class="code-block__caption">ejemplo.sql</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-sql">BEGIN;
+
+INSERT INTO pedidos (id, estado) VALUES (101, 'confirmado');
+
+INSERT INTO outbox (id, agregado, tipo, payload, publicado)
+VALUES (
+   '9f3c...', 'pedido', 'pedido_confirmado',
+   '{&quot;pedido_id&quot;: 101}', false
+);
+
+COMMIT;</code></pre></div>
+</figure>
+<pre><code class="language-text">El pedido y su evento quedan a la vez: o los dos, o ninguno.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>El relayer consulta los eventos no publicados y los envía al broker, marcándolos después. Con un límite y orden por id garantizamos publicación en orden.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Relayer que publica eventos pendientes</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def publicar_pendientes(broker, db):
+    eventos = db.ejecutar(
+        &quot;SELECT * FROM outbox WHERE publicado = false &quot;
+        &quot;ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED&quot;
+    )
+    for evento in eventos:
+        broker.publicar(evento.tipo, evento.payload)
+        db.ejecutar(
+            &quot;UPDATE outbox SET publicado = true WHERE id = %s&quot;,
+            (evento.id,)
+        )
+        db.confirmar()
+    return len(eventos)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un marketplace marca millones de pedidos al día. Facturación, stock y notificaciones consumen pedido_confirmado desde la cola. El outbox garantiza que ningún pedido queda sin su evento, incluso si el broker cae en el peor momento.</p>
+<ul><li>Diseña los consumidores idempotentes: procesar dos veces un evento debe ser inocuo.</li>
+<li>Reintenta con backoff y cola de mensajes muertos para eventos que fallan.</li>
+<li>Monitorea el tamaño de la tabla outbox: un crecimiento indica un publicador caído.</li>
+<li>Usa FOR UPDATE SKIP LOCKED para que varios publicadores no se pisen.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">class PedidoServicio:
+    def confirmar(self, pedido_id):
+        with self.db.transaccion():
+            self.db.guardar_pedido(pedido_id, &quot;confirmado&quot;)
+            self.db.insertar_outbox(
+                evento=&quot;pedido_confirmado&quot;,
+                payload=json.dumps({&quot;pedido_id&quot;: pedido_id}),
+            )
+        # El event broker recibe el evento más tarde via relayer</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Combinarlo con idempotencia en el consumidor convierte un sistema eventual en uno muy difícil de romper.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El punto clave es que la inserción del evento vive en la misma transacción que el cambio de negocio.</li>
+<li>El broker falla, pero el evento no se pierde: queda en la tabla hasta que el relayer lo publique.</li>
+<li>Si el relayer falla, la tabla crece y las métricas te avisan; el sistema no se corrompe.</li>
+<li>Los consumidores deben deduplicar por id de evento para tolerar reintentos.</li>
+<li>Es la alternativa pragmática a transacciones distribuidas de dos fases.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Publicar el evento fuera de la transacción: se pierden eventos cuando el commit falla.</li>
+<li>Olvidar la idempotencia y duplicar facturas al reintentar.</li>
+<li>No limpiar la tabla: crece sin límite y degrada las consultas.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Añade un índice eficiente sobre publicado y añade una marca de los eventos viejos.</li>
+<li>Elige ids de evento aleatorios (UUID) para detectar duplicados de forma fiable.</li>
+<li>Prueba el escenario exacto: apaga el broker, confirma un pedido y verifica que el evento aparece tarde.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea la tabla outbox y publica pedido_confirmado dentro de una transacción.</li>
+<li>Escribe un relayer con reintentos que no pierda orden para un agregado concreto.</li>
+<li>Simula la caída del broker y comprueba que el evento se publica al recuperarlo.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El outbox guarda el evento con el cambio de negocio en la misma transacción.</li>
+<li>Un relayer publica los pendientes en el broker sin perder ninguno.</li>
+<li>Consumidores idempotentes convierten el diseño en un sistema robusto.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de patrones</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Patrones creacionales</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Patrones estructurales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Patrones de comportamiento</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Patrones de backend</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Patrones modernos</a></li>
+          <li><a href="./index.html">Módulo 7 · Patrones emergentes y arquitectura moderna</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

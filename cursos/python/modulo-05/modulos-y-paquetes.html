@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="modulos-y-paquetes">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulos y paquetes · Python para Backend · Backend Academy</title>
+<meta name="description" content="Divide tu proyecto en módulos y paquetes.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="python" data-current="modulos-y-paquetes"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Módulos y paquetes</span>
+        </nav>
+        <h1 class="lesson-title">Módulos y paquetes</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Módulos, archivos y excepciones</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un backend de verdad se organiza en muchos archivos: modelos, utilidades, configuración, rutas. Los módulos y paquetes hacen que el código viaje de archivo en archivo.</p>
+<p>En Python, un módulo es cualquier archivo .py y un paquete es una carpeta con __init__.py.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Un módulo agrupa funciones, clases y constantes reutilizables; un paquete es una carpeta con __init__.py que agrupa módulos relacionados bajo un espacio de nombres.</p><p><strong>Por qué importa.</strong> Dividir el código en módulos permite testear de forma aislada, reutilizar y mantener proyectos de cientos de archivos ordenados.</p><p><strong>Cuándo usarlo.</strong> Usa módulos desde el primer helper; arma paquetes cuando el proyecto crece: utils, config, models.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>import modulo o from modulo import funcion.</li>
+<li>El bloque if __name__ == "__main__": evita ejecutar al importar.</li>
+<li>Alias: import modulo as m.</li>
+<li>Una carpeta con __init__.py es un paquete importable.</li>
+<li>Los imports relativos (from .modulo import x) funcionan dentro del paquete.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un utilitario reutilizable en su propio módulo y su uso desde otro archivo.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python"># archivo: utilidades.py
+def normalizar_email(email):
+    return email.strip().lower()
+
+def contar_elementos(items):
+    return len(items)
+
+if __name__ == &quot;__main__&quot;:
+    print(&quot;Probando utilidades...&quot;)
+
+# archivo: app.py (misma carpeta)
+import utilidades
+email = utilidades.normalizar_email(&quot;  ANA@MAIL.COM  &quot;)
+print(email)
+print(utilidades.contar_elementos([1, 2, 3]))</code></pre></div>
+</figure>
+<pre><code class="language-text">ana@mail.com
+3</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Organizar el proyecto con un paquete y controlar la ejecución directa.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Paquete con __init__.py e import con alias</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># estructura:
+# mi_proyecto/
+#   __init__.py
+#   db.py
+#   utils.py
+
+# __init__.py
+from . import db
+from . import utils
+
+# db.py
+def conectar(host):
+    return f&quot;Conectado a {host}&quot;
+
+# utils.py
+def limpiar_texto(texto):
+    return texto.strip()
+
+# en otro archivo
+import mi_proyecto as proy
+print(proy.db.conectar(&quot;db-01&quot;))
+print(proy.utils.limpiar_texto(&quot;  ok  &quot;))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Estructura típica de un pequeño backend por capas, con config y versionado.</p>
+<ul><li>Separa responsabilidades en archivos: config, utils, modelos, rutas.</li>
+<li>Los imports explícitos revelan las dependencias.</li>
+<li>El guard __main__ permite probar cada archivo por separado.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># config.py
+DEBUG = True
+PUERTO = 8000
+
+# versions.py
+VERSION_API = &quot;v1&quot;
+
+# main.py
+import config
+import versions
+
+def arrancar():
+    print(f&quot;Arrancando API {versions.VERSION_API} en el puerto {config.PUERTO}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    arrancar()</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Los frameworks reales (FastAPI) usan paquetes de carpetas: routers, schemas, models. La misma mecánica que acabas de ver.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Importar ejecuta el módulo una sola vez y lo guarda en sys.modules.</li>
+<li>El guard __name__ evita efectos colaterales al importar.</li>
+<li>Los paquetes sin __init__.py (namespace) existen, pero añadirlo es explícito.</li>
+<li>Los imports relativos de un paquete evitan rutas frágiles.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>ModuleNotFoundError cuando la ruta o el nombre no coinciden.</li>
+<li>Import circular (a importa b y b importa a) deja funciones sin definir.</li>
+<li>Ejecutar código de arranque al importar por olvidar el guard __main__.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Prefiere imports explícitos: from utilidades import normalizar_email.</li>
+<li>Evita los imports circulares moviendo el punto de cruce a un tercer módulo.</li>
+<li>Nombra módulos y paquetes en minúsculas (PEP 8).</li>
+<li>Guarda secretos en variables de entorno, no en módulos de código.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Divide tu ejercicio de funciones en utilidades.py y app.py.</li>
+<li>Crea un paquete con __init__.py y dos módulos, luego impórtalos.</li>
+<li>Ejecuta un módulo directamente y también vía import, observando __name__.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Un módulo es un archivo .py; un paquete una carpeta con __init__.py.</li>
+<li>El guard __name__ == "__main__" separa import de ejecución.</li>
+<li>Un backend por capas se apoya en paquetes organizados.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Programación orientada a objetos</a></li>
+          <li><a href="./index.html">Módulo 5 · Módulos, archivos y excepciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Web con Flask</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · APIs con FastAPI</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo 3 · HTTP · Fundamentos de Backend</title>
-<meta name="description" content="Módulo 3 del curso Fundamentos de Backend: el protocolo HTTP, HTTPS, requests, responses, headers, body, cookies, caché, content-type y códigos de estado.">
+<title>Módulo 3 · HTTP · Fundamentos de Backend · Backend Academy</title>
+<meta name="description" content="HTTP y HTTPS, la anatomía de peticiones y respuestas, cabeceras, body, parámetros, cookies, caché y códigos de estado: el protocolo que todo backend debe dominar.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,8 +26,12 @@
 <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../../assets/css/components.css">
 <link rel="stylesheet" href="../../../assets/css/toc.css">
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../../">
+
+
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="../../../index.html">
@@ -34,12 +40,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../../index.html">Inicio</a>
-      <a href="../../../roadmap/index.html">Roadmap</a>
-      <a href="../../../aprender/index.html">Aprender</a>
-      <a href="../../../practica/index.html">Práctica</a>
-      <a href="../../../proyectos/index.html">Proyectos</a>
-      <a href="../../../recursos/index.html">Recursos</a>
-      <a href="../../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -48,24 +54,27 @@
     </div>
   </div>
 </header>
+
 <main class="main-content">
   <section class="page-hero">
     <div class="container">
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../../../cursos/index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Fundamentos de Backend</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Módulo 3 · HTTP</span>
-    </nav>
-    <p class="page-hero__eyebrow">🌱 Principiante</p>
-    <h1 class="page-hero__title">Módulo 3 · HTTP</h1>
-    <p class="page-hero__subtitle">HTTP es el idioma que hablan el navegador y el servidor. Aquí aprendes a leerlo, escribirlo y depurarlo: es la habilidad más útil de un Backend.</p>
-    <div class="page-hero__meta"><span ><i class="fa-solid fa-book-open" aria-hidden="true"></i> 12 lecciones</span>
-        <span ><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 109 min</span>
-        <span ><i class="fa-solid fa-signal" aria-hidden="true"></i> Módulo 2 recomendado</span></div>
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../../index.html">Cursos</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item"><a href="../index.html">Fundamentos de Backend</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">/</span>
+        <span class="breadcrumb__item" aria-current="page">Módulo 3</span>
+      </nav>
+      <p class="page-hero__eyebrow">💻 Básico</p>
+      <h1 class="page-hero__title">Módulo 3 · HTTP</h1>
+      <p class="page-hero__subtitle">Cada intercambio entre cliente y servidor habla HTTP; aprende a leerlo.</p>
+      <div class="page-hero__meta">
+        <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 12 lecciones</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i> ≈ 109 min</span>
+        <span><i class="fa-solid fa-signal" aria-hidden="true"></i> Nivel básico</span>
+      </div>
     </div>
   </section>
   <div class="container">
@@ -73,97 +82,104 @@
       <section>
         <h2>Objetivos del módulo</h2>
         <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender qué es HTTP y de qué protege HTTPS.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Leer un request y un response HTTP como un mensaje en verso.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Usar headers, body, query parameters y path parameters con criterio.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Conocer cookies, cache-control, content-type y los códigos de estado.</span></div>
-        </div>
-      </section>
-      <section>
-        <h2>Tu progreso</h2>
-        <div class="progress" data-progress="fundamentos-backend">
-          <div class="progress__bar"><div class="progress__fill" style="width:0%"></div></div>
-          <span class="progress__label">0%</span>
-        </div>
-      </section>
-      <section>
-        <h2>Lecciones</h2>
-        <div class="grid-2">
-          <a class="card card--lesson card--link" href="que-es-http.html">
-          <h3>1 · HTTP</h3>
-            <p>El protocolo de transferencia que mueve la Web entera.</p>
-            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">protocolo</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="http-vs-https.html">
-          <h3>2 · HTTPS</h3>
-            <p>El candado que cifra la conversación entre cliente y servidor.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">seguridad</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="peticion-http.html">
-          <h3>3 · Request HTTP</h3>
-            <p>La petición línea por línea: método, URL, headers y body.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">request</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="respuesta-http.html">
-          <h3>4 · Response HTTP</h3>
-            <p>La respuesta del servidor: línea de estado, headers y cuerpo.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">response</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="headers-http.html">
-          <h3>5 · Headers HTTP</h3>
-            <p>Metadatos en ambos sentidos: quién eres, qué esperas y qué envías.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">headers</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="body-http.html">
-          <h3>6 · Body HTTP</h3>
-            <p>El contenido real del mensaje: JSON, texto o datos binarios.</p>
-            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">body</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="query-parameters.html">
-          <h3>7 · Query Parameters</h3>
-            <p>La parte de la URL que filtra, busca y pagina los recursos.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">URL</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="path-parameters.html">
-          <h3>8 · Path Parameters</h3>
-            <p>Identificadores dentro de la ruta: /usuarios/42 y amigos.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">URL</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="cookies.html">
-          <h3>9 · Cookies</h3>
-            <p>Memoria del navegador para sesiones, preferencias y estado.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">sesiones</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="cache-control.html">
-          <h3>10 · Cache-Control</h3>
-            <p>Instrucciones de caché que ahorran tráfico y aceleran respuestas.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">caché</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="content-type.html">
-          <h3>11 · Content-Type</h3>
-            <p>Cómo sabe el receptor si lo que llega es JSON, HTML o una imagen.</p>
-            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">formatos</span></div>
-          </a>
-          <a class="card card--lesson card--link" href="status-codes.html">
-          <h3>12 · Códigos de Estado HTTP</h3>
-            <p>El semáforo de HTTP: 2xx, 3xx, 4xx y 5xx explicados con ejemplos.</p>
-            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">estados</span></div>
-          </a>
+          <div class="objective"><span class="objective__icon">✔</span><span>Explicar qué es HTTP y qué aporta HTTPS</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Desglosar peticiones y respuestas HTTP</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Dominar headers, body y parámetros</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Entender cookies, caché y Content-Type</span></div>
+          <div class="objective"><span class="objective__icon">✔</span><span>Leer los códigos de estado del 1xx al 5xx</span></div>
         </div>
       </section>
     </section>
+
+    <section class="lesson-grid-section">
+      <div class="section-head">
+        <h2>Lecciones del módulo</h2>
+        <p>12 lecciones · ~109 min · El idioma de la web: peticiones, respuestas y códigos HTTP..</p>
+      </div>
+      <div class="grid-2">
+          <a class="card card--lesson card--link" href="./que-es-http.html">
+            <h3>1 · HTTP</h3>
+            <p>El protocolo que habla la web: qué es y por qué importa.</p>
+            <div class="card__meta"><span class="tag">10 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./http-vs-https.html">
+            <h3>2 · HTTPS</h3>
+            <p>La capa de cifrado que protege todo lo que viaja con HTTP.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./peticion-http.html">
+            <h3>3 · Request HTTP</h3>
+            <p>Línea inicial, cabeceras y cuerpo: las partes de una petición.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./respuesta-http.html">
+            <h3>4 · Response HTTP</h3>
+            <p>Versión, status y cabeceras: cómo responde el servidor.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./headers-http.html">
+            <h3>5 · Headers HTTP</h3>
+            <p>Los metadatos que negocian cada intercambio del protocolo.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./body-http.html">
+            <h3>6 · Body HTTP</h3>
+            <p>El contenido que viaja en la petición: datos, JSON y formularios.</p>
+            <div class="card__meta"><span class="tag">8 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./query-parameters.html">
+            <h3>7 · Query Parameters</h3>
+            <p>Opciones de búsqueda y filtrado dentro de la propia URL.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./path-parameters.html">
+            <h3>8 · Path Parameters</h3>
+            <p>Valores incrustados en la ruta para identificar recursos.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./cookies.html">
+            <h3>9 · Cookies</h3>
+            <p>Pequeñas huellas que el servidor deja en el cliente.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./cache-control.html">
+            <h3>10 · Cache-Control</h3>
+            <p>Quién cachea, cuánto y qué reglas gobiernan la caché.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./content-type.html">
+            <h3>11 · Content-Type</h3>
+            <p>El formato del contenido: cómo se anuncia y negocia.</p>
+            <div class="card__meta"><span class="tag">9 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          <a class="card card--lesson card--link" href="./status-codes.html">
+            <h3>12 · Códigos de Estado HTTP</h3>
+            <p>Del 1xx al 5xx: el idioma de los códigos de respuesta.</p>
+            <div class="card__meta"><span class="tag">12 min</span><span class="tag tag--cat">http</span></div>
+            <span class="btn btn--sm btn--outline card__action">Abrir lección <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </a>
+      </div>
+    </section>
+
     <nav class="lesson-prevnext" aria-label="Navegación entre módulos">
-      <a class="lesson-prevnext__link" href="../modulo-02/index.html">
-        <span class="label">← Módulo anterior</span>
-        <span class="title">Internet y la Web</span>
-      </a>
-      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html">
-        <span class="label">Siguiente módulo →</span>
-        <span class="title">Arquitectura Web</span>
-      </a>
+      <a class="lesson-prevnext__link" href="../modulo-02/index.html"><span class="label">← Anterior</span><span class="title">Módulo 2 · Internet y la Web</span></a>
+      <a class="lesson-prevnext__link lesson-prevnext__link--next" href="../modulo-04/index.html"><span class="label">Siguiente módulo →</span><span class="title">Módulo 4 · Arquitectura Web</span></a>
     </nav>
   </div>
 </main>
+
+
 <footer class="site-footer">
   <div class="container">
     <div class="site-footer__top">
@@ -175,41 +191,44 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../../index.html">Inicio</a></li>
-          <li><a href="../../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../../practica/index.html">Práctica</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción</a></li>
-          <li><a href="../modulo-02/index.html">Módulo 2 · Internet</a></li>
-          <li><a href="../modulo-03/index.html">Módulo 3 · HTTP</a></li>
-          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura</a></li>
-          <li><a href="../modulo-05/index.html">Módulo 5 · Formatos</a></li>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción al Backend</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Internet y la Web</a></li>
+          <li><a href="./index.html">Módulo 3 · HTTP</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Arquitectura Web</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Formatos y Comunicación</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · APIs y HTTP en la práctica</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · De cero a producción</a></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../../acerca/index.html">Acerca de</a>
-        <a href="../../../favoritos/index.html">Favoritos</a>
-        <a href="../../../historial/index.html">Historial</a>
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>
 </footer>
+
 <script src="../../../assets/js/helpers.js"></script>
 <script src="../../../assets/js/storage.js"></script>
 <script src="../../../assets/js/theme.js"></script>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="cache-stampede-y-warming">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cache stampede y cache warming · Redis y Caching · Backend Academy</title>
+<meta name="description" content="Prevén cache stampede con locks y cache warming, y recarga en caliente.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="redis" data-current="cache-stampede-y-warming"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Redis y Caching</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 7</a><span class="sep">/</span>
+          <span class="current">Cache stampede y cache warming</span>
+        </nav>
+        <h1 class="lesson-title">Cache stampede y cache warming</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Redis y Caching</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 7 · Redis en producción</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Imagina que la clave del día cae en un momento de pico: mil peticiones fallan en la caché y todas golpean la base de datos a la vez. Ese momento se llama cache stampede (o thundering herd) y convierte un reinicio de caché en un apagón de la BD.</p>
+<p>Hay dos defensas: el lock de regeneración (solo un hilo recarga, el resto espera) y el cache warming (recargar las claves antes de que expiren). Una combinación de ambas deja la caché siempre caliente.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El cache stampede es el aumento masivo de carga que se produce cuando una clave poco fresca expira y todos los lectores fallan a la vez; se evita con locks y expiración anticipada (probabilística o warming).</p><p><strong>Por qué importa.</strong> Un solo evento de cache miss en pico puede tumbar la base de datos y convertir un problema de caché en una caída completa.</p><p><strong>Cuándo usarlo.</strong> Aplícalo en claves populares y costosas de regenerar: rankings, portadas, memoria de recomendaciones. En claves baratas, el stampede apenas importa.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>El lock distribuido (SET NX EX) hace que solo un regeneración corra a la vez.</li>
+<li>Los lectores sin lock esperan y leen completed o usan valores stale.</li>
+<li>El cache warming recarga proactivamente antes de que expire (TTL - margen).</li>
+<li>La expiración probabilística adelanta la regeneración con probabilidad creciente.</li>
+<li>Los valores stale plus async refresh evitan ventanas vacías.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Implementamos un lock para regenerar una clave una sola vez.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">import redis, uuid
+r = redis.Redis.from_url(&quot;redis://localhost:6379&quot;)
+def con_lock(clave, ttl_lock=2):
+    token = str(uuid.uuid4())
+    ok = r.set(f&quot;lock:{clave}&quot;, token, nx=True, ex=ttl_lock)
+    if not ok:
+        return None
+    # regenerar... (aquia iria la llamada pesada)
+    r.set(clave, &quot;nuevo-valor&quot;, ex=60)
+    if r.get(f&quot;lock:{clave}&quot;) == token:
+        r.delete(f&quot;lock:{clave}&quot;)
+    return &quot;nuevo-valor&quot;
+print(con_lock(&quot;top:dia&quot;))</code></pre></div>
+</figure>
+<pre><code class="language-text">nuevo-valor</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Lectura inteligente: devolvemos stale mientras regeneramos en segundo plano.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Valor stale + regeneración con lock en miss</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import time
+def leer(clave):
+    valor = r.get(clave)
+    if valor:
+        return valor
+    # miss: intentamos regenerar con lock
+    lock = con_lock(clave)
+    return lock or r.blpop([f&quot;resultado:{clave}&quot;], timeout=2)[1]
+
+r.set(&quot;top:dia&quot;, &quot;valor-stale&quot;, ex=60)
+print(leer(&quot;top:dia&quot;))</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un portal de noticias regenera la portada cada 5 minutos. Configuran TTL (55s) con cache warming por un worker que recalcula faltando 10s y un lock para el remanente. El hit rate pasa del 97% al 99,8% y nunca vuelven a ver un pico de BD en la portada.</p>
+<ul><li>Elige un margen de warming proporcional a la costura de regeneración.</li>
+<li>El lock debe estar en el mismo Redis (misma partición) que la clave.</li>
+<li>Mide stampedes: cuenta misses de expectativa con métricas de regeneración.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def recarga_anticipada(clave, ttl=60, margen=10):
+    while True:
+        valor = r.get(clave)
+        ttl_restante = r.ttl(clave)
+        if ttl_restante &gt; margen:
+            value_nuevo = &quot;cache-calentada&quot;   # llamada pesada a BD
+            r.set(clave, value_nuevo, ex=ttl)
+        time.sleep(5)
+
+# worker que corre al margen del TTL
+recarga_anticipada(&quot;portada&quot;)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Redis 6.2+ exponen TTL por comando para decidir el margen sin round-trip extra.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>SET NX EX implementa un lock atómico con expiración: nunca queda atascado.</li>
+<li>El token (UUID) permite liberar el lock solo si aún es tuyo (evita borrar el de otro).</li>
+<li>La regeneración bajo lock serializa la carga de BD al fallo de caché.</li>
+<li>El warming adelanta el recálculo fuera de la ventana de tráfico.</li>
+<li>El stale-through sirve el dato viejo mientras regenera: ningún usuario espera.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Locks sin expiración: un crash deja la clave bloqueada para siempre.</li>
+<li>Borrar el lock sin verificar el token: revoca el lock de un regenerador nuevo.</li>
+<li>Warming sin lock en arranques múltiples: N procesos recargando en paralelo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Mantén el TTL del lock por encima del tiempo máximo de regeneración.</li>
+<li>Envuelve la regeneración en try/finally para liberar el lock siempre.</li>
+<li>Mide la cadencia de regeneración como indicador de stampede (P99 gaps).</li>
+<li>Para claves de negocio críticas, puedes incluso evitar la expiración y refrescar manualmente.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Simula 50 hilos leyendo una clave vacía y cuenta cuántos regeneran (solo 1).</li>
+<li>Añade cache warming con margen de 10s a una clave que expira cada 60s.</li>
+<li>Verifica que un lock atascado se auto-libera por su EX.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El cache stampede satura la BD cuando una clave popular expira en pico.</li>
+<li>Locks y valores stale serializan la regeneración y evitan duplicados.</li>
+<li>Cache warming + TTL margen mantienen las claves calientes de forma preventiva.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Redis</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Estructuras de Datos</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Caché y Rendimiento</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Estructuras de datos avanzadas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Persistencia y alta disponibilidad</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Colas y streaming</a></li>
+          <li><a href="./index.html">Módulo 7 · Redis en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

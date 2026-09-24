@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="instrumentacion-de-aplicaciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrumentando tu aplicación con client libraries · Observabilidad · Backend Academy</title>
+<meta name="description" content="Instrumenta tu aplicación con client libraries como el estándar de medición.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="instrumentacion-de-aplicaciones"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Observabilidad</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Instrumentando tu aplicación con client libraries</span>
+        </nav>
+        <h1 class="lesson-title">Instrumentando tu aplicación con client libraries</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 14 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Métricas y servidores de métricas</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Las métricas del servidor dicen cuánto consume el nodo, pero no qué hace tu lógica. Para saber qué pasa dentro del proceso hay que instrumentar: añadir contadores, histogramas y gauges en los puntos que importan.</p>
+<p>Esta lección muestra cómo instrumentar una API con una client library (prometheus_client, opentelemetry) siguiendo patrones limpios: middleware para HTTP, métricas por operación y carencia de etiquetas peligrosas.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La instrumentación con client libraries añade puntos de medición en el código de la aplicación: middleware, repositorios y servicios exponen métricas en /metrics que el servidor recoge.</p><p><strong>Por qué importa.</strong> Solo el código sabe la latencia de cada operación, el encuentro de errores por tipo o el tamaño de lo que devuelve: es la capa de observabilidad que más valor da por construcción.</p><p><strong>Cuándo usarlo.</strong> Instrumenta desde el primer endpoint y con middleware centralizado; quiere decir: no esparzas métricas sueltas sin vistas, haz que la librería lo cubra para toda la app.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Middleware de métricas: captura request, status y latencia de cada ruta automáticamente.</li>
+<li>Histograma por operación: latencia de cada método de tu dominio (buscar, crear, pagar).</li>
+<li>Contadores de negocio: pedidos creados, importes totales: las que hablan de producto.</li>
+<li>Etiquetas seguras: path y status como labels, nunca ids de entidades.</li>
+<li>Exposición en /metrics: el endpoint que Prometheus scrapea de forma estandarizada.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Un middleware de Flask expone las cuatro señales sin tocar cada ruta.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from prometheus_client import Counter, Histogram
+REQ = Counter('http_requests_total', '', ['method', 'path', 'status'])
+LAT = Histogram('http_request_duration_seconds', '', ['method', 'path'])
+
+@app.before_request
+def start():  request.start = time.perf_counter()
+
+@app.after_request
+def report(resp):
+    REQ.labels(request.method, request.path, resp.status_code).inc()
+    LAT.labels(request.method, request.path).observe(
+        time.perf_counter() - request.start)
+    return resp</code></pre></div>
+</figure>
+<pre><code class="language-text">Cada petición alimenta los contadores e histogramas sin tocar una sola ruta.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Además de HTTP, medimos las operaciones de dominio y del repositorio para localizar el cuello.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Métricas de operaciones internas</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">cargos = Counter('pagos_cargos_total', 'cargos de tarjeta', ['resultado'])
+pago_lat = Histogram('pagos_duracion_seconds', 'tiempo de cargo')
+
+def cargar_tarjeta(datos):
+    with pago_lat.time():
+        try:
+            proveedor.cargar(datos)
+            cargos.labels('ok').inc()
+        except DeclineError:
+            cargos.labels('rechazo').inc()</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un equipo instrumentó su API con middleware: al día siguiente encontraron que el endpoint de búsqueda tenía p95 de 2s solo cuando el query llegaba vacío. La métrica por operación (latencia de repo.buscar) apuntó a la consulta mal construida que solo saltaba en ese caso.</p>
+<ul><li>Usa middleware para HTTP y métricas por operación para la lógica de dominio.</li>
+<li>Cuenta los resultados de cada flujo (ok, rechazo, timeout) para ver tasas.</li>
+<li>Nunca pongas el id de una entidad como etiqueta: usa el tipo o el nombre.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Inventario minimo de metricas por servicio
+http_requests_total{method, path, status}
+http_request_duration_seconds{method, path}
+dominio_&lt;operacion&gt;_total{resultado}
+dominio_&lt;operacion&gt;_duration_seconds</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> La instrumentación de OpenTelemetry cubre lo mismo y más, con métricas y trazas de una sola API.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El middleware concentra la instrumentación HTTP en un solo punto, evitando duplicados.</li>
+<li>Las métricas por operación de dominio señalan qué capa concreta se degrada.</li>
+<li>Los contadores por resultado permiten tasas (cuántos de cada 100 pagos fallan).</li>
+<li>Las etiquetas correctas hacen las series útiles sin reventar la cardinalidad.</li>
+<li>El endpoint /metrics estándar permite al servidor descubrir el servicio sin esfuerzo.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Instrumentar cada ruta a mano: duplicados, olvidos y cardinidad dispar.</li>
+<li>Etiquetas con ids de usuario o pedido: miles de series al mínimo volumen.</li>
+<li>Poner la instrumentación después de los bugs: debería ser parte del contrato del endpoint.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Crea un middleware o decorador de métricas y úsalo en toda la app.</li>
+<li>Añade una métrica de negocio por flujo ejecutable (crear, pagar, enviar).</li>
+<li>Prueba con un endpoint de desarrollo que el /metrics responda antes de promulgar.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Instrumenta una ruta con middleware y observa tus series en /metrics.</li>
+<li>Añade una métrica por operación de dominio con su contador de resultado.</li>
+<li>Comprueba la cardinalidad de series de tu servicio y corrige una etiqueta peligrosa.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La instrumentación con client libraries mide la lógica desde dentro del proceso.</li>
+<li>El middleware centraliza HTTP; las operaciones de dominio localizan el cuello.</li>
+<li>Etiquetas seguras y métricas de negocio completan un servicio observable.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+          <li><a href="./index.html">Módulo 4 · Métricas y servidores de métricas</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Trazas y distributed tracing</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Alertas y SLOs</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

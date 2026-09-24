@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-clasificacion-de-texto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clasificación de texto con IA · Backend para IA · Backend Academy</title>
+<meta name="description" content="Clasifica texto libre en categorías cerradas usando LLMs dentro de tu backend.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-clasificacion-de-texto"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Backend para IA</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Clasificación de texto con IA</span>
+        </nav>
+        <h1 class="lesson-title">Clasificación de texto con IA</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Clasificación y modelos de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un buzón de soporte recibe cientos de mensajes al día y cada uno debe ir al equipo correcto. La clasificación de texto convierte ese problema de contenido libre en una decisión de rutas: una categoría, un equipo, una acción.</p>
+<p>En el backend la clasificación se delega normalmente a un modelo de lenguaje: defines un conjunto cerrado de categorías y el modelo asigna la más probable. El resultado es estable, se puede validar y se guarda junto al mensaje original.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>La clasificación de texto asigna un documento o mensaje de entrada a una de entre varias categorías predefinidas, utilizando un modelo de lenguaje que devuelve la etiqueta más probable.</p><p><strong>Por qué importa.</strong> Automatiza enrutado, moderación, priorización y analítica sin escribir reglas infinitas, y el resultado alimenta tablas, colas y dashboards.</p><p><strong>Cuándo usarlo.</strong> Usa clasificación cuando tienes un conjunto de categorías conocido y estable. No lo uses para categorías que cambian cada hora o que no conoces de antemano: ahí mejor extracción abierta.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Categorías cerradas: lista fija de etiquetas conocidas por el modelo.</li>
+<li>Zero-shot: el modelo clasifica categorías nuevas sin entrenamiento previo.</li>
+<li>Few-shot: incluyes ejemplos en el prompt para fijar el formato.</li>
+<li>Umbral de confianza: por debajo de él se deriva a revisión humana.</li>
+<li>Etiqueta normalizada: forzamos valores canónicos, no texto libre.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Lo más simple que se puede hacer en producción: una única llamada que devuelve la categoría.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">from openai import OpenAI
+
+cliente = OpenAI()
+
+respuesta = cliente.chat.completions.create(
+    model=&quot;gpt-4o-mini&quot;,
+    messages=[
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;Clasifica el ticket en: soporte, ventas o facturacion. Responde solo con la categoria.&quot;},
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;No me llego el reembolso del pedido 3321.&quot;},
+    ],
+    temperature=0,
+)
+print(respuesta.choices[0].message.content)</code></pre></div>
+</figure>
+<pre><code class="language-text">facturacion</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Forzamos categorías válidas y añadimos ejemplos few-shot para que el modelo no invente etiquetas.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Few-shot con conjunto de categorías validado</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">categorias = [&quot;soporte&quot;, &quot;ventas&quot;, &quot;facturacion&quot;]
+system = &quot;Clasifica el mensaje. Responde SOLO con una de: &quot; + &quot;, &quot;.join(categorias)
+ejemplos = [
+    (&quot;Mi servidor se cae a las 3am&quot;, &quot;soporte&quot;),
+    (&quot;Quiero cambiar mi plan&quot;, &quot;ventas&quot;),
+    (&quot;Me cobraron dos veces&quot;, &quot;facturacion&quot;),
+    (&quot;No recibi mi factura&quot;, &quot;facturacion&quot;),
+]
+messages = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system}]
+for texto, etiqueta in ejemplos:
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: texto})
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: etiqueta})
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;El login va lento desde ayer&quot;})
+respuesta = cliente.chat.completions.create(model=&quot;gpt-4o-mini&quot;, messages=messages, temperature=0)
+print(respuesta.choices[0].message.content)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En producción la clasificación vive dentro de un servicio con caché, validación y derivación a humano.</p>
+<ul><li>Normaliza la salida a minúsculas y valida contra las categorías permitidas.</li>
+<li>Usa una caché por hash del mensaje para no pagar dos veces lo mismo.</li>
+<li>Deriva a un humano los casos ambiguos o con baja confianza.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">import hashlib
+
+def clasificar(mensaje: str) -&gt; str:
+    cache_key = &quot;clasif:&quot; + hashlib.sha256(mensaje.encode()).hexdigest()
+    guardado = redis.get(cache_key)
+    if guardado:
+        return guardado.decode()
+    etiqueta = pedir_clasificacion(mensaje).strip().lower()
+    if etiqueta not in categorias:
+        etiqueta = &quot;derivar_humano&quot;
+    redis.setex(cache_key, 3600, etiqueta)
+    return etiqueta
+
+ticket = &quot;Mi acceso a la API dejo de funcionar&quot;
+print(clasificar(ticket))</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Combina la caché con una cola para los casos derivar_humano y que un moderador los revise.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>El modelo no piensa: asigna probabilidades de secuencia guiadas por el prompt de sistema.</li>
+<li>temperature=0 reduce la aleatoriedad y estabiliza la salida entre llamadas.</li>
+<li>Validar contra el conjunto cerrado protege el esquema de tu base de datos.</li>
+<li>La caché por hash del texto ahorra coste y latencia cuando el mismo mensaje se reenvía.</li>
+<li>Medir precisión sobre un golden set te dice si el umbral de derivación es correcto.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Aceptar la salida sin validar: el modelo puede devolver Facturacion en vez de facturacion.</li>
+<li>No fijar temperature: la misma entrada devuelve categorías distintas en cada llamada.</li>
+<li>No derivar a humano: los errores de clasificación se acumulan en silencio.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Usa etiquetas en minúsculas y sin acentos en el prompt y traduce solo en la interfaz.</li>
+<li>Registra siempre entrada, etiqueta y modelo para auditar decisiones.</li>
+<li>Empieza con 3-5 categorías y añade más solo cuando se repitan de verdad.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Clasifica comentarios de una app en bug, feature y duda con el mismo patrón.</li>
+<li>Cambia el prompt para pedir la categoría en mayúsculas y normalízala con .lower().</li>
+<li>Añade una regla manual que fuerce spam cuando el mensaje contenga una URL.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La clasificación con LLM convierte texto libre en una etiqueta de un conjunto cerrado.</li>
+<li>Zero-shot y few-shot permiten clasificar sin entrenamiento propio.</li>
+<li>Validación, caché y derivación humana hacen la clasificación apta para producción.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+          <li><a href="./index.html">Módulo 4 · Clasificación y modelos de datos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · IA generativa y LLMs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · RAG y búsqueda semántica</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · IA en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="automatizacion-de-tareas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatización de tareas del servidor · DevOps para Backend · Backend Academy</title>
+<meta name="description" content="Automatiza tareas repetitivas del servidor: backups, limpieza y salud con cron.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="devops" data-current="automatizacion-de-tareas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">DevOps para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Automatización de tareas del servidor</span>
+        </nav>
+        <h1 class="lesson-title">Automatización de tareas del servidor</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 11 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> DevOps para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Contenedores y automatización</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Parte del trabajo DevOps no son despliegues: son tareas repetidas de mantenimiento, como backups, purga de logs o reportería. Hacerlas a mano garantiza que tarde o temprano se olvide alguna.</p>
+<p>El agendador de tareas del sistema, cron, las ejecuta con precisión de minutos y sin intervención humana.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>cron es el programador de tareas de Unix: cada entrada de la crontab define el momento (minuto, hora, día, mes, día de semana) y el comando a ejecutar.</p><p><strong>Por qué importa.</strong> Porque la fiabilidad de operación se mide por lo que pasa cuando nadie mira: el buen backup es el que se hace solo y se verifica después.</p><p><strong>Cuándo usarlo.</strong> Utilízalo para tareas periódicas deterministas: copias de seguridad, rotación de logs, envío de métricas o limpieza de temporales.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>crontab: la tabla de tareas programadas del usuario.</li>
+<li>Expresión cron: los cinco campos que definen la periodicidad.</li>
+<li>Log: registrar la salida de la tarea para poder auditarla.</li>
+<li>Exit code: el código de salida del script para detectar fallos.</li>
+<li>Redundancia: dos niveles de protección para tareas críticas.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>La sintaxis de una entrada cron: minuto, hora, día del mes, mes y día de semana, seguidos del comando. El asterisco significa cada valor posible.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># min  hour  dom  mon  dow  comando
+30 2 * * * /usr/bin/docker compose -f /srv/api/compose.yml exec db pg_dump -U app app &gt; /backups/api.sql</code></pre></div>
+</figure>
+<pre><code class="language-text">Cada día a las 02:30 se genera la copia de la base de datos</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Un crontab real combina el backup diario, la rotación de logs semanal y la limpieza de temporales. Cada tarea redirige su log a un archivo con fecha.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">INI</span><span class="code-block__caption">Crontab con backups y mantenimiento</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-ini">SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+30 2 * * * /srv/scripts/backup_db.sh &gt;&gt; /var/log/backup.log 2&gt;&amp;1
+0 4 * * 1 /srv/scripts/rotate_logs.sh &gt;&gt; /var/log/rotate.log 2&gt;&amp;1
+0 5 * * * find /tmp -type f -mtime +7 -delete</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El script de backup con compresión y retención: genera un archivo con fecha, lo comprime y conserva solo los últimos diez. Cron solo llama a este script.</p>
+<ul><li>Backup diario de la PostgreSQL dentro del contenedor.</li>
+<li>Compresión gzip para ahorrar disco.</li>
+<li>Retención de 10 días con rotación automática.</li>
+<li>Log con fecha y hora de cada ejecución.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">#!/bin/bash
+set -euo pipefail
+DATE=$(date +%Y%m%d)
+BACKUP_DIR=/backups
+docker compose exec -T db pg_dump -U app app | gzip &gt; ${BACKUP_DIR}/db_${DATE}.sql.gz
+find ${BACKUP_DIR} -name 'db_*.sql.gz' -mtime +10 -delete
+echo &quot;Backup completado: ${DATE}&quot;</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El backup solo sirve si la restauración está probada: agenda una restauración periódica en un entorno temporal.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>cron no espera confirmación: si el comando falla, la tarea termina con su código de salida.</li>
+<li>Redirigir la salida es imprescindible: sin log, las fallas quedan ocultas.</li>
+<li>Los scripts idempotentes (que se pueden repetir sin daño) son más seguros con cron.</li>
+<li>Para tareas de minutos usa timer de systemd por su robustez y sofisticación.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Olvidar redirigir la salida: los errores van al correo o se pierden.</li>
+<li>Backups en el mismo disco del servidor: un fallo del disco se lo lleva todo.</li>
+<li>Fechas de retención con mtime cuando los archivos se tocan accidentalmente.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Despliega los scripts de mantenimiento desde el repositorio, no ad-hoc.</li>
+<li>Monitorea los logs de cron y alerta si una tarea crítica falla.</li>
+<li>Prueba la restauración de tus backups al menos una vez al mes.</li>
+<li>Usa variables de entorno y paths absolutos dentro del crontab.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Escribe un script de backup con rotación y programarlo para las 03:00 diarias.</li>
+<li>Simula el fallo de la tarea y confirma que el error aparece en el log.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>cron ejecuta tareas periódicas con precisión de minutos.</li>
+<li>Los scripts idempotentes con logs visten las tareas de producción.</li>
+<li>Los backups requieren retención y restauración probada.</li>
+<li>La automatización convierte el mantenimiento en algo predecible.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a DevOps</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de versiones para operaciones</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · GitHub Actions</a></li>
+          <li><a href="./index.html">Módulo 4 · Contenedores y automatización</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Despliegue Continuo (CD)</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · DevOps en el Backend</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad y cultura DevOps</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

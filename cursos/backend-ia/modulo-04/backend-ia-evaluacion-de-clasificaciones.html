@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="backend-ia-evaluacion-de-clasificaciones">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etiquetado y evaluación de predicciones · Backend para IA · Backend Academy</title>
+<meta name="description" content="Crea golden sets y métricas para evaluar clasificadores y extracciones de IA.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="backend-ia" data-current="backend-ia-evaluacion-de-clasificaciones"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Backend para IA</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 4</a><span class="sep">/</span>
+          <span class="current">Etiquetado y evaluación de predicciones</span>
+        </nav>
+        <h1 class="lesson-title">Etiquetado y evaluación de predicciones</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 10 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Backend para IA</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 4 · Clasificación y modelos de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un clasificador sin métricas es una opinión. Para saber si la feature funciona, necesitas un conjunto de ejemplos etiquetados a mano y unas métricas que comparen la predicción con esa referencia.</p>
+<p>El golden set se revisa al añadir modelos o cambiar prompts: la evaluación offline evita llevarse los problemas a producción.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Evaluar una clasificación consiste en comparar las predicciones del modelo contra etiquetas de referencia humanas y medir aciertos y fallos por categoría.</p><p><strong>Por qué importa.</strong> Las métricas convierten cambios de prompt, modelo o umbral en decisiones medibles y evitan regresiones silenciosas al actualizar el sistema.</p><p><strong>Cuándo usarlo.</strong> Evalúa online al cambiar el modelo o el prompt, y en producción haz seguimiento continuo de una muestra etiquetada.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Golden set: ejemplos etiquetados manualmente y congelados.</li>
+<li>Precisión: de lo predicho positivo, cuánto es correcto.</li>
+<li>Recall: de lo positivo real, cuánto se detectó.</li>
+<li>Matriz de confusión: aciertos y cruces entre categorías.</li>
+<li>Regresión: la nueva versión empeora un caso que antes acertaba.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Evaluamos un clasificador simple contra un golden set con dos categorías.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">def accuracy(real, predecido):
+    aciertos = sum(r == p for r, p in zip(real, predecido))
+    return aciertos / len(real)
+
+real = [&quot;spam&quot;, &quot;ham&quot;, &quot;spam&quot;, &quot;ham&quot;, &quot;ham&quot;]
+predecido = [&quot;spam&quot;, &quot;ham&quot;, &quot;spam&quot;, &quot;spam&quot;, &quot;ham&quot;]
+print(&quot;accuracy:&quot;, round(accuracy(real, predecido), 2))</code></pre></div>
+</figure>
+<pre><code class="language-text">accuracy: 0.8</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Calculamos precisión y recall por categoría sobre el golden set real.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Métricas por clase</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">from collections import defaultdict
+
+def metricas_por_clase(real, predecido):
+    resultado = {}
+    for clase in set(real):
+        tp = sum(r == c and p == c for r, p in zip(real, predecido))
+        fp = sum(r != c and p == c for r, p in zip(real, predecido))
+        fn = sum(r == c and p != c for r, p in zip(real, predecido))
+        precision = tp / (tp + fp) if tp + fp else 0
+        recall = tp / (tp + fn) if tp + fn else 0
+        resultado[clase] = (precision, recall)
+    return resultado</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>En un flujo real la evaluación se engancha al pipeline de versionado: cada modelo candidato corre el mismo golden set.</p>
+<ul><li>Congela el golden set y no lo cambies sin justificación.</li>
+<li>Corre la evaluación en CI para cada cambio de prompt.</li>
+<li>Compara contra la versión anterior y bloquea si hay regresiones.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def evaluar(modelo, golden):
+    predecidos = [clasificar(g.texto, modelo=modelo) for g in golden]
+    reales = [g.etiqueta for g in golden]
+    return metricas_por_clase(reales, predecidos)
+
+base = evaluar(&quot;gpt-4o-mini&quot;, golden)
+candidato = evaluar(&quot;gpt-4o&quot;, golden)
+print(&quot;delta soporte:&quot;, candidato[&quot;soporte&quot;][0] - base[&quot;soporte&quot;][0])</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un delta negativo en una categoría crítica debe congelar la promoción del modelo.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La precisión baja dice que el modelo marca de más: más falsos positivos a la cola de humanos.</li>
+<li>Un recall bajo significa que se escapan casos reales: peor para moderación.</li>
+<li>La matriz de confusión revela qué categorías se confunden entre sí.</li>
+<li>El golden set se degrada: añade casos nuevos y revisa los antiguos.</li>
+<li>Las métricas de producción, sobre una muestra etiquetada, complementan al golden set.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Evaluar solo con accuracy en categorías desbalanceadas.</li>
+<li>Cambiar el golden set sin registrar, comparando manzanas con peras.</li>
+<li>Confiar en métricas de un solo modelo sin dif contra la anterior.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Empieza con 100-200 ejemplos etiquetados por clase relevante.</li>
+<li>Versiona el golden set y el código de evaluación en Git.</li>
+<li>Etiqueta a doble ciego los casos dudosos antes de congelarlos.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Anota 20 tickets a mano y calcula precisión y recall de tu clasificador.</li>
+<li>Añade una tercera categoría y observa cómo cambian las métricas.</li>
+<li>Crea un test de CI que falle si el recall de spam baja del 0.95.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>El golden set etiquetado a mano es la referencia de toda evaluación.</li>
+<li>Precisión, recall y matriz de confusión dicen más que accuracy sola.</li>
+<li>Evaluar en CI y comparar deltas evita regresiones al cambiar modelo o prompt.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos de IA</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Features con IA</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Producción de IA</a></li>
+          <li><a href="./index.html">Módulo 4 · Clasificación y modelos de datos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · IA generativa y LLMs</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · RAG y búsqueda semántica</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · IA en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="linealizabilidad-y-cas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linealizabilidad y operaciones CAS · Sistemas Distribuidos · Backend Academy</title>
+<meta name="description" content="Linealizabilidad, compare-and-set y operaciones atómicas distribuidas.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="sistemas-distribuidos" data-current="linealizabilidad-y-cas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Sistemas Distribuidos</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Linealizabilidad y operaciones CAS</span>
+        </nav>
+        <h1 class="lesson-title">Linealizabilidad y operaciones CAS</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-experto">🧠 Experto</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 12 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Sistemas Distribuidos</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Consistencia y consenso</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>A veces necesitas la garantía más fuerte que existe: que una operación parece ocurrir en un único instante y que, a partir de ahí, cualquiera ve su efecto. Eso es la linealizabilidad.</p>
+<p>La operación compare-and-set (CAS) es su herramienta práctica: actualiza solo si el valor sigue siendo el esperado, resolviendo la carrera de manera atómica.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Linealizabilidad: cada operación parece ejecutarse en un punto único y bajo el cual el estado fue el último antes de esa operación. CAS: actualiza un valor solo si coincide con el que esperas.</p><p><strong>Por qué importa.</strong> Son la base de locks, contadores exactos, líderes únicos y transacciones sobre datos compartidos en varios nodos.</p><p><strong>Cuándo usarlo.</strong> Usa linealizabilidad para operaciones que no toleran lecturas viejas; CAS para actualizaciones concurrentes sin pérdidas.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Atomicidad: la operación 'todo o nada' en un instante.</li>
+<li>Linealización: el punto en el tiempo en el que la operación parece ocurrir.</li>
+<li>CAS: leer-verificar-escribir en una sola operación atómica.</li>
+<li>Optimistic locking: comparas la versión antes de escribir.</li>
+<li>AB/BA y lost updates: los problemas que CAS y versiones evitan.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>CAS atómico en Redis: actualizar solo si el valor no cambió.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">JavaScript</span><span class="code-block__caption">ejemplo.js</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-js">const WATCH_KEY = &quot;contador:stock&quot;;
+
+async function descuento(detalle) {
+  // WATCH hace que todods los cambios la transaccion falle
+  await redis.watch(WATCH_KEY);
+  const actual = parseInt(await redis.get(WATCH_KEY));
+  const tx = redis.multi().set(WATCH_KEY, actual - detalle);
+  const [err, ok] = await tx.exec();
+  if (err || !ok) console.log(&quot;CONDICION ROTA: reintenta&quot;);
+  else console.log(&quot;stock actualizado sin perdidas&quot;);
+  return ok;
+}</code></pre></div>
+</figure>
+<pre><code class="language-text">Si otro proceso cambió el stock, la transacción falla y se reintenta.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Compare-and-set con versión en la base de datos (optimistic lock).</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Actualización optimista por versión de fila</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">const fila = await db.leer(&quot;pedidos&quot;, id);
+const [updated] = await db.actualizarCondicional(
+  &quot;UPDATE pedidos SET estado = $1, version = version + 1
+   WHERE id = $2 AND version = $3 RETURNING *&quot;,
+  [&quot;entregado&quot;, id, fila.version],
+);
+
+if (!updated) {
+  throw new Error(&quot;Cambio concurrente, recarga y reintenta&quot;);
+}</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Un inventario compartido entre tres servicios cree un descuento de stock. Con CAS, la transacción que llegue con una versión distinta a la leída falla: exactamente la condición en la que se debe reintentar.</p>
+<ul><li>Siempre CAS en las actualizaciones que compiten por un valor.</li>
+<li>Devuelve la versión nueva al cliente para que reintente sobre datos frescos.</li>
+<li>Cuidado con multiclient: la linealizabilidad necesita un punto único real.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">async function reservarStock(articulo, cantidad) {
+  const stock = await productoCas.bajarStock({
+    id: articulo.id,
+    decremento: cantidad,
+    siVersion: articulo.version,
+  });
+  return stock.version; // nueva version para el cliente
+}
+
+// si stock.version cambió, el backend responde 409 y el cliente reintenta</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Un 409 o una transacción fallida con mensaje claro es mejor que un dato corrupto silencioso.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La linealizabilidad convierte operaciones concurrentes en una cola virtual.</li>
+<li>CAS reemplaza el leer→verificar→escribir por una sola operación atómica.</li>
+<li>El optimistic lock con versión protege contra lost updates sin bloquear.</li>
+<li>Un 409 TPC que pide reintento con datos frescos es el patrón sano.</li>
+<li>La linealizabilidad exige un único nodo o un servicio de consenso: el resto es costo.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Leer y escribir sin check: se pierden actualizaciones concurrentes.</li>
+<li>CAS sobre un valor maleteado que nunca coincide.</li>
+<li>Ignorar el 409 y no reintentar con los datos nuevos.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Aplica CAS en inventarios, contadores y operaciones balancísticas.</li>
+<li>Elige linealizabilidad solo donde el coste se justifica.</li>
+<li>Devuelve la versión o el valor actualizado para facilitar el reintento.</li>
+<li>Prueba la concurrencia con hilos y workeres reales.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Implementa CAS en tu contador de stock con Redis.</li>
+<li>Escribe la versión optimista en un UPDATE de tu base.</li>
+<li>Crea una anulación de dos procesos y comprueba que uno falla limpiamente.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>La linealizabilidad da atomicidad en un instante, la garantía más fuerte.</li>
+<li>CAS y el lock optimista por versión evitan actualizaciones perdidas.</li>
+<li>Un 409 que pide reintento es el contrato honesto de la concurrencia.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Replicación y consistencia</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Escalabilidad y casos reales</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Tolerancia a fallos</a></li>
+          <li><a href="./index.html">Módulo 5 · Consistencia y consenso</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Sistemas distribuidos a escala</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Patrones distribuidos en la práctica</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

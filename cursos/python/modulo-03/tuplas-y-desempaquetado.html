@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="tuplas-y-desempaquetado">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuplas y desempaquetado · Python para Backend · Backend Academy</title>
+<meta name="description" content="Tuplas inmutables y desempaquetado de iterables.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="python" data-current="tuplas-y-desempaquetado"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Python para Backend</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 3</a><span class="sep">/</span>
+          <span class="current">Tuplas y desempaquetado</span>
+        </nav>
+        <h1 class="lesson-title">Tuplas y desempaquetado</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-intermedio">⚙️ Intermedio</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 9 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Python para Backend</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 3 · Estructuras de datos</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Cuando una función devuelve varios valores o quieres un grupo inmutable, las tuplas son la elección natural.</p>
+<p>Junto con el desempaquetado, escriben código muy expresivo en backend: coordenadas, pares clave-valor, intervalos.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>Una tupla es una secuencia inmutable que agrupa valores; el desempaquetado asigna sus elementos a variables en una sola línea.</p><p><strong>Por qué importa.</strong> Los datos estructurales (un rango, un endpoint con verbo, una coordenada) no deberían mutar; las tuplas protegen y documentan eso.</p><p><strong>Cuándo usarlo.</strong> Usa tuplas para retornos múltiples, claves de dict, configs inmutables y conjuntos de constantes.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Una tupla se crea con (a, b) o con la coma: a, b = 1, 2.</li>
+<li>Es inmutable: no admite append ni asignación de índices.</li>
+<li>El desempaquetado a, b = tupla funciona con cualquier iterable.</li>
+<li>El asterisco captura el resto: primero, *resto = datos.</li>
+<li>Para ignorar valores usa el guion bajo.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Crear y desempaquetar una tupla de configuración.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Python</span><span class="code-block__caption">ejemplo.python</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-python">config = (&quot;db-01&quot;, 5432)
+servidor, puerto = config
+print(f&quot;Conectando a {servidor} por el puerto {puerto}&quot;)
+
+primero, *resto = [1, 2, 3, 4]
+print(primero, resto)</code></pre></div>
+</figure>
+<pre><code class="language-text">Conectando a db-01 por el puerto 5432
+1 [2, 3, 4]</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Recorrer un dict y desempaquetar clave y valor con .items().</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Desempaquetado de pares clave-valor en un bucle</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">usuario = {&quot;nombre&quot;: &quot;Ana&quot;, &quot;rol&quot;: &quot;admin&quot;, &quot;activo&quot;: True}
+for clave, valor in usuario.items():
+    print(f&quot;{clave}: {valor}&quot;)
+
+nombre, rol, _ = (usuario[&quot;nombre&quot;], usuario[&quot;rol&quot;], usuario[&quot;activo&quot;])
+print(nombre, rol)</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>Intercambiar variables y devolver rangos desde utilidades de paginación.</p>
+<ul><li>Swap de variables sin variable temporal.</li>
+<li>Retorno múltiple que el llamador desempaqueta.</li>
+<li>Valores inmutables para constantes de configuración.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash">def rango_pagina(pagina, limite):
+    inicio = (pagina - 1) * limite
+    return inicio, inicio + limite
+
+inicio, fin = rango_pagina(3, 10)
+print(f&quot;Rows {inicio} a {fin}&quot;)
+
+a, b = &quot;db-01&quot;, &quot;db-02&quot;
+b, a = a, b   # swap
+print(a, b)</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> El swap b, a = a, b funciona porque Python evalúa el lado derecho completo antes de asignar.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>Las tuplas son inmutables: imposible modificar datos por accidente.</li>
+<li>El desempaquetado obliga a que la cantidad de variables coincida con la de elementos.</li>
+<li>El asterisco captura el resto y facilita trabajar con listas de tamaño variable.</li>
+<li>Los pares clave-valor de .items() se desempaquetan naturalmente en bucles.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>ValueError: too many values to unpack al usar más variables que elementos.</li>
+<li>Tuple index assignment lanza TypeError por inmutabilidad.</li>
+<li>Olvidar la coma en tuplas de un solo elemento: (5) no es tupla, (5,) sí.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Usa tuplas para datos que nunca deban cambiar: rutas, puertos, constantes.</li>
+<li>Desempaqueta con nombres claros que expliquen cada elemento.</li>
+<li>Usa _ para marcar los valores que descartas.</li>
+<li>Prefiere tuplas a listas para los retornos múltiples de funciones.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Crea una tupla llamada constantes con (10, 20, 30) y desempaquétala en 3 variables.</li>
+<li>Escribe una función devolver_estado() que retorne (codigo, mensaje) y captura ambos.</li>
+<li>Intercambia dos variables sin variable auxiliar.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Las tuplas agrupan datos inmutables.</li>
+<li>El desempaquetado asigna muchos valores en una línea.</li>
+<li>*resto y _ hacen flexible el unpacking con listas variables.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Introducción a Python</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Control de flujo y funciones</a></li>
+          <li><a href="./index.html">Módulo 3 · Estructuras de datos</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Programación orientada a objetos</a></li>
+          <li><a href="../modulo-05/index.html">Módulo 5 · Módulos, archivos y excepciones</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Web con Flask</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · APIs con FastAPI</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>

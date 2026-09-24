@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Observabilidad Backend · Backend Academy</title>
-<meta name="description" content="Curso gratuito de Observabilidad para Backend: logs, métricas, distributed tracing y OpenTelemetry. Crea dashboards y detecta problemas en producción.">
+<title>Observabilidad · Backend Academy</title>
+<meta name="description" content="Logs, métricas, tracing, monitoring, health checks, alertas y dashboards para conocer tu sistema por dentro.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="../../assets/css/dashboard.css">
 <link rel="stylesheet" href="../../assets/css/components.css">
 <link rel="stylesheet" href="../../assets/css/toc.css">
+<link rel="stylesheet" href="../../assets/css/course.css">
+<link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-root="../../">
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="brand" href="../../index.html">
       <span class="brand__logo">⚙️</span>
@@ -35,12 +37,12 @@
     </a>
     <nav class="nav-main" aria-label="Navegación principal">
       <a href="../../index.html">Inicio</a>
-      <a href="../../roadmap/index.html">Roadmap</a>
-      <a href="../../aprender/index.html">Aprender</a>
-      <a href="../../practica/index.html">Práctica</a>
-      <a href="../../proyectos/index.html">Proyectos</a>
-      <a href="../../recursos/index.html">Recursos</a>
-      <a href="../../buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+      <a href="../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../secciones/practica/index.html">Práctica</a>
+      <a href="../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
     </nav>
     <div class="header-actions">
       <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
@@ -50,158 +52,272 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container-narrow">
+<aside data-sidebar></aside>
 
-    <nav class="breadcrumb" aria-label="Miga de pan">
-      <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item"><a href="../index.html">Cursos</a></span>
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
-      <span class="breadcrumb__item" aria-current="page">Observabilidad Backend</span>
-    </nav>
+<main data-content>
+  <section class="page-hero page-hero--course">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Miga de pan">
+        <span class="breadcrumb__item"><a href="../../index.html">Inicio</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item"><a href="../../secciones/aprender/index.html">Aprender</a></span>
+        <span class="breadcrumb__separator" aria-hidden="true">›</span>
+        <span class="breadcrumb__item" aria-current="page">Observabilidad</span>
+      </nav>
+      <div class="page-hero__inner">
+        <div class="page-hero__content">
+          <p class="page-hero__eyebrow">🔥 Avanzado</p>
+          <h1 class="page-hero__title">📊 Observabilidad</h1>
+          <p class="page-hero__subtitle">Logs, métricas, tracing, monitoring, health checks, alertas y dashboards para conocer tu sistema por dentro.</p>
+          <div class="page-hero__meta">
+            <span><i class="fa-solid fa-clock" aria-hidden="true"></i> 5 semanas</span>
+            <span><i class="fa-solid fa-book-open" aria-hidden="true"></i> 7 módulos · 35 lecciones</span>
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Logs · Métricas · Tracing</span>
+          </div>
+          <div class="page-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#modulos"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Empezar curso</a>
+            <a class="btn btn--ghost btn--lg" href="../../secciones/aprender/index.html"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Todos los cursos</a>
+          </div>
+        </div>
+                  <div class="course-visual" aria-hidden="true">
+            <div class="terminal-card">
+              <div class="terminal-card__bar">
+                <span></span><span></span><span></span>
+                <small>backend-academy · README</small>
+              </div>
+              <pre class="terminal-card__body"><span class="t-c"># Observabilidad</span>
+<span class="t-p">$</span> <span class="t-w">npm run dev</span>
 
-    <header class="lesson-hero">
-      <p class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🚀 Avanzado</span></p>
-      <h1 class="lesson-title">🔭 Observabilidad Backend</h1>
-      <p class="section-subtitle">Tu Backend en producción necesita ojos. Aprende a centralizar logs, definir métricas, implementar distributed tracing con OpenTelemetry y construir dashboards que te cuenten qué está pasando antes de que el usuario lo note.</p>
-      <div class="lesson-meta">
-        <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 4 semanas</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-book-open" aria-hidden="true"></i> 6 módulos · 42 lecciones</span>
-        <span class="lesson-meta__item"><i class="fa-solid fa-tag" aria-hidden="true"></i> Observabilidad · Métricas · Logs</span>
+  <span class="t-g">✓</span> <span class="t-w">Servidor listo en <span class="t-g">:3000</span></span>
+  <span class="t-g">✓</span> <span class="t-w">7 módulos · 35 lecciones</span>
+
+<span class="t-b">GET</span>  <span class="t-w">/api/logs</span>      <span class="t-g">200 OK</span>
+<span class="t-b">POST</span> <span class="t-w">/api/logs</span>  <span class="t-g">201 Created</span></pre>
+              <div class="terminal-card__glow"></div>
+            </div>
+            <div class="floating-chip floating-chip--top"><i class="fa-solid fa-code" aria-hidden="true"></i> Logs</div>
+            <div class="floating-chip floating-chip--bottom"><i class="fa-solid fa-rocket" aria-hidden="true"></i> 100% gratis</div>
+          </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <section class="lesson-content">
-      <section>
-        <h2>¿Qué vas a aprender?</h2>
-        <p>Un Backend sin observabilidad es una caja negra. En este curso aprenderás los tres pilares de la observabilidad: logs, métricas y tracing. Usarás herramientas como OpenTelemetry para instrumentar tu código sin atarte a un proveedor, y construirás dashboards que combinan datos de tus servicios, bases de datos e infraestructura. Terminarás sabiendo encontrar el cuello de botella de la próxima caída en minutos, no en horas.</p>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🚀 Avanzado</span></div>
-          <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">4 semanas</span></div>
-          <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">6</span></div>
-          <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">42</span></div>
-          <div class="info-item"><span class="info-item__label">Categoría</span><span class="info-item__value">🔭 Observabilidad</span></div>
+  <div class="container">
+    <article class="course" data-course-id="observabilidad">
+
+      <section class="lesson-content">
+        <section>
+          <h2>¿Qué vas a aprender?</h2>
+          <p>Logs, métricas, tracing, monitoring, health checks, alertas y dashboards para conocer tu sistema por dentro.</p>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-item__label">Nivel</span><span class="info-item__value">🔥 Avanzado</span></div>
+            <div class="info-item"><span class="info-item__label">Duración</span><span class="info-item__value">5 semanas</span></div>
+            <div class="info-item"><span class="info-item__label">Módulos</span><span class="info-item__value">7</span></div>
+            <div class="info-item"><span class="info-item__label">Lecciones</span><span class="info-item__value">35</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Objetivos de aprendizaje</h2>
+          <div class="objectives">
+            <div class="objective"><span class="objective__icon">✔</span><span>Implementar logs y métricas</span></div>
+            <div class="objective"><span class="objective__icon">✔</span><span>Detectar problemas antes que el usuario</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Requisitos previos</h2>
+          <ul>
+<li>DevOps</li>
+            <li><strong>Constancia:</strong> practica cada lección antes de avanzar.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Tecnologías y herramientas</h2>
+          <div class="row">
+<span class="tag tag--tech">Logs</span>
+<span class="tag tag--tech">Métricas</span>
+<span class="tag tag--tech">Tracing</span>
+          </div>
+        </section>
+      </section>
+
+      <hr class="divider">
+
+      <section id="modulos">
+        <h2 class="section-title">Módulos del curso</h2>
+        <p class="section-subtitle">7 módulos con 35 lecciones en total.</p>
+
+        <div class="section-grid">
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-sitemap" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 1 · Fundamentos</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 43 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Comprende qué es la observabilidad, los tres pilares (logs, métricas y trazas), cómo se estructura cada uno y por qué juntos permiten explicar qué pasa dentro del sistema.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-01/logs-estructurados.html">Logs estructurados</a></li>
+<li><a href="./modulo-01/los-tres-pilares.html">Los tres pilares</a></li>
+<li><a href="./modulo-01/metricas.html">Métricas</a></li>
+<li><a href="./modulo-01/que-es-observabilidad.html">¿Qué es la observabilidad?</a></li>
+<li><a href="./modulo-01/trazas-distribuidas.html">Trazas distribuidas</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-01/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 2 · Herramientas</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 45 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Recorre el stack de observabilidad: Prometheus para métricas, Grafana para dashboards, ELK y OpenSearch para logs, OpenTelemetry como estándar de instrumentación y Jaeger/Zipkin para trazas.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-02/elk-stack.html">ELK y OpenSearch</a></li>
+<li><a href="./modulo-02/grafana.html">Grafana</a></li>
+<li><a href="./modulo-02/jaeger-y-zipkin.html">Jaeger y Zipkin</a></li>
+<li><a href="./modulo-02/opentelemetry.html">OpenTelemetry</a></li>
+<li><a href="./modulo-02/prometheus.html">Prometheus</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-02/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-code" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 3 · Alertas y dashboards</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 46 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Lleva la observabilidad a la práctica: SLOs y SLIs, alertas inteligentes, dashboards efectivos, gestión on-call e incidentes y profiling con correlación de pilares.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-03/alertas-inteligentes.html">Alertas inteligentes</a></li>
+<li><a href="./modulo-03/dashboards-efectivos.html">Dashboards efectivos</a></li>
+<li><a href="./modulo-03/on-call-y-incidentes.html">On-call y manejo de incidentes</a></li>
+<li><a href="./modulo-03/profiling-de-produccion.html">Profiling y correlación</a></li>
+<li><a href="./modulo-03/slos-y-slis.html">SLOs, SLIs y SRE</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-03/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 4 · Métricas y servidores de métricas</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 64 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Perfecciona tus métricas: qué vigilar en un backend, tipos de métricas y su semántica, recolección y scraping a escala, los enfoques RED/USE y cómo instrumentar la aplicación con client libraries.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-04/que-metricas-vigilar.html">Qué métricas vigilar en tu backend</a></li>
+<li><a href="./modulo-04/tipos-de-metricas.html">Tipos de métricas: contadores, gauges e histogramas</a></li>
+<li><a href="./modulo-04/recoleccion-y-agregacion.html">Recolección, scraping y agregación</a></li>
+<li><a href="./modulo-04/metricas-doradas-red-use.html">Las métricas doradas y los enfoques RED y USE</a></li>
+<li><a href="./modulo-04/instrumentacion-de-aplicaciones.html">Instrumentando tu aplicación con client libraries</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-04/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 5 · Trazas y distributed tracing</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 67 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Profundiza en el tracing: anatomía de trazas y spans, propagación de contexto, OpenTelemetry aplicado, muestreo de trazas y diagnóstico de latencia con trazas reales.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-05/anatomia-de-una-traza.html">Anatomía de una traza: span, trace y contexto</a></li>
+<li><a href="./modulo-05/propagacion-de-contexto.html">Propagación de contexto entre servicios</a></li>
+<li><a href="./modulo-05/opentelemetry-en-la-practica.html">OpenTelemetry aplicado a tu API</a></li>
+<li><a href="./modulo-05/muestreo-de-trazas.html">Muestreo de trazas y control de costes</a></li>
+<li><a href="./modulo-05/diagnostico-con-trazas.html">Diagnosticando latencia con trazas</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-05/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-server" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 6 · Alertas y SLOs</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 66 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Gobierna la fiabilidad con números: diseño de alertas efectivas, SLIs y SLOs con error budgets, alertas basadas en métricas y logs, runbooks y on-call, y burn rate para detectar incidentes pronto.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-06/diseno-de-alertas.html">Diseño de alertas efectivas</a></li>
+<li><a href="./modulo-06/sli-slo-error-budget.html">SLIs, SLOs y error budgets</a></li>
+<li><a href="./modulo-06/alertas-basadas-en-pilares.html">Alertas basadas en métricas y logs</a></li>
+<li><a href="./modulo-06/runbooks-y-manejo-oncall.html">Runbooks y gestión on-call</a></li>
+<li><a href="./modulo-06/burn-rate-y-deteccion-precoz.html">Burn rate y detección precoz</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-06/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
+
+          <article class="card card--module">
+            <div class="card__top card__top--with-icon">
+              <span class="card__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+              <div class="card__head">
+                <h3 class="card__title">Módulo 7 · Observabilidad en producción</h3>
+                <div class="card__meta">
+                  <span>5 lecciones</span><span>≈ 67 min</span>
+                </div>
+              </div>
+            </div>
+            <p class="card__text">Aplica la observabilidad en producción: base de datos, contenedores y Kubernetes, correlación de los tres pilares, construcción de una plataforma de observabilidad y la observabilidad como cultura de equipo.</p>
+            <ol class="module-lessons">
+<li><a href="./modulo-07/observabilidad-de-bases-de-datos.html">Observabilidad de bases de datos</a></li>
+<li><a href="./modulo-07/observabilidad-en-contenedores.html">Observabilidad en contenedores y Kubernetes</a></li>
+<li><a href="./modulo-07/correlacion-de-pilares.html">Correlacionando logs, métricas y trazas</a></li>
+<li><a href="./modulo-07/plataforma-de-observabilidad.html">Construyendo una plataforma de observabilidad</a></li>
+<li><a href="./modulo-07/observabilidad-como-cultura.html">La observabilidad como cultura de equipo</a></li>
+            </ol>
+            <div class="card__actions">
+              <a class="btn btn--primary btn--sm" href="./modulo-07/index.html">Empezar módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section>
-        <h2>Objetivos del curso</h2>
-        <div class="objectives">
-          <div class="objective"><span class="objective__icon">✔</span><span>Entender los tres pilares: logs, métricas y traces, y cuándo usar cada uno.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Estructurar logs con niveles, contextos y correlación de IDs.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Definir métricas clave: RED, USE y custom metrics de negocio.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Implementar distributed tracing con OpenTelemetry para peticiones que cruzan servicios.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Centralizar logs y métricas con ELK, Prometheus y Grafana.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Crear dashboards útiles y alertas que no generen ruido.</span></div>
-          <div class="objective"><span class="objective__icon">✔</span><span>Correlacionar métricas, logs y traces en una incidencia real.</span></div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Requisitos previos</h2>
-        <ul>
-          <li>Experiencia construyendo y desplegando APIs Backend.</li>
-          <li>Conocimientos básicos de Docker y despliegue en servidores.</li>
-          <li>Familiaridad con HTTP, bases de datos y colas.</li>
-          <li>Un proyecto Backend desplegado (local o en la nube) para instrumentar.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Tecnologías y herramientas</h2>
-        <div class="row">
-          <span class="tag tag--tech">Logs</span>
-          <span class="tag tag--tech">Métricas</span>
-          <span class="tag tag--tech">Tracing</span>
-          <span class="tag tag--tech">OpenTelemetry</span>
-          <span class="tag tag--tech">Prometheus</span>
-          <span class="tag tag--tech">Grafana</span>
-          <span class="tag tag--tech">ELK</span>
-          <span class="tag tag--tech">Dashboards</span>
-        </div>
-      </section>
-    </section>
-
-    <hr class="divider">
-
-    <section>
-      <h2 class="section-title">Módulos del curso</h2>
-      <p class="section-subtitle">Seis módulos que transforman tu Backend en un sistema transparente, medible y monitoreable en producción.</p>
-
-      <div class="section-grid">
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">1. Fundamentos de Observabilidad</h3>
-          </div>
-          <p class="card__text">Observabilidad vs monitoreo. Los tres pilares y la diferencia con el logging clásico. Correlación: la clave para encontrar respuestas.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 60 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-01/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">2. Logs de Calidad</h3>
-          </div>
-          <p class="card__text">Niveles, estructuración con JSON, contextos, logs de acceso y de aplicación. Solo logs que sirven para investigar incidencias.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 62 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-02/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">3. Métricas y SLOs</h3>
-          </div>
-          <p class="card__text">Métricas RED (Rate, Errors, Duration) y USE (Utilization, Saturation, Errors). SLIs, SLOs y buenas métricas de negocio y servicio.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 66 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="modulo-03/index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">4. Distributed Tracing</h3>
-          </div>
-          <p class="card__text">Trace IDs, spans y contexto de propagación. Sigue una petición a través de microservicios, bases de datos y colas con OpenTelemetry.</p>
-          <div class="card__meta">
-            <span>7 lecciones</span><span>≈ 70 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">5. OpenTelemetry</h3>
-          </div>
-          <p class="card__text">El estándar abierto para instrumentación. APIs, SDKs, exporters y collectors. Instrumenta Node.js, Python y PHP sin proveedor cautivo.</p>
-          <div class="card__meta">
-            <span>8 lecciones</span><span>≈ 76 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-
-        <article class="card card--module card--link">
-          <div class="card__top">
-            <h3 class="card__title">6. Dashboards y Alertas</h3>
-          </div>
-          <p class="card__text">Grafana, Prometheus y centralización de logs con ELK. Crea dashboards accionables, alertas con significado y un proyecto final completo.</p>
-          <div class="card__meta">
-            <span>6 lecciones</span><span>≈ 58 min</span>
-          </div>
-          <a class="btn btn--primary btn--sm" href="index.html">Ver módulo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-        </article>
-      </div>
-    </section>
-
+    </article>
   </div>
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer" data-footer>
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__desc">
@@ -212,38 +328,39 @@
         <h4>Explora</h4>
         <ul>
           <li><a href="../../index.html">Inicio</a></li>
-          <li><a href="../../roadmap/index.html">Roadmap de aprendizaje</a></li>
-          <li><a href="../../aprender/index.html">Aprender</a></li>
-          <li><a href="../../practica/index.html">Práctica</a></li>
+          <li><a href="../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../secciones/practica/index.html">Práctica</a></li>
         </ul>
       </nav>
       <nav aria-label="Recursos">
         <h4>Recursos</h4>
         <ul>
-          <li><a href="../../recursos/index.html">Recursos</a></li>
-          <li><a href="../../glosario/index.html">Glosario</a></li>
-          <li><a href="../../cheatsheets/index.html">Cheatsheets</a></li>
-          <li><a href="../../buscador/index.html">Buscar</a></li>
+          <li><a href="../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../secciones/buscador/index.html">Buscar</a></li>
         </ul>
       </nav>
       <nav aria-label="Curso">
         <h4>Curso actual</h4>
         <ul>
-          <li><a href="modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
-          <li><a href="modulo-02/index.html">Módulo 2 · Logs</a></li>
-          <li><a href="modulo-03/index.html">Módulo 3 · Métricas</a></li>
-          <li><a href="index.html">Módulo 4 · Tracing</a></li>
-          <li><a href="index.html">Módulo 5 · OTel</a></li>
-          <li><a href="index.html">Módulo 6 · Dashboards</a></li>
+          <li><span>Módulo 1 · Fundamentos</span></li>
+          <li><span>Módulo 2 · Herramientas</span></li>
+          <li><span>Módulo 3 · Alertas y dashboards</span></li>
+          <li><span>Módulo 4 · Métricas y servidores de métricas</span></li>
+          <li><span>Módulo 5 · Trazas y distributed tracing</span></li>
+          <li><span>Módulo 6 · Alertas y SLOs</span></li>
+          <li><span>Módulo 7 · Observabilidad en producción</span></li>
         </ul>
       </nav>
     </div>
     <div class="site-footer__bottom">
       <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
       <div class="site-footer__links">
-        <a href="../../acerca/index.html">Acerca de</a>
-        <a href="../../favoritos/index.html">Favoritos</a>
-        <a href="../../historial/index.html">Historial</a>
+        <a href="../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../secciones/historial/index.html">Historial</a>
       </div>
     </div>
   </div>

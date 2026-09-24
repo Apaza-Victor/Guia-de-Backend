@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light" data-lesson-id="diagnostico-con-trazas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnosticando latencia con trazas · Observabilidad · Backend Academy</title>
+<meta name="description" content="Usa trazas para localizar el cuello de botella de la latencia en tus servicios.">
+<meta name="generator" content="Backend Academy - generador de cursos">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../../../assets/css/reset.css">
+<link rel="stylesheet" href="../../../assets/css/variables.css">
+<link rel="stylesheet" href="../../../assets/css/global.css">
+<link rel="stylesheet" href="../../../assets/css/layout.css">
+<link rel="stylesheet" href="../../../assets/css/header.css">
+<link rel="stylesheet" href="../../../assets/css/sidebar.css">
+<link rel="stylesheet" href="../../../assets/css/footer.css">
+<link rel="stylesheet" href="../../../assets/css/cards.css">
+<link rel="stylesheet" href="../../../assets/css/lesson.css">
+<link rel="stylesheet" href="../../../assets/css/code.css">
+<link rel="stylesheet" href="../../../assets/css/forms.css">
+<link rel="stylesheet" href="../../../assets/css/roadmap.css">
+<link rel="stylesheet" href="../../../assets/css/dashboard.css">
+<link rel="stylesheet" href="../../../assets/css/components.css">
+<link rel="stylesheet" href="../../../assets/css/toc.css">
+
+<link rel="stylesheet" href="../../../assets/css/course.css">
+<link rel="stylesheet" href="../../../assets/css/responsive.css">
+</head>
+<body data-root="../../../" class="app-shell">
+
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="../../../index.html">
+      <span class="brand__logo">⚙️</span>
+      <span>Backend Academy<small>Cursos</small></span>
+    </a>
+    <nav class="nav-main" aria-label="Navegación principal">
+      <a href="../../../index.html">Inicio</a>
+      <a href="../../../secciones/roadmap/index.html">Roadmap</a>
+      <a href="../../../secciones/aprender/index.html">Aprender</a>
+      <a href="../../../secciones/practica/index.html">Práctica</a>
+      <a href="../../../secciones/proyectos/index.html">Proyectos</a>
+      <a href="../../../secciones/recursos/index.html">Recursos</a>
+      <a href="../../../secciones/buscador/index.html" class="nav-icon" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn--icon btn--ghost theme-toggle" type="button" aria-label="Cambiar a tema oscuro">
+        <i data-mode="light" class="fa-solid fa-moon" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="lesson-layout lesson-layout--with-toc" id="top">
+  <aside class="sidebar" data-sidebar="course" data-course="observabilidad" data-current="diagnostico-con-trazas"></aside>
+  <main class="lesson-main">
+    <article class="lesson-article">
+      <header class="lesson-hero">
+        
+        <nav class="lesson-crumbs" aria-label="Miga de pan">
+          <a href="../../../index.html">Inicio</a><span class="sep">/</span>
+          <a href="../../index.html">Cursos</a><span class="sep">/</span>
+          <a href="../../index.html">Observabilidad</a><span class="sep">/</span>
+          <a href="../index.html">Módulo 5</a><span class="sep">/</span>
+          <span class="current">Diagnosticando latencia con trazas</span>
+        </nav>
+        <h1 class="lesson-title">Diagnosticando latencia con trazas</h1>
+        
+        <div class="lesson-meta">
+          <span class="lesson-meta__item"><span class="badge badge--level badge--level-avanzado">🔥 Avanzado</span></span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-clock" aria-hidden="true"></i> 13 min</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-book" aria-hidden="true"></i> Observabilidad</span>
+          <span class="lesson-meta__item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Módulo 5 · Trazas y distributed tracing</span>
+        </div>
+      </header>
+
+      <div class="lesson-content" id="contenido">
+        <section id="introduccion" aria-labelledby="introduccion-t"><h2 id="introduccion-t">Introducción</h2><p>Un p99 alto es un síntoma, no un diagnóstico. Las trazas te dan la escena del crimen: el recorrido completo de la petición con el tiempo de cada servicio, cada consulta y cada espera. Con la herramienta adecuada pasas de 'está lento' a 'el span de la BD tarda 700ms'.</p>
+<p>Esta lección muestra el proceso completo: encontrar una traza lenta, aislar el span dominante, comparar la misma operación en otras trazas y confirmar la hipótesis antes de tocar código.</p></section>
+
+<section id="definicion" aria-labelledby="definicion-t"><h2 id="definicion-t">Definición</h2><p>El diagnóstico con trazas localiza un problema de latencia comparando los spans de una petición: identifica cuál acapara el tiempo, si es hardware, dependencia o código, y en qué condiciones ocurre.</p><p><strong>Por qué importa.</strong> Sobre HTTP y logs tardarías horas en separar machetes; una traza te da el desglose de tiempos de un solo caso real en minutos.</p><p><strong>Cuándo usarlo.</strong> Diagnostica con trazas cuando el p99 de un endpoint empeora, cuando un flujo concreto tarda de forma episódica o cuando la observabilidad básica no apunta a un recurso claro.</p></section>
+
+<section id="conceptos-clave" aria-labelledby="conceptos-clave-t"><h2 id="conceptos-clave-t">Conceptos clave</h2><ul><li>Seleccionar la traza lenta: busca en el backend por latencia y operación.</li>
+<li>Flame graph: la visión en cascada que muestra cuál span ocupa el tiempo.</li>
+<li>Span dominante: el paso que representa la mayor parte de la duración.</li>
+<li>Comparación de distribuciones: la misma operación en trazas buenas vs malas.</li>
+<li>Correlación con logs y métricas del recurso en el momento del span.</li></ul></section>
+
+<section id="ejemplo-basico" aria-labelledby="ejemplo-basico-t"><h2 id="ejemplo-basico-t">Ejemplo básico</h2><p>Una query a Tempo/Jaeger por latencia del endpoint te devuelve las trazas lentas de hoy.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.bash</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Buscar las trazas mas lentas del endpoint de checkout
+find: service_name=&quot;api-checkout&quot; AND operation=&quot;POST /checkout&quot;
+sort: duration desc limit 20
+
+# Abrir la mas lenta y ver el flame graph: el span 'call.inventario'
+# ocupa 780ms de los 1050ms totales.</code></pre></div>
+</figure>
+<pre><code class="language-text">La traza señala que el span de inventario acapara el 74% del tiempo de la petición.</code></pre></section>
+
+<section id="ejemplo-intermedio" aria-labelledby="ejemplo-intermedio-t"><h2 id="ejemplo-intermedio-t">Ejemplo intermedio</h2><p>Comparamos la misma operación entre trazas rápidas y lentas para encontrar el patrón.</p>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">Comparando spans entre trazas</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Traza rapida (120ms):
+  POST /checkout       120ms
+    call.inventario     20ms   query: SELECT con index
+    call.pagos          85ms
+
+# Traza lenta (1050ms):
+  POST /checkout      1050ms
+    call.inventario    780ms   query: sin index -&gt; seq scan
+    call.pagos          90ms</code></pre></div>
+</figure></section>
+
+<section id="ejemplo-real" aria-labelledby="ejemplo-real-t"><h2 id="ejemplo-real-t">Ejemplo real</h2><p>El p95 del checkout cayó a 1.1s tras un cambio de modelo de inventario. Las trazas mostraron que el span de la BD saltaba a 780ms solo cuando el query incluía la talla y el color sin índice. El flujo de diagnóstico (traza lenta → span dominante → query revisada) evitó dos días de conjeturas.</p>
+<ul><li>Empieza por la traza más lenta del día y encuentra su span dominante.</li>
+<li>Busca el patrón: ¿se repite en todas las trazas o solo con ciertos atributos?</li>
+<li>Cruza el span con la métrica del recurso (BD) en ese mismo minuto.</li></ul>
+<figure class="code-block">
+  <figcaption class="code-block__header"><span class="code-block__lang">Bash</span><span class="code-block__caption">ejemplo.py</span></figcaption>
+  <div class="code-block__body"><pre><code class="language-bash"># Checklist de diagnostico con trazas
+1. Traza lenta: filtrar por operation + duration desc
+2. Span dominante: flame graph, % del total
+3. Atributos del span: query, filtros, parametros
+4. Comparar: misma operacion en trazas buenas
+5. Hipotesis -&gt; confirmar con metrica del recurso</code></pre></div>
+</figure>
+<div class="note note--info"><p><i class="fa-solid fa-circle-info" aria-hidden="true"></i> No todas las lentitudes son el mayor span: a veces el span dominante es 'espera a la cola' porque el worker no procesa.</p></div></section>
+
+<section id="explicacion" aria-labelledby="explicacion-t"><h2 id="explicacion-t">Explicación</h2><ul><li>La traza lenta es la evidencia, el flame graph la distribución del tiempo.</li>
+<li>El span dominante no es siempre el culpable: hay que mirar su causa (query, red, lock).</li>
+<li>Comparar trazas buenas y malas revela el factor diferencial (un índice, un filtro).</li>
+<li>Correlacionar con métricas del recurso confirma que la hipótesis coincide con la realidad.</li>
+<li>El diagnóstico con trazas convierte una degradación en un ticket de trabajo accionable.</li></ul></section>
+
+<section id="errores-comunes" aria-labelledby="errores-comunes-t"><h2 id="errores-comunes-t">Errores comunes</h2><ul><li>Detenerse en el primer span lento sin verificar su causa (la BD está lenta o el query es malo).</li>
+<li>Diagnosticar con una traza suelta: confirma el patrón en varias.</li>
+<li>Olvidar que el span de red, lock o cola también cuenta como tiempo.</li></ul></section>
+
+<section id="buenas-practicas" aria-labelledby="buenas-practicas-t"><h2 id="buenas-practicas-t">Buenas prácticas</h2><ul><li>Fija una operación por endpoint: el diagnóstico por operación es mucho más directo.</li>
+<li>Conserva atributos de la operación (query, params) en los spans.</li>
+<li>Comparte la traza en el ticket del bug: la reproducción viene incluida.</li></ul></section>
+
+<section id="ejercicio" aria-labelledby="ejercicio-t" class="exercise"><div class="exercise__head"><h2 id="ejercicio-t"><i class="fa-solid fa-pen" aria-hidden="true"></i> Ejercicio</h2></div><ol><li>Busca la traza más lenta de tu servicio y describe su flame graph.</li>
+<li>Compara la misma operación en una traza rápida y una lenta.</li>
+<li>Elige una hipótesis de lentitud y confírmala con una métrica del recurso.</li></ol></section>
+
+<section id="resumen" aria-labelledby="resumen-t" class="summary"><h2 id="resumen-t">Resumen</h2><ul class="lesson-list"><li>Las trazas convert ratifican el p99 alto en el span dominante.</li>
+<li>Comparar trazas buenas y malas descubre el factor diferencial.</li>
+<li>Correlacionar el span con la métrica del recurso confirma la causa.</li></ul></section>
+      </div>
+
+      <nav class="lesson-nav-footer" aria-label="Contenido del módulo">
+        <a class="lesson-nav-footer__link" href="../index.html">
+          <i class="fa-solid fa-bars" aria-hidden="true"></i> Contenido del módulo
+        </a>
+      </nav>
+
+      <form class="complete-toggle"><label><input type="checkbox"> Marcar lección como completada</label></form>
+      <div data-prev-next></div>
+    </article>
+  </main>
+  <aside class="toc-rail" data-toc aria-label="Contenido de la página"></aside>
+</div>
+
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__desc">
+        <p><strong>Backend Academy</strong></p>
+        <p>Plataforma gratuita para aprender desarrollo Backend desde cero: conceptos, protocolos, arquitectura y práctica con ejemplos reales.</p>
+      </div>
+      <nav aria-label="Secciones">
+        <h4>Explora</h4>
+        <ul>
+          <li><a href="../../../index.html">Inicio</a></li>
+          <li><a href="../../../secciones/roadmap/index.html">Roadmap de aprendizaje</a></li>
+          <li><a href="../../../secciones/aprender/index.html">Aprender</a></li>
+          <li><a href="../../../secciones/practica/index.html">Práctica</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Recursos">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="../../../secciones/recursos/index.html">Recursos</a></li>
+          <li><a href="../../../secciones/glosario/index.html">Glosario</a></li>
+          <li><a href="../../../secciones/cheatsheets/index.html">Cheatsheets</a></li>
+          <li><a href="../../../secciones/buscador/index.html">Buscar</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Curso">
+        <h4>Curso actual</h4>
+        <ul>
+          <li><a href="../modulo-01/index.html">Módulo 1 · Fundamentos</a></li>
+          <li><a href="../modulo-02/index.html">Módulo 2 · Herramientas</a></li>
+          <li><a href="../modulo-03/index.html">Módulo 3 · Alertas y dashboards</a></li>
+          <li><a href="../modulo-04/index.html">Módulo 4 · Métricas y servidores de métricas</a></li>
+          <li><a href="./index.html">Módulo 5 · Trazas y distributed tracing</a></li>
+          <li><a href="../modulo-06/index.html">Módulo 6 · Alertas y SLOs</a></li>
+          <li><a href="../modulo-07/index.html">Módulo 7 · Observabilidad en producción</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 Backend Academy. Contenido liberado para aprender y compartir.</span>
+      <div class="site-footer__links">
+        <a href="../../../secciones/acerca/index.html">Acerca de</a>
+        <a href="../../../secciones/favoritos/index.html">Favoritos</a>
+        <a href="../../../secciones/historial/index.html">Historial</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../../assets/js/helpers.js"></script>
+<script src="../../../assets/js/storage.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/data.js"></script>
+<script src="../../../assets/js/progress.js"></script>
+<script src="../../../assets/js/navigation.js"></script>
+<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../../assets/js/toc.js"></script>
+<script src="../../../assets/js/code.js"></script>
+<script src="../../../assets/js/main.js"></script>
+</body>
+</html>
