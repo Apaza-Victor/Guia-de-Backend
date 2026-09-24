@@ -14,7 +14,11 @@ html {
 
 body {
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: hidden; /* fallback: navegadores sin soporte de `clip` */
+  overflow-x: clip;   /* clips el desborde horizontal SIN crear scroll container,
+                         algo que `hidden` sí hace y que en iOS Safari desactiva
+                         el header fijo (position: sticky) del sitio */
+
   font-family: var(--font-sans);
   background-color: var(--bg);
   background-image:
